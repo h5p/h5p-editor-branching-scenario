@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Editor from './editor'
+import Editor from './components/editor'
 
 /*global H5PEditor, H5P*/
 H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($) {
@@ -9,7 +9,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   }
 
   BranchingScenarioEditor.prototype.appendTo = function ($wrapper) {
-   ReactDOM.render(
+   $wrapper.parent().css('padding', 0);
+
+    ReactDOM.render(
      (<Editor/>), $wrapper.get(0)
    )
   }
