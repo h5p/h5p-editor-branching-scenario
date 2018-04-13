@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Editor from './components/editor'
+import Editor from '../scripts/editor'
 
 /*global H5PEditor, H5P*/
 H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($) {
