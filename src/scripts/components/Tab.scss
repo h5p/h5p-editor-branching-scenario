@@ -113,7 +113,7 @@ input[type="button"], input[type="submit"] {
   font-family: BSFont;
   top: 0;
   font-size: 0.7rem;
-  content: "";
+  content: "\1F6C8";
   color: #6e6e6e;
   cursor: pointer;
   padding-left: 0.3rem; }
@@ -141,7 +141,7 @@ input[type="button"], input[type="submit"] {
 .tab-view-info-tip::before {
   font-family: BSFont;
   position: absolute;
-  content: "";
+  content: "\1F6C8";
   font-size: 1.3rem;
   color: #1773DA;
   left: 0.6rem;

@@ -12,21 +12,7 @@ export default class Editor extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO: Set these with values from old file if available
-    this.state = {
-      settings: {
-        startTitle: '',
-        startSubtitle: '',
-        startImage: undefined,
-        endScore: 0,
-        endFeedback: '',
-        endImage: undefined,
-        optionsSkipToAQuestion: false,
-        optionsConfirmOnAlternative: false,
-        optionsTryAnotherChoice: false,
-        optionsDisplayScore: false
-      }
-    };
+    this.state = {settings: props.settings};
   }
 
   /**
@@ -35,6 +21,7 @@ export default class Editor extends React.Component {
    * @param {Event} event - Change event.
    */
   onSettingsChange(event) {
+    // TODO: Let changed settings bubble up to become params, so they can be saved
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
@@ -47,8 +34,11 @@ export default class Editor extends React.Component {
   render() {
     return (
       <Tabs className="tab-view-wrapper">
-        <Tab active="true" title="add content" className="bs-editor-content-tab has-submenu">
-					Tab One content
+        <Tab
+          active="true"
+          title="add content"
+          className="bs-editor-content-tab has-submenu">
+					  Tab One content
 				</Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
           <TabViewSettings

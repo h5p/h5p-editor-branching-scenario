@@ -1,13 +1,6 @@
 import React from 'react';
 
 export default class TabViewSettings extends React.Component {
-  constructor(props) {
-    super(props);
-
-    console.log(props);
-
-    this.props = props;
-  }
 	render() {
 		return (
       <div id="settings" className="tab tab-view-full-page large-padding">
