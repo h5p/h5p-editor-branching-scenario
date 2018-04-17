@@ -1,0 +1,101 @@
+@font-face {
+  font-family: "BSFont";
+  src: url('../../styles/fonts/bs.eot');
+  src: url('../../styles/fonts/bs.woff');
+}
+
+.tabs {
+  overflow: hidden;
+  height: 30em;
+}
+
+.tabs-nav {
+  height: 100%;
+  float: left;
+  clear: both;
+  background: grey;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  list-style-type: none;
+  width: 3rem;
+  background-color: #191e22;
+}
+
+.tabs-nav li {
+  padding: 1rem 0.5rem 1rem 0.3rem;
+  color: #d1d2d2;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+  border-left: solid 3px #191e22;
+
+  &:hover {
+    background-color: #363b42;
+    border-color: #363b42;
+    color: #fff;
+  }
+
+  &:before {
+    font-family: "BSFont";
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    font-size: 1.3rem;
+  }
+
+  &.bs-editor-content-tab::before {
+    content: "\e91c";
+  }
+
+  &.bs-editor-settings-tab::before {
+    content: "\e91b";
+  }
+
+  &.bs-editor-translations-tab::before {
+    content: "\e91a";
+  }
+
+  &.bs-editor-tutorial-tab::before {
+    content: "\e90b";
+  }
+
+  &.bs-editor-metadata-tab::before {
+    content: "\e901";
+  }
+}
+
+.tabs-nav li.active {
+  background-color: #F1F3F6;
+  border-color: #F1F3F6;
+  border-left: solid 3px #F1F3F6;
+
+  &:before {
+    color: #363b42;
+  }
+
+  &:hover {
+    background-color: #F1F3F6;
+    border-color: #F1F3F6;
+  }
+}
+
+.tabs-nav li.has-submenu {
+  border-color: #191e22;
+
+  &:before {
+    color: #d1d2d2;
+  }
+
+  &:hover {
+    border-color: #363b42;
+  }
+}
+
+.tabs-nav li.has-submenu.active {
+  background-color: #363b42;
+  border-color: #1773DA;
+
+  &:before {
+    color: #fff;
+  }
+}

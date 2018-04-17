@@ -1,13 +1,13 @@
 import React from 'react';
-import './Tab.css'
+import './Tab.scss';
 
 export default class Tab extends React.Component {
-	render() {
-		return (
-			<div className={ "tab-panel" + (this.props.active ? ' active' : '') }>
-				{ this.props.children } 
-			</div> 
-		)
-	}		
+  render() {
+    return (
+      <div className={ "tab-panel" + (this.props.active ? ' active' : '') }>
+        { this.props.children } 
+      </div> 
+    )
+  }   
 }
 
