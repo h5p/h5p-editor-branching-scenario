@@ -1,6 +1,13 @@
 import React from 'react';
 
 export default class TabViewSettings extends React.Component {
+  constructor(props) {
+    super(props);
+
+    console.log(props);
+
+    this.props = props;
+  }
 	render() {
 		return (
       <div id="settings" className="tab tab-view-full-page large-padding">
@@ -17,7 +24,7 @@ export default class TabViewSettings extends React.Component {
                 id="startTitle"
                 type="text"
                 name="startTitle"
-                value={this.props.startTitle}
+                value={this.props.value.startTitle}
                 placeholder="Title for your course"
                 onChange={this.props.onChange}
               />
@@ -26,7 +33,7 @@ export default class TabViewSettings extends React.Component {
                 id="startSubtitle"
                 type="text"
                 name="startSubtitle"
-                value={this.props.startSubtitle}
+                value={this.props.value.startSubtitle}
                 placeholder="Details about the course"
                 onChange={this.props.onChange}
               />
@@ -47,7 +54,7 @@ export default class TabViewSettings extends React.Component {
                 id="endScore"
                 type="number"
                 name="endScore"
-                value={this.props.endScore}
+                value={this.props.value.endScore}
                 onChange={this.props.onChange}
               />
               <label className="tab-view-info" htmlFor="endFeedback">Textual feedback for the user
@@ -58,7 +65,7 @@ export default class TabViewSettings extends React.Component {
                 type="text"
                 name="endFeedback"
                 placeholder="Some feedback for the user"
-                value={this.props.endFeedback}
+                value={this.props.value.endFeedback}
                 onChange={this.props.onChange}
               />
               <label htmlFor="endImage">Upload the image</label>
@@ -75,28 +82,28 @@ export default class TabViewSettings extends React.Component {
                 id="optionsSkipToAQuestion"
                 type="checkbox"
                 name="optionsSkipToAQuestion"
-                checked={this.props.optionsSkipToAQuestion}
+                checked={this.props.value.optionsSkipToAQuestion}
                 onChange={this.props.onChange}
               />Show "Skip to a question" button<br />
               <input
                 id="optionsConfirmOnAlternative"
                 type="checkbox"
                 name="optionsConfirmOnAlternative"
-                checked={this.props.optionsConfirmOnAlternative}
+                checked={this.props.value.optionsConfirmOnAlternative}
                 onChange={this.props.onChange}
               />Show "Confirm" after you select an alternative<br />
               <input
                 id="optionsTryAnotherChoice"
                 type="checkbox"
                 name="optionsTryAnotherChoice"
-                checked={this.props.optionsTryAnotherChoice}
+                checked={this.props.value.optionsTryAnotherChoice}
                 onChange={this.props.onChange}
               />Show "Try another choice" after an answer <br />
               <input
                 id="optionsDisplayScore"
                 type="checkbox"
                 name="optionsDisplayScore"
-                checked={this.props.optionsDisplayScore}
+                checked={this.props.value.optionsDisplayScore}
                 onChange={this.props.onChange}
               />Display score<br />
             </fieldset>

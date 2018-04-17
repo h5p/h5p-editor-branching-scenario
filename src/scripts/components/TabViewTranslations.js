@@ -12,7 +12,7 @@ export default class TabViewTranslations extends React.Component {
 								<legend>Interactive Video Translations</legend>
 							</fieldset>
 							<fieldset>
-								<legend>Presentaion Translations</legend>
+								<legend>Presentation Translations</legend>
 							</fieldset>
 							<fieldset>
 								<legend>Video Translations</legend>

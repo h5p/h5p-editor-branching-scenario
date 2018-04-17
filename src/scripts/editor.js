@@ -15,7 +15,7 @@ export default class Editor extends React.Component {
     // TODO: Set these with values from old file if available
     this.state = {
       settings: {
-        startTitle: 'title',
+        startTitle: '',
         startSubtitle: '',
         startImage: undefined,
         endScore: 0,
