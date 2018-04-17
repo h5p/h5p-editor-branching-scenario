@@ -1,3 +1,13 @@
+a {
+  color: #1773DA;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .tab-panel {
 	display: none;
 }
@@ -5,3 +15,108 @@
 .tab-panel.active {
   display: block;
 }
+
+.tab-view-wrapper {
+	height: 100%;
+	overflow-y: hidden;
+	overflow-x: hidden;
+	margin: 0;
+	padding: 0;
+}
+
+.tab-view-full-page {
+  background-color: #F1F3F6;
+  width: calc(100% - 6rem);
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  /* height: calc(100% - 2rem); */
+  margin-left: 3rem;
+	margin-right: 6rem;
+}
+
+.tab-view-full-page fieldset {
+  border: solid 0.042rem #e2e5ee;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.tab-view-full-page fieldset legend {
+  color: #363b42;
+  background-color: white;
+  padding: 0.6rem;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.large-padding {
+  padding: 1.5rem;
+}
+
+.tab-view-white-box {
+  border: solid 0.042rem #e2e5ee;
+  border-radius: 4px;
+  background-color: #fff;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.tab-view-title {
+	font-size: 2rem;
+  display: block;
+  font-weight: 300;
+  color: #1773DA;
+}
+
+.tab-view-description {
+	font-size: 0.75rem;
+  margin-top: 0.3rem;
+  display: block;
+  color: #626262;
+}
+
+.tab-view-info {
+  position: relative;
+  display: block; }
+
+.tab-view-info::after {
+  font-family: BSFont;
+  top: 0;
+  font-size: 0.7rem;
+  content: "";
+  color: #6e6e6e;
+  cursor: pointer;
+  padding-left: 0.3rem; }
+
+.tab-view-info-tip {
+  display: none;
+  position: absolute;
+  bottom: 130%;
+  min-width: 15rem;
+  background-color: #ffffff;
+  z-index: 2000;
+  padding: 0.6rem;
+  border-radius: 5px;
+  font-weight: normal;
+  padding-left: 3.5rem;
+  text-align: left;
+  -webkit-box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+  font-size: 0.75rem;
+  line-height: 0.9rem;
+  font-family: "Roboto";
+  color: #363b42; }
+
+.tab-view-info-tip::before {
+  font-family: BSFont;
+  position: absolute;
+  content: "";
+  font-size: 1.3rem;
+  color: #1773DA;
+  left: 0.6rem;
+  top: 0.6rem;
+  border-right: solid 1px #e9ebee;
+  padding-right: 0.6rem;
+  height: calc(100% - 1rem);
+  font-weight: normal; }
