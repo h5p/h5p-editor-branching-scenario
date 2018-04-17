@@ -19,9 +19,14 @@ var config = {
         use: 'babel-loader',
       },
       {
-        test: /\.css$/,
+        test:/\.(s*)css$/,
         include: path.resolve(__dirname, 'src'),
-        use: ['style-loader', 'css-loader']
+        use: ['style-loader', 'css-loader', 'resolve-url-loader', 'sass-loader']
+      },
+      {
+        test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+        include: path.resolve(__dirname, 'src'),
+        loader: 'url-loader?limit=100000'
       }
     ]
   }

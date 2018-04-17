@@ -23,9 +23,13 @@
     "cross-env": "^3.1.4",
     "css-loader": "^0.25.0",
     "jest-cli": "^17.0.0",
+    "node-sass": "^4.8.3",
     "react-addons-test-utils": "^15.1.0",
     "react-test-renderer": "^15.4.2",
+    "resolve-url-loader": "^2.3.0",
+    "sass-loader": "^7.0.1",
     "style-loader": "^0.13.1",
+    "url-loader": "^1.0.1",
     "webpack": "^1.14.0"
   },
   "dependencies": {

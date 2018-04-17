@@ -47,22 +47,22 @@ export default class Editor extends React.Component {
   render() {
     return (
       <Tabs className="tab-view-wrapper">
-        <Tab active="true" title="add content">
+        <Tab active="true" title="add content" className="bs-editor-content-tab has-submenu">
 					Tab One content
 				</Tab>
-        <Tab title="settings">
+        <Tab title="settings" className="bs-editor-settings-tab">
           <TabViewSettings
             value={this.state.settings}
             onChange={(event) => this.onSettingsChange(event)}
           />
         </Tab>
-        <Tab title="translations">
+        <Tab title="translations" className="bs-editor-translations-tab">
           <TabViewTranslations />
         </Tab>
-        <Tab title="tutorial">
+        <Tab title="tutorial" className="bs-editor-tutorial-tab">
           <TabViewTutorial />
         </Tab>
-        <Tab title="metadata">
+        <Tab title="metadata" className="bs-editor-metadata-tab">
           <TabViewMetadata
             value="TODO: fetch metadata"
           />
