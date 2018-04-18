@@ -3,6 +3,7 @@ import '../styles/editor-branching-scenario.css';
 
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';
+import ContentTypeMenu from './components/ContentTypeMenu';
 import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
@@ -48,6 +49,7 @@ export default class Editor extends React.Component {
     return (
       <Tabs className="tab-view-wrapper">
         <Tab active="true" title="add content" className="bs-editor-content-tab has-submenu">
+          <ContentTypeMenu />
 					Tab One content
 				</Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
