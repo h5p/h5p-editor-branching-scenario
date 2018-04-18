@@ -1,5 +1,4 @@
 import React from 'react';
-import '../styles/editor-branching-scenario.css';
 
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';

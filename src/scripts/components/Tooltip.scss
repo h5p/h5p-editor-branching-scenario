@@ -1,8 +1,4 @@
-@font-face {
-  font-family: "BSFont";
-  src: url('../../styles/fonts/bs.eot');
-  src: url('../../styles/fonts/bs.woff');
-}
+@import '../../styles/main.scss';
 
 .tooltip-wrapper {
   display: inline;
@@ -23,7 +19,7 @@
     color: #6e6e6e;
     cursor: pointer;
     padding-left: 0.3rem;
-    content: "\e908";
+    content: $icon-info;
   }
 }
 
@@ -45,15 +41,15 @@
 }
 
 .tooltip::before {
-    font-family: BSFont;
-    position: absolute;
-    content: "\e908";
-    font-size: 1.3rem;
-    color: #1773DA;
-    left: 0.6rem;
-    top: 0.6rem;
-    border-right: solid 1px #e9ebee;
-    padding-right: 0.6rem;
-    height: calc(100% - 1rem);
-    font-weight: normal;
-  }
+  font-family: BSFont;
+  position: absolute;
+  content: "\e908";
+  font-size: 1.3rem;
+  color: #1773DA;
+  left: 0.6rem;
+  top: 0.6rem;
+  border-right: solid 1px #e9ebee;
+  padding-right: 0.6rem;
+  height: calc(100% - 1rem);
+  font-weight: normal;
+}
