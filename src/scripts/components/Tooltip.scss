@@ -1,0 +1,59 @@
+@font-face {
+  font-family: "BSFont";
+  src: url('../../styles/fonts/bs.eot');
+  src: url('../../styles/fonts/bs.woff');
+}
+
+.tooltip-wrapper {
+  display: inline;
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+
+  /* Rules below not implemented in browsers yet */
+  -o-user-select: none;
+  user-select: none;
+}
+
+.tooltip-button {
+  &:after {
+    font-family: BSFont;
+    top: 0;
+    font-size: 0.7rem;
+    color: #6e6e6e;
+    cursor: pointer;
+    padding-left: 0.3rem;
+    content: "\e908";
+  }
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 98%;
+  width: 15rem;
+  background-color: #ffffff;
+  z-index: 2000;
+  padding: 0.6rem;
+  border-radius: 5px;
+  font-weight: normal;
+  padding-left: 3.5rem;
+  text-align: left;
+  box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+  font-size: 0.75rem;
+  line-height: 0.9rem;
+  color: #363b42;
+}
+
+.tooltip::before {
+    font-family: BSFont;
+    position: absolute;
+    content: "\e908";
+    font-size: 1.3rem;
+    color: #1773DA;
+    left: 0.6rem;
+    top: 0.6rem;
+    border-right: solid 1px #e9ebee;
+    padding-right: 0.6rem;
+    height: calc(100% - 1rem);
+    font-weight: normal;
+  }
