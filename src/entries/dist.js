@@ -4,7 +4,6 @@ import Editor from '../scripts/editor';
 
 /*global H5PEditor, H5P*/
 H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($) {
-
   /**
    * Initialize Branching Scenario editor.
    *
@@ -19,33 +18,37 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     // Fields of semantics
     this.field = field;
 
-    // TODO: Sanitization (in Branching Scenario)
-    this.params = $.extend({
-      title: 'foobar',
-      startScreen : {
-        startScreentitle: '',
-        startScreenSubtitle: ''
-      }
-    }, params);
+    this.params = params;
     setValue(field, this.params);
 
     // TODO: Match semantics with design
+    // TODO: Sanitized access
     this.settings = {
-      startTitle: '',
-      startSubtitle: '',
-      startImage: undefined,
-      endScore: 0,
-      endFeedback: '',
-      endImage: undefined,
-      optionsSkipToAQuestion: false,
-      optionsConfirmOnAlternative: false,
-      optionsTryAnotherChoice: false,
-      optionsDisplayScore: false
+      startTitle: this.params.startScreen.startScreenTitle,
+      startSubtitle: this.params.startScreen.startScreenSubtitle,
+      //startImage: this.params.startScreen.startScreenImage.path, // TODO: Adapt to use widget
+      endScore: 0, // TODO: Doesn't have a match in current semantics
+      endFeedback: '', // TODO: Doesn't have a match in current semantics
+      //endImage: this.params.endScreens[0].endScreenImage.path, // TODO: Adapt to use widget
+      optionsSkipToAQuestion: false, // TODO: Doesn't have a match in current semantics
+      optionsConfirmOnAlternative: false, // TODO: Doesn't have a match in current semantics
+      optionsTryAnotherChoice: false, // TODO: Doesn't have a match in current semantics
+      optionsDisplayScore: false // TODO: Doesn't have a match in current semantics
     };
 
     this.passReadies = true;
     parent.ready(() => this.passReadies = false);
   }
+
+  BranchingScenarioEditor.prototype.updateParams = function (data) {
+    // TODO Switch here if we accept data from more than one component
+    this.params.startScreen.startScreenTitle = data.startTitle;
+    this.params.startScreen.startScreenSubtitle = data.startSubtitle;
+
+    // TODO: Adapt to use widget
+    //this.params.startScreen.startScreenImage.path = data.startImage;
+    //this.params.endScreens[0].endScreenImage.path = data.endImage;
+  };
 
   /**
    * Validate the current field.
@@ -68,6 +71,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     ReactDOM.render(
      (<Editor
        settings={this.settings}
+       updateParams={this.updateParams.bind(this)}
      />), $wrapper.get(0)
     );
   };
