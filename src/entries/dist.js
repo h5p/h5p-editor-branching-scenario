@@ -18,11 +18,15 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     // Fields of semantics
     this.field = field;
 
-    this.params = params;
+    this.params = params || {};
     setValue(field, this.params);
 
     // TODO: Match semantics with design
-    // TODO: Sanitized access
+    // TODO: Sanitized access more elegantly
+    this.params.startScreen = this.params.startScreen || {};
+    this.params.startScreen.startScreenTitle = this.params.startScreen.startScreenTitle || '';
+    this.params.startScreen.startScreenSubtitle = this.params.startScreen.startScreenSubtitle || '';
+
     this.settings = {
       startTitle: this.params.startScreen.startScreenTitle,
       startSubtitle: this.params.startScreen.startScreenSubtitle,
