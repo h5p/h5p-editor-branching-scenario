@@ -9,6 +9,9 @@ export default class TabViewTranslations extends React.Component {
 					<div className="tab-view-white-box">
 						<form>
 							<fieldset>
+								<legend>Branching Scenario Translations</legend>
+							</fieldset>
+							<fieldset>
 								<legend>Interactive Video Translations</legend>
 							</fieldset>
 							<fieldset>
