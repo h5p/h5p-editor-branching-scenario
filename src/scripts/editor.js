@@ -19,11 +19,12 @@ export default class Editor extends React.Component {
 
   /**
    * Update settings
+   * TODO: For a more general solution such as the fullscreen editor, this
+   *       should be more abstract
    *
    * @param {Event} event - Change event.
    */
   onSettingsChange(event) {
-    // TODO: Let changed settings bubble up to become params, so they can be saved
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
@@ -48,6 +49,8 @@ export default class Editor extends React.Component {
         <Tab title="settings" className="bs-editor-settings-tab">
           <TabViewSettings
             value={this.state.settings}
+            startImageChooser={this.props.startImageChooser}
+            endImageChooser={this.props.endImageChooser}
             onChange={(event) => this.onSettingsChange(event)}
           />
         </Tab>

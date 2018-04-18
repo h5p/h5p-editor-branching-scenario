@@ -26,14 +26,15 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     this.params.startScreen = this.params.startScreen || {};
     this.params.startScreen.startScreenTitle = this.params.startScreen.startScreenTitle || '';
     this.params.startScreen.startScreenSubtitle = this.params.startScreen.startScreenSubtitle || '';
+    this.params.endScreens = this.params.endScreens || [{}];
 
     this.settings = {
       startTitle: this.params.startScreen.startScreenTitle,
       startSubtitle: this.params.startScreen.startScreenSubtitle,
-      //startImage: this.params.startScreen.startScreenImage.path, // TODO: Adapt to use widget
+      startImage: this.params.startScreen.startScreenImage,
       endScore: 0, // TODO: Doesn't have a match in current semantics
       endFeedback: '', // TODO: Doesn't have a match in current semantics
-      //endImage: this.params.endScreens[0].endScreenImage.path, // TODO: Adapt to use widget
+      endImage: this.params.endScreens[0].endScreenImage,
       optionsSkipToAQuestion: false, // TODO: Doesn't have a match in current semantics
       optionsConfirmOnAlternative: false, // TODO: Doesn't have a match in current semantics
       optionsTryAnotherChoice: false, // TODO: Doesn't have a match in current semantics
@@ -42,16 +43,26 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     this.passReadies = true;
     parent.ready(() => this.passReadies = false);
+
+    // TODO: Make a general function for retrieving particular fields from semantics
+    const field1 = this.field.fields[1].fields[2];
+    this.startImageChooser = new H5PEditor.widgets.image(this, field1, this.settings.startImage, () => {});
+
+    const field2 = this.field.fields[2].field.fields[2];
+    this.endImageChooser = new H5PEditor.widgets.image(this, field2, this.settings.endImage, () => {});
   }
 
+  /**
+   * Update parameters with values delivered by React components.
+   *
+   * @param {Object} data - Data from React components.
+   */
   BranchingScenarioEditor.prototype.updateParams = function (data) {
-    // TODO Switch here if we accept data from more than one component
+    // TODO: Switch here if we accept data from more than one component
     this.params.startScreen.startScreenTitle = data.startTitle;
     this.params.startScreen.startScreenSubtitle = data.startSubtitle;
-
-    // TODO: Adapt to use widget
-    //this.params.startScreen.startScreenImage.path = data.startImage;
-    //this.params.endScreens[0].endScreenImage.path = data.endImage;
+    this.params.startScreen.startScreenImage = data.startImage;
+    this.params.endScreens[0].endScreenImage = data.endImage;
   };
 
   /**
@@ -65,6 +76,20 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
+   * Collect functions to execute once the tree is complete.
+   *
+   * @param {function} ready
+   */
+  BranchingScenarioEditor.prototype.ready = function (ready) {
+    if (this.passReadies) {
+      this.parent.ready(ready);
+    }
+    else {
+      this.readies.push(ready);
+    }
+  };
+
+  /**
    * Append Editor to DOM.
    *
    * @param {jQuery} $wrapper - Container in DOM.
@@ -75,6 +100,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     ReactDOM.render(
      (<Editor
        settings={this.settings}
+       startImageChooser={this.startImageChooser}
+       endImageChooser={this.endImageChooser}
        updateParams={this.updateParams.bind(this)}
      />), $wrapper.get(0)
     );
