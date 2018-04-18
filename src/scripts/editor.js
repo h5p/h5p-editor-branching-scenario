@@ -12,7 +12,9 @@ export default class Editor extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {settings: props.settings};
+    this.state = {
+      settings: props.settings
+    };
   }
 
   /**
@@ -29,6 +31,8 @@ export default class Editor extends React.Component {
     const settings = this.state.settings;
     settings[[name]] = value;
     this.setState({settings: settings});
+
+    this.props.updateParams(settings);
   }
 
   render() {
