@@ -1,7 +1,49 @@
 import React from 'react';
 
 export default class TabViewSettings extends React.Component {
-	render() {
+	constructor (props) {
+    super(props);
+
+    this.refStartImageChooser = React.createRef();
+		this.refEndImageChooser = React.createRef();
+  }
+
+	componentDidMount () {
+		/*
+		 * This is hacking the old widget to quickly suit the new prerequisites.
+		 * TODO: Create a new widget that can also be used in the fullscreen editor later
+		 */
+		this.props.startImageChooser.appendTo(this.refStartImageChooser.current);
+		const startImage = document.getElementById('startImage').firstChild;
+		startImage.removeChild(startImage.childNodes[0]);
+
+		this.props.startImageChooser.on('changedImage', event => {
+			// Pretend to be a React event
+			event.target = {
+				type: 'h5p-image',
+				name: 'startImage',
+				value: event.data
+			};
+			this.props.onChange(event);
+		});
+
+		// Same as above for default endscreen image
+		this.props.endImageChooser.appendTo(this.refEndImageChooser.current);
+		const endImage = document.getElementById('endImage').firstChild;
+		endImage.removeChild(endImage.childNodes[0]);
+
+		this.props.endImageChooser.on('changedImage', event => {
+			// Pretend to be a React event
+			event.target = {
+				type: 'h5p-image',
+				name: 'endImage',
+				value: event.data
+			};
+			this.props.onChange(event);
+		});
+  }
+
+	render () {
 		return (
       <div id="settings" className="tab tab-view-full-page large-padding">
         <span className="tab-view-title">Settings</span>
@@ -31,12 +73,11 @@ export default class TabViewSettings extends React.Component {
                 onChange={this.props.onChange}
               />
               <label htmlFor="startImage">Upload the image</label>
-              <input
-                id="startImage"
-                type="file"
-                name="startImage"
-                onChange={this.props.onChange}
-              />
+							<div
+								id="startImage"
+								name="startImage"
+								ref={this.refStartImageChooser}
+							/>
             </fieldset>
             <fieldset>
               <legend className="tab-view-info">Configure the default "End Scenario" screen
@@ -62,12 +103,11 @@ export default class TabViewSettings extends React.Component {
                 onChange={this.props.onChange}
               />
               <label htmlFor="endImage">Upload the image</label>
-              <input
-                id="endImage"
-                type="file"
-                name="endImage"
-                onChange={this.props.onChange}
-              />
+							<div
+								id="endImage"
+								name="endImage"
+								ref={this.refEndImageChooser}
+							/>
             </fieldset>
             <fieldset>
               <legend className="tab-view-info">Behavioural settings</legend>

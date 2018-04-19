@@ -38,6 +38,11 @@ input[type="button"], input[type="submit"] {
   border-radius: 2px;
   cursor: pointer; }
 
+form {
+  height: 100%;
+  overflow-y: auto;
+}
+
 .tab-panel {
 	display: none;
 }
@@ -60,6 +65,13 @@ input[type="button"], input[type="submit"] {
   background-color: #F1F3F6;
   box-sizing: border-box;
   display: block;
+  width: calc(100% - 3rem);
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  height: 100%;
+  margin-left: 3rem;
+	margin-right: 6rem;
 }
 
 .tab-view-full-page fieldset {
@@ -86,6 +98,8 @@ input[type="button"], input[type="submit"] {
   background-color: #fff;
   padding: 1rem;
   margin-top: 1rem;
+  max-height: calc(100% - 7.55rem);
+  overflow-y: auto;
 }
 
 .tab-view-title {
