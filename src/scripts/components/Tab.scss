@@ -48,7 +48,8 @@ form {
 }
 
 .tab-panel.active {
-  display: block;
+  display: flex;
+  width: 100%;
 }
 
 .tab-view-wrapper {
@@ -60,7 +61,10 @@ form {
 }
 
 .tab-view-full-page {
+  width: 100%;
   background-color: #F1F3F6;
+  box-sizing: border-box;
+  display: block;
   width: calc(100% - 3rem);
   box-sizing: border-box;
   display: block;

@@ -3,6 +3,7 @@ import React from 'react';
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';
 import ContentTypeMenu from './components/ContentTypeMenu';
+import Canvas from './components/Canvas';
 import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
@@ -13,8 +14,28 @@ export default class Editor extends React.Component {
     super(props);
 
     this.state = {
-      settings: props.settings
+      settings: props.settings,
+			pos: {
+ 				x: 0,
+				y: 0
+			},
+			dragging: false,
+			rel: null
     };
+
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
+  }
+
+  componentDidUpdate(props, state) {
+    if (this.state.dragging && !state.dragging) {
+      document.addEventListener('mousemove', this.onMouseMove)
+      document.addEventListener('mouseup', this.onMouseUp)
+    }
+    else if (!this.state.dragging && state.dragging) {
+      document.removeEventListener('mousemove', this.onMouseMove);
+      document.removeEventListener('mouseup', this.onMouseUp);
+    }
   }
 
   /**
@@ -36,15 +57,60 @@ export default class Editor extends React.Component {
     this.props.updateParams(settings);
   }
 
+  onMouseDown(e, data) {
+    this.setState(prevState => ({
+      dragging: true,
+      draggable: data,
+      rel : {
+        x: data.xPos,
+        y: data.yPos/2
+      },
+			pos : {
+        x: e.pageX - data.xPos,
+        y: e.pageY - data.yPos
+			}
+    }));  
+    e.stopPropagation()
+    e.preventDefault()
+  }   
+
+  onMouseUp(e) {
+    this.setState({
+			dragging: false
+		})
+    e.stopPropagation()
+    e.preventDefault()
+  }   
+
+  onMouseMove(e) {
+		if (!this.state.dragging) return
+    this.setState({
+      pos: {
+        x: e.pageX - this.state.rel.x,
+        y: e.pageY - this.state.rel.y
+      }
+    })
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
   render() {
     return (
       <Tabs className="tab-view-wrapper">
         <Tab
+          onMouseUp={ this.onMouseUp.bind(this)  }
           active="true"
           title="add content"
           className="bs-editor-content-tab has-submenu">
-          <ContentTypeMenu />
-					Tab One content
+          <ContentTypeMenu 
+            onMouseDown={ this.onMouseDown.bind(this)  }
+          />
+          <Canvas
+            dragging={this.state.dragging}
+            draggable={this.state.draggable} 
+						mouseX={this.state.pos.x}
+						mouseY={this.state.pos.y}
+          />
 				</Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
           <TabViewSettings

@@ -44,9 +44,7 @@ export default class Tabs extends React.Component {
         <ul className="tabs-nav">
           { Object.keys(this.props.children).map(this.renderNavItem.bind(this)) }
         </ul>
-        <div>
-          { tabs }
-        </div>
+        { tabs }
       </div>
     )
   }

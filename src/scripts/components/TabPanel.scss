@@ -5,21 +5,19 @@
 }
 
 .tabs {
-  overflow: hidden;
+  display: flex;
+  flex-direction: row;
   height: 55em;
 }
 
 .tabs-nav {
-  font-size: 0.6em;
   height: 100%;
-  float: left;
-  clear: both;
-  background: grey;
   margin-top: 0;
   margin-bottom: 0;
   padding: 0;
+  font-size: 0.6em;
+  background: grey;
   list-style-type: none;
-  width: 3rem;
   background-color: #191e22;
 }
 
