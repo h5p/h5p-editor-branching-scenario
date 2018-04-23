@@ -15,12 +15,19 @@ export default class Editor extends React.Component {
 
     this.state = {
       settings: props.settings,
+			dragging: false,
+      mouse: {
+        x: 0,
+        y: 0
+      },
+			rel: {
+        x: 0,
+        y: 0
+      },
 			pos: {
  				x: 0,
 				y: 0
 			},
-			dragging: false,
-			rel: null
     };
 
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -61,30 +68,39 @@ export default class Editor extends React.Component {
     this.setState(prevState => ({
       dragging: true,
       draggable: data,
+      mouse: {
+        x: e.pageX,
+        y: e.pageY 
+      },
       rel : {
         x: data.xPos,
         y: data.yPos/2
       },
 			pos : {
         x: e.pageX - data.xPos,
-        y: e.pageY - data.yPos
-			}
+        y: e.pageY - data.yPos/2
+			},
     }));  
-    e.stopPropagation()
-    e.preventDefault()
+    e.persist();
+    e.stopPropagation(); 
+    e.preventDefault(); 
   }   
 
   onMouseUp(e) {
     this.setState({
 			dragging: false
 		})
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation();
+    e.preventDefault(); 
   }   
 
   onMouseMove(e) {
 		if (!this.state.dragging) return
     this.setState({
+      mouse: {
+        x: e.pageX,
+        y: e.pageY
+      },
       pos: {
         x: e.pageX - this.state.rel.x,
         y: e.pageY - this.state.rel.y
@@ -108,8 +124,11 @@ export default class Editor extends React.Component {
           <Canvas
             dragging={this.state.dragging}
             draggable={this.state.draggable} 
-						mouseX={this.state.pos.x}
-						mouseY={this.state.pos.y}
+						mouseX={this.state.mouse.x}
+						mouseY={this.state.mouse.y}
+						posX={this.state.pos.x}
+						posY={this.state.pos.y}
+            width={this.state.draggable ? this.state.draggable.wdith: ''} 
           />
 				</Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
