@@ -6,11 +6,55 @@ export default class ContentTypeMenu extends React.Component {
 
   constructor(props) {
     super(props);
+		this.state = {};
     this.handleMouseDown = this.handleMouseDown.bind(this);
   }
 
+  componentDidMount() {
+		// Load the libraries
+		const self = this;
+    window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, function(libraries) {
+
+			let loadedLibraries = [] 
+
+      for (var i = 0; i < libraries.length; i++) {
+        if (libraries[i].restricted !== true) {
+					loadedLibraries.push(libraries[i].title)
+        }
+      }
+
+			self.setState({
+				loadedLibraries: loadedLibraries 
+			});
+    }); 
+	}
+
+	renderDnDButtons() {
+		if (!this.state.loadedLibraries) {
+			return ''
+		}
+
+		let listItems = this.state.loadedLibraries.map(name => {
+			return <li 
+				key={ Math.random() } 
+				className={ name.replace(/\s/g, '') }
+				ref= { name.replace(/\s/g, '') } 
+				onMouseDown={ this.handleMouseDown } 
+				onMouseUp={ this.handleMouseUp } 
+				> 
+					{ name }
+				</li> 
+		});
+
+		return (
+			<ul className="content-type-buttons">
+			  { listItems } 
+			</ul>
+		)
+	}
+
   handleMouseDown(e, data) {
-    const positionData = this.refs.contentTypeButton.getBoundingClientRect();
+    const positionData = this.refs[e.currentTarget.className].getBoundingClientRect();
 
     const mouseDownData = {
       contentClass: e.currentTarget.className,
@@ -34,14 +78,7 @@ export default class ContentTypeMenu extends React.Component {
             Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>
           </Tooltip>
         </label>
-        <ul className="content-type-buttons">
-        <li className="video" title="Add New Video" ref={"contentTypeButton"} onMouseDown={this.handleMouseDown} onMouseUp={this.props.onMouseUp}>Video</li>
-          <li className="presentation" title="Add New Course Presentation">Presentation</li>
-          <li className="text" title="Add New Text">Text</li>
-          <li className="image" title="Add New Image">Image</li>
-          <li className="interactive-video " title="Add New Interactive Video">Interac. Video</li>
-          <li className="image-hotspots" title="Add New Image Hotspots">Hotspots</li>
-        </ul>
+				{ this.renderDnDButtons() }
         <label className="label-info">
           Branching Content
           <Tooltip>

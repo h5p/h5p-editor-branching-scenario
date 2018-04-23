@@ -17,6 +17,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     this.parent = parent;
     // Fields of semantics
     this.field = field;
+		
+		let elementFields = this.findField('content', this.field.fields);
+		this.libraries = this.findField('content', elementFields.field.fields).options;
 
     this.params = params || {};
     setValue(field, this.params);
@@ -265,6 +268,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     }
   };
 
+	BranchingScenarioEditor.prototype.findField = function (name, fields) {
+    for (var i = 0; i < fields.length; i++) {
+      if (fields[i].name === name) {
+        return fields[i];
+      }
+    }	
+	}
+
   /**
    * Append Editor to DOM.
    *
@@ -275,6 +286,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     ReactDOM.render(
      (<Editor
+		 	 libraries={this.libraries}
        settings={this.settings}
        startImageChooser={this.startImageChooser}
        endImageChooser={this.endImageChooser}

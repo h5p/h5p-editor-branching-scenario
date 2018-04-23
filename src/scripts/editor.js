@@ -15,6 +15,7 @@ export default class Editor extends React.Component {
 
     this.state = {
       settings: props.settings,
+			libraries: props.libraries,
 			dragging: false,
       mouse: {
         x: 0,
@@ -74,11 +75,11 @@ export default class Editor extends React.Component {
       },
       rel : {
         x: data.xPos,
-        y: data.yPos/2
+        y: data.yPos
       },
 			pos : {
         x: e.pageX - data.xPos,
-        y: e.pageY - data.yPos/2
+        y: e.pageY - data.yPos
 			},
     }));  
     e.persist();
@@ -119,6 +120,7 @@ export default class Editor extends React.Component {
           title="add content"
           className="bs-editor-content-tab has-submenu">
           <ContentTypeMenu 
+						libraries={ this.state.libraries } 
             onMouseDown={ this.onMouseDown.bind(this)  }
           />
           <Canvas
