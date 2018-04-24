@@ -17,7 +17,7 @@ export default class Canvas extends React.Component {
     }); 
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (prevProps.dragging === true && this.props.dragging == false) {
       if (this.isInDropZone()) {
         this.addDraggableToDropped(this.props.mouseX, this.props.mouseY);
@@ -46,7 +46,7 @@ export default class Canvas extends React.Component {
     }
 
     return ( 
-       <li 
+      <li 
         style={
           {
             top: this.props.posY + 'px',
@@ -55,32 +55,32 @@ export default class Canvas extends React.Component {
           }
         } 
         className={ ['draggable', this.props.draggable.contentClass].join(' ') }>
-          Video
-        </li> 
-     );
+      Video
+      </li> 
+    );
   }
 
   addDraggableToDropped(xPos, yPos) {
     const newDraggable = (  
-       <li
-         key = { Math.random() * 100 } 
-         style={
-           {
-             top: yPos/2 + 'px', //TODO Fix offset 
-             left: xPos + 'px',   
-             width: this.props.draggable.width + 'px'
-           }
-         } 
-         className={ ['draggable'].join(' ') }>
-         Video
+      <li
+        key = { Math.random() * 100 } 
+        style={
+          {
+            top: yPos/2 + 'px', //TODO Fix offset 
+            left: xPos + 'px',   
+            width: this.props.draggable.width + 'px'
+          }
+        } 
+        className={ ['draggable'].join(' ') }>
+      Video
       </li>
-    )
+    );
 
     this.setState(prevState => {
       return {
         droppedDraggables: [...prevState.droppedDraggables, newDraggable] 
-      }
-    })
+      };
+    });
   }
 
   render() {
@@ -92,10 +92,10 @@ export default class Canvas extends React.Component {
           <div 
             className="droppable"
             ref={ "droppable" }  
-           />
+          />
         </div>
       </div>
-    )
+    );
   }
 }
 
@@ -107,4 +107,4 @@ Canvas.propTypes = {
   posX: PropTypes.number,
   poxY: PropTypes.number,
   width: PropTypes.number
-}
+};

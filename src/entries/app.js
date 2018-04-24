@@ -17,9 +17,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     this.parent = parent;
     // Fields of semantics
     this.field = field;
-		
-		let elementFields = this.findField('content', this.field.fields);
-		this.libraries = this.findField('content', elementFields.field.fields).options;
+
+    let elementFields = this.findField('content', this.field.fields);
+    this.libraries = this.findField('content', elementFields.field.fields).options;
 
     this.params = params || {};
     setValue(field, this.params);
@@ -156,7 +156,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     };
 
     // This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise(resolve => {
       const libraryNames = getLibraryNames(this.params, [parent.currentLibrary]);
       const allSemantics = [];
       libraryNames.forEach(libraryName => {
@@ -196,7 +196,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
        * BUT the procedure is too slow, and we still don't have the values from params and would have
        * to get them, too. There must be a smarter way!
        */
-      console.log(this.translations);
     });
 
 
@@ -268,13 +267,13 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     }
   };
 
-	BranchingScenarioEditor.prototype.findField = function (name, fields) {
+  BranchingScenarioEditor.prototype.findField = function (name, fields) {
     for (var i = 0; i < fields.length; i++) {
       if (fields[i].name === name) {
         return fields[i];
       }
-    }	
-	}
+    } 
+  };
 
   /**
    * Append Editor to DOM.
@@ -285,13 +284,13 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     $wrapper.parent().css('padding', 0);
 
     ReactDOM.render(
-     (<Editor
-		 	 libraries={this.libraries}
-       settings={this.settings}
-       startImageChooser={this.startImageChooser}
-       endImageChooser={this.endImageChooser}
-       updateParams={this.updateParams.bind(this)}
-     />), $wrapper.get(0)
+      (<Editor
+        libraries={this.libraries}
+        settings={this.settings}
+        startImageChooser={this.startImageChooser}
+        endImageChooser={this.endImageChooser}
+        updateParams={this.updateParams.bind(this)}
+      />), $wrapper.get(0)
     );
   };
 

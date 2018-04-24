@@ -26,18 +26,18 @@ export default class Tooltip extends React.Component {
             { this.props.children }
           </div>
         </div>
-      )
+      );
     }
     else {
       return (
         <div className="tooltip-wrapper">
           <a className="tooltip-button" onClick={ this.handleClick }/>
         </div>
-      )
+      );
     }
   }
 }
 
 Tooltip.propTypes = {
   children: PropTypes.array
-}
+};

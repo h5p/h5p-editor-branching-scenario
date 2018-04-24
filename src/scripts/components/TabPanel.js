@@ -28,7 +28,7 @@ export default class Tabs extends React.Component {
         className={[tab.props.className, this.state.activeIndex == key ? 'active' : ''].join(' ')}
         onClick={ this.handleOnClick.bind(this, key) }>
       </li>
-    )
+    );
   }
 
   render() {
@@ -40,7 +40,7 @@ export default class Tabs extends React.Component {
       return React.cloneElement(child, {
         active: child.props.active === true ? true : (active == index++)
       });
-    })
+    });
 
     return (
       <div className="tabs">
@@ -49,6 +49,6 @@ export default class Tabs extends React.Component {
         </ul>
         { tabs }
       </div>
-    )
+    );
   }
 }

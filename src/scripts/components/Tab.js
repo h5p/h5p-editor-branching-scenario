@@ -8,10 +8,10 @@ export default class Tab extends React.Component {
       <div className={ "tab-panel" + (this.props.active === true ? ' active' : '') }>
         { this.props.children }
       </div>
-    )
+    );
   }
 }
 
 Tab.propTypes = {
   active: PropTypes.bool
-}
+};
