@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './Tooltip.scss';
 
 export default class Tooltip extends React.Component {
@@ -8,10 +9,9 @@ export default class Tooltip extends React.Component {
     this.state = {
       showTooltip: false
     };
-    this.handleClick = this.handleClick.bind(this);
   }
 
-  handleClick() {
+  handleClick = () => {
     this.setState(prevState => ({
       showTooltip: !prevState.showTooltip
     }));
@@ -36,4 +36,8 @@ export default class Tooltip extends React.Component {
       )
     }
   }
+}
+
+Tooltip.propTypes = {
+  children: PropTypes.array
 }

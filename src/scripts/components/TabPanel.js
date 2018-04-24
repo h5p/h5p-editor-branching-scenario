@@ -19,11 +19,14 @@ export default class Tabs extends React.Component {
     });
   }
 
-  renderNavItem(key) {
+  renderNavItem = (key) => {
     let tab = this.props.children[key];
 
     return (
-      <li key={ key } className={[tab.props.className, this.state.activeIndex == key ? 'active' : ''].join(' ')} onClick={ this.handleOnClick.bind(this, key) }>
+      <li
+        key={ key }
+        className={[tab.props.className, this.state.activeIndex == key ? 'active' : ''].join(' ')}
+        onClick={ this.handleOnClick.bind(this, key) }>
       </li>
     )
   }
@@ -42,7 +45,7 @@ export default class Tabs extends React.Component {
     return (
       <div className="tabs">
         <ul className="tabs-nav">
-          { Object.keys(this.props.children).map(this.renderNavItem.bind(this)) }
+          { Object.keys(this.props.children).map(this.renderNavItem) }
         </ul>
         { tabs }
       </div>

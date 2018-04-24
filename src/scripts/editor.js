@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';
@@ -30,19 +31,16 @@ export default class Editor extends React.Component {
 				y: 0
 			},
     };
-
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
   }
 
   componentDidUpdate(props, state) {
     if (this.state.dragging && !state.dragging) {
-      document.addEventListener('mousemove', this.onMouseMove)
-      document.addEventListener('mouseup', this.onMouseUp)
+      window.addEventListener('mousemove', this.handleMouseMove)
+      window.addEventListener('mouseup', this.handleMouseUp)
     }
     else if (!this.state.dragging && state.dragging) {
-      document.removeEventListener('mousemove', this.onMouseMove);
-      document.removeEventListener('mouseup', this.onMouseUp);
+      window.removeEventListener('mousemove', this.handleMouseMove);
+      window.removeEventListener('mouseup', this.handleMouseUp);
     }
   }
 
@@ -65,13 +63,13 @@ export default class Editor extends React.Component {
     this.props.updateParams(settings);
   }
 
-  onMouseDown(e, data) {
+  handleMouseDown = (e, data) => {
     this.setState(prevState => ({
       dragging: true,
       draggable: data,
       mouse: {
         x: e.pageX,
-        y: e.pageY 
+        y: e.pageY
       },
       rel : {
         x: data.xPos,
@@ -81,21 +79,21 @@ export default class Editor extends React.Component {
         x: e.pageX - data.xPos,
         y: e.pageY - data.yPos
 			},
-    }));  
+    }));
     e.persist();
-    e.stopPropagation(); 
-    e.preventDefault(); 
-  }   
+    e.stopPropagation();
+    e.preventDefault();
+  }
 
-  onMouseUp(e) {
+  handleMouseUp = (e) => {
     this.setState({
 			dragging: false
 		})
     e.stopPropagation();
-    e.preventDefault(); 
-  }   
+    e.preventDefault();
+  }
 
-  onMouseMove(e) {
+  handleMouseMove = (e) => {
 		if (!this.state.dragging) return
     this.setState({
       mouse: {
@@ -115,22 +113,21 @@ export default class Editor extends React.Component {
     return (
       <Tabs className="tab-view-wrapper">
         <Tab
-          onMouseUp={ this.onMouseUp.bind(this)  }
-          active="true"
+          handleMouseUp={ this.handleMouseUp }
           title="add content"
           className="bs-editor-content-tab has-submenu">
-          <ContentTypeMenu 
-						libraries={ this.state.libraries } 
-            onMouseDown={ this.onMouseDown.bind(this)  }
+          <ContentTypeMenu
+						libraries={ this.state.libraries }
+            handleMouseDown={ this.handleMouseDown  }
           />
           <Canvas
             dragging={this.state.dragging}
-            draggable={this.state.draggable} 
+            draggable={this.state.draggable}
 						mouseX={this.state.mouse.x}
 						mouseY={this.state.mouse.y}
 						posX={this.state.pos.x}
 						posY={this.state.pos.y}
-            width={this.state.draggable ? this.state.draggable.wdith: ''} 
+            width={this.state.draggable ? parseInt(this.state.draggable.wdith): null}
           />
 				</Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
@@ -156,3 +153,11 @@ export default class Editor extends React.Component {
     );
   }
 }
+
+Editor.propTypes = {
+  libraries: PropTypes.array,
+  settings: PropTypes.object,
+  updateParams: PropTypes.func
+}
+
+// TODO Proptypes for endImageChooser and startImageChooser

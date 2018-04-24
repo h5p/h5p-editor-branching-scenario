@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './Canvas.scss';
 
 export default class Canvas extends React.Component {
@@ -96,4 +97,14 @@ export default class Canvas extends React.Component {
       </div>
     )
   }
+}
+
+Canvas.propTypes = {
+  draggable: PropTypes.object,
+  dragging: PropTypes.bool,
+  mouseX: PropTypes.number,
+  mouseY: PropTypes.number,
+  posX: PropTypes.number,
+  poxY: PropTypes.number,
+  width: PropTypes.number
 }

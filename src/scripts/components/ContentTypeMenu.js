@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './ContentTypeMenu.scss';
 import Tooltip from './Tooltip';
 
@@ -7,7 +8,6 @@ export default class ContentTypeMenu extends React.Component {
   constructor(props) {
     super(props);
 		this.state = {};
-    this.handleMouseDown = this.handleMouseDown.bind(this);
   }
 
   componentDidMount() {
@@ -39,8 +39,8 @@ export default class ContentTypeMenu extends React.Component {
 				key={ Math.random() } 
 				className={ name.replace(/\s/g, '') }
 				ref= { name.replace(/\s/g, '') } 
-				onMouseDown={ this.handleMouseDown } 
-				onMouseUp={ this.handleMouseUp } 
+				handleMouseDown={ this.handleMouseDown } 
+				handleMouseUp={ this.handleMouseUp } 
 				> 
 					{ name }
 				</li> 
@@ -53,7 +53,7 @@ export default class ContentTypeMenu extends React.Component {
 		)
 	}
 
-  handleMouseDown(e, data) {
+  handleMouseDown = (e, data) => {
     const positionData = this.refs[e.currentTarget.className].getBoundingClientRect();
 
     const mouseDownData = {
@@ -64,7 +64,7 @@ export default class ContentTypeMenu extends React.Component {
       height: positionData.height,
       top: positionData.top
     }
-    this.props.onMouseDown(e, mouseDownData);
+    this.props.handleMouseDown(e, mouseDownData);
     e.stopPropagation();
     e.preventDefault();
   }
@@ -91,4 +91,9 @@ export default class ContentTypeMenu extends React.Component {
       </div>
     )
   }
+}
+
+ContentTypeMenu.propTypes = {
+  libraries: PropTypes.array,
+  handleMouseDown: PropTypes.func
 }
