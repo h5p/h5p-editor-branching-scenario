@@ -17,6 +17,7 @@ export default class Editor extends React.Component {
     this.state = {
       settings: props.settings,
       libraries: props.libraries,
+      active: false,
       dragging: false,
       mouse: {
         x: 0,
@@ -31,17 +32,8 @@ export default class Editor extends React.Component {
         y: 0
       },
     };
-  }
 
-  componentDidUpdate(props, state) {
-    if (this.state.dragging && !state.dragging) {
-      window.addEventListener('mousemove', this.handleMouseMove);
-      window.addEventListener('mouseup', this.handleMouseUp);
-    }
-    else if (!this.state.dragging && state.dragging) {
-      window.removeEventListener('mousemove', this.handleMouseMove);
-      window.removeEventListener('mouseup', this.handleMouseUp);
-    }
+    window.addEventListener('mouseup', this.handleMouseUp);
   }
 
   /**
@@ -64,22 +56,41 @@ export default class Editor extends React.Component {
   }
 
   handleMouseDown = (e, data) => {
-    this.setState({
-      dragging: true,
-      draggable: data,
-      mouse: {
-        x: e.pageX,
-        y: e.pageY
-      },
-      rel : {
-        x: data.xPos,
-        y: data.yPos
-      },
-      pos : {
-        x: e.pageX - data.xPos,
-        y: e.pageY - data.yPos
-      },
-    });
+
+    if (data) {
+      this.setState(prevState => {
+        return {
+          active: !prevState.active,
+          draggable: data,
+          mouse: {
+            x: e.pageX,
+            y: e.pageY
+          },
+          rel : {
+            x: data.xPos,
+            y: data.yPos
+          },
+          pos : {
+            x: e.pageX - data.xPos,
+            y: e.pageY + data.yPos
+          },
+        };
+      });
+      window.addEventListener('mousemove', this.handleMouseMove);
+    }
+
+    else {
+      this.setState(prevState => {
+        return {
+          active: !prevState.active,
+          mouse: {
+            x: e.pageX,
+            y: e.pageY
+          } 
+        };
+      }); 
+    }
+
     e.persist();
     e.stopPropagation();
     e.preventDefault();
@@ -89,20 +100,21 @@ export default class Editor extends React.Component {
     this.setState({
       dragging: false
     });
+    window.removeEventListener('mousemove', this.handleMouseMove);
     e.stopPropagation();
     e.preventDefault();
   }
 
   handleMouseMove = (e) => {
-    if (!this.state.dragging) return;
     this.setState({
+      dragging: true,
       mouse: {
         x: e.pageX,
         y: e.pageY
       },
       pos: {
         x: e.pageX - this.state.rel.x,
-        y: e.pageY - this.state.rel.y
+        y: e.pageY + this.state.rel.y
       }
     });
     e.stopPropagation();
@@ -119,8 +131,10 @@ export default class Editor extends React.Component {
           <ContentTypeMenu
             libraries={ this.state.libraries }
             onMouseDown={ this.handleMouseDown  }
+            active={ this.state.active }
           />
           <Canvas
+            active={this.state.active}
             dragging={this.state.dragging}
             draggable={this.state.draggable}
             mouseX={this.state.mouse.x}
@@ -128,6 +142,7 @@ export default class Editor extends React.Component {
             posX={this.state.pos.x}
             posY={this.state.pos.y}
             width={this.state.draggable ? parseInt(this.state.draggable.wdith): null}
+            onMouseDown={ this.handleMouseDown  }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

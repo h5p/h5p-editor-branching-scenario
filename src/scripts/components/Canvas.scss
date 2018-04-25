@@ -3,25 +3,6 @@
   background: gray;
 }
 
-.draggable {
-  height: 2rem;
-  background: #2B2F36;
-  padding: 0.5rem;
-  box-sizing: border-box;
-  font-size: 0.7rem;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  line-height: 0.875rem;
-  color: #e9ebee;
-  font-weight: 400;
-  border: solid 1px #2B2F36;
-  border-radius: 3px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  position:absolute;
-}
-
 .start-canvas {
   width: 100%;
   height: 100%; 

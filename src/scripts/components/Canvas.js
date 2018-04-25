@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Canvas.scss';
+import Draggable from './Draggable.js';
 
 export default class Canvas extends React.Component {
   constructor(props) {
@@ -19,6 +20,12 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.dragging === true && this.props.dragging == false) {
+      if (this.isInDropZone()) {
+        this.addDraggableToDropped(this.props.mouseX, this.props.mouseY);
+      }
+    }
+
+    if (prevProps.active === true && this.props.active === false) {
       if (this.isInDropZone()) {
         this.addDraggableToDropped(this.props.mouseX, this.props.mouseY);
       }
@@ -45,35 +52,31 @@ export default class Canvas extends React.Component {
       return '';
     }
 
+    const draggableData = this.props.draggable;
+
     return ( 
-      <li 
-        style={
-          {
-            top: this.props.posY + 'px',
-            left: this.props.posX + 'px', 
-            width: this.props.draggable.width + 'px'
-          }
-        } 
-        className={ ['draggable', this.props.draggable.contentClass].join(' ') }>
-      Video
-      </li> 
+      <Draggable
+        yPos={ this.props.mouseY - 65}
+        xPos={ this.props.posX }
+        width={ draggableData.width } 
+        contentClass={ draggableData.contentClass }
+        content={ draggableData.content } 
+      />
     );
   }
 
   addDraggableToDropped(xPos, yPos) {
+    const draggableData = this.props.draggable;
+
     const newDraggable = (  
-      <li
-        key = { Math.random() * 100 } 
-        style={
-          {
-            top: yPos/2 + 'px', //TODO Fix offset 
-            left: xPos + 'px',   
-            width: this.props.draggable.width + 'px'
-          }
-        } 
-        className={ ['draggable'].join(' ') }>
-      Video
-      </li>
+      <Draggable
+        key={ Math.random() } 
+        xPos={ xPos - 60 } 
+        yPos={ yPos - 65 }
+        width={ draggableData.width } 
+        contentClass={ draggableData.contentClass }
+        content={ draggableData.content } 
+      />
     );
 
     this.setState(prevState => {
@@ -85,7 +88,9 @@ export default class Canvas extends React.Component {
 
   render() {
     return (
-      <div className="canvas">
+      <div className="canvas"
+        onMouseDown= { this.props.onMouseDown } 
+      >
         { this.renderActiveDraggable() } 
         { this.state.droppedDraggables } 
         <div className="start-canvas">
@@ -100,6 +105,7 @@ export default class Canvas extends React.Component {
 }
 
 Canvas.propTypes = {
+  clicked: PropTypes.bool,
   draggable: PropTypes.object,
   dragging: PropTypes.bool,
   mouseX: PropTypes.number,

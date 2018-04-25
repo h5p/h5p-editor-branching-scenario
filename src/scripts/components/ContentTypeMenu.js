@@ -7,7 +7,9 @@ export default class ContentTypeMenu extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      active: props.active
+    };
   }
 
   componentDidMount() {
@@ -29,12 +31,21 @@ export default class ContentTypeMenu extends React.Component {
     }); 
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({ active: nextProps.active });
+  }
+
   renderDnDButtons() {
     if (!this.state.loadedLibraries) {
       return '';
     }
 
     let listItems = this.state.loadedLibraries.map(name => {
+
+      if (name === 'Branching Question') {
+        return '';
+      }
+
       return <li 
         key={ Math.random() } 
         className={ name.replace(/\s/g, '') }
@@ -58,6 +69,7 @@ export default class ContentTypeMenu extends React.Component {
 
     const mouseDownData = {
       contentClass: e.currentTarget.className,
+      content: e.currentTarget.innerHTML,
       xPos: positionData.x,
       yPos: positionData.y,
       width: positionData.width,
