@@ -45,7 +45,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         if (!content.content || typeof content.content !== 'object') {
           return;
         }
-        if (content.content.library && typeof content.content.library === 'string' && !results.includes(content.content.library)) {
+        if (content.content.library && typeof content.content.library === 'string' && results.indexOf(content.content.library) === -1) {
           results.push(content.content.library);
         }
       });
@@ -155,9 +155,66 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       return flatSemantics.filter(semantic => andOrOr(semantic, filters, mode));
     };
 
+
+    /**
+     * Filter params for a particular keys and return string values.
+     * Will fail if there are multiple duplicate property names.
+     *
+     * @param {object} params - Parameters to check.
+     * @param {string} key - Property to look for.
+     * @return {object[]} Values found for key.
+     */
+    const guessTranslationTexts = function (params, key) {
+      if (typeof params !== 'object') {
+        return;
+      }
+      if (typeof key !== 'string') {
+        return;
+      }
+
+      let results = [];
+
+      for (let param in params) {
+        if (typeof params[param] === 'object') {
+          results = results.concat(guessTranslationTexts(params[param], key));
+        }
+        if (param === key && typeof params[param] === 'string') {
+          results.push(params[param]);
+        }
+      }
+      return results;
+    };
+
+
+    /**
+     * Get parameters of subcontent.
+     *
+     * @param {object} params - Params to start looking.
+     * @param {string} libraryName - LibraryName to look for.
+     * @return {object} Params.
+     */
+    const getSubParams = function (params, libraryName) {
+      if (typeof params !== 'object') {
+        return;
+      }
+      if (typeof libraryName !== 'string') {
+        return;
+      }
+
+      let results;
+      if (params.library === libraryName && params.params) {
+        results = params.params;
+      }
+      for (let param in params) {
+        results = results || getSubParams(params[param], libraryName);
+      }
+      return results;
+    };
+
     // This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
     const promise = new Promise(resolve => {
       const libraryNames = getLibraryNames(this.params, [parent.currentLibrary]);
+
       const allSemantics = [];
       libraryNames.forEach(libraryName => {
         H5PEditor.loadLibrary(libraryName, result => {
@@ -176,26 +233,37 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       results.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
-
+        const currentLibrary = getSubParams(this.params, result.library) || this.params;
+        const fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
+        fields.forEach(field => {
+          field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
+          field.library = result.library;
+        });
         // Flatten out the firstFilter to get a plain structure
-        this.translations[result.library] = filterSemantics(firstFilter, {property: 'type', value: 'text'});
+        if (fields.length > 0) {
+          this.translations.push(fields);
+        }
       });
       /*
-       * TODO:
        * this.translations now contains all translatable fields as
        *
        * [
        *   {
-       *     "Library Machine Name x.y": [
-       *       {name: ...},
-       *       {name: ...}
+       *     fields: [
+       *       {name: ..., library: ..., translation: ...},
+       *       {name: ..., library: ..., translation: ...}
        *     ]
        *   }
        * ]
        *
-       * BUT the procedure is too slow, and we still don't have the values from params and would have
-       * to get them, too. There must be a smarter way!
+       * BUT the procedure can be slow and delay populating the translation fields.
+       * There must be a smarter way (in core) -- at least when replacing the old editor!
        */
+
+       // Update ReactDOM
+       if (this.editor) {
+         this.editor.update({translations: this.translations});
+       }
     });
 
 
@@ -272,7 +340,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       if (fields[i].name === name) {
         return fields[i];
       }
-    } 
+    }
   };
 
   /**
@@ -283,8 +351,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   BranchingScenarioEditor.prototype.appendTo = function ($wrapper) {
     $wrapper.parent().css('padding', 0);
 
-    ReactDOM.render(
+    this.editor = ReactDOM.render(
       (<Editor
+        translations={this.translations}
         libraries={this.libraries}
         settings={this.settings}
         startImageChooser={this.startImageChooser}
