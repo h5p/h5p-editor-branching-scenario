@@ -2,103 +2,219 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './Canvas.scss';
 import Draggable from './Draggable.js';
+import Dropzone from './Dropzone.js';
+import ConfirmationDialog from './ConfirmationDialog.js';
 
 export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      dropzoneArea: {},
-      droppedDraggables: []
+      dragging: false,
+			activeDraggable: undefined,
+			showConfirmationDialog: false,
+			droppedDraggables: [],
     };
-  }
-
-  componentDidMount() {
-    this.setState({
-      dropzone: this.refs.droppable.getBoundingClientRect()
-    }); 
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.dragging === true && this.props.dragging == false) {
-      if (this.isInDropZone()) {
-        this.addDraggableToDropped(this.props.mouseX, this.props.mouseY);
+	
+    this.dropzones = [
+      { 
+        key: 0, 
+        entered: false, 
+        hasDroppable: false,
+        posX: 375,
+        posY: 200
       }
+    ],
+
+	  this.dropzonesTemp = [
+      { 
+        key: 0, 
+        entered: false, 
+        hasDroppable: false,
+        posX: 375,
+        posY: 200
+      }, 
+      { 
+        key: 1, 
+        entered: false, 
+        hasDroppable: false,
+        temp: true, 
+        posX: 375,
+        posY: 300
+      }
+    ];
+  }
+
+	handleEntered = (index, entered) => {
+    this.dropzonesTemp[index].entered = entered;
+	}
+
+  generateTempDropZones = () => {
+    const lastDropzone = this.dropzones[this.dropzones.length-1];
+    const newDropzone = {...lastDropzone}
+    newDropzone.key = lastDropzone.key + 1
+    newDropzone.posY = lastDropzone.posY + 100
+    newDropzone.hasDroppable = false
+    this.dropzonesTemp = this.dropzones.map(x => x) // Copy without reference
+    this.dropzonesTemp.push(newDropzone)
+    this.setState()
+  }
+
+
+	componentWillReceiveProps(nextProps) {
+		// Handle dragging
+    if (nextProps.dragging) {
+      console.log('dragging')
+		  this.setState({
+        dragging: true, 
+		  	activeDraggable: {
+          yPos: nextProps.posY,
+          xPos: nextProps.posX,
+          width: nextProps.draggable.width,
+          contentClass: nextProps.draggable.contentClass,
+          content: nextProps.draggable.content
+		  	}
+		  });
     }
 
-    if (prevProps.active === true && this.props.active === false) {
-      if (this.isInDropZone()) {
-        this.addDraggableToDropped(this.props.mouseX, this.props.mouseY);
+		// Handle dropping
+	 	if (this.props.dragging && !nextProps.dragging) {
+      console.log('dropping')
+	    let isInDropZone = false;
+      for (var i = 0; i < this.dropzonesTemp.length; i ++) {
+        if (this.dropzonesTemp[i].entered == true) {
+          isInDropZone = true;
+        }
       }
-    }
-  }
+		  const enteredIndex = this.dropzonesTemp.findIndex(dz => dz.entered == true);
 
-  isInDropZone() {
-    const dz = this.state.dropzone;
+			if (isInDropZone) {
+				if (this.dropzonesTemp[enteredIndex].hasDroppable == true) {
+					this.setState({
+            dragging: false, 
+						showConfirmationDialog: true
+					})
+				}
+			  else {
+					const droppableToAdd = this.state.activeDraggable;
+					droppableToAdd.dropzone = enteredIndex;
 
-    const xStart = dz.x;
-    const xEnd = dz.x + dz.width;
+  		    this.setState({
+		    	  droppedDraggables: [...this.state.droppedDraggables, droppableToAdd],
+            dragging: false, 
+		    	  activeDraggable: undefined
+		      })	
 
-    const yStart = dz.y;
-    const yEnd = dz.y + dz.height;
+          this.dropzonesTemp[enteredIndex].hasDroppable = true;
+          this.dropzonesTemp[enteredIndex].entered = false;
+          this.dropzones.push(this.dropzonesTemp[enteredIndex]);
+          this.setState();
+          this.generateTempDropZones(); 
+        }
+			}
+			else {
+				this.setState({
+          dragging: false, 
+					activeDraggable: undefined
+				})
+			}
+		}	
+	}
 
-    const mX = this.props.mouseX;
-    const mY = this.props.mouseY;
-
-    return (mX > xStart && mX < xEnd && mY > yStart && mY < yEnd);
-  }
 
   renderActiveDraggable() {
-    if (!this.props.dragging || !this.props.draggable) {
-      return '';
-    }
+		const d = this.state.activeDraggable;
+		if (!this.props.dragging || d == undefined) {
+			return '';
+		}
 
-    const draggableData = this.props.draggable;
-
-    return ( 
-      <Draggable
-        yPos={ this.props.mouseY - 65}
-        xPos={ this.props.posX }
-        width={ draggableData.width } 
-        contentClass={ draggableData.contentClass }
-        content={ draggableData.content } 
-      />
-    );
+		return (
+			<Draggable
+        key={ Math.random() }
+        dropped={ false }
+        yPos={ d.yPos } 
+        xPos={ d.xPos }
+        width={ d.width } 
+        contentClass={ d.contentClass }
+        content={ d.content } 
+			/>
+		)
   }
 
-  addDraggableToDropped(xPos, yPos) {
-    const draggableData = this.props.draggable;
+	renderDroppedDraggables(xPos, yPos) {
+		if (this.state.droppedDraggables.length == 0) {
+			return '';
+		}
 
-    const newDraggable = (  
-      <Draggable
-        key={ Math.random() } 
-        xPos={ xPos - 60 } 
-        yPos={ yPos - 65 }
-        width={ draggableData.width } 
-        contentClass={ draggableData.contentClass }
-        content={ draggableData.content } 
-      />
-    );
+		return this.state.droppedDraggables.map(d => {
+		  return (
+		  	<Draggable
+          key={ Math.random() }
+          dropped={ true }
+          yPos={ d.yPos } 
+          xPos={ d.xPos - 189 } // TODO: calculate offset better
+          width={ d.width } 
+          contentClass={ d.contentClass }
+          content={ d.content } 
+		  	/>
+		  )
+		})
+	}
 
-    this.setState(prevState => {
-      return {
-        droppedDraggables: [...prevState.droppedDraggables, newDraggable] 
-      };
-    });
-  }
+	renderDropzones() {
+    const dropzones = this.state.dragging ? this.dropzonesTemp : this.dropzones; 
+		return dropzones.map(dz => {
+		  return (
+		  	<Dropzone 
+		  		key={ dz.key } 
+          posX={ dz.posX }
+          posY={ dz.posY }
+		  		mouseX={ this.props.mouseX } 
+		  		mouseY={ this.props.mouseY } 
+  	  		handleEntered={ entered => this.handleEntered(dz.key, entered) }
+		  	/> 
+		  )
+		})
+	}
+
+	handleDelete = () => {
+		// Get dropped draggable to remove
+		const index = this.state.droppedDraggables.indexOf(draggable => {
+			draggable.dropzone == 0
+		});
+
+		this.state.droppedDraggables.splice(index);
+		this.state.droppedDraggables.push(this.state.activeDraggable)
+		
+		this.setState({
+			showConfirmationDialog: false,
+			activeDraggable: undefined
+		});
+	}
+
+	handleCancel = () => {
+		this.setState({
+			showConfirmationDialog: false,
+			activeDraggable: undefined
+		});
+	}
 
   render() {
     return (
-      <div className="canvas"
-        onMouseDown= { this.props.onMouseDown } 
-      >
+      <div className="wrapper" onMouseDown= { this.props.onMouseDown }>
+
         { this.renderActiveDraggable() } 
-        { this.state.droppedDraggables } 
-        <div className="start-canvas">
-          <div 
-            className="droppable"
-            ref={ "droppable" }  
-          />
+
+        <div className="canvas">
+	    		{ this.state.showConfirmationDialog ? 
+	    			<ConfirmationDialog
+	    				handleDelete={ this.handleDelete }
+	    				handleCancel={ this.handleCancel } 
+	    			/> : ''
+	    		} 
+	    		{ this.renderDroppedDraggables() } 
+          { this.renderDropzones() }        
         </div>
+     
       </div>
     );
   }

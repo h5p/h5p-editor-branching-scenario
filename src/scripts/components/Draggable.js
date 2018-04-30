@@ -14,13 +14,27 @@ export default class Draggable extends React.Component {
       width: this.props.width + 'px'
     };
 
-    return (
-      <li
-        style={ draggableStyle } 
-        className={ ['draggable', this.props.contentClass].join(' ') }>
-        { this.props.content } 
-      </li>
-    );
+    if (this.props.dropped) {
+      return (
+        <div>
+          <li
+            style={ draggableStyle } 
+            className={ ['draggable', this.props.contentClass].join(' ') }>
+            { this.props.content } 
+          </li>
+        </div> 
+      );
+    }
+    else {
+      return (
+        <li
+          style={ draggableStyle } 
+          className={ ['draggable', this.props.contentClass].join(' ') }>
+          { this.props.content } 
+        </li>
+      );
+    }
+
   }
 }
 
