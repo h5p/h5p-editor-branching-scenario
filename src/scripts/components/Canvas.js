@@ -11,6 +11,7 @@ export default class Canvas extends React.Component {
     this.state = {
       dragging: false,
       activeDraggable: undefined,
+      overlap: undefined,
       showConfirmationDialog: false,
       droppedDraggables: [],
     };
@@ -60,7 +61,7 @@ export default class Canvas extends React.Component {
   }
 
 
-  ComponentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
     // Handle dragging
     if (nextProps.dragging) {
       this.setState({
@@ -89,7 +90,8 @@ export default class Canvas extends React.Component {
         if (this.dropzonesTemp[enteredIndex].hasDroppable == true) {
           this.setState({
             dragging: false, 
-            showConfirmationDialog: true
+            showConfirmationDialog: true,
+            overlap: enteredIndex
           });
         }
         else {
@@ -174,10 +176,10 @@ export default class Canvas extends React.Component {
     });
   }
 
-  handleDelete = () => {
+  handleDelete = (dropzoneIndex) => {
     // Get dropped draggable to remove
     const index = this.state.droppedDraggables.indexOf(draggable => {
-      draggable.dropzone == 0;
+      draggable.dropzone == this.state.overlap;
     });
 
     this.state.droppedDraggables.splice(index);
@@ -185,7 +187,8 @@ export default class Canvas extends React.Component {
     
     this.setState({
       showConfirmationDialog: false,
-      activeDraggable: undefined
+      activeDraggable: undefined,
+      overlap: undefined
     });
   }
 
