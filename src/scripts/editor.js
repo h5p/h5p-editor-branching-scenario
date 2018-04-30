@@ -64,8 +64,6 @@ export default class Editor extends React.Component {
     const translations = this.state.translations;
     translations[[name]] = value;
     this.setState({settings: settings});
-
-    console.log(target, value, name);
   }
 
   update(paramsObject) {
@@ -114,7 +112,6 @@ export default class Editor extends React.Component {
   }
 
   handleMouseUp = (e) => {
-    console.log('mouse up')
     this.setState({
       dragging: false
     });

@@ -12,6 +12,6 @@ export default class ConfirmationDialog extends React.Component {
         <button onClick={ this.props.handleDelete }>Delete</button>
         <button onClick={ this.props.handleCancel }>Cancel</button> 
       </div> 
-    )
+    );
   }
 }

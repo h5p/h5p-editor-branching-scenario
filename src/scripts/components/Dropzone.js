@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import './Dropzone.scss';
 
 export default class Dropzone extends React.Component {
@@ -13,7 +12,7 @@ export default class Dropzone extends React.Component {
     this.dropElement = React.createRef();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate() {
     this.props.handleEntered(this.isInDropZone(this.props.mouseX, this.props.mouseY));
   }
 
@@ -31,27 +30,27 @@ export default class Dropzone extends React.Component {
     const res = (mouseX > xStart && mouseX < xEnd && 
             mouseY > yStart && mouseY < yEnd);
 
-    return res
+    return res;
   }
 
   render() {
     return (
-     <div 
-       className="dropzone"
-       style={ 
-        { 
-          top: this.props.posY + 'px',
-          left: this.props.posX + 'px'
+      <div 
+        className="dropzone"
+        style={ 
+          { 
+            top: this.props.posY + 'px',
+            left: this.props.posX + 'px'
+          }
         }
-       }
-       ref={ node => {
-        if (node !== null && this.state.dropzone == undefined) {
-          this.setState({
-            dropzone: node.getBoundingClientRect()
-          }); 
-         }         
-       }} 
-     />
-    )
+        ref={ node => {
+          if (node !== null && this.state.dropzone == undefined) {
+            this.setState({
+              dropzone: node.getBoundingClientRect()
+            }); 
+          }         
+        }} 
+      />
+    );
   }
 }
