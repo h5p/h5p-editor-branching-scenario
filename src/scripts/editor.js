@@ -79,10 +79,10 @@ export default class Editor extends React.Component {
   }
 
   handleMouseDown = (e, data) => {
-
     if (data) {
       this.setState(prevState => {
         return {
+          dragging: true,
           active: !prevState.active,
           draggable: data,
           mouse: {
@@ -95,7 +95,7 @@ export default class Editor extends React.Component {
           },
           pos : {
             x: e.pageX - data.xPos,
-            y: e.pageY + data.yPos
+            y: e.pageY - 65
           },
         };
       });
@@ -130,14 +130,13 @@ export default class Editor extends React.Component {
 
   handleMouseMove = (e) => {
     this.setState({
-      dragging: true,
       mouse: {
         x: e.pageX,
         y: e.pageY
       },
       pos: {
         x: e.pageX - this.state.rel.x,
-        y: e.pageY + this.state.rel.y
+        y: e.pageY - 65
       }
     });
     e.stopPropagation();

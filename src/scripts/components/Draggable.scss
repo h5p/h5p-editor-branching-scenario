@@ -20,6 +20,7 @@
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
+  z-index: 1000;
 
   &:before {
     font-family: "BSFont";

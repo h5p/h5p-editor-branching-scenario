@@ -237,10 +237,10 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
        * There must be a smarter way (in core) -- at least when replacing the old editor!
        */
 
-       // Update ReactDOM
-       if (this.editor) {
-         this.editor.update({translations: this.translations});
-       }
+      // Update ReactDOM
+      if (this.editor) {
+        this.editor.update({translations: this.translations});
+      }
     });
 
 
