@@ -15,6 +15,7 @@ export default class Editor extends React.Component {
     super(props);
 
     this.state = {
+      translations: props.translations,
       settings: props.settings,
       libraries: props.libraries,
       active: false,
@@ -55,6 +56,22 @@ export default class Editor extends React.Component {
     this.props.updateParams(settings);
   }
 
+  onTranslationsChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    const translations = this.state.translations;
+    translations[[name]] = value;
+    this.setState({settings: settings});
+
+    console.log(target, value, name);
+  }
+
+  update(paramsObject) {
+    this.setState(paramsObject);
+  }
+
   handleMouseDown = (e, data) => {
     if (data) {
       this.setState(prevState => {
@@ -88,7 +105,7 @@ export default class Editor extends React.Component {
             y: e.pageY 
           } 
         };
-      }); 
+      });
     }
 
     e.persist();
@@ -154,7 +171,10 @@ export default class Editor extends React.Component {
           />
         </Tab>
         <Tab title="translations" className="bs-editor-translations-tab">
-          <TabViewTranslations />
+          <TabViewTranslations
+            translations={this.state.translations}
+            onChange={(event) => this.onTranslationsChange(event)}
+          />
         </Tab>
         <Tab title="tutorial" className="bs-editor-tutorial-tab">
           <TabViewTutorial />
