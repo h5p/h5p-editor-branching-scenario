@@ -54,26 +54,29 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     };
 
     /**
-     * Flatten semantics. Unsanitized.
+     * Flatten semantics. Unsanitized. Will keep track of the old path.
      *
      * @param {object} field - Semantics field to start with flattening.
+     * @param {object[]} [path] - Start path to be added.
      * @return {object[]} Flattened semantics.
      */
-    const flattenSemantics = function(field) {
+    const flattenSemantics = function(field, path = []) {
       if (!Array.isArray(field)) {
         field = [field];
       }
 
       let results = [];
+      const currentPath = path.slice();
 
       field.forEach(field => {
+        const nextPathItem = field.name ? [field.name] : [];
+        field.path = currentPath;
         results.push(field);
         if (field.type === 'group') {
-          results = results.concat(flattenSemantics(field.fields));
+          results = results.concat(flattenSemantics(field.fields, currentPath.concat(nextPathItem)));
         }
         if (field.type === 'list') {
-          results.push(field.field);
-          results = results.concat(flattenSemantics(field.field.fields));
+          results = results.concat(flattenSemantics(field.field.fields, currentPath.concat(nextPathItem).concat([field.field.name])));
         }
       });
 
@@ -185,32 +188,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       return results;
     };
 
-
-    /**
-     * Get parameters of subcontent.
-     *
-     * @param {object} params - Params to start looking.
-     * @param {string} libraryName - LibraryName to look for.
-     * @return {object} Params.
-     */
-    const getSubParams = function (params, libraryName) {
-      if (typeof params !== 'object') {
-        return;
-      }
-      if (typeof libraryName !== 'string') {
-        return;
-      }
-
-      let results;
-      if (params.library === libraryName && params.params) {
-        results = params.params;
-      }
-      for (let param in params) {
-        results = results || getSubParams(params[param], libraryName);
-      }
-      return results;
-    };
-
     // This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
     const promise = new Promise(resolve => {
       const libraryNames = getLibraryNames(this.params, [parent.currentLibrary]);
@@ -233,7 +210,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       results.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
-        const currentLibrary = getSubParams(this.params, result.library) || this.params;
+        const currentLibrary = this.getSubParams(this.params, result.library) || this.params;
         const fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
         fields.forEach(field => {
           field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
@@ -312,6 +289,50 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
+   * Update translations
+   *
+   * @param {Object} data - Data from React components.
+   */
+  BranchingScenarioEditor.prototype.updateTranslations = function (data) {
+    // ;-)
+    const weNeedToDigDeeper = function (root, path) {
+      if (path.length === 0) {
+        return root;
+      }
+      return weNeedToDigDeeper(root[path[0]], path.slice(1));
+    };
+
+    // Get the reference to the position we need to update -- and update it
+    const path = weNeedToDigDeeper(this.getSubParams(this.params, data.library) || this.params, data.path);
+    path[data.name] = data.translation;
+  };
+
+  /**
+   * Get parameters of subcontent.
+   *
+   * @param {object} params - Params to start looking.
+   * @param {string} libraryName - LibraryName to look for.
+   * @return {object} Params.
+   */
+  BranchingScenarioEditor.prototype.getSubParams = function (params, libraryName) {
+    if (typeof params !== 'object') {
+      return;
+    }
+    if (typeof libraryName !== 'string') {
+      return;
+    }
+
+    let results;
+    if (params.library === libraryName && params.params) {
+      results = params.params;
+    }
+    for (let param in params) {
+      results = results || this.getSubParams(params[param], libraryName);
+    }
+    return results;
+  };
+
+  /**
    * Validate the current field.
    *
    * @returns {boolean} True if validatable.
@@ -359,6 +380,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         startImageChooser={this.startImageChooser}
         endImageChooser={this.endImageChooser}
         updateParams={this.updateParams.bind(this)}
+        updateTranslations={this.updateTranslations.bind(this)}
       />), $wrapper.get(0)
     );
   };

@@ -62,10 +62,16 @@ export default class Editor extends React.Component {
     const name = target.name;
 
     const translations = this.state.translations;
-    translations[[name]] = value;
-    this.setState({settings: settings});
 
-    console.log(target, value, name);
+    // TODO: Change the data structure of translations!!!
+    const pathItems = target.name.split('/');
+    const affectedItem = translations
+      .reduce((a, b) => a.concat(b), [])
+      .filter(t => t.library === pathItems[0] && t.name === pathItems[pathItems.length - 1]);
+    affectedItem[0].translation = value;
+    this.setState({translations: translations});
+
+    this.props.updateTranslations(affectedItem[0]);
   }
 
   update(paramsObject) {
