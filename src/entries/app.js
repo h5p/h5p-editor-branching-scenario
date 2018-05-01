@@ -32,6 +32,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
      * Will recursively look for "library" property and return Array of contents.
      * Could well be generalized and become a filter function.
      *
+     * Does NOT yet meet the design requirements! Needs nested libraries for
+     * subcontent.
+     *
      * @param {object} [params] - Parameters.
      * @return {object[]} Array of machine names of libraries used.
      */
@@ -61,7 +64,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     };
 
     /**
-     * Flatten semantics. Unsanitized. Will keep track of the old path.
+     * Flatten semantics.
+     * Unsanitized. Will keep track of the old path, so it can be "reverted" later.
      *
      * @param {object} field - Semantics field to start with flattening.
      * @param {object[]} [path] - Start path to be added.
@@ -78,16 +82,16 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       field
         .filter(field => field !== undefined)
         .forEach(field => {
-        const nextPathItem = field.name ? [field.name] : [];
-        field.path = currentPath;
-        results.push(field);
-        if (field.type === 'group') {
-          results = results.concat(flattenSemantics(field.fields, currentPath.concat(nextPathItem)));
-        }
-        if (field.type === 'list') {
-          results = results.concat(flattenSemantics(field.field.fields, currentPath.concat(nextPathItem).concat([field.field.name])));
-        }
-      });
+          const nextPathItem = field.name ? [field.name] : [];
+          field.path = currentPath;
+          results.push(field);
+          if (field.type === 'group') {
+            results = results.concat(flattenSemantics(field.fields, currentPath.concat(nextPathItem)));
+          }
+          if (field.type === 'list') {
+            results = results.concat(flattenSemantics(field.field.fields, currentPath.concat(nextPathItem).concat([field.field.name])));
+          }
+        });
 
       return results;
     };
@@ -167,10 +171,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       return flatSemantics.filter(semantic => andOrOr(semantic, filters, mode));
     };
 
-
     /**
      * Filter params for a particular keys and return string values.
-     * Will fail if there are multiple duplicate property names.
+     * Can fail if there are multiple duplicate property names. It'd be better
+     * to synchronize parsing params with semantics in order to get the
+     * correct field.
      *
      * @param {object} params - Parameters to check.
      * @param {string} key - Property to look for.
@@ -197,7 +202,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       return results;
     };
 
-    // This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
+    /*
+     * This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
+     * Also: IE 11 doesn't support promises (and async/await) and'd need a Polyfill or an oldfashioned
+     * solution.
+     */
     const promise = new Promise(resolve => {
       const libraryNames = getLibraryNames(this.params, [parent.currentLibrary]);
 
@@ -224,7 +233,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
           field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
           field.library = result.library;
         });
-        // Flatten out the firstFilter to get a plain structure
+
+        // Flatten out the firstFilter to get a plain structure if there was a group in between
         if (fields.length > 0) {
           this.translations.push(fields);
         }
