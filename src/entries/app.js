@@ -27,26 +27,33 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     this.translations = [];
 
     /**
-     * Get all the machine names of content types used.
+     * Get all the machine names of libraries used in params.
+     *
+     * Will recursively look for "library" property and return Array of contents.
+     * Could well be generalized and become a filter function.
      *
      * @param {object} [params] - Parameters.
-     * @return {object[]} Array of machine names of content types used.
+     * @return {object[]} Array of machine names of libraries used.
      */
     const getLibraryNames = function (params = {}, results = []) {
       if (!Array.isArray(results) || results.some(result => typeof result !== 'string')) {
         return [];
       }
 
-      if (!params.content || !Array.isArray(params.content)) {
-        return results;
-      }
-
-      params.content.forEach(content => {
-        if (!content.content || typeof content.content !== 'object') {
-          return;
+      Object.entries(params).forEach(entry => {
+        // Library string
+        if (entry[0] === 'library' && typeof entry[1] === 'string' && results.indexOf(entry[1]) === -1) {
+          results.push(entry[1]);
         }
-        if (content.content.library && typeof content.content.library === 'string' && results.indexOf(content.content.library) === -1) {
-          results.push(content.content.library);
+        // JSON content
+        if (typeof entry[1] === 'object' && !Array.isArray(entry[1])) {
+          return getLibraryNames(entry[1], results);
+        }
+        // Array content
+        if (typeof entry[1] === 'object' && Array.isArray(entry[1])) {
+          entry[1].forEach(item => {
+            return getLibraryNames(item, results);
+          });
         }
       });
 
@@ -69,7 +76,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       const currentPath = path.slice();
 
       field
-        .filter(field => field !== undefined) // TODO: Check why something can be undefined here
+        .filter(field => field !== undefined)
         .forEach(field => {
         const nextPathItem = field.name ? [field.name] : [];
         field.path = currentPath;
