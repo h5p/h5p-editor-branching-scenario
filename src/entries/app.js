@@ -68,7 +68,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       let results = [];
       const currentPath = path.slice();
 
-      field.forEach(field => {
+      field
+        .filter(field => field !== undefined) // TODO: Check why something can be undefined here
+        .forEach(field => {
         const nextPathItem = field.name ? [field.name] : [];
         field.path = currentPath;
         results.push(field);
@@ -205,7 +207,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         });
       });
     });
-
     promise.then((results) => {
       results.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
