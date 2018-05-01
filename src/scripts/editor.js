@@ -186,7 +186,7 @@ export default class Editor extends React.Component {
         </Tab>
         <Tab title="metadata" className="bs-editor-metadata-tab">
           <TabViewMetadata
-            value="TODO: fetch metadata"
+            value=""
           />
         </Tab>
       </Tabs>
