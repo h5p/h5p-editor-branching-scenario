@@ -35,6 +35,24 @@ export default class ContentTypeMenu extends React.Component {
     this.setState({ active: nextProps.active });
   }
 
+  handleMouseDown = (event) => {
+    const positionData = this.refs[event.currentTarget.className].getBoundingClientRect();
+
+    const elementData = {
+      contentClass: event.currentTarget.className,
+      content: event.currentTarget.innerHTML,
+      xPos: positionData.x,
+      yPos: positionData.y,
+      width: positionData.width,
+      height: positionData.height,
+      top: positionData.top
+    };
+
+    this.props.onMouseDown(event, elementData);
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
   renderDnDButtons() {
     if (!this.state.loadedLibraries) {
       return '';
@@ -64,23 +82,6 @@ export default class ContentTypeMenu extends React.Component {
     );
   }
 
-  handleMouseDown = (e) => {
-    const positionData = this.refs[e.currentTarget.className].getBoundingClientRect();
-
-    const mouseDownData = {
-      contentClass: e.currentTarget.className,
-      content: e.currentTarget.innerHTML,
-      xPos: positionData.x,
-      yPos: positionData.y,
-      width: positionData.width,
-      height: positionData.height,
-      top: positionData.top
-    };
-    this.props.onMouseDown(e, mouseDownData);
-    e.stopPropagation();
-    e.preventDefault();
-  }
-
   render() {
     return (
       <div className="content-type-menu">
@@ -98,7 +99,7 @@ export default class ContentTypeMenu extends React.Component {
           </Tooltip>
         </label>
         <ul className="content-type-buttons">
-          <li className="branching-question purple" title="Add New Branching Question">Branching Question</li>
+          <li className="branching-question" title="Add New Branching Question">Branching Question</li>
         </ul>
       </div>
     );

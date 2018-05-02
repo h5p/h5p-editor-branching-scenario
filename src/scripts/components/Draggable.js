@@ -7,6 +7,25 @@ export default class Draggable extends React.Component {
     super(props);
   }
 
+  handleMouseDown = (e) => {
+    const positionData = this.refs['listItem'].getBoundingClientRect();
+
+    const mouseDownData = {
+      id: this.props.id,
+      contentClass: e.currentTarget.className,
+      content: e.currentTarget.innerHTML,
+      xPos: positionData.width/2,
+      yPos: positionData.y,
+      width: positionData.width,
+      height: positionData.height,
+      top: positionData.top
+    };
+
+    this.props.handleMouseDown(e, mouseDownData);
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
   render() {
     const draggableStyle = {
       top: this.props.yPos + 'px', //TODO Fix offset, snap to?
@@ -18,6 +37,8 @@ export default class Draggable extends React.Component {
       return (
         <div>
           <li
+            ref= { 'listItem' } 
+            onMouseDown={ e => this.handleMouseDown(e) }
             style={ draggableStyle } 
             className={ ['draggable', this.props.contentClass].join(' ') }>
             { this.props.content } 
@@ -34,7 +55,6 @@ export default class Draggable extends React.Component {
         </li>
       );
     }
-
   }
 }
 
