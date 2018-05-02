@@ -27,26 +27,36 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     this.translations = [];
 
     /**
-     * Get all the machine names of content types used.
+     * Get all the machine names of libraries used in params.
+     *
+     * Will recursively look for "library" property and return Array of contents.
+     * Could well be generalized and become a filter function.
+     *
+     * Does NOT yet meet the design requirements! Needs nested libraries for
+     * subcontent.
      *
      * @param {object} [params] - Parameters.
-     * @return {object[]} Array of machine names of content types used.
+     * @return {object[]} Array of machine names of libraries used.
      */
     const getLibraryNames = function (params = {}, results = []) {
       if (!Array.isArray(results) || results.some(result => typeof result !== 'string')) {
         return [];
       }
 
-      if (!params.content || !Array.isArray(params.content)) {
-        return results;
-      }
-
-      params.content.forEach(content => {
-        if (!content.content || typeof content.content !== 'object') {
-          return;
+      Object.entries(params).forEach(entry => {
+        // Library string
+        if (entry[0] === 'library' && typeof entry[1] === 'string' && results.indexOf(entry[1]) === -1) {
+          results.push(entry[1]);
         }
-        if (content.content.library && typeof content.content.library === 'string' && results.indexOf(content.content.library) === -1) {
-          results.push(content.content.library);
+        // JSON content
+        if (typeof entry[1] === 'object' && !Array.isArray(entry[1])) {
+          return getLibraryNames(entry[1], results);
+        }
+        // Array content
+        if (typeof entry[1] === 'object' && Array.isArray(entry[1])) {
+          entry[1].forEach(item => {
+            return getLibraryNames(item, results);
+          });
         }
       });
 
@@ -54,28 +64,34 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     };
 
     /**
-     * Flatten semantics. Unsanitized.
+     * Flatten semantics.
+     * Unsanitized. Will keep track of the old path, so it can be "reverted" later.
      *
      * @param {object} field - Semantics field to start with flattening.
+     * @param {object[]} [path] - Start path to be added.
      * @return {object[]} Flattened semantics.
      */
-    const flattenSemantics = function(field) {
+    const flattenSemantics = function(field, path = []) {
       if (!Array.isArray(field)) {
         field = [field];
       }
 
       let results = [];
+      const currentPath = path.slice();
 
-      field.forEach(field => {
-        results.push(field);
-        if (field.type === 'group') {
-          results = results.concat(flattenSemantics(field.fields));
-        }
-        if (field.type === 'list') {
-          results.push(field.field);
-          results = results.concat(flattenSemantics(field.field.fields));
-        }
-      });
+      field
+        .filter(field => field !== undefined)
+        .forEach(field => {
+          const nextPathItem = field.name ? [field.name] : [];
+          field.path = currentPath;
+          results.push(field);
+          if (field.type === 'group') {
+            results = results.concat(flattenSemantics(field.fields, currentPath.concat(nextPathItem)));
+          }
+          if (field.type === 'list') {
+            results = results.concat(flattenSemantics(field.field.fields, currentPath.concat(nextPathItem).concat([field.field.name])));
+          }
+        });
 
       return results;
     };
@@ -155,10 +171,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       return flatSemantics.filter(semantic => andOrOr(semantic, filters, mode));
     };
 
-
     /**
      * Filter params for a particular keys and return string values.
-     * Will fail if there are multiple duplicate property names.
+     * Can fail if there are multiple duplicate property names. It'd be better
+     * to synchronize parsing params with semantics in order to get the
+     * correct field.
      *
      * @param {object} params - Parameters to check.
      * @param {string} key - Property to look for.
@@ -185,33 +202,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       return results;
     };
 
-
-    /**
-     * Get parameters of subcontent.
-     *
-     * @param {object} params - Params to start looking.
-     * @param {string} libraryName - LibraryName to look for.
-     * @return {object} Params.
+    /*
+     * This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
+     * Also: IE 11 doesn't support promises (and async/await) and'd need a Polyfill or an oldfashioned
+     * solution.
      */
-    const getSubParams = function (params, libraryName) {
-      if (typeof params !== 'object') {
-        return;
-      }
-      if (typeof libraryName !== 'string') {
-        return;
-      }
-
-      let results;
-      if (params.library === libraryName && params.params) {
-        results = params.params;
-      }
-      for (let param in params) {
-        results = results || getSubParams(params[param], libraryName);
-      }
-      return results;
-    };
-
-    // This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
     const promise = new Promise(resolve => {
       const libraryNames = getLibraryNames(this.params, [parent.currentLibrary]);
 
@@ -228,18 +223,18 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         });
       });
     });
-
     promise.then((results) => {
       results.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
-        const currentLibrary = getSubParams(this.params, result.library) || this.params;
+        const currentLibrary = this.getSubParams(this.params, result.library) || this.params;
         const fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
         fields.forEach(field => {
           field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
           field.library = result.library;
         });
-        // Flatten out the firstFilter to get a plain structure
+
+        // Flatten out the firstFilter to get a plain structure if there was a group in between
         if (fields.length > 0) {
           this.translations.push(fields);
         }
@@ -312,6 +307,50 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
+   * Update translations
+   *
+   * @param {Object} data - Data from React components.
+   */
+  BranchingScenarioEditor.prototype.updateTranslations = function (data) {
+    // ;-)
+    const weNeedToDigDeeper = function (root, path) {
+      if (path.length === 0) {
+        return root;
+      }
+      return weNeedToDigDeeper(root[path[0]], path.slice(1));
+    };
+
+    // Get the reference to the position we need to update -- and update it
+    const path = weNeedToDigDeeper(this.getSubParams(this.params, data.library) || this.params, data.path);
+    path[data.name] = data.translation;
+  };
+
+  /**
+   * Get parameters of subcontent.
+   *
+   * @param {object} params - Params to start looking.
+   * @param {string} libraryName - LibraryName to look for.
+   * @return {object} Params.
+   */
+  BranchingScenarioEditor.prototype.getSubParams = function (params, libraryName) {
+    if (typeof params !== 'object') {
+      return;
+    }
+    if (typeof libraryName !== 'string') {
+      return;
+    }
+
+    let results;
+    if (params.library === libraryName && params.params) {
+      results = params.params;
+    }
+    for (let param in params) {
+      results = results || this.getSubParams(params[param], libraryName);
+    }
+    return results;
+  };
+
+  /**
    * Validate the current field.
    *
    * @returns {boolean} True if validatable.
@@ -359,6 +398,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         startImageChooser={this.startImageChooser}
         endImageChooser={this.endImageChooser}
         updateParams={this.updateParams.bind(this)}
+        updateTranslations={this.updateTranslations.bind(this)}
       />), $wrapper.get(0)
     );
   };
