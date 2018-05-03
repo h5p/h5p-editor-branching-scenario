@@ -9,10 +9,14 @@ import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
 import TabViewMetadata from './components/TabViewMetadata';
+import EditorOverlay from './components/EditorOverlay';
 
 export default class Editor extends React.Component {
   constructor(props) {
     super(props);
+
+    // Working around core ... :-(
+    this.parent = props.parent;
 
     this.state = {
       translations: props.translations,
@@ -35,6 +39,13 @@ export default class Editor extends React.Component {
     };
 
     window.addEventListener('mouseup', this.handleMouseUp);
+
+    // For testing the editor overlay, press § (shift-3)
+    document.addEventListener('keydown', event => {
+      if (event.keyCode === 51 && this.child) {
+        this.child.toggleEditorOverlay();
+      }
+    });
   }
 
   /**
@@ -74,8 +85,14 @@ export default class Editor extends React.Component {
     this.props.updateTranslations(affectedItem[0]);
   }
 
-  update(paramsObject) {
-    this.setState(paramsObject);
+  /**
+   * Set all semantics by outside component.
+   * Expects {library: 'machineName', semantics{...}}
+   *
+   * @param {object[]} semantics - All semantics used (should be enlarged to all possible)
+   */
+  setSemantics(semantics) {
+    this.allSemantics = semantics;
   }
 
   handleMouseDown = (e, data) => {
@@ -115,8 +132,9 @@ export default class Editor extends React.Component {
     }
 
     e.persist();
-    e.stopPropagation();
-    e.preventDefault();
+    //Will prevent forms from working correctly
+    //e.stopPropagation();
+    //e.preventDefault();
   }
 
   handleMouseUp = (e) => {
@@ -143,6 +161,45 @@ export default class Editor extends React.Component {
     e.preventDefault();
   }
 
+  /**
+   * Signal readiness to processSemanticsChunk.
+   * TODO: Should probably be completed as intended.
+   *
+   * @return {boolean} true.
+   */
+  ready () {
+    return true;
+  }
+
+  /**
+   * Update the form for editing an interaction
+   *
+   * @param {string} libraryName - Name of the interaction library to use.
+   * @param {object} [elementParams] - Parameters to set in form.
+   */
+  updateForm (libraryName = 'H5P.Image', elementParams = {}) {
+    this.passReadies = false;
+
+    const $form = H5P.jQuery('<div/>');
+
+    let elementFields = {};
+    if (this.allSemantics) {
+      const testLibrary = this.allSemantics.filter(item => item.library.indexOf(libraryName) !== -1)[0];
+      elementFields = testLibrary.semantics.fields;
+    }
+
+    // Attach the DOM to $form
+    H5PEditor.processSemanticsChunk(elementFields, elementParams, $form, this.parent);
+    /*
+     * React doesn't allow DOM or jQuery elements, so this is a workaround
+     * to update the form overlay components contents.
+     * TODO: When working, don't keep the component, but create/destroy it as
+     *       needed. Makes more sense. This will probably go into the
+     *       component's constructor then.
+     */
+    this.child.child.updateForm($form);
+  }
+
   render() {
     return (
       <Tabs className="tab-view-wrapper">
@@ -156,6 +213,7 @@ export default class Editor extends React.Component {
             active={ this.state.active }
           />
           <Canvas
+            onRef={ref => (this.child = ref)}
             active={this.state.active}
             dragging={this.state.dragging}
             draggable={this.state.draggable}

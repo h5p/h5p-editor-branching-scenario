@@ -18,8 +18,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     // Fields of semantics
     this.field = field;
 
-    let elementFields = this.findField('content', this.field.fields);
-    this.libraries = this.findField('content', elementFields.field.fields).options;
+    this.elementFields = this.findField('content', this.field.fields);
+    this.libraries = this.findField('content', this.elementFields.field.fields).options;
 
     this.params = params || {};
     setValue(field, this.params);
@@ -98,6 +98,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     /**
      * Check if field properties match a filter in a given way.
+     * TODO: Better solution, step 1: Do the filtering via a function such as semanticsFilter(semantics, filterFunction)
+     * TODO: Better solution, step 2: Build a semantics class with a function such as filter(filterFunction)
      *
      * @param {object} field - Semantics field.
      * @param {object} filter - Filter.
@@ -224,11 +226,16 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       });
     });
     promise.then((results) => {
+      if (this.editor) {
+        this.editor.setSemantics(results);
+        this.editor.updateForm();
+      }
+
       results.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
         const currentLibrary = this.getSubParams(this.params, result.library) || this.params;
-        const fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
+        let fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
         fields.forEach(field => {
           field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
           field.library = result.library;
@@ -257,8 +264,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
       // Update ReactDOM
       if (this.editor) {
-        this.editor.update({translations: this.translations});
+        this.editor.setState({translations: this.translations});
       }
+
+      /*
+       * TODO: The editor core still attaches the common fields to the main form,
+       *       but they are hidden via CSS. Could be removed alltogether now
+       *       from allSemantics.
+       */
     });
 
 
@@ -392,6 +405,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     this.editor = ReactDOM.render(
       (<Editor
+        parent={this} // hacky
         translations={this.translations}
         libraries={this.libraries}
         settings={this.settings}

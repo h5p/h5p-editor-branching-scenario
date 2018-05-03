@@ -4,22 +4,35 @@ import './Canvas.scss';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
+import EditorOverlay from './EditorOverlay';
 
 export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       dragging: false,
       activeDraggable: undefined,
       overlap: undefined,
       showConfirmationDialog: false,
       droppedDraggables: [],
+      editorOverlay: 'inactive',
+      editorContents: {
+        top: {
+          icon: "\ue91b", // TODO: Replace with actual icon
+          title: "Title of the Content", // TODO: Replace with actual title
+          saveButton: "Save changes",
+          closeButton: "close"
+        },
+        content: {
+        }
+      }
     };
-  
+
     this.dropzones = [
-      { 
-        key: 0, 
-        entered: false, 
+      {
+        key: 0,
+        entered: false,
         hasDroppable: false,
         posX: 375,
         posY: 200
@@ -27,22 +40,30 @@ export default class Canvas extends React.Component {
     ],
 
     this.dropzonesTemp = [
-      { 
-        key: 0, 
-        entered: false, 
+      {
+        key: 0,
+        entered: false,
         hasDroppable: false,
         posX: 375,
         posY: 200
-      }, 
-      { 
-        key: 1, 
-        entered: false, 
+      },
+      {
+        key: 1,
+        entered: false,
         hasDroppable: false,
-        temp: true, 
+        temp: true,
         posX: 375,
         posY: 300
       }
     ];
+  }
+
+  componentDidMount() {
+    this.props.onRef(this);
+  }
+
+  componentWillUnmount() {
+    this.props.onRef(undefined);
   }
 
   handleEntered = (index, entered) => {
@@ -60,12 +81,11 @@ export default class Canvas extends React.Component {
     this.setState();
   }
 
-
   componentWillReceiveProps(nextProps) {
     // Handle dragging
     if (nextProps.dragging) {
       this.setState({
-        dragging: true, 
+        dragging: true,
         activeDraggable: {
           yPos: nextProps.posY,
           xPos: nextProps.posX,
@@ -89,7 +109,7 @@ export default class Canvas extends React.Component {
       if (isInDropZone) {
         if (this.dropzonesTemp[enteredIndex].hasDroppable == true) {
           this.setState({
-            dragging: false, 
+            dragging: false,
             showConfirmationDialog: true,
             overlap: enteredIndex
           });
@@ -100,24 +120,24 @@ export default class Canvas extends React.Component {
 
           this.setState({
             droppedDraggables: [...this.state.droppedDraggables, droppableToAdd],
-            dragging: false, 
+            dragging: false,
             activeDraggable: undefined
-          }); 
+          });
 
           this.dropzonesTemp[enteredIndex].hasDroppable = true;
           this.dropzonesTemp[enteredIndex].entered = false;
           this.dropzones.push(this.dropzonesTemp[enteredIndex]);
           this.setState();
-          this.generateTempDropZones(); 
+          this.generateTempDropZones();
         }
       }
       else {
         this.setState({
-          dragging: false, 
+          dragging: false,
           activeDraggable: undefined
         });
       }
-    } 
+    }
   }
 
 
@@ -131,11 +151,11 @@ export default class Canvas extends React.Component {
       <Draggable
         key={ Math.random() }
         dropped={ false }
-        yPos={ d.yPos } 
+        yPos={ d.yPos }
         xPos={ d.xPos }
-        width={ d.width } 
+        width={ d.width }
         contentClass={ d.contentClass }
-        content={ d.content } 
+        content={ d.content }
       />
     );
   }
@@ -150,29 +170,67 @@ export default class Canvas extends React.Component {
         <Draggable
           key={ Math.random() }
           dropped={ true }
-          yPos={ d.yPos } 
+          yPos={ d.yPos }
           xPos={ d.xPos - 189 } // TODO: calculate offset better
-          width={ d.width } 
+          width={ d.width }
           contentClass={ d.contentClass }
-          content={ d.content } 
+          content={ d.content }
         />
       );
     });
   }
 
   renderDropzones() {
-    const dropzones = this.state.dragging ? this.dropzonesTemp : this.dropzones; 
+    const dropzones = this.state.dragging ? this.dropzonesTemp : this.dropzones;
     return dropzones.map(dz => {
       return (
-        <Dropzone 
-          key={ dz.key } 
+        <Dropzone
+          key={ dz.key }
           posX={ dz.posX }
           posY={ dz.posY }
-          mouseX={ this.props.mouseX } 
-          mouseY={ this.props.mouseY } 
+          mouseX={ this.props.mouseX }
+          mouseY={ this.props.mouseY }
           handleEntered={ entered => this.handleEntered(dz.key, entered) }
-        /> 
+        />
       );
+    });
+  }
+
+  /**
+   * Render the editor overlay.
+   *
+   * @param {string} [state] - Display state [active|inactive].
+   * @return {object} React render object.
+   */
+  renderEditorOverlay({state = 'inactive', form = {}} = {}) {
+    return (
+      <EditorOverlay
+        onRef={ref => (this.child = ref)}
+        state={state}
+        editorContents={this.state.editorContents}
+        form={form}
+        closeForm={this.toggleEditorOverlay.bind(this)}
+      />
+    );
+  }
+
+  /**
+   * Toggle the editor overlay.
+   *
+   * @param {boolean} visibility - Override visibility toggling.
+   */
+  toggleEditorOverlay(visibility) {
+    if (visibility === true) {
+      visibility = 'active';
+    }
+    else if (visibility === false) {
+      visibility = 'inactive';
+    }
+    else {
+      visibility = undefined;
+    }
+    this.setState({
+      editorOverlay: visibility || ((this.state.editorOverlay === 'active') ? 'inactive' : 'active')
     });
   }
 
@@ -184,7 +242,7 @@ export default class Canvas extends React.Component {
 
     this.state.droppedDraggables.splice(index);
     this.state.droppedDraggables.push(this.state.activeDraggable);
-    
+
     this.setState({
       showConfirmationDialog: false,
       activeDraggable: undefined,
@@ -203,19 +261,19 @@ export default class Canvas extends React.Component {
     return (
       <div className="wrapper" onMouseDown= { this.props.onMouseDown }>
 
-        { this.renderActiveDraggable() } 
+        { this.renderActiveDraggable() }
 
         <div className="canvas">
-          { this.state.showConfirmationDialog ? 
+          { this.state.showConfirmationDialog ?
             <ConfirmationDialog
               handleDelete={ this.handleDelete }
-              handleCancel={ this.handleCancel } 
+              handleCancel={ this.handleCancel }
             /> : ''
-          } 
-          { this.renderDroppedDraggables() } 
-          { this.renderDropzones() }        
+          }
+          { this.renderDroppedDraggables() }
+          { this.renderDropzones() }
+          { this.renderEditorOverlay({state: this.state.editorOverlay}) }
         </div>
-     
       </div>
     );
   }
