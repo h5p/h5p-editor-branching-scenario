@@ -22,7 +22,6 @@ export default class Editor extends React.Component {
       translations: props.translations,
       settings: props.settings,
       libraries: props.libraries,
-      active: false,
       dragging: false,
       mouse: {
         x: 0,
@@ -97,37 +96,31 @@ export default class Editor extends React.Component {
 
   handleMouseDown = (e, data) => {
     if (data) {
-      this.setState(prevState => {
-        return {
-          dragging: true,
-          active: !prevState.active,
-          draggable: data,
-          mouse: {
-            x: e.pageX,
-            y: e.pageY
-          },
-          rel : {
-            x: data.xPos,
-            y: data.yPos
-          },
-          pos : {
-            x: e.pageX - data.xPos,
-            y: e.pageY - 65
-          },
-        };
+      this.setState({
+        dragging: true,
+        draggable: data,
+        mouse: {
+          x: e.pageX,
+          y: e.pageY
+        },
+        rel : {
+          x: data.xPos,
+          y: data.yPos
+        },
+        pos : {
+          x: e.pageX - data.xPos,
+          y: e.pageY - 65
+        }
       });
       window.addEventListener('mousemove', this.handleMouseMove);
     }
 
     else {
-      this.setState(prevState => {
-        return {
-          active: !prevState.active,
-          mouse: {
-            x: e.pageX,
-            y: e.pageY
-          }
-        };
+      this.setState({
+        mouse: {
+          x: e.pageX,
+          y: e.pageY
+        }
       });
     }
 
@@ -135,15 +128,6 @@ export default class Editor extends React.Component {
     //Will prevent forms from working correctly
     //e.stopPropagation();
     //e.preventDefault();
-  }
-
-  handleMouseUp = (e) => {
-    this.setState({
-      dragging: false
-    });
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    e.stopPropagation();
-    e.preventDefault();
   }
 
   handleMouseMove = (e) => {
@@ -198,6 +182,14 @@ export default class Editor extends React.Component {
      *       component's constructor then.
      */
     this.child.child.updateForm($form);
+
+  handleMouseUp = (e) => {
+    this.setState({
+      dragging: false
+    });
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    e.stopPropagation();
+    e.preventDefault();
   }
 
   render() {
@@ -210,7 +202,6 @@ export default class Editor extends React.Component {
           <ContentTypeMenu
             libraries={ this.state.libraries }
             onMouseDown={ this.handleMouseDown  }
-            active={ this.state.active }
           />
           <Canvas
             onRef={ref => (this.child = ref)}
@@ -222,7 +213,7 @@ export default class Editor extends React.Component {
             posX={this.state.pos.x}
             posY={this.state.pos.y}
             width={this.state.draggable ? parseInt(this.state.draggable.wdith): null}
-            onMouseDown={ this.handleMouseDown  }
+            onMouseDown={ this.handleMouseDown }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

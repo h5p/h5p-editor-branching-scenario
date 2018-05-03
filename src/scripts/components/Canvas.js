@@ -30,30 +30,15 @@ export default class Canvas extends React.Component {
     };
 
     this.dropzones = [
-      {
-        key: 0,
-        entered: false,
-        hasDroppable: false,
-        posX: 375,
-        posY: 200
-      }
     ],
 
     this.dropzonesTemp = [
       {
         key: 0,
         entered: false,
-        hasDroppable: false,
+        hasDraggable: false,
         posX: 375,
-        posY: 200
-      },
-      {
-        key: 1,
-        entered: false,
-        hasDroppable: false,
-        temp: true,
-        posX: 375,
-        posY: 300
+        posY: 100
       }
     ];
   }
@@ -75,13 +60,14 @@ export default class Canvas extends React.Component {
     const newDropzone = {...lastDropzone};
     newDropzone.key = lastDropzone.key + 1;
     newDropzone.posY = lastDropzone.posY + 100;
-    newDropzone.hasDroppable = false;
+    newDropzone.hasDraggable = false;
     this.dropzonesTemp = this.dropzones.map(x => x); // Copy without reference
     this.dropzonesTemp.push(newDropzone);
     this.setState();
   }
 
   componentWillReceiveProps(nextProps) {
+
     // Handle dragging
     if (nextProps.dragging) {
       this.setState({
@@ -98,25 +84,24 @@ export default class Canvas extends React.Component {
 
     // Handle dropping
     if (this.props.dragging && !nextProps.dragging) {
-      let isInDropZone = false;
-      for (var i = 0; i < this.dropzonesTemp.length; i ++) {
-        if (this.dropzonesTemp[i].entered == true) {
-          isInDropZone = true;
-        }
-      }
       const enteredIndex = this.dropzonesTemp.findIndex(dz => dz.entered == true);
 
-      if (isInDropZone) {
-        if (this.dropzonesTemp[enteredIndex].hasDroppable == true) {
+      if (this.isInDropzone()) {
+
+        // The dropzone already has a draggable
+        if (this.dropzonesTemp[enteredIndex].hasDraggable == true) {
+          // Ask for confirmation before replacing existing draggable
           this.setState({
             dragging: false,
             showConfirmationDialog: true,
             overlap: enteredIndex
           });
         }
+
+        // The dropzone is empty
         else {
-          const droppableToAdd = this.state.activeDraggable;
-          droppableToAdd.dropzone = enteredIndex;
+          const draggableToAdd = this.state.activeDraggable;
+          draggableToAdd.dropzone = enteredIndex;
 
           this.setState({
             droppedDraggables: [...this.state.droppedDraggables, droppableToAdd],
@@ -124,13 +109,15 @@ export default class Canvas extends React.Component {
             activeDraggable: undefined
           });
 
-          this.dropzonesTemp[enteredIndex].hasDroppable = true;
+          this.dropzonesTemp[enteredIndex].hasDraggable = true;
           this.dropzonesTemp[enteredIndex].entered = false;
           this.dropzones.push(this.dropzonesTemp[enteredIndex]);
           this.setState();
           this.generateTempDropZones();
         }
       }
+
+      // Dropped outside a dropzone
       else {
         this.setState({
           dragging: false,
@@ -140,16 +127,36 @@ export default class Canvas extends React.Component {
     }
   }
 
+  isInDropzone = () => {
+    let result = false;
+    for (var i = 0; i < this.dropzonesTemp.length; i ++) {
+      if (this.dropzonesTemp[i].entered == true) {
+        result = true;
+      }
+    }
+    return result;
+  }
+
+  handleMouseDown = (e, data) => {
+    const index = data.id;
+    //const dropzoneToUpdate = this.state.droppedDraggables[index].dropzone;
+    this.state.droppedDraggables.splice(index, 1);
+
+    this.setState({
+      droppedDraggables: this.state.droppedDraggables
+    });
+
+    this.props.onMouseDown(e, data);
+  }
 
   renderActiveDraggable() {
     const d = this.state.activeDraggable;
-    if (!this.props.dragging || d == undefined) {
+    if (!this.props.dragging && d == undefined) {
       return '';
     }
 
     return (
       <Draggable
-        key={ Math.random() }
         dropped={ false }
         yPos={ d.yPos }
         xPos={ d.xPos }
@@ -165,16 +172,18 @@ export default class Canvas extends React.Component {
       return '';
     }
 
-    return this.state.droppedDraggables.map(d => {
+    return this.state.droppedDraggables.map((d, i) => {
       return (
         <Draggable
-          key={ Math.random() }
+          key={ i }
+          id={ i }
           dropped={ true }
           yPos={ d.yPos }
           xPos={ d.xPos - 189 } // TODO: calculate offset better
           width={ d.width }
           contentClass={ d.contentClass }
           content={ d.content }
+          handleMouseDown={ (e, data) => this.handleMouseDown(e, data) }
         />
       );
     });
@@ -234,7 +243,7 @@ export default class Canvas extends React.Component {
     });
   }
 
-  handleDelete = (dropzoneIndex) => {
+  handleDelete = () => {
     // Get dropped draggable to remove
     const index = this.state.droppedDraggables.indexOf(draggable => {
       draggable.dropzone == this.state.overlap;
@@ -259,7 +268,7 @@ export default class Canvas extends React.Component {
 
   render() {
     return (
-      <div className="wrapper" onMouseDown= { this.props.onMouseDown }>
+      <div className="wrapper">
 
         { this.renderActiveDraggable() }
 
