@@ -182,6 +182,7 @@ export default class Editor extends React.Component {
      *       component's constructor then.
      */
     this.child.child.updateForm($form);
+  }
 
   handleMouseUp = (e) => {
     this.setState({

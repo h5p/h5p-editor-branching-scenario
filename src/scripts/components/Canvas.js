@@ -104,7 +104,7 @@ export default class Canvas extends React.Component {
           draggableToAdd.dropzone = enteredIndex;
 
           this.setState({
-            droppedDraggables: [...this.state.droppedDraggables, droppableToAdd],
+            droppedDraggables: [...this.state.droppedDraggables, draggableToAdd],
             dragging: false,
             activeDraggable: undefined
           });
