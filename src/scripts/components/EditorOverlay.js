@@ -23,14 +23,42 @@ export default class EditorOverlay extends React.Component {
   }
 
   /**
-   * Update the React ref for the form.
-   * Could go in the constructor if the form is not kept permanently, but created/destroyed as needed
+   * Update the form for editing an interaction
    *
-   * @param {jQuery} $form - Form returned by processSemanticsChunk.
+   * @param {string} libraryName - Name of the interaction library to use.
+   * @param {object} [elementParams] - Parameters to set in form.
    */
-  updateForm ($form) {
+  updateForm (libraryName = 'H5P.Image', elementParams = {}) {
+    this.passReadies = false;
+
+    const $form = H5P.jQuery('<div/>');
+
+    let elementFields = {};
+    const allSemantics = this.props.main.getAllSemantics();
+    if (allSemantics) {
+      const testLibrary = allSemantics.filter(item => item.library.indexOf(libraryName) !== -1)[0];
+      elementFields = testLibrary.semantics.fields;
+    }
+
+    // Attach the DOM to $form
+    H5PEditor.processSemanticsChunk(elementFields, elementParams, $form, this.props.main);
+    /*
+     * React doesn't allow DOM or jQuery elements, so this is a workaround
+     * to update the form overlay component's contents.
+     * TODO: When working, don't keep the component, but create/destroy it as
+     *       needed and put this in the constructor. Makes more sense.
+     */
     this.refForm.current.innerHTML = '';
     $form.appendTo(this.refForm.current);
+  }
+
+  /*
+   * Return data from the form to the callback function.
+   */
+  saveData = () => {
+    // TODO: Replace foo with parameters from the form, cmp. e.g. IV
+    this.props.saveData('foo');
+    this.props.closeForm();
   }
 
   render() {
@@ -41,8 +69,12 @@ export default class EditorOverlay extends React.Component {
           <span className="icon">{this.props.editorContents.top.icon}</span>
           <span className="title">{this.props.editorContents.top.title}</span>
           <span className="buttons">
-          <button className="buttonBlue">{this.props.editorContents.top.saveButton}</button>
-          <button className="button" onClick={this.props.closeForm}>{this.props.editorContents.top.closeButton}</button>
+          <button className="buttonBlue" onClick={this.saveData}>
+            {this.props.editorContents.top.saveButton}
+          </button>
+          <button className="button" onClick={this.props.closeForm}>
+            {this.props.editorContents.top.closeButton}
+          </button>
           </span>
         </div>
         <div className='content' ref={this.refForm} />

@@ -226,8 +226,10 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       });
     });
     promise.then((results) => {
+      this.allSemantics = results;
+
+      // This is just temporary for testing
       if (this.editor) {
-        this.editor.setSemantics(results);
         this.editor.updateForm();
       }
 
@@ -339,6 +341,25 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
+   * Save data.
+   *
+   * @param {object} data - Data from Editor.
+   */
+  BranchingScenarioEditor.prototype.saveData = function (data) {
+    console.log('Saving data:', data);
+    // Put data in the correct place in this.params
+  };
+
+  /**
+   * Get all semantics available.
+   *
+   * @return {object[]} All semantics.
+   */
+  BranchingScenarioEditor.prototype.getAllSemantics = function () {
+    return this.allSemantics;
+  };
+
+  /**
    * Get parameters of subcontent.
    *
    * @param {object} params - Params to start looking.
@@ -405,7 +426,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     this.editor = ReactDOM.render(
       (<Editor
-        parent={this} // hacky
+        main={this} // hacky
         translations={this.translations}
         libraries={this.libraries}
         settings={this.settings}
@@ -413,6 +434,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         endImageChooser={this.endImageChooser}
         updateParams={this.updateParams.bind(this)}
         updateTranslations={this.updateTranslations.bind(this)}
+        saveData={this.saveData.bind(this)}
       />), $wrapper.get(0)
     );
   };

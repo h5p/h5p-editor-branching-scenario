@@ -15,9 +15,6 @@ export default class Editor extends React.Component {
   constructor(props) {
     super(props);
 
-    // Working around core ... :-(
-    this.parent = props.parent;
-
     this.state = {
       translations: props.translations,
       settings: props.settings,
@@ -82,16 +79,6 @@ export default class Editor extends React.Component {
     this.setState({translations: translations});
 
     this.props.updateTranslations(affectedItem[0]);
-  }
-
-  /**
-   * Set all semantics by outside component.
-   * Expects {library: 'machineName', semantics{...}}
-   *
-   * @param {object[]} semantics - All semantics used (should be enlarged to all possible)
-   */
-  setSemantics(semantics) {
-    this.allSemantics = semantics;
   }
 
   handleMouseDown = (e, data) => {
@@ -162,26 +149,7 @@ export default class Editor extends React.Component {
    * @param {object} [elementParams] - Parameters to set in form.
    */
   updateForm (libraryName = 'H5P.Image', elementParams = {}) {
-    this.passReadies = false;
-
-    const $form = H5P.jQuery('<div/>');
-
-    let elementFields = {};
-    if (this.allSemantics) {
-      const testLibrary = this.allSemantics.filter(item => item.library.indexOf(libraryName) !== -1)[0];
-      elementFields = testLibrary.semantics.fields;
-    }
-
-    // Attach the DOM to $form
-    H5PEditor.processSemanticsChunk(elementFields, elementParams, $form, this.parent);
-    /*
-     * React doesn't allow DOM or jQuery elements, so this is a workaround
-     * to update the form overlay components contents.
-     * TODO: When working, don't keep the component, but create/destroy it as
-     *       needed. Makes more sense. This will probably go into the
-     *       component's constructor then.
-     */
-    this.child.child.updateForm($form);
+    this.child.child.updateForm(libraryName, elementParams);
   }
 
   handleMouseUp = (e) => {
@@ -215,6 +183,8 @@ export default class Editor extends React.Component {
             posY={this.state.pos.y}
             width={this.state.draggable ? parseInt(this.state.draggable.wdith): null}
             onMouseDown={ this.handleMouseDown }
+            saveData={this.props.saveData}
+            main={this.props.main}
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
