@@ -35,13 +35,6 @@ export default class Editor extends React.Component {
     };
 
     window.addEventListener('mouseup', this.handleMouseUp);
-
-    // For testing the editor overlay, press § (shift-3)
-    document.addEventListener('keydown', event => {
-      if (event.keyCode === 51 && this.child) {
-        this.child.toggleEditorOverlay();
-      }
-    });
   }
 
   /**
@@ -145,11 +138,10 @@ export default class Editor extends React.Component {
   /**
    * Update the form for editing an interaction
    *
-   * @param {string} libraryName - Name of the interaction library to use.
-   * @param {object} [elementParams] - Parameters to set in form.
+   * @param {object} interaction - Parameters to set in form.
    */
-  updateForm (libraryName = 'H5P.Image', elementParams = {}) {
-    this.child.child.updateForm(libraryName, elementParams);
+  updateForm (interaction, elementFields) {
+    this.child.child.updateForm(interaction, elementFields);
   }
 
   handleMouseUp = (e) => {
@@ -184,6 +176,7 @@ export default class Editor extends React.Component {
             width={this.state.draggable ? parseInt(this.state.draggable.wdith): null}
             onMouseDown={ this.handleMouseDown }
             saveData={this.props.saveData}
+            removeData={this.props.removeData}
             main={this.props.main}
           />
         </Tab>

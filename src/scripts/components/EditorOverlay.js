@@ -25,17 +25,22 @@ export default class EditorOverlay extends React.Component {
   /**
    * Update the form for editing an interaction
    *
-   * @param {string} libraryName - Name of the interaction library to use.
-   * @param {object} [elementParams] - Parameters to set in form.
+   * @param {object} interaction - Parameters to set in form.
    */
-  updateForm (libraryName = 'H5P.Image', elementParams = {}) {
+  updateForm (interaction, elementFields) {
+    interaction = interaction || {};
+    if (!interaction.content) {
+      interaction.content = {};
+      //return; // TODO: Error handling
+    }
+    interaction.content.library = interaction.content.library || 'H5P.Image';
+    interaction.content.params = interaction.content.params || {};
+    this.interaction = interaction;
+
     this.passReadies = false;
 
-    const $form = H5P.jQuery('<div/>');
-    const elementFields = this.props.main.getSemantics(libraryName);
-
     // Attach the DOM to $form
-    H5PEditor.processSemanticsChunk(elementFields, elementParams, $form, this.props.main);
+    H5PEditor.processSemanticsChunk(elementFields, interaction.content.params, interaction.$form, this.props.main);
     /*
      * React doesn't allow DOM or jQuery elements, so this is a workaround
      * to update the form overlay component's contents.
@@ -43,16 +48,22 @@ export default class EditorOverlay extends React.Component {
      *       needed and put this in the constructor. Makes more sense.
      */
     this.refForm.current.innerHTML = '';
-    $form.appendTo(this.refForm.current);
+    interaction.$form.appendTo(this.refForm.current);
   }
 
   /*
    * Return data from the form to the callback function.
    */
   saveData = () => {
-    // TODO: Replace foo with parameters from the form, cmp. e.g. IV
+    this.props.saveData(this.interaction);
+    this.props.closeForm();
+  }
 
-    this.props.saveData('foo');
+  /*
+   * Remove data.
+   */
+  removeData = () => {
+    this.props.removeData(this.interaction.contentId);
     this.props.closeForm();
   }
 
@@ -67,7 +78,7 @@ export default class EditorOverlay extends React.Component {
           <button className="buttonBlue" onClick={this.saveData}>
             {this.props.editorContents.top.saveButton}
           </button>
-          <button className="button" onClick={this.props.closeForm}>
+          <button className="button" onClick={this.removeData}>
             {this.props.editorContents.top.closeButton}
           </button>
           </span>

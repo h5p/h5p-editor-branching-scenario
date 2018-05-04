@@ -26,6 +26,15 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     this.translations = [];
 
+    // For testing the editor overlay, press § (shift-3)
+    document.addEventListener('keydown', event => {
+      if (event.keyCode === 51 && this.editor && this.editor.child) {
+        const interaction = this.createInteraction('H5P.Image');
+        this.addInteraction(interaction);
+        this.openInteractionEditor(interaction);
+      }
+    });
+
     /**
      * Get all the machine names of libraries used in params.
      *
@@ -228,11 +237,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     promise.then((results) => {
       this.allSemantics = results;
 
-      // This is just temporary for testing
-      if (this.editor) {
-        this.editor.updateForm();
-      }
-
       results.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
@@ -341,13 +345,87 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
-   * Save data.
+   * Get next free content Id.
    *
-   * @param {object} data - Data from Editor.
+   * @return {number} Id to be used for new content.
    */
-  BranchingScenarioEditor.prototype.saveData = function (data) {
-    console.log('Saving data:', data);
-    // Put data in the correct place in this.params
+  BranchingScenarioEditor.prototype.getFreeContentId = function () {
+    /*
+     * TODO: Implement. Could simply be the next highest id -- trying to
+     *       fill in gaps probably doesn't make sense.
+     *       => get highest id on load and then increment on every call
+     */
+    return 999;
+  };
+
+  /**
+   * Get next if for nextContentId, possibly always -1 for default end node
+   *
+   * @return {number} Id to be used for nextContentId.
+   */
+  BranchingScenarioEditor.prototype.getNextContentId = function () {
+    return -1;
+  };
+
+  /**
+   * Create new Interaction (could possibly be a class of its own).
+   *
+   * @param {string} libraryName - Library name to create interaction for.
+   * @param {object} params - Spare params for optional values later.
+   */
+  BranchingScenarioEditor.prototype.createInteraction = function (libraryName, params) {
+    const interaction = {
+      content: {
+        params: {},
+        library: libraryName,
+        subContentId: H5P.createUUID()
+      },
+      showContentTitle: false,
+      contentId: this.getFreeContentId(),
+      nextContentId: this.getNextContentId(),
+      contentTitle: libraryName // TODO: There's probably a better default
+    };
+
+    return interaction;
+  };
+
+  /**
+   * Add interaction.
+   *
+   * @param {object} interaction - BS interaction object.
+   */
+  BranchingScenarioEditor.prototype.addInteraction = function (interaction) {
+    this.params.content.push(interaction);
+  };
+
+  /**
+   * Remove interaction.
+   *
+   * @param {number} contentId - if of the object to be removed
+   */
+  BranchingScenarioEditor.prototype.removeInteraction = function (contentId) {
+    this.params.content = this.params.content.filter(content => content.contentId !== contentId);
+  };
+
+  /**
+   * Open the interaction editor.
+   *
+   * @param {object} interaction - BS interaction object.
+   */
+  BranchingScenarioEditor.prototype.openInteractionEditor = function (interaction) {
+    interaction.$form = H5P.jQuery('<div/>');
+    this.editor.updateForm(interaction, this.getSemantics(interaction.content.library));
+
+    this.editor.child.toggleEditorOverlay(true);
+  };
+
+  /**
+   * If there's something to be done on saving, do it here.
+   *
+   * @param {object} interaction - BS interaction object.
+   */
+  BranchingScenarioEditor.prototype.saveInteraction = function(interaction) {
+    console.log('saved', interaction);
   };
 
   /**
@@ -396,7 +474,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @returns {boolean} True if validatable.
    */
   BranchingScenarioEditor.prototype.validate = function () {
-    // TODO: Run validate on all subcontent types to trigger the storing of values
+    // TODO: Run validate on all subcontent types
     return true;
   };
 
@@ -440,7 +518,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         endImageChooser={this.endImageChooser}
         updateParams={this.updateParams.bind(this)}
         updateTranslations={this.updateTranslations.bind(this)}
-        saveData={this.saveData.bind(this)}
+        saveData={this.saveInteraction.bind(this)}
+        removeData={this.removeInteraction.bind(this)}
       />), $wrapper.get(0)
     );
   };

@@ -220,6 +220,7 @@ export default class Canvas extends React.Component {
         form={form}
         closeForm={this.toggleEditorOverlay.bind(this)}
         saveData={this.props.saveData}
+        removeData={this.props.removeData}
         main={this.props.main}
       />
     );
