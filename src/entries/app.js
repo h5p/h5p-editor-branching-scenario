@@ -351,12 +351,18 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
-   * Get all semantics available.
+   * Get semantics fields for a library.
    *
-   * @return {object[]} All semantics.
+   * @param {string} libraryName - Library name.
+   * @return {object} Semantics for library.
    */
-  BranchingScenarioEditor.prototype.getAllSemantics = function () {
-    return this.allSemantics;
+  BranchingScenarioEditor.prototype.getSemantics = function (libraryName) {
+    let elementFields = {};
+    if (this.allSemantics) {
+      const testLibrary = this.allSemantics.filter(item => item.library.indexOf(libraryName) !== -1)[0];
+      elementFields = testLibrary.semantics.fields;
+    }
+    return elementFields;
   };
 
   /**

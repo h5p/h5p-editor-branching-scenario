@@ -32,13 +32,7 @@ export default class EditorOverlay extends React.Component {
     this.passReadies = false;
 
     const $form = H5P.jQuery('<div/>');
-
-    let elementFields = {};
-    const allSemantics = this.props.main.getAllSemantics();
-    if (allSemantics) {
-      const testLibrary = allSemantics.filter(item => item.library.indexOf(libraryName) !== -1)[0];
-      elementFields = testLibrary.semantics.fields;
-    }
+    const elementFields = this.props.main.getSemantics(libraryName);
 
     // Attach the DOM to $form
     H5PEditor.processSemanticsChunk(elementFields, elementParams, $form, this.props.main);
@@ -57,6 +51,7 @@ export default class EditorOverlay extends React.Component {
    */
   saveData = () => {
     // TODO: Replace foo with parameters from the form, cmp. e.g. IV
+
     this.props.saveData('foo');
     this.props.closeForm();
   }
