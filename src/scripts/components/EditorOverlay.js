@@ -75,12 +75,12 @@ export default class EditorOverlay extends React.Component {
           <span className="icon">{this.props.editorContents.top.icon}</span>
           <span className="title">{this.props.editorContents.top.title}</span>
           <span className="buttons">
-          <button className="buttonBlue" onClick={this.saveData}>
-            {this.props.editorContents.top.saveButton}
-          </button>
-          <button className="button" onClick={this.removeData}>
-            {this.props.editorContents.top.closeButton}
-          </button>
+            <button className="buttonBlue" onClick={this.saveData}>
+              {this.props.editorContents.top.saveButton}
+            </button>
+            <button className="button" onClick={this.removeData}>
+              {this.props.editorContents.top.closeButton}
+            </button>
           </span>
         </div>
         <div className='content' ref={this.refForm} />

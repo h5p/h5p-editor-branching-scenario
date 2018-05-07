@@ -6,21 +6,21 @@ export default class TabViewTranslations extends React.Component {
     const fieldsets = (this.props.translations || [])
       .map(items => {
         return (<fieldset key={items[0].library}>
-        <legend>{items[0].library}</legend>
-        {items.map((item, index) => <div key={index}>
-          <label htmlFor={item.name}>
-            {item.label}
-          </label>
-          <input
-            type='text'
-            key={item.name}
-            name={item.library + '/' + ((item.path.length > 0) ? item.path.join('/') + '/' : '') + item.name}
-            value={item.translation}
-            placeholder={item.default}
-            onChange={this.props.onChange}
-          />
-        </div>)}
-      </fieldset>);
+          <legend>{items[0].library}</legend>
+          {items.map((item, index) => <div key={index}>
+            <label htmlFor={item.name}>
+              {item.label}
+            </label>
+            <input
+              type='text'
+              key={item.name}
+              name={item.library + '/' + ((item.path.length > 0) ? item.path.join('/') + '/' : '') + item.name}
+              value={item.translation}
+              placeholder={item.default}
+              onChange={this.props.onChange}
+            />
+          </div>)}
+        </fieldset>);
       });
 
     return fieldsets;

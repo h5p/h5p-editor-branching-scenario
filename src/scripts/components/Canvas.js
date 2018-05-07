@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Canvas.scss';
+import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
@@ -34,30 +35,30 @@ export default class Canvas extends React.Component {
         key: 0, 
         entered: false, 
         draggable: {
- 				  content: "Interactive Video",
-				  contentClass: "InteractiveVideo",
+          content: "Interactive Video",
+          contentClass: "InteractiveVideo",
         }
       },
       { 
         key: 1, 
         entered: false, 
         draggable: {
- 				  content: "Text",
-				  contentClass: "Text",
+          content: "Text",
+          contentClass: "Text",
         }
       },
       { 
         key: 2, 
         entered: false, 
         draggable: {
- 				  content: "Image",
-				  contentClass: "Image",
+          content: "Image",
+          contentClass: "Image",
         }
       } 
     ];
 
     this.dropzonesTemp = [];
-    this.generateTempDropZones()
+    this.generateTempDropZones();
   }
 
   componentDidMount() {
@@ -70,43 +71,43 @@ export default class Canvas extends React.Component {
 
   handleEntered = (index, entered) => {
     if (!entered) {
-      return 
+      return; 
     }
     this.dropzonesTemp.forEach((dz, i) => {
-      dz.entered = i== index ? true : false
-    })
+      dz.entered = i== index ? true : false;
+    });
   }
 
   generateTempDropZones = (a) => {
     this.dropzonesTemp = JSON.parse(JSON.stringify(this.dropzones)); // Copy without reference 
-    this.dropzonesTemp.forEach((dz, i) => {
-      dz.originalKey = dz.key
-    })
+    this.dropzonesTemp.forEach(dz => {
+      dz.originalKey = dz.key;
+    });
 
     let tempDropzone = {
       entered: false,
       temp: true
-    }
+    };
     
     // Add temp dropzones before and after all dropzones
     this.dropzonesTemp = this.dropzonesTemp.reduce((acc, next) => {
-      acc.push(next)
-      acc.push(Object.assign({}, tempDropzone))
-      return acc 
-    }, [Object.assign({}, tempDropzone)])
+      acc.push(next);
+      acc.push(Object.assign({}, tempDropzone));
+      return acc; 
+    }, [Object.assign({}, tempDropzone)]);
 
     // TODO: Remove temp dropzones if a permanent dropzone doesn't have a draggable
-    let indexToRemove
+    let indexToRemove;
 
     this.dropzonesTemp.forEach((dz, i) => {
       if (!dz.draggable && !dz.temp) {
-        indexToRemove = i
+        indexToRemove = i;
       }
-    })
+    });
 
     if (a) {
-     this.dropzonesTemp.splice(indexToRemove, 1) 
-     this.dropzonesTemp.splice(indexToRemove, 1) 
+      this.dropzonesTemp.splice(indexToRemove, 1); 
+      this.dropzonesTemp.splice(indexToRemove, 1); 
     }
 
     for (var i = 0; i < this.dropzonesTemp.length; i++) {
@@ -133,7 +134,7 @@ export default class Canvas extends React.Component {
     // Handle dropping
     if (this.props.dragging && !nextProps.dragging) {
       const enteredIndex = this.dropzonesTemp.findIndex(dz => dz.entered == true);
-      const enteredDropzone = this.dropzonesTemp[enteredIndex]
+      const enteredDropzone = this.dropzonesTemp[enteredIndex];
 
       if (this.isInDropzone()) {
         // The dropzone already has a draggable 
@@ -148,41 +149,41 @@ export default class Canvas extends React.Component {
 
         // The dropzone is empty and therefore a temp dropzone
         else {
-					// Make the temp dropzone permanent	
+          // Make the temp dropzone permanent 
           const dropzoneToAdd = {
             hasDraggable: true,
             entered: false,
             draggable: this.state.activeDraggable
-          }
+          };
 
-          const indexToInsert = this.dropzonesTemp[enteredIndex].originalKey
-          this.dropzones.splice(indexToInsert, 0, dropzoneToAdd)
+          const indexToInsert = this.dropzonesTemp[enteredIndex].originalKey;
+          this.dropzones.splice(indexToInsert, 0, dropzoneToAdd);
 
           // Remove empty dropzones
           let indexToRemove;
           for (var i = 0; i < this.dropzones.length; i++) {
             if (!this.dropzones[i].draggable) {
-              indexToRemove = i
+              indexToRemove = i;
             }
           }
           if (indexToRemove) {
-            this.dropzones.splice(indexToRemove, 1)
+            this.dropzones.splice(indexToRemove, 1);
           }
-					
+          
           // Reset the keys for the dropzones
-          for (var i = 0; i < this.dropzones.length; i++) {
-            this.dropzones[i].key = i
+          for (var j = 0; j < this.dropzones.length; j++) {
+            this.dropzones[j].key = j;
           }
 
           this.setState({
             dragging: false, 
             activeDraggable: undefined
           }); 
-					
-    			this.generateTempDropZones()
+          
+          this.generateTempDropZones();
           this.setState();
         }
-     }
+      }
 
       // Dropped outside a dropzone
       else {
@@ -206,9 +207,9 @@ export default class Canvas extends React.Component {
 
   handleMouseDown = (e, dropzoneIndex, data) => {
     this.dropzones[dropzoneIndex].draggable = undefined;
-    this.generateTempDropZones(true)
+    this.generateTempDropZones(true);
     this.props.onMouseDown(e, data);
-    this.setState({})
+    this.setState({});
   }
 
   renderActiveDraggable() {
@@ -233,7 +234,7 @@ export default class Canvas extends React.Component {
     const dropzones = this.state.dragging ? this.dropzonesTemp : this.dropzones;
     return dropzones.map(dropzone => {
       if (!dropzone.draggable) {
-        return ''
+        return '';
       }
 
       return (
@@ -244,10 +245,10 @@ export default class Canvas extends React.Component {
           width={ 121 } 
           contentClass={ dropzone.draggable.contentClass }
           content={ dropzone.draggable.content } 
-          handleMouseDown={ (e, data) => { this.handleMouseDown(e, dropzone.key, data)} } 
+          handleMouseDown={ (e, data) => { this.handleMouseDown(e, dropzone.key, data);} } 
         />
       );
-    })
+    });
   }
 
   renderDropzones() {
@@ -331,9 +332,7 @@ export default class Canvas extends React.Component {
   }
 
   render() {
-    //console.log(this.dropzones)
-    //console.log(this.state)
-    //console.log(this.state.droppedDraggables)
+
     return (
       <div className="wrapper">
 
@@ -349,6 +348,11 @@ export default class Canvas extends React.Component {
           { this.renderDroppedDraggables() }
           { this.renderDropzones() }
           { this.renderEditorOverlay({state: this.state.editorOverlay}) }
+          {/*
+          <StartScreen
+            handleClicked={ this.props.navigateToTutorial } 
+          />
+          */}
         </div>
       </div>
     );
