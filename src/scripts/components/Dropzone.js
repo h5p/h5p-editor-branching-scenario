@@ -18,7 +18,7 @@ export default class Dropzone extends React.Component {
 
   isInDropZone = (mouseX, mouseY) => {
     if (this.state.dropzone == undefined) {
-      return false; 
+      return false;
     }
 
     const xStart = this.state.dropzone.x;
@@ -35,10 +35,10 @@ export default class Dropzone extends React.Component {
 
   render() {
     return (
-      <div 
+      <div
         className="dropzone"
-        style={ 
-          { 
+        style={
+          {
             top: this.props.posY + 'px',
             left: this.props.posX + 'px'
           }
@@ -47,9 +47,9 @@ export default class Dropzone extends React.Component {
           if (node !== null && this.state.dropzone == undefined) {
             this.setState({
               dropzone: node.getBoundingClientRect()
-            }); 
-          }         
-        }} 
+            });
+          }
+        }}
       />
     );
   }

@@ -18,13 +18,22 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     // Fields of semantics
     this.field = field;
 
-    let elementFields = this.findField('content', this.field.fields);
-    this.libraries = this.findField('content', elementFields.field.fields).options;
+    this.elementFields = this.findField('content', this.field.fields);
+    this.libraries = this.findField('content', this.elementFields.field.fields).options;
 
     this.params = params || {};
     setValue(field, this.params);
 
     this.translations = [];
+
+    // For testing the editor overlay, press § (shift-3)
+    document.addEventListener('keydown', event => {
+      if (event.keyCode === 51 && this.editor && this.editor.child) {
+        const interaction = this.createInteraction('H5P.Image');
+        this.addInteraction(interaction);
+        this.openInteractionEditor(interaction);
+      }
+    });
 
     /**
      * Get all the machine names of libraries used in params.
@@ -98,6 +107,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     /**
      * Check if field properties match a filter in a given way.
+     * TODO: Better solution, step 1: Do the filtering via a function such as semanticsFilter(semantics, filterFunction)
+     * TODO: Better solution, step 2: Build a semantics class with a function such as filter(filterFunction)
      *
      * @param {object} field - Semantics field.
      * @param {object} filter - Filter.
@@ -224,11 +235,13 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       });
     });
     promise.then((results) => {
+      this.allSemantics = results;
+
       results.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
         const currentLibrary = this.getSubParams(this.params, result.library) || this.params;
-        const fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
+        let fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
         fields.forEach(field => {
           field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
           field.library = result.library;
@@ -257,8 +270,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
       // Update ReactDOM
       if (this.editor) {
-        this.editor.update({translations: this.translations});
+        this.editor.setState({translations: this.translations});
       }
+
+      /*
+       * TODO: The editor core still attaches the common fields to the main form,
+       *       but they are hidden via CSS. Could be removed alltogether now
+       *       from allSemantics.
+       */
     });
 
 
@@ -326,6 +345,105 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
+   * Get next free content Id.
+   *
+   * @return {number} Id to be used for new content.
+   */
+  BranchingScenarioEditor.prototype.getFreeContentId = function () {
+    /*
+     * TODO: Implement. Could simply be the next highest id -- trying to
+     *       fill in gaps probably doesn't make sense.
+     *       => get highest id on load and then increment on every call
+     */
+    return 999;
+  };
+
+  /**
+   * Get next if for nextContentId, possibly always -1 for default end node
+   *
+   * @return {number} Id to be used for nextContentId.
+   */
+  BranchingScenarioEditor.prototype.getNextContentId = function () {
+    return -1;
+  };
+
+  /**
+   * Create new Interaction (could possibly be a class of its own).
+   *
+   * @param {string} libraryName - Library name to create interaction for.
+   * @param {object} params - Spare params for optional values later.
+   */
+  BranchingScenarioEditor.prototype.createInteraction = function (libraryName, params) {
+    const interaction = {
+      content: {
+        params: {},
+        library: libraryName,
+        subContentId: H5P.createUUID()
+      },
+      showContentTitle: false,
+      contentId: this.getFreeContentId(),
+      nextContentId: this.getNextContentId(),
+      contentTitle: libraryName // TODO: There's probably a better default
+    };
+
+    return interaction;
+  };
+
+  /**
+   * Add interaction.
+   *
+   * @param {object} interaction - BS interaction object.
+   */
+  BranchingScenarioEditor.prototype.addInteraction = function (interaction) {
+    this.params.content.push(interaction);
+  };
+
+  /**
+   * Remove interaction.
+   *
+   * @param {number} contentId - if of the object to be removed
+   */
+  BranchingScenarioEditor.prototype.removeInteraction = function (contentId) {
+    this.params.content = this.params.content.filter(content => content.contentId !== contentId);
+  };
+
+  /**
+   * Open the interaction editor.
+   *
+   * @param {object} interaction - BS interaction object.
+   */
+  BranchingScenarioEditor.prototype.openInteractionEditor = function (interaction) {
+    interaction.$form = H5P.jQuery('<div/>');
+    this.editor.updateForm(interaction, this.getSemantics(interaction.content.library));
+
+    this.editor.child.toggleEditorOverlay(true);
+  };
+
+  /**
+   * If there's something to be done on saving, do it here.
+   *
+   * @param {object} interaction - BS interaction object.
+   */
+  BranchingScenarioEditor.prototype.saveInteraction = function(interaction) {
+    console.log('saved', interaction);
+  };
+
+  /**
+   * Get semantics fields for a library.
+   *
+   * @param {string} libraryName - Library name.
+   * @return {object} Semantics for library.
+   */
+  BranchingScenarioEditor.prototype.getSemantics = function (libraryName) {
+    let elementFields = {};
+    if (this.allSemantics) {
+      const testLibrary = this.allSemantics.filter(item => item.library.indexOf(libraryName) !== -1)[0];
+      elementFields = testLibrary.semantics.fields;
+    }
+    return elementFields;
+  };
+
+  /**
    * Get parameters of subcontent.
    *
    * @param {object} params - Params to start looking.
@@ -356,7 +474,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @returns {boolean} True if validatable.
    */
   BranchingScenarioEditor.prototype.validate = function () {
-    // TODO: Run validate on all subcontent types to trigger the storing of values
+    // TODO: Run validate on all subcontent types
     return true;
   };
 
@@ -392,6 +510,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     this.editor = ReactDOM.render(
       (<Editor
+        main={this} // hacky
         translations={this.translations}
         libraries={this.libraries}
         settings={this.settings}
@@ -399,6 +518,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         endImageChooser={this.endImageChooser}
         updateParams={this.updateParams.bind(this)}
         updateTranslations={this.updateTranslations.bind(this)}
+        saveData={this.saveInteraction.bind(this)}
+        removeData={this.removeInteraction.bind(this)}
       />), $wrapper.get(0)
     );
   };

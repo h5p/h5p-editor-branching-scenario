@@ -9,6 +9,7 @@ import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
 import TabViewMetadata from './components/TabViewMetadata';
+import EditorOverlay from './components/EditorOverlay';
 
 export default class Editor extends React.Component {
   constructor(props) {
@@ -73,10 +74,6 @@ export default class Editor extends React.Component {
     this.props.updateTranslations(affectedItem[0]);
   }
 
-  update(paramsObject) {
-    this.setState(paramsObject);
-  }
-
   handleMouseDown = (e, data) => {
     if (data) {
       this.setState({
@@ -102,14 +99,15 @@ export default class Editor extends React.Component {
       this.setState({
         mouse: {
           x: e.pageX,
-          y: e.pageY 
-        } 
+          y: e.pageY
+        }
       });
     }
 
     e.persist();
-    e.stopPropagation();
-    e.preventDefault();
+    //Will prevent forms from working correctly
+    //e.stopPropagation();
+    //e.preventDefault();
   }
 
   handleMouseMove = (e) => {
@@ -125,6 +123,25 @@ export default class Editor extends React.Component {
     });
     e.stopPropagation();
     e.preventDefault();
+  }
+
+  /**
+   * Signal readiness to processSemanticsChunk.
+   * TODO: Should probably be completed as intended.
+   *
+   * @return {boolean} true.
+   */
+  ready () {
+    return true;
+  }
+
+  /**
+   * Update the form for editing an interaction
+   *
+   * @param {object} interaction - Parameters to set in form.
+   */
+  updateForm (interaction, elementFields) {
+    this.child.child.updateForm(interaction, elementFields);
   }
 
   handleMouseUp = (e) => {
@@ -148,6 +165,8 @@ export default class Editor extends React.Component {
             onMouseDown={ this.handleMouseDown  }
           />
           <Canvas
+            onRef={ref => (this.child = ref)}
+            active={this.state.active}
             dragging={this.state.dragging}
             draggable={this.state.draggable}
             mouseX={this.state.mouse.x}
@@ -156,6 +175,9 @@ export default class Editor extends React.Component {
             posY={this.state.pos.y}
             width={this.state.draggable ? parseInt(this.state.draggable.wdith): null}
             onMouseDown={ this.handleMouseDown }
+            saveData={this.props.saveData}
+            removeData={this.props.removeData}
+            main={this.props.main}
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
