@@ -1,0 +1,36 @@
+@import '../../styles/main.scss';
+
+.startscreen-wrapper {
+  width: 100%;
+  height: 100%;
+  background: $background-gray;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.startscreen-header {
+  text-align: center;
+
+  h1 {
+    font-size: 2rem;
+    display: block;
+    font-weight: 300;
+    color: $accent-col;
+  }
+ 
+  p {
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+    display: block;
+    color: $dark-gray;
+  }
+}
+
+.startscreen-footer {
+  text-align: center;
+
+  a {
+    cursor: pointer;
+  }
+}

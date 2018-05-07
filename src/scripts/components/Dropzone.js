@@ -26,9 +26,9 @@ export default class Dropzone extends React.Component {
 
     const yStart = this.state.dropzone.y;
     const yEnd = this.state.dropzone.y + this.state.dropzone.height;
-
-    const res = (mouseX > xStart && mouseX < xEnd &&
-            mouseY > yStart && mouseY < yEnd);
+    
+    const res = (mouseX > xStart && mouseX < xEnd && 
+                 mouseY > yStart && mouseY < yEnd);
 
     return res;
   }

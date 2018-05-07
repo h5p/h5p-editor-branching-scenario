@@ -16,6 +16,7 @@ export default class Editor extends React.Component {
     super(props);
 
     this.state = {
+      activeIndex: 0,
       translations: props.translations,
       settings: props.settings,
       libraries: props.libraries,
@@ -153,9 +154,24 @@ export default class Editor extends React.Component {
     e.preventDefault();
   }
 
+  navigateToTutorial = () => {
+    this.setState({
+      activeIndex: 3 
+    });
+  }
+
+  setActiveIndex = (key) => {
+    this.setState({
+      activeIndex: key
+    });
+  }
+
   render() {
     return (
-      <Tabs className="tab-view-wrapper">
+      <Tabs className="tab-view-wrapper"
+        activeIndex={ this.state.activeIndex}
+        setActiveIndex={ key => this.setActiveIndex(key)}
+      >
         <Tab
           onMouseUp={ this.handleMouseUp }
           title="add content"
@@ -178,6 +194,7 @@ export default class Editor extends React.Component {
             saveData={this.props.saveData}
             removeData={this.props.removeData}
             main={this.props.main}
+            navigateToTutorial={this.navigateToTutorial} 
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
