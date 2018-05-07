@@ -5,6 +5,13 @@ export default class EditorOverlay extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      icon: '',
+      title: 'I am the title!', // TODO: Needs to be translatable???
+      saveButton: "Save changes", // TODO: Needs to be translatable
+      closeButton: "close" // TODO: Needs to be translatable
+    }
+
     this.refForm = React.createRef();
   }
 
@@ -22,25 +29,36 @@ export default class EditorOverlay extends React.Component {
     this.props.onRef(undefined);
   }
 
+  updateTitle(event) {
+    const target = event.target;
+    const value = target.value;
+
+    this.setState({title: value});
+  }
+
   /**
    * Update the form for editing an interaction
    *
    * @param {object} interaction - Parameters to set in form.
    */
   updateForm (interaction, elementFields) {
-    interaction = interaction || {};
-    if (!interaction.content) {
-      interaction.content = {};
+    this.interaction = interaction || {};
+
+    if (!this.interaction.content) {
+      this.interaction.content = {};
       //return; // TODO: Error handling
     }
-    interaction.content.library = interaction.content.library || 'H5P.Image';
-    interaction.content.params = interaction.content.params || {};
-    this.interaction = interaction;
+    this.interaction.content.library = this.interaction.content.library || '';
+
+    const icon = `editor-overlay-icon-${this.camelToKebab(this.interaction.content.library.split('.')[1])}`;
+    this.setState({icon: icon});
+
+    this.interaction.content.params = this.interaction.content.params || {};
 
     this.passReadies = false;
 
     // Attach the DOM to $form
-    H5PEditor.processSemanticsChunk(elementFields, interaction.content.params, interaction.$form, this.props.main);
+    H5PEditor.processSemanticsChunk(elementFields, this.interaction.content.params, this.interaction.$form, this.props.main);
     /*
      * React doesn't allow DOM or jQuery elements, so this is a workaround
      * to update the form overlay component's contents.
@@ -48,13 +66,46 @@ export default class EditorOverlay extends React.Component {
      *       needed and put this in the constructor. Makes more sense.
      */
     this.refForm.current.innerHTML = '';
-    interaction.$form.appendTo(this.refForm.current);
+    this.interaction.$form.appendTo(this.refForm.current);
+  }
+
+  /**
+   * Convert camel case to kebab case.
+   *
+   * @param {string} camel - Camel case.
+   * @return {string} Kebab case.
+   */
+  camelToKebab(camel) {
+    return camel.split('').map((char, i) => {
+  		if (i === 0) {
+  			return char.toLowerCase();
+  		}
+      if (char === char.toUpperCase()) {
+  			return `-${char.toLowerCase()}`;
+  		}
+  		return char;
+	   }).join('');
+  }
+
+  /**
+   * Check form for validity.
+   *
+   * @param {object} interaction - Interaction object.
+   * @return {boolean} True if valid form entries.
+   */
+  isValid(interaction) {
+    // TODO: Check form for validity.
+    return true;
   }
 
   /*
    * Return data from the form to the callback function.
    */
   saveData = () => {
+    if (!this.isValid(this.interaction)) {
+      // TODO: Show hint.
+      return;
+    }
     this.props.saveData(this.interaction);
     this.props.closeForm();
   }
@@ -67,23 +118,29 @@ export default class EditorOverlay extends React.Component {
     this.props.closeForm();
   }
 
+  // TODO: The height of editor-overlay-content must be limited on the y axis (doesn't work with relative heights)
   render() {
     const className = `editor-overlay ${this.props.state}`;
     return (
       <div className={className} >
-        <div className='top'>
-          <span className="icon">{this.props.editorContents.top.icon}</span>
-          <span className="title">{this.props.editorContents.top.title}</span>
+        <div className='editor-overlay-header'>
+          <span className={['editor-overlay-title', this.state.icon].join(' ')}>{this.state.title}</span>
           <span className="buttons">
           <button className="buttonBlue" onClick={this.saveData}>
-            {this.props.editorContents.top.saveButton}
+            {this.state.saveButton}
           </button>
           <button className="button" onClick={this.removeData}>
-            {this.props.editorContents.top.closeButton}
+            {this.state.closeButton}
           </button>
           </span>
         </div>
-        <div className='content' ref={this.refForm} />
+        <div className='editor-overlay-content'>
+        <div>
+          <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
+          <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.updateTitle.bind(this)} />
+        </div>
+        <div className='editor-overlay-semantics' ref={this.refForm} />
+        </div>
       </div>
     );
   }
