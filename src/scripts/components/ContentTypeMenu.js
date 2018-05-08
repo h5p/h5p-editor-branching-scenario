@@ -16,9 +16,9 @@ export default class ContentTypeMenu extends React.Component {
     // Load the libraries
     const self = this;
     window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, function(libraries) {
+      // TODO: Move to Editor – Canvas needs to know the names
 
-      let loadedLibraries = []; 
-
+      let loadedLibraries = [];
       for (var i = 0; i < libraries.length; i++) {
         if (libraries[i].restricted !== true) {
           loadedLibraries.push(libraries[i].title);
@@ -26,9 +26,9 @@ export default class ContentTypeMenu extends React.Component {
       }
 
       self.setState({
-        loadedLibraries: loadedLibraries 
+        loadedLibraries: loadedLibraries
       });
-    }); 
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -36,19 +36,16 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   handleMouseDown = (event) => {
-    const positionData = this.refs[event.currentTarget.className].getBoundingClientRect();
+    if (event.button !== 0) {
+      return; // Only handle left click
+    }
 
-    const elementData = {
-      contentClass: event.currentTarget.className,
-      content: event.currentTarget.innerHTML,
-      xPos: positionData.x,
-      yPos: positionData.y,
-      width: positionData.width,
-      height: positionData.height,
-      top: positionData.top
-    };
+    this.props.onMouseDown({
+      target: event.currentTarget,
+      startX: event.pageX,
+      startY: event.pageY
+    });
 
-    this.props.onMouseDown(event, elementData);
     event.stopPropagation();
     event.preventDefault();
   }
@@ -64,20 +61,18 @@ export default class ContentTypeMenu extends React.Component {
         return '';
       }
 
-      return <li 
-        key={ Math.random() } 
+      return <li
+        key={ Math.random() }
         className={ name.replace(/\s/g, '') }
-        ref= { name.replace(/\s/g, '') } 
-        onMouseDown={ this.handleMouseDown } 
-        onMouseUp={ this.handleMouseUp } 
-      > 
+        onMouseDown={ this.handleMouseDown }
+      >
         { name }
-      </li>; 
+      </li>;
     });
 
     return (
       <ul className="content-type-buttons">
-        { listItems } 
+        { listItems }
       </ul>
     );
   }
