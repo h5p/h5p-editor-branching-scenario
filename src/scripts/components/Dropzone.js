@@ -25,6 +25,14 @@ export default class Dropzone extends React.Component {
              points[0].x > local[1].x )
   }
 
+  highlight() {
+    this.refs.element.classList.add('highlight');
+  }
+
+  dehighlight() {
+    this.refs.element.classList.remove('highlight');
+  }
+
   render() {
     const style = {
       left: this.props.position.x + 'px',
@@ -32,9 +40,6 @@ export default class Dropzone extends React.Component {
     };
 
     let elementClass = 'dropzone';
-    if (this.props.highlight) {
-      elementClass += ' highlight';
-    }
 
     return (
       <div
