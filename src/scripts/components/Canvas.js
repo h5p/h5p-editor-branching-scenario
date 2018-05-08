@@ -97,8 +97,13 @@ export default class Canvas extends React.Component {
   }
 
   handleMove = (index) => {
-    const points = this.refs['draggable-' + index].getPoints();
+    const draggable = this['draggable-' + index];
+    const points = draggable.getPoints();
     this.dropzones.forEach(dropzone => {
+      if (!dropzone || dropzone === draggable) {
+        return; // Skip
+      }
+
       if (dropzone.overlap(points)) {
         dropzone.highlight();
       }
@@ -114,10 +119,24 @@ export default class Canvas extends React.Component {
     };
 
     // Check if the node overlaps with one of the drop zones
-    const points = this.refs['draggable-' + index].getPoints();
+    const draggable = this['draggable-' + index];
+    const points = draggable.getPoints();
     if (!this.dropzones.some(dropzone => {
+        if (!dropzone || dropzone === draggable) {
+          return; // Skip
+        }
+
         if (dropzone.overlap(points)) {
-          this.setNewParent(index, dropzone.props.parent);
+          if (dropzone instanceof Draggable) {
+            // TODO: Replace
+            console.log('REPLACE', this.state.placing + ' => ' + dropzone.props.index);
+            this.setState({
+              deleting: dropzone.props.index
+            });
+          }
+          else {
+            this.setNewParent(index, dropzone.props.parent);
+          }
           return true;
         }
       })) {
@@ -229,7 +248,8 @@ export default class Canvas extends React.Component {
       nodes.push(
         <Draggable
           key={ index }
-          ref={ 'draggable-' + index }
+          index={ index }
+          ref={ element => { this['draggable-' + index] = element; if (this.state.placing !== null && this.state.placing !== index) this.dropzones.push(element) } }
           position={ position }
           width={ width }
           onPlacing={ () => this.handlePlacing(index) }
@@ -257,7 +277,7 @@ export default class Canvas extends React.Component {
           nodes.push(this.renderDropzone(index, {
             x: position.x + 40,
             y: position.y - 52
-          }, -1, 1));
+          }, -1, 2));
         }
       }
 

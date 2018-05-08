@@ -34,6 +34,22 @@ export default class Draggable extends React.Component {
     }]
   }
 
+  overlap(points) {
+    const local = this.getPoints();
+    return !(points[1].y < local[0].y ||
+             points[0].y > local[1].y ||
+             points[1].x < local[0].x ||
+             points[0].x > local[1].x )
+  }
+
+  highlight() {
+    this.refs.element.classList.add('highlight');
+  }
+
+  dehighlight() {
+    this.refs.element.classList.remove('highlight');
+  }
+
   handleMouseUp = (event) => {
     if (this.state.moving.started) {
       this.setState({
