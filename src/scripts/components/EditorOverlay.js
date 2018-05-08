@@ -7,7 +7,7 @@ export default class EditorOverlay extends React.Component {
 
     this.state = {
       icon: '',
-      title: 'I am the title!', // TODO: Needs to be translatable???
+      title: '',
       saveButton: "Save changes", // TODO: Needs to be translatable
       closeButton: "close" // TODO: Needs to be translatable
     }
@@ -51,7 +51,8 @@ export default class EditorOverlay extends React.Component {
     this.interaction.content.library = this.interaction.content.library || '';
 
     const icon = `editor-overlay-icon-${this.camelToKebab(this.interaction.content.library.split('.')[1])}`;
-    this.setState({icon: icon});
+    const title = (this.interaction.getTitle) ? this.interaction.getTitle() : this.interaction.content.library.split('.')[1];
+    this.setState({icon: icon, title: title});
 
     this.interaction.content.params = this.interaction.content.params || {};
 
@@ -65,6 +66,10 @@ export default class EditorOverlay extends React.Component {
      * TODO: When working, don't keep the component, but create/destroy it as
      *       needed and put this in the constructor. Makes more sense.
      */
+
+    // Keep track of form fields that have been populated by processSemanticsChunk
+    this.interaction.children = this.props.main.children;
+
     this.refForm.current.innerHTML = '';
     this.interaction.$form.appendTo(this.refForm.current);
   }
@@ -94,16 +99,22 @@ export default class EditorOverlay extends React.Component {
    * @return {boolean} True if valid form entries.
    */
   isValid(interaction) {
-    // TODO: Check form for validity.
-    return true;
+    var valid = true;
+    var elementKids = interaction.children;
+    for (var i = 0; i < elementKids.length; i++) {
+      if (elementKids[i].validate() === false) {
+        valid = false;
+      }
+    }
+    return valid;
   }
 
   /*
    * Return data from the form to the callback function.
    */
   saveData = () => {
+    // Check if all required form fields can be validated
     if (!this.isValid(this.interaction)) {
-      // TODO: Show hint.
       return;
     }
     this.props.saveData(this.interaction);
