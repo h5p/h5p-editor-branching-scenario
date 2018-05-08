@@ -113,9 +113,10 @@ export default class Canvas extends React.Component {
 
     // Check if the node overlaps with one of the drop zones
     const points = this.refs['draggable-' + index].getPoints();
+    let data;
     if (!this.dropzones.some(dropzone => {
         if (dropzone.overlap(points)) {
-          this.setNewParent(index, dropzone.props.parent);
+          data = this.setNewParent(index, dropzone.props.parent, this.refs['draggable-' + index].libraryName);
           return true;
         }
       })) {
@@ -123,7 +124,7 @@ export default class Canvas extends React.Component {
         placing: null
       });
     }
-    this.props.onInserted();
+    this.props.onInserted(data);
   }
 
   handleDropzoneClick = (newParent) => {
@@ -131,7 +132,8 @@ export default class Canvas extends React.Component {
     this.props.onInserted();
   }
 
-  setNewParent(index, newParent) {
+  setNewParent(index, newParent, library = 'H5P.NewNode 1.0') {
+    let newNode;
     // Set new parent for node
     this.setState(prevState => {
       let newState = {
@@ -141,12 +143,13 @@ export default class Canvas extends React.Component {
 
       if (index === -1) {
         // Insert new node
-        newState.content.push({
+        newNode = {
           type: {
-            library: 'H5P.NewNode 1.0',
+            library: library,
             params: {}
           }
-        });
+        };
+        newState.content.push(newNode);
         index = newState.content.length - 1;
       }
 
@@ -167,6 +170,7 @@ export default class Canvas extends React.Component {
       newState.content[index].parent = newParent
       return newState;
     });
+    return newNode;
   }
 
   renderTree = (parent, x, y) => {

@@ -9,6 +9,7 @@ export default class Draggable extends React.Component {
     if (props.inserting) {
       this.state = this.prepareMouseMove(props.inserting);
       this.state.position = {x: -200, y: -200}; // TODO: Improve
+      this.libraryName = this.props.inserting.target.dataset.libraryName;
     }
     else {
       this.state = {
