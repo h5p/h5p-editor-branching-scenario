@@ -29,6 +29,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     // For testing the editor overlay, press § (shift-3)
     document.addEventListener('keydown', event => {
       if (event.keyCode === 51 && this.editor && this.editor.child) {
+        // TODO: Needs to be replaced with the library name of the caller
         const interaction = this.createInteraction('H5P.Image');
         this.addInteraction(interaction);
         this.openInteractionEditor(interaction);
@@ -350,12 +351,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @return {number} Id to be used for new content.
    */
   BranchingScenarioEditor.prototype.getFreeContentId = function () {
-    /*
-     * TODO: Implement. Could simply be the next highest id -- trying to
-     *       fill in gaps probably doesn't make sense.
-     *       => get highest id on load and then increment on every call
-     */
-    return 999;
+    if (!this.params.content || this.params.content.length === 0) {
+      return 1;
+    }
+    // Assume the last interaction has the highest id
+    return this.params.content[this.params.content.length - 1].contentId + 1;
   };
 
   /**
@@ -364,6 +364,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @return {number} Id to be used for nextContentId.
    */
   BranchingScenarioEditor.prototype.getNextContentId = function () {
+    // TODO: Check what the behavior here should be
     return -1;
   };
 
@@ -373,10 +374,10 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @param {string} libraryName - Library name to create interaction for.
    * @param {object} params - Spare params for optional values later.
    */
-  BranchingScenarioEditor.prototype.createInteraction = function (libraryName, params) {
+  BranchingScenarioEditor.prototype.createInteraction = function (libraryName, params = {}) {
     const interaction = {
       content: {
-        params: {},
+        params: params,
         library: libraryName,
         subContentId: H5P.createUUID()
       },
@@ -451,7 +452,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @return {object} Params.
    */
   BranchingScenarioEditor.prototype.getSubParams = function (params, libraryName) {
-    if (typeof params !== 'object') {
+    if (!params || typeof params !== 'object') {
       return;
     }
     if (typeof libraryName !== 'string') {

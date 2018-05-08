@@ -17,17 +17,7 @@ export default class Canvas extends React.Component {
       overlap: undefined,
       showConfirmationDialog: false,
       droppedDraggables: [],
-      editorOverlay: 'inactive',
-      editorContents: {
-        top: {
-          icon: "\ue91b", // TODO: Replace with actual icon
-          title: "Title of the Content", // TODO: Replace with actual title
-          saveButton: "Save changes",
-          closeButton: "close"
-        },
-        content: {
-        }
-      }
+      editorOverlay: 'inactive'
     };
 
     this.dropzones = [
