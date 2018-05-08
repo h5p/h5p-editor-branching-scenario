@@ -121,15 +121,12 @@ export default class Canvas extends React.Component {
     // Check if the node overlaps with one of the drop zones
     const draggable = this['draggable-' + index];
     const points = draggable.getPoints();
-    let data;
     if (!this.dropzones.some(dropzone => {
         if (!dropzone || dropzone === draggable) {
           return; // Skip
         }
 
         if (dropzone.overlap(points)) {
-          data = this.setNewParent(index, dropzone.props.parent, this.refs['draggable-' + index].libraryName);
-
           if (dropzone instanceof Draggable) {
             // TODO: Replace
             console.log('REPLACE', this.state.placing + ' => ' + dropzone.props.index);
@@ -147,7 +144,7 @@ export default class Canvas extends React.Component {
         placing: null
       });
     }
-    this.props.onInserted(data);
+    this.props.onInserted();
   }
 
   handleDropzoneClick = (newParent) => {
@@ -155,8 +152,7 @@ export default class Canvas extends React.Component {
     this.props.onInserted();
   }
 
-  setNewParent(index, newParent, library = 'H5P.NewNode 1.0') {
-    let newNode;
+  setNewParent(index, newParent) {
     // Set new parent for node
     this.setState(prevState => {
       let newState = {
@@ -166,13 +162,12 @@ export default class Canvas extends React.Component {
 
       if (index === -1) {
         // Insert new node
-        newNode = {
+        newState.content.push({
           type: {
-            library: library,
+            library: 'H5P.NewNode 1.0',
             params: {}
           }
-        };
-        newState.content.push(newNode);
+        });
         index = newState.content.length - 1;
       }
 
@@ -193,7 +188,6 @@ export default class Canvas extends React.Component {
       newState.content[index].parent = newParent
       return newState;
     });
-    return newNode;
   }
 
   renderDropzone(index, position, parent, num) {

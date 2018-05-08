@@ -58,8 +58,6 @@ export default class EditorOverlay extends React.Component {
 
     this.passReadies = false;
 
-    console.log(elementFields, this.interaction.$form);
-
     // Attach the DOM to $form
     H5PEditor.processSemanticsChunk(elementFields, this.interaction.content.params, this.interaction.$form, this.props.main);
     /*

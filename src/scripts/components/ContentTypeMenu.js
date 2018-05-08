@@ -21,10 +21,7 @@ export default class ContentTypeMenu extends React.Component {
       let loadedLibraries = [];
       for (var i = 0; i < libraries.length; i++) {
         if (libraries[i].restricted !== true) {
-          loadedLibraries.push({
-            title: libraries[i].title,
-            name: libraries[i].name
-          });
+          loadedLibraries.push(libraries[i].title);
         }
       }
 
@@ -62,19 +59,18 @@ export default class ContentTypeMenu extends React.Component {
       return '';
     }
 
-    let listItems = this.state.loadedLibraries.map(library => {
+    let listItems = this.state.loadedLibraries.map(name => {
 
-      if (library.title === 'Branching Question') {
+      if (name === 'Branching Question') {
         return '';
       }
 
       return <li
         key={ Math.random() }
-        className={ library.title.replace(/\s/g, '') }
+        className={ name.replace(/\s/g, '') }
         onMouseDown={ this.handleMouseDown }
-        data-library-name={ library.name }
       >
-        { library.title }
+        { name }
       </li>;
     });
 
