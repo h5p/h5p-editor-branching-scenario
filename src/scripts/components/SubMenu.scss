@@ -1,0 +1,56 @@
+@import '../../styles/main.scss';
+
+.submenu {
+  position: absolute;
+  left: 100px;
+  top: 100%;
+  color: black;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  width: 15rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  margin: 0;
+  list-style: none;
+  padding: 0;
+
+  li {
+    padding: 0.5rem;
+    line-height: 0.708rem;
+    color: #363b42;
+    padding-left: 0.6rem;
+    align-items: center;
+  }
+
+  li:hover {
+    background-color: #F1F3F6;
+  }
+
+  li:first-child {
+    background-color: #F1F3F6;
+    font-weight: bold;
+    border-bottom: solid 0.042rem #F1F3F6;
+  }
+
+  li:last-child {
+    border-top: solid 0.042rem #F1F3F6;
+  }
+
+  li.start-preview:before {
+    font-family: BSFont;
+    content: $icon-preview;
+    margin-right: 0.3em;
+  }
+
+  li.edit-content:before {
+    font-family: BSFont; 
+    content: $icon-edit;
+    margin-right: 0.3em;
+  }
+
+  li.delete:before {
+    font-family: BSFont;
+    content: $icon-delete;
+    margin-right: 0.3em;
+  }
+}

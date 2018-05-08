@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Draggable.scss';
+import SubMenu from './SubMenu.js'
 
 export default class Draggable extends React.Component {
   constructor(props) {
@@ -133,12 +134,12 @@ export default class Draggable extends React.Component {
           style={ draggableStyle }
           className={ elementClass }>
           { this.props.children }
+          { /*<SubMenu /> Work in progress */}  
         </li>
       </div>
     );
   }
 }
-
 
 Draggable.propTypes = {
   yPos: PropTypes.number,
