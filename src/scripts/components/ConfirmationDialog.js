@@ -9,8 +9,19 @@ export default class ConfirmationDialog extends React.Component {
   render() {
     return (
       <div className='confirmation-dialog'>
-        <button onClick={ this.props.handleDelete }>Delete</button>
-        <button onClick={ this.props.handleCancel }>Cancel</button> 
+        <div className='confirmation-dialog-header'> 
+          <span className='icon'/>
+          <span className='header-text'> 
+            Delete Question 
+          </span>
+        </div>
+        <div className='confirmation-dialog-body'>
+          Are you sure you want to delete this content?
+          <div>
+            <a className='dialog-delete' onClick={ this.props.handleDelete }>Delete</a>
+            <a className='dialog-cancel' onClick={ this.props.handleCancel }>Cancel</a> 
+          </div>
+        </div>
       </div> 
     );
   }

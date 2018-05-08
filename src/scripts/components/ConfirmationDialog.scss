@@ -1,10 +1,69 @@
+@import '../../styles/components/icons.scss';
+
 .confirmation-dialog {
 	position: absolute;
-  width: 15em;
-  height: 12em;
-  text-align: center;
-  background: red;
+  width: 20em;
+  height: 18em;
   top: 122px;
-  left: 37%;
+  left: 25%;
   z-index: 99999;
+  background: #fff;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.confirmation-dialog-header {
+  padding: 1.5rem;
+  border-bottom: 0.042rem solid #EEC;
+  flex: 0 1 auto;
+  align-items: center;
+  display: flex;
+
+  .icon:before {
+    font-family: BSFont;
+    content: $icon-delete;
+    font-size: 1.3rem;
+    margin-right: 0.5em;
+  }
+  
+  .header-text {
+    font-size: 1.2em;
+  }
+}
+
+.confirmation-dialog-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1 1 auto;
+
+  .dialog-delete {
+    margin-right: 0.2em;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 2px;
+    cursor: pointer; 
+    color: #fff;
+    background-color: #1773DA;
+    border: solid 2px #1773DA;
+
+    &:hover {
+      background-color: #1567c3;
+    }
+
+  }
+
+  .dialog-cancel {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 2px;
+    cursor: pointer; 
+    color: #363b42;
+
+    &:hover {
+      background-color: #dbdee3;
+    }
+  }
 }
