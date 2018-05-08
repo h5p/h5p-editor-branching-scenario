@@ -227,7 +227,7 @@ export default class Canvas extends React.Component {
         </Draggable>
       );
 
-      if (this.state.placing !== null) {
+      if (this.state.placing !== null && this.state.placing !== index) {
         // Draw dropzone below node
         const dzPosition = {
           x: position.x + spacing,
