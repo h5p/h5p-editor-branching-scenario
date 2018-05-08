@@ -359,6 +359,10 @@ export default class Canvas extends React.Component {
       // Change parent for the moving node
       newState.content[index].parent = newState.content[this.state.deleting].parent;
 
+      // Replace the node (preserves tree drawing order)
+      newState.content[this.state.deleting] = newState.content[index];
+      newState.content.splice(index, 1);
+
       // Update all parents before splicing the array
       newState.content.forEach(content => {
         // Move current children of the moved node to grand parent
@@ -366,19 +370,11 @@ export default class Canvas extends React.Component {
           content.parent = grandParent;
         }
 
-        // Update all children of the deleted node to point to the new one
-        if (content.parent === this.state.deleting) {
-          content.parent = index;
-        }
-
         // Decrease all parent values larger than the deleted node index
-        if (content.parent > this.state.deleting) {
+        if (content.parent > index) {
           content.parent--;
         }
       });
-
-      // Remove the replaced node
-      newState.content.splice(this.state.deleting, 1);
 
       return newState;
     });
