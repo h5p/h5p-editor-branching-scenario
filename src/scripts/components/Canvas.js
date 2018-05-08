@@ -97,11 +97,18 @@ export default class Canvas extends React.Component {
   }
 
   handleMove = (index) => {
-    const points = this.refs['draggable-' + index].getPoints();
-    this.dropzones.some(dropzone => {
+    const draggable = this['draggable-' + index];
+    const points = draggable.getPoints();
+    this.dropzones.forEach(dropzone => {
+      if (!dropzone || dropzone === draggable) {
+        return; // Skip
+      }
+
       if (dropzone.overlap(points)) {
-        // TODO: Highlight
-        return true;
+        dropzone.highlight();
+      }
+      else {
+        dropzone.dehighlight();
       }
     });
   }
@@ -112,10 +119,24 @@ export default class Canvas extends React.Component {
     };
 
     // Check if the node overlaps with one of the drop zones
-    const points = this.refs['draggable-' + index].getPoints();
+    const draggable = this['draggable-' + index];
+    const points = draggable.getPoints();
     if (!this.dropzones.some(dropzone => {
+        if (!dropzone || dropzone === draggable) {
+          return; // Skip
+        }
+
         if (dropzone.overlap(points)) {
-          this.setNewParent(index, dropzone.props.parent);
+          if (dropzone instanceof Draggable) {
+            // TODO: Replace
+            console.log('REPLACE', this.state.placing + ' => ' + dropzone.props.index);
+            this.setState({
+              deleting: dropzone.props.index
+            });
+          }
+          else {
+            this.setNewParent(index, dropzone.props.parent);
+          }
           return true;
         }
       })) {
@@ -169,6 +190,20 @@ export default class Canvas extends React.Component {
     });
   }
 
+  renderDropzone(index, position, parent, num) {
+    parent = parent || index;
+    num = num || 0;
+    return (
+      <Dropzone
+        key={ index + '-dz-' + num }
+        ref={ element => this.dropzones.push(element) }
+        parent={ parent }
+        position={ position }
+        onClick={ () => this.handleDropzoneClick(parent) }
+      />
+    );
+  }
+
   renderTree = (parent, x, y) => {
     let nodes = [];
 
@@ -180,7 +215,7 @@ export default class Canvas extends React.Component {
       x = 0; // X level start
     }
     if (y === undefined) {
-      y = 0; // Y level start
+      y = 1; // Y level start
     }
     const width = 121; // TODO: Constant or css value?
     const spacing = 29; // TODO: Constant or css value?
@@ -213,7 +248,8 @@ export default class Canvas extends React.Component {
       nodes.push(
         <Draggable
           key={ index }
-          ref={ 'draggable-' + index }
+          index={ index }
+          ref={ element => { this['draggable-' + index] = element; if (this.state.placing !== null && this.state.placing !== index) this.dropzones.push(element) } }
           position={ position }
           width={ width }
           onPlacing={ () => this.handlePlacing(index) }
@@ -225,21 +261,24 @@ export default class Canvas extends React.Component {
         </Draggable>
       );
 
-      if (this.state.placing !== null) {
-        // Draw dropzone below node
-        const dzPosition = {
-          x: position.x + spacing,
-          y: position.y + spacing 
-        };
-        nodes.push(
-          <Dropzone
-            key={ index + '-dz-1' }
-            ref={ element => this.dropzones.push(element) }
-            parent={ index }
-            position={ dzPosition }
-            onClick={ () => this.handleDropzoneClick(index) }
-          />
-        );
+      // Add dropzones when placing, except for below the one being moved
+      if (this.state.placing !== null && this.state.placing !== index) {
+
+        // Draw dropzone below node, but not above the one being moved
+        if (this.state.content[this.state.placing].parent !== index) {
+          nodes.push(this.renderDropzone(index, {
+            x: position.x + 40, // TODO: Decide on spacing a better way?
+            y: position.y + 42
+          }));
+        }
+
+        // Add extra drop zone above the first node
+        if (parent === -1) {
+          nodes.push(this.renderDropzone(index, {
+            x: position.x + 40,
+            y: position.y - 52
+          }, -1, 2));
+        }
       }
 
       // Increase same level offset + offset required by subtree
@@ -333,6 +372,7 @@ export default class Canvas extends React.Component {
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
             contentClass='new-node'
+            position={ this.props.inserting.position }
           >
             New Node
           </Draggable>

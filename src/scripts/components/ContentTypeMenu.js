@@ -40,10 +40,14 @@ export default class ContentTypeMenu extends React.Component {
       return; // Only handle left click
     }
 
+    const raw = event.currentTarget.getBoundingClientRect();
     this.props.onMouseDown({
-      target: event.currentTarget,
       startX: event.pageX,
-      startY: event.pageY
+      startY: event.pageY,
+      position: {
+        x: raw.left - 1,
+        y: raw.top - 58 // TODO: Determine where offset comes from
+      }
     });
 
     event.stopPropagation();
