@@ -1,9 +1,9 @@
 @import '../../styles/main.scss';
 
 .dropzone {
-  position: absolute; 
+  position: absolute;
   width: 2.6em;
-  height: 2.6em; 
+  height: 2.6em;
   padding-top: 0.3rem;
   box-sizing: border-box;
   color: #1773DA;
@@ -11,14 +11,14 @@
   border: dashed 2px #1773DA;
   cursor: pointer;
 
-   &:before {
+  &:before {
     font-family: 'BSFont';
     content: $icon-plus-2;
     font-size: 1.5em;
     font-weight: 800;
   }
 
-  &:hover {
+  &:hover, &.highlight {
     border-color: #125bac;
     color: #125bac;
     background-color: #96c2f4;

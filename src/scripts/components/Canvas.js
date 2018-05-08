@@ -98,10 +98,12 @@ export default class Canvas extends React.Component {
 
   handleMove = (index) => {
     const points = this.refs['draggable-' + index].getPoints();
-    this.dropzones.some(dropzone => {
+    this.dropzones.forEach(dropzone => {
       if (dropzone.overlap(points)) {
-        // TODO: Highlight
-        return true;
+        dropzone.highlight();
+      }
+      else {
+        dropzone.dehighlight();
       }
     });
   }
