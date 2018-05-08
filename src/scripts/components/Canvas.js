@@ -13,7 +13,7 @@ export default class Canvas extends React.Component {
 
     this.state = {
       placing: null,
-      showConfirmationDialog: false,
+      deleting: null,
       editorOverlay: 'inactive',
       editorContents: {
         top: {
@@ -128,8 +128,6 @@ export default class Canvas extends React.Component {
 
         if (dropzone.overlap(points)) {
           if (dropzone instanceof Draggable) {
-            // TODO: Replace
-            console.log('REPLACE', this.state.placing + ' => ' + dropzone.props.index);
             this.setState({
               deleting: dropzone.props.index
             });
@@ -152,6 +150,15 @@ export default class Canvas extends React.Component {
     this.props.onInserted();
   }
 
+  getNewContentParams() {
+    return {
+      type: {
+        library: 'H5P.NewNode 1.0',
+        params: {}
+      }
+    };
+  }
+
   setNewParent(index, newParent) {
     // Set new parent for node
     this.setState(prevState => {
@@ -162,12 +169,7 @@ export default class Canvas extends React.Component {
 
       if (index === -1) {
         // Insert new node
-        newState.content.push({
-          type: {
-            library: 'H5P.NewNode 1.0',
-            params: {}
-          }
-        });
+        newState.content.push(this.getNewContentParams());
         index = newState.content.length - 1;
       }
 
@@ -265,7 +267,7 @@ export default class Canvas extends React.Component {
       if (this.state.placing !== null && this.state.placing !== index) {
 
         // Draw dropzone below node, but not above the one being moved
-        if (this.state.content[this.state.placing].parent !== index) {
+        if (this.state.placing === -1 || this.state.content[this.state.placing].parent !== index) {
           nodes.push(this.renderDropzone(index, {
             x: position.x + 40, // TODO: Decide on spacing a better way?
             y: position.y + 42
@@ -337,25 +339,55 @@ export default class Canvas extends React.Component {
   }
 
   handleDelete = () => {
-    // Get dropped draggable to remove
-    const index = this.state.droppedDraggables.indexOf(draggable => {
-      draggable.dropzone == this.state.overlap;
-    });
+    // Set new parent for node
+    this.setState(prevState => {
+      let newState = {
+        placing: null,
+        deleting: null,
+        content: [...prevState.content]
+      };
 
-    this.state.droppedDraggables.splice(index);
-    this.state.droppedDraggables.push(this.state.activeDraggable);
+      let index = this.state.placing;
+      if (index === -1) {
+        // Insert new node
+        newState.content.push(this.getNewContentParams());
+        index = newState.content.length - 1;
+      }
 
-    this.setState({
-      showConfirmationDialog: false,
-      activeDraggable: undefined,
-      overlap: undefined
+      const grandParent = newState.content[index].parent;
+
+      // Change parent for the moving node
+      newState.content[index].parent = newState.content[this.state.deleting].parent;
+
+      // Update all parents before splicing the array
+      newState.content.forEach(content => {
+        // Move current children of the moved node to grand parent
+        if (content.parent === index) {
+          content.parent = grandParent;
+        }
+
+        // Update all children of the deleted node to point to the new one
+        if (content.parent === this.state.deleting) {
+          content.parent = index;
+        }
+
+        // Decrease all parent values larger than the deleted node index
+        if (content.parent > this.state.deleting) {
+          content.parent--;
+        }
+      });
+
+      // Remove the replaced node
+      newState.content.splice(this.state.deleting, 1);
+
+      return newState;
     });
   }
 
   handleCancel = () => {
     this.setState({
-      showConfirmationDialog: false,
-      activeDraggable: undefined
+      placing: null,
+      deleting: null
     });
   }
 
@@ -368,7 +400,7 @@ export default class Canvas extends React.Component {
         { !! this.props.inserting &&
           <Draggable
             inserting={ this.props.inserting }
-            ref={ 'draggable--1' }
+            ref={ element => this['draggable--1'] = element }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
             contentClass='new-node'
@@ -379,11 +411,11 @@ export default class Canvas extends React.Component {
         }
 
         <div className="canvas">
-          { this.state.showConfirmationDialog ?
+          { this.state.deleting !== null &&
             <ConfirmationDialog
               handleDelete={ this.handleDelete }
               handleCancel={ this.handleCancel }
-            /> : ''
+            />
           }
           { this.renderTree().nodes }
           { this.renderEditorOverlay({state: this.state.editorOverlay}) }
