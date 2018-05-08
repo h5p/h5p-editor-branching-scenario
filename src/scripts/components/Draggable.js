@@ -6,15 +6,8 @@ export default class Draggable extends React.Component {
   constructor(props) {
     super(props);
 
-    if (props.inserting) {
-      this.state = this.prepareMouseMove(props.inserting);
-      this.state.position = {x: -200, y: -200}; // TODO: Improve
-    }
-    else {
-      this.state = {
-        position: this.props.position
-      };
-    }
+    this.state = props.inserting ? this.prepareMouseMove(props.inserting) : {};
+    this.state.position = this.props.position;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -44,11 +37,7 @@ export default class Draggable extends React.Component {
   handleMouseUp = (event) => {
     if (this.state.moving.started) {
       this.setState({
-        moving: null,
-        position: {
-          x: event.pageX,
-          y: event.pageY
-        }
+        moving: null
       });
       this.props.onDropped();
     }
@@ -56,7 +45,23 @@ export default class Draggable extends React.Component {
     window.removeEventListener('mousemove', this.handleMouseMove);
   }
 
+  determineOffset(element, x, y) {
+    var style = window.getComputedStyle(element);
+    if (style.position === 'relative') {
+      const raw = element.getBoundingClientRect();
+      return {
+        x: raw.left,
+        y: raw.top
+      };
+    }
+    else if (element.parentElement) {
+      return this.determineOffset(element.parentElement);
+    }
+  }
+
   handleMouseMove = (event) => {
+    let newState;
+
     if (!this.state.moving.started) {
       // Element has not started moving yet (might be clicking)
 
@@ -65,21 +70,35 @@ export default class Draggable extends React.Component {
           event.pageX < this.state.moving.startX - threshold ||
           event.pageY > this.state.moving.startY + threshold ||
           event.pageY < this.state.moving.startY - threshold) {
-        this.state.moving.started = true;
-        //this.setState({}); TODO
+        newState = {
+          moving: {
+            started: true
+          },
+          offset: this.determineOffset(this.refs.element.parentElement, event.pageX, event.pageY)
+        };
+
+        // Compensate for mouse position on element
+        newState.offset.x += event.pageX - this.props.position.x - newState.offset.x;
+        newState.offset.y += event.pageY - this.props.position.y - newState.offset.y;
       }
       else {
         return; // Not passed threshold value yet
       }
     }
 
+    // Determine if new state has been set already
+    newState = newState || {};
+
+    // Use newest offset if possible
+    let offset = (newState.offset ? newState.offset : this.state.offset);
+
     // Update element position
-    this.setState({
-      position: {
-        x: event.pageX,
-        y: event.pageY
-      }
-    });
+    newState.position = {
+      x: event.pageX - offset.x,
+      y: event.pageY - offset.y
+    };
+
+    this.setState(newState);
     this.props.onMove();
   }
 
@@ -97,7 +116,6 @@ export default class Draggable extends React.Component {
     }
 
     this.setState(this.prepareMouseMove({
-      target: event.currentTarget,
       startX: event.pageX,
       startY: event.pageY
     }));

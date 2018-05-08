@@ -333,6 +333,7 @@ export default class Canvas extends React.Component {
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
             contentClass='new-node'
+            position={ this.props.inserting.position }
           >
             New Node
           </Draggable>
