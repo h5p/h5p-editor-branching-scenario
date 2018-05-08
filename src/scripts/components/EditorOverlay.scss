@@ -15,6 +15,8 @@
   z-index: 3;
   font-size: 0.7rem;
   z-index:1001;
+  display: flex;
+  flex-direction: column;
 }
 
 .editor-overlay.inactive {
@@ -22,7 +24,6 @@
 }
 
 .editor-overlay.active {
-  display: inherit;
 }
 
 .editor-overlay .editor-overlay-header {

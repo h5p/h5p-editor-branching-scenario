@@ -29,7 +29,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     // For testing the editor overlay, press § (shift-3)
     document.addEventListener('keydown', event => {
       if (event.keyCode === 51 && this.editor && this.editor.child) {
-        // TODO: Needs to be replaced with the library name of the caller
+        // TODO: When dropping, fetch interaction or identifying info from draggable
         const interaction = this.createInteraction('H5P.Image');
         this.addInteraction(interaction);
         this.openInteractionEditor(interaction);
@@ -359,16 +359,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
-   * Get next if for nextContentId, possibly always -1 for default end node
-   *
-   * @return {number} Id to be used for nextContentId.
-   */
-  BranchingScenarioEditor.prototype.getNextContentId = function () {
-    // TODO: Check what the behavior here should be
-    return -1;
-  };
-
-  /**
    * Create new Interaction (could possibly be a class of its own).
    *
    * @param {string} libraryName - Library name to create interaction for.
@@ -377,13 +367,13 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   BranchingScenarioEditor.prototype.createInteraction = function (libraryName, params = {}) {
     const interaction = {
       content: {
-        params: params,
+        params: {},
         library: libraryName,
         subContentId: H5P.createUUID()
       },
       showContentTitle: false,
       contentId: this.getFreeContentId(),
-      nextContentId: this.getNextContentId(),
+      nextContentId: -1,
       contentTitle: libraryName // TODO: There's probably a better default
     };
 
@@ -426,7 +416,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @param {object} interaction - BS interaction object.
    */
   BranchingScenarioEditor.prototype.saveInteraction = function(interaction) {
-    console.log('saved', interaction);
   };
 
   /**
