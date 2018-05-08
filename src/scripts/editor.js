@@ -18,23 +18,8 @@ export default class Editor extends React.Component {
     this.state = {
       translations: props.translations,
       settings: props.settings,
-      libraries: props.libraries,
-      dragging: false,
-      mouse: {
-        x: 0,
-        y: 0
-      },
-      rel: {
-        x: 0,
-        y: 0
-      },
-      pos: {
-        x: 0,
-        y: 0
-      },
+      libraries: props.libraries
     };
-
-    window.addEventListener('mouseup', this.handleMouseUp);
   }
 
   /**
@@ -44,7 +29,7 @@ export default class Editor extends React.Component {
    *
    * @param {Event} event - Change event.
    */
-  onSettingsChange(event) {
+  handleSettingsChange = (event) => {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
@@ -56,7 +41,7 @@ export default class Editor extends React.Component {
     this.props.updateParams(settings);
   }
 
-  onTranslationsChange(event) {
+  handleTranslationsChange = (event) => {
     const target = event.target;
     const value = target.value;
     const name = target.name;
@@ -74,64 +59,13 @@ export default class Editor extends React.Component {
     this.props.updateTranslations(affectedItem[0]);
   }
 
-  handleMouseDown = (e, data) => {
-    if (data) {
-      this.setState({
-        dragging: true,
-        draggable: data,
-        mouse: {
-          x: e.pageX,
-          y: e.pageY
-        },
-        rel : {
-          x: data.xPos,
-          y: data.yPos
-        },
-        pos : {
-          x: e.pageX - data.xPos,
-          y: e.pageY - 65
-        }
-      });
-      window.addEventListener('mousemove', this.handleMouseMove);
-    }
-
-    else {
-      this.setState({
-        mouse: {
-          x: e.pageX,
-          y: e.pageY
-        }
-      });
-    }
-
-    e.persist();
-    //Will prevent forms from working correctly
-    //e.stopPropagation();
-    //e.preventDefault();
-  }
-
-  handleMouseMove = (e) => {
-    this.setState({
-      mouse: {
-        x: e.pageX,
-        y: e.pageY
-      },
-      pos: {
-        x: e.pageX - this.state.rel.x,
-        y: e.pageY - 65
-      }
-    });
-    e.stopPropagation();
-    e.preventDefault();
-  }
-
   /**
    * Signal readiness to processSemanticsChunk.
    * TODO: Should probably be completed as intended.
    *
    * @return {boolean} true.
    */
-  ready () {
+  ready() {
     return true;
   }
 
@@ -140,44 +74,37 @@ export default class Editor extends React.Component {
    *
    * @param {object} interaction - Parameters to set in form.
    */
-  updateForm (interaction, elementFields) {
+  updateForm(interaction, elementFields) {
     this.child.child.updateForm(interaction, elementFields);
   }
 
-  handleMouseUp = (e) => {
+  handleMouseDown = (event) => {
     this.setState({
-      dragging: false
+      inserting: event
     });
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    e.stopPropagation();
-    e.preventDefault();
+  }
+
+  handleInserted = () => {
+    this.setState({
+      inserting: null
+    });
   }
 
   render() {
     return (
       <Tabs className="tab-view-wrapper">
-        <Tab
-          onMouseUp={ this.handleMouseUp }
-          title="add content"
-          className="bs-editor-content-tab has-submenu">
+        <Tab title="add content" className="bs-editor-content-tab has-submenu">
           <ContentTypeMenu
-            libraries={ this.state.libraries }
-            onMouseDown={ this.handleMouseDown  }
+            libraries={ this.state.libraries } // TODO: Load libraries in this widget?
+            onMouseDown={ this.handleMouseDown }
           />
           <Canvas
+            inserting={ this.state.inserting }
+            onInserted={ this.handleInserted }
             onRef={ref => (this.child = ref)}
-            active={this.state.active}
-            dragging={this.state.dragging}
-            draggable={this.state.draggable}
-            mouseX={this.state.mouse.x}
-            mouseY={this.state.mouse.y}
-            posX={this.state.pos.x}
-            posY={this.state.pos.y}
-            width={this.state.draggable ? parseInt(this.state.draggable.wdith): null}
-            onMouseDown={ this.handleMouseDown }
             saveData={this.props.saveData}
             removeData={this.props.removeData}
-            main={this.props.main}
+            main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
@@ -185,13 +112,13 @@ export default class Editor extends React.Component {
             value={this.state.settings}
             startImageChooser={this.props.startImageChooser}
             endImageChooser={this.props.endImageChooser}
-            onChange={(event) => this.onSettingsChange(event)}
+            onChange={this.handleSettingsChange}
           />
         </Tab>
         <Tab title="translations" className="bs-editor-translations-tab">
           <TabViewTranslations
             translations={this.state.translations}
-            onChange={(event) => this.onTranslationsChange(event)}
+            onChange={this.handleTranslationsChange}
           />
         </Tab>
         <Tab title="tutorial" className="bs-editor-tutorial-tab">

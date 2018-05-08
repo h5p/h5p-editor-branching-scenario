@@ -11,11 +11,8 @@ export default class Canvas extends React.Component {
     super(props);
 
     this.state = {
-      dragging: false,
-      activeDraggable: undefined,
-      overlap: undefined,
+      placing: null,
       showConfirmationDialog: false,
-      droppedDraggables: [],
       editorOverlay: 'inactive',
       editorContents: {
         top: {
@@ -29,35 +26,51 @@ export default class Canvas extends React.Component {
       }
     };
 
-    this.dropzones = [
-      { 
-        key: 0, 
-        entered: false, 
-        draggable: {
- 				  content: "Interactive Video",
-				  contentClass: "InteractiveVideo",
+    // Hard-coded for now, but will come in through props.
+    this.state.content = [
+      {
+        parent: 3,
+        type: {
+          library: 'H5P.BranchingQuestion 1.0',
+          params: {}
         }
       },
-      { 
-        key: 1, 
-        entered: false, 
-        draggable: {
- 				  content: "Text",
-				  contentClass: "Text",
+      {
+        parent: 0,
+        type: {
+          library: 'H5P.InteractiveVideo 1.0',
+          params: {}
         }
       },
-      { 
-        key: 2, 
-        entered: false, 
-        draggable: {
- 				  content: "Image",
-				  contentClass: "Image",
+      {
+        parent: 0,
+        type: {
+          library: 'H5P.Text 1.0',
+          params: {}
         }
-      } 
+      },
+      {
+        parent: -1,
+        type: {
+          library: 'H5P.Video 1.0',
+          params: {}
+        }
+      },
+      {
+        parent: 2,
+        type: {
+          library: 'H5P.Image 1.0',
+          params: {}
+        }
+      },
+      {
+        parent: 2,
+        type: {
+          library: 'H5P.Image 1.0',
+          params: {}
+        }
+      }
     ];
-
-    this.dropzonesTemp = [];
-    this.generateTempDropZones()
   }
 
   componentDidMount() {
@@ -68,202 +81,178 @@ export default class Canvas extends React.Component {
     this.props.onRef(undefined);
   }
 
-  handleEntered = (index, entered) => {
-    if (!entered) {
-      return 
-    }
-    this.dropzonesTemp.forEach((dz, i) => {
-      dz.entered = i== index ? true : false
-    })
-  }
-
-  generateTempDropZones = (a) => {
-    this.dropzonesTemp = JSON.parse(JSON.stringify(this.dropzones)); // Copy without reference 
-    this.dropzonesTemp.forEach((dz, i) => {
-      dz.originalKey = dz.key
-    })
-
-    let tempDropzone = {
-      entered: false,
-      temp: true
-    }
-    
-    // Add temp dropzones before and after all dropzones
-    this.dropzonesTemp = this.dropzonesTemp.reduce((acc, next) => {
-      acc.push(next)
-      acc.push(Object.assign({}, tempDropzone))
-      return acc 
-    }, [Object.assign({}, tempDropzone)])
-
-    // TODO: Remove temp dropzones if a permanent dropzone doesn't have a draggable
-    let indexToRemove
-
-    this.dropzonesTemp.forEach((dz, i) => {
-      if (!dz.draggable && !dz.temp) {
-        indexToRemove = i
-      }
-    })
-
-    if (a) {
-     this.dropzonesTemp.splice(indexToRemove, 1) 
-     this.dropzonesTemp.splice(indexToRemove, 1) 
-    }
-
-    for (var i = 0; i < this.dropzonesTemp.length; i++) {
-      this.dropzonesTemp[i].key = i;
-    }
-  }
-      
   componentWillReceiveProps(nextProps) {
-
-    // Handle dragging
-    if (nextProps.dragging) {
+    if (nextProps.inserting) {
       this.setState({
-        dragging: true,
-        activeDraggable: {
-          yPos: nextProps.posY,
-          xPos: nextProps.posX,
-          width: nextProps.draggable.width,
-          contentClass: nextProps.draggable.contentClass,
-          content: nextProps.draggable.content
-        }
+        placing: -1
       });
     }
-
-    // Handle dropping
-    if (this.props.dragging && !nextProps.dragging) {
-      const enteredIndex = this.dropzonesTemp.findIndex(dz => dz.entered == true);
-      const enteredDropzone = this.dropzonesTemp[enteredIndex]
-
-      if (this.isInDropzone()) {
-        // The dropzone already has a draggable 
-        if (enteredDropzone.draggable) {
-          // Ask for confirmation before replacing existing draggable 
-          this.setState({
-            dragging: false,
-            showConfirmationDialog: true,
-            overlap: enteredIndex
-          });
-        }
-
-        // The dropzone is empty and therefore a temp dropzone
-        else {
-					// Make the temp dropzone permanent	
-          const dropzoneToAdd = {
-            hasDraggable: true,
-            entered: false,
-            draggable: this.state.activeDraggable
-          }
-
-          const indexToInsert = this.dropzonesTemp[enteredIndex].originalKey
-          this.dropzones.splice(indexToInsert, 0, dropzoneToAdd)
-
-          // Remove empty dropzones
-          let indexToRemove;
-          for (var i = 0; i < this.dropzones.length; i++) {
-            if (!this.dropzones[i].draggable) {
-              indexToRemove = i
-            }
-          }
-          if (indexToRemove) {
-            this.dropzones.splice(indexToRemove, 1)
-          }
-					
-          // Reset the keys for the dropzones
-          for (var i = 0; i < this.dropzones.length; i++) {
-            this.dropzones[i].key = i
-          }
-
-          this.setState({
-            dragging: false, 
-            activeDraggable: undefined
-          }); 
-					
-    			this.generateTempDropZones()
-          this.setState();
-        }
-     }
-
-      // Dropped outside a dropzone
-      else {
-        this.setState({
-          dragging: false,
-          activeDraggable: undefined
-        });
-      }
-    }
   }
 
-  isInDropzone = () => {
-    let result = false;
-    for (var i = 0; i < this.dropzonesTemp.length; i ++) {
-      if (this.dropzonesTemp[i].entered == true) {
-        result = true;
-      }
-    }
-    return result;
-  }
-
-  handleMouseDown = (e, dropzoneIndex, data) => {
-    this.dropzones[dropzoneIndex].draggable = undefined;
-    this.generateTempDropZones(true)
-    this.props.onMouseDown(e, data);
-    this.setState({})
-  }
-
-  renderActiveDraggable() {
-    const d = this.state.activeDraggable;
-    if (!this.props.dragging && d == undefined) {
-      return '';
-    }
-
-    return (
-      <Draggable
-        dropped={ false }
-        yPos={ d.yPos }
-        xPos={ d.xPos }
-        width={ d.width }
-        contentClass={ d.contentClass }
-        content={ d.content }
-      />
-    );
-  }
-
-  renderDroppedDraggables() {
-    const dropzones = this.state.dragging ? this.dropzonesTemp : this.dropzones;
-    return dropzones.map(dropzone => {
-      if (!dropzone.draggable) {
-        return ''
-      }
-
-      return (
-        <Draggable
-          dropped={ true }
-          yPos={ (dropzone.key + 1) * 100 } 
-          xPos={ 300 - (121/4) } // TODO: calculate offset better
-          width={ 121 } 
-          contentClass={ dropzone.draggable.contentClass }
-          content={ dropzone.draggable.content } 
-          handleMouseDown={ (e, data) => { this.handleMouseDown(e, dropzone.key, data)} } 
-        />
-      );
-    })
-  }
-
-  renderDropzones() {
-    const dropzones = this.state.dragging ? this.dropzonesTemp : this.dropzones;
-    return dropzones.map(dz => {
-      return (
-        <Dropzone 
-          key={ dz.key } 
-          posX={ 300 }
-          posY={ (dz.key + 1) * 100 }
-          mouseX={ this.props.mouseX } 
-          mouseY={ this.props.mouseY } 
-          handleEntered={ entered => this.handleEntered(dz.key, entered) }
-        />
-      );
+  handlePlacing = (index) => {
+    this.setState({
+      placing: index
     });
+  }
+
+  handleMove = (index) => {
+    const points = this.refs['draggable-' + index].getPoints();
+    this.dropzones.some(dropzone => {
+      if (dropzone.overlap(points)) {
+        // TODO: Highlight
+        return true;
+      }
+    });
+  }
+
+  handleDropped = (index) => {
+    let newState = {
+      placing: null
+    };
+
+    // Check if the node overlaps with one of the drop zones
+    const points = this.refs['draggable-' + index].getPoints();
+    if (!this.dropzones.some(dropzone => {
+        if (dropzone.overlap(points)) {
+          this.setNewParent(index, dropzone.props.parent);
+          return true;
+        }
+      })) {
+      this.setState({
+        placing: null
+      });
+    }
+    this.props.onInserted();
+  }
+
+  handleDropzoneClick = (newParent) => {
+    this.setNewParent(this.state.placing, newParent);
+    this.props.onInserted();
+  }
+
+  setNewParent(index, newParent) {
+    // Set new parent for node
+    this.setState(prevState => {
+      let newState = {
+        placing: null,
+        content: [...prevState.content]
+      };
+
+      if (index === -1) {
+        // Insert new node
+        newState.content.push({
+          type: {
+            library: 'H5P.NewNode 1.0',
+            params: {}
+          }
+        });
+        index = newState.content.length - 1;
+      }
+
+      newState.content.forEach(content => {
+        // We do not want to bring our current children with us, so we
+        // update our old children to use our old parent directly
+        if (content.parent === index) {
+          content.parent = newState.content[index].parent;
+        }
+
+        // We want the children of our new parent to become our children
+        if (content.parent === newParent) {
+          content.parent = index;
+        }
+      });
+
+      // Set new parent to the one dictated by the dropzone
+      newState.content[index].parent = newParent
+      return newState;
+    });
+  }
+
+  renderTree = (parent, x, y) => {
+    let nodes = [];
+
+    // Set defaults
+    if (parent === undefined) {
+      parent = -1; // Starting parent
+    }
+    if (x === undefined) {
+      x = 0; // X level start
+    }
+    if (y === undefined) {
+      y = 0; // Y level start
+    }
+    const width = 121; // TODO: Constant or css value?
+    const spacing = 29; // TODO: Constant or css value?
+
+    this.state.content.forEach((content, index) => {
+      if (content.parent !== parent) {
+        return;
+      }
+
+      // Draw subtree
+      const subtree = this.renderTree(index, x, y + 1);
+      const subtreeWidth = subtree.x - x;
+
+      if (x !== 0) {
+        x += spacing; // Add spacing between nodes
+      }
+
+      // Determine position of node
+      let position = {
+        x: x,
+        y: y * 100
+      }
+
+      if (subtreeWidth >= width) {
+        // Center parent above subtree
+        position.x += ((subtree.x - x) / 2) - (width / 2);
+      }
+
+      // Draw node
+      nodes.push(
+        <Draggable
+          key={ index }
+          ref={ 'draggable-' + index }
+          position={ position }
+          width={ width }
+          onPlacing={ () => this.handlePlacing(index) }
+          onMove={ () => this.handleMove(index) }
+          onDropped={ () => this.handleDropped(index) }
+          contentClass='test'
+        >
+          { content.type.library }
+        </Draggable>
+      );
+
+      if (this.state.placing !== null) {
+        // Draw dropzone below node
+        const dzPosition = {
+          x: position.x + spacing,
+          y: position.y + spacing 
+        };
+        nodes.push(
+          <Dropzone
+            key={ index + '-dz-1' }
+            ref={ element => this.dropzones.push(element) }
+            parent={ index }
+            position={ dzPosition }
+            onClick={ () => this.handleDropzoneClick(index) }
+          />
+        );
+      }
+
+      // Increase same level offset + offset required by subtree
+      x += (subtreeWidth >= width ? subtreeWidth : width);
+
+      // Merge our trees
+      nodes = nodes.concat(subtree.nodes);
+    });
+
+    return {
+      nodes: nodes,
+      x: x
+    };
+
   }
 
   /**
@@ -331,13 +320,22 @@ export default class Canvas extends React.Component {
   }
 
   render() {
-    //console.log(this.dropzones)
-    //console.log(this.state)
-    //console.log(this.state.droppedDraggables)
+    this.dropzones = [];
+
     return (
       <div className="wrapper">
 
-        { this.renderActiveDraggable() }
+        { !! this.props.inserting &&
+          <Draggable
+            inserting={ this.props.inserting }
+            ref={ 'draggable--1' }
+            onMove={ () => this.handleMove(-1) }
+            onDropped={ () => this.handleDropped(-1) }
+            contentClass='new-node'
+          >
+            New Node
+          </Draggable>
+        }
 
         <div className="canvas">
           { this.state.showConfirmationDialog ?
@@ -346,8 +344,7 @@ export default class Canvas extends React.Component {
               handleCancel={ this.handleCancel }
             /> : ''
           }
-          { this.renderDroppedDraggables() }
-          { this.renderDropzones() }
+          { this.renderTree().nodes }
           { this.renderEditorOverlay({state: this.state.editorOverlay}) }
         </div>
       </div>
@@ -356,12 +353,6 @@ export default class Canvas extends React.Component {
 }
 
 Canvas.propTypes = {
-  clicked: PropTypes.bool,
-  draggable: PropTypes.object,
-  dragging: PropTypes.bool,
-  mouseX: PropTypes.number,
-  mouseY: PropTypes.number,
-  posX: PropTypes.number,
-  poxY: PropTypes.number,
-  width: PropTypes.number
+  width: PropTypes.number,
+  inserting: PropTypes.object
 };
