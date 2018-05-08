@@ -117,6 +117,10 @@ export default class EditorOverlay extends React.Component {
     if (!this.isValid(this.interaction)) {
       return;
     }
+
+    // Add title from title input field to content
+    this.interaction.contentTitle = this.state.title;
+
     this.props.saveData(this.interaction);
     this.props.closeForm();
   }
