@@ -3,20 +3,23 @@ import './TabPanel.scss';
 
 export default class Tabs extends React.Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
-      activeIndex: 0
+      activeIndex: this.props.activeIndex
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      activeIndex: nextProps.activeIndex
+    });
   }
 
   handleOnClick(key, event) {
     event.preventDefault();
-
-    this.setState({
-      activeIndex: key
-    });
+    this.props.setActiveIndex(key);
   }
 
   renderNavItem = (key) => {

@@ -16,6 +16,7 @@ export default class Editor extends React.Component {
     super(props);
 
     this.state = {
+      activeIndex: 0,
       translations: props.translations,
       settings: props.settings,
       libraries: props.libraries
@@ -90,10 +91,28 @@ export default class Editor extends React.Component {
     });
   }
 
+  navigateToTutorial = () => {
+    this.setState({
+      activeIndex: 3
+    });
+  }
+
+  setActiveIndex = (key) => {
+    this.setState({
+      activeIndex: key
+    });
+  }
+
   render() {
     return (
-      <Tabs className="tab-view-wrapper">
-        <Tab title="add content" className="bs-editor-content-tab has-submenu">
+      <Tabs className="tab-view-wrapper"
+        activeIndex={ this.state.activeIndex}
+        setActiveIndex={ key => this.setActiveIndex(key)}
+      >
+        <Tab
+          onMouseUp={ this.handleMouseUp }
+          title="add content"
+          className="bs-editor-content-tab has-submenu">
           <ContentTypeMenu
             libraries={ this.state.libraries } // TODO: Load libraries in this widget?
             onMouseDown={ this.handleMouseDown }
@@ -105,6 +124,7 @@ export default class Editor extends React.Component {
             saveData={this.props.saveData}
             removeData={this.props.removeData}
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
+            navigateToTutorial={this.navigateToTutorial}
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Canvas.scss';
+import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
@@ -346,6 +347,11 @@ export default class Canvas extends React.Component {
           }
           { this.renderTree().nodes }
           { this.renderEditorOverlay({state: this.state.editorOverlay}) }
+          {/*
+          <StartScreen
+            handleClicked={ this.props.navigateToTutorial }
+          />
+          */}
         </div>
       </div>
     );
