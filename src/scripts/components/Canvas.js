@@ -150,7 +150,7 @@ export default class Canvas extends React.Component {
     if (!this.state.placing) {
       return;
     }
-    
+
     this.setNewParent(this.state.placing, newParent);
     this.props.onInserted();
   }
@@ -392,15 +392,23 @@ export default class Canvas extends React.Component {
     });
   }
 
+  componentDidUpdate() {
+
+    // Center the tree
+    if (this.treeWidth !== this.lastTreeWidth) {
+      this.lastTreeWidth = this.treeWidth;
+      this.refs.tree.style.marginLeft = '';
+      const raw = this.refs.tree.getBoundingClientRect();
+      this.refs.tree.style.marginLeft = ((raw.width - this.treeWidth) / 2) + 'px';
+    }
+  }
+
   render() {
     this.dropzones = [];
 
     // Generate the tree
-    const tree = this.renderTree().nodes;
-    if (!tree.length) {
-      // No tree, use start screen instead
-
-    }
+    const tree = this.renderTree();
+    this.treeWidth = tree.x;
 
     return (
       <div className="wrapper">
@@ -425,14 +433,16 @@ export default class Canvas extends React.Component {
               handleCancel={ this.handleCancel }
             />
           }
-          { tree }
-          { !tree.length &&
+          <div className="tree" ref={ 'tree' }>
+            { tree.nodes }
+          </div>
+          { !tree.nodes.length &&
             <StartScreen
               handleClicked={ this.props.navigateToTutorial }
             >
               { this.renderDropzone(-1, {
-                  x: 40,
-                  y: 48
+                  x: 363.19,
+                  y: 130
                 }) }
             </StartScreen>
           }
