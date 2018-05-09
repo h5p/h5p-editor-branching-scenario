@@ -229,7 +229,9 @@ export default class EditorOverlay extends React.Component {
             <select onChange={this.handleOptionChange}>
               <option value="end-scenario">End scenario here</option>
               <option value="new-content">Send a viewer to a new content/question</option>
-              <option value="old-content">Send a viewer to an existing content/question</option>
+              { this.props.content.length > 1 &&
+                <option value="old-content">Send a viewer to an existing content/question</option>
+              }
             </select>
 
             { this.state.showNextPathDropzone &&
