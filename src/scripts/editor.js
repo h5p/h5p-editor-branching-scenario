@@ -86,7 +86,7 @@ export default class Editor extends React.Component {
   }
 
   handleInserted = (data) => {
-    if (data) {
+    if (data && !this.props.main.canvasDev) {
       // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
       const interaction = this.props.main.createInteraction(data);
       this.props.main.addInteraction(interaction);

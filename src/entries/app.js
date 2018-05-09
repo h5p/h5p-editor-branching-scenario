@@ -33,7 +33,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       if (event.keyCode === 51) {
         this.canvasDev = !this.canvasDev;
       }
-    }
+    });
 
     /**
      * Get all the machine names of libraries used in params.
