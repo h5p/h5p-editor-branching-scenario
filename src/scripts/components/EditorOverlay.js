@@ -12,7 +12,9 @@ export default class EditorOverlay extends React.Component {
       closeButton: "close", // TODO: Needs to be translatable
       nextContentId: -1,
       showNextPathDropzone: false,
-      showNextPathChooser: false
+      showNextPathChooser: false,
+      nextPath: '',
+      branchingOptions: ''
     };
 
     this.refForm = React.createRef();
@@ -40,7 +42,9 @@ export default class EditorOverlay extends React.Component {
       title: '',
       nextContentId: -1,
       showNextPathDropzone: false,
-      showNextPathChooser: false
+      showNextPathChooser: false,
+      nextPath: '',
+      branchingOptions: ''
     });
   }
 
@@ -191,7 +195,7 @@ export default class EditorOverlay extends React.Component {
     return (
       <div>
         <label htmlFor="nextPath">Select a path to send a user to</label>
-        <select name="nextPath" onChange={this.updateNextContentId}>
+        <select name="nextPath" value={this.state.nextPath} onChange={this.updateNextContentId}>
           {this.props.content
             .filter((node, index, array) => {
               return (
@@ -237,7 +241,7 @@ export default class EditorOverlay extends React.Component {
           <div className='editor-overlay-semantics' ref={this.refForm} />
 
           <div className='editor-overlay-branching-options'>
-            <select onChange={this.handleOptionChange}>
+            <select value={ this.state.branchingOptions } onChange={ this.handleOptionChange}>
               <option value="end-scenario">End scenario here</option>
               <option value="new-content">Send a viewer to a new content/question</option>
               { this.props.content.length > 1 &&
