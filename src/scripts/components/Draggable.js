@@ -9,6 +9,9 @@ export default class Draggable extends React.Component {
 
     this.state = props.inserting ? this.prepareMouseMove(props.inserting) : {};
     this.state.position = this.props.position;
+    if (props.inserting) {
+      this.libraryName = this.props.inserting.target.dataset.libraryName;
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -168,7 +171,7 @@ export default class Draggable extends React.Component {
           style={ draggableStyle }
           className={ elementClass }>
           { this.props.children }
-          { /*<SubMenu /> Work in progress */}  
+          { /*<SubMenu /> Work in progress */}
         </li>
       </div>
     );

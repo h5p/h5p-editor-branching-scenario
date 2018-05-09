@@ -85,7 +85,14 @@ export default class Editor extends React.Component {
     });
   }
 
-  handleInserted = () => {
+  handleInserted = (data) => {
+    if (data && !this.props.main.canvasDev) {
+      // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
+      const interaction = this.props.main.createInteraction(data);
+      this.props.main.addInteraction(interaction);
+      this.props.main.openInteractionEditor(interaction);
+    }
+
     this.setState({
       inserting: null
     });
