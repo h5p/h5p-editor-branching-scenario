@@ -39,6 +39,7 @@
   z-index: 1000;
   display: flex;
   flex-direction: row;
+  flex-shrink: 0;
   width: 100%;
 }
 
@@ -153,4 +154,14 @@
 .editor-overlay .editor-overlay-label-red {
   margin-left: 0.25em;
   color: #da0001;
+}
+/* Add icons for IV overlay */
+.field.wizard .h5peditor-tab-a.h5peditor-tab-video:before {
+  content: '\e911';
+}
+.field.wizard .h5peditor-tab-a.h5peditor-tab-assets:before {
+  content: '\e917';
+}
+.field.wizard .h5peditor-tab-a.h5peditor-tab-summary:before {
+  content: '\e912';
 }
