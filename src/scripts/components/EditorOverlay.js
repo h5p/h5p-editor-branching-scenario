@@ -13,7 +13,7 @@ export default class EditorOverlay extends React.Component {
       nextContentId: -1,
       showNextPathDropzone: false,
       showNextPathChooser: false
-    }
+    };
 
     this.refForm = React.createRef();
     this.handleOptionChange = this.handleOptionChange.bind(this);
@@ -34,6 +34,16 @@ export default class EditorOverlay extends React.Component {
     this.props.onRef(undefined);
   }
 
+  reset() {
+    this.setState({
+      icon: '',
+      title: '',
+      nextContentId: -1,
+      showNextPathDropzone: false,
+      showNextPathChooser: false
+    });
+  }
+
   updateTitle(event) {
     const target = event.target;
     const value = target.value;
@@ -47,6 +57,7 @@ export default class EditorOverlay extends React.Component {
    * @param {object} interaction - Parameters to set in form.
    */
   updateForm (interaction, elementFields) {
+    this.reset();
     this.interaction = interaction || {};
 
     if (!this.interaction.content) {
