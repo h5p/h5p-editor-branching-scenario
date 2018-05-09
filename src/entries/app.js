@@ -26,15 +26,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     this.translations = [];
 
-    // For testing the editor overlay, press § (shift-3)
+    // Switch to activate/deactivate the editor popup. Useful for canvas development.
+    this.canvasDev = true;
     document.addEventListener('keydown', event => {
-      if (event.keyCode === 51 && this.editor && this.editor.child) {
-        // TODO: When dropping, fetch interaction or identifying info from draggable
-        const interaction = this.createInteraction('H5P.Image');
-        this.addInteraction(interaction);
-        this.openInteractionEditor(interaction);
+      // shift-3
+      if (event.keyCode === 51) {
+        this.canvasDev = !this.canvasDev;
       }
-    });
+    }
 
     /**
      * Get all the machine names of libraries used in params.
@@ -218,27 +217,32 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
      * This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
      * Also: IE 11 doesn't support promises (and async/await) and'd need a Polyfill or an oldfashioned
      * solution.
+     *
+     * This complete approach is crap.
      */
     const promise = new Promise(resolve => {
-      const libraryNames = getLibraryNames(this.params, [parent.currentLibrary]);
+      // Get ALL library names that are used inside the file, including subcontent
+      let librariesUsed = getLibraryNames(this.params, [parent.currentLibrary]);
+
+      // Add all libraries that are not used but options in semantics
+      librariesUsed = librariesUsed.concat(this.libraries).filter((library, index, array) => array.indexOf(library) === index);
 
       const allSemantics = [];
-      libraryNames.forEach(libraryName => {
+      librariesUsed.forEach(libraryName => {
         H5PEditor.loadLibrary(libraryName, result => {
           allSemantics.push({library: libraryName, semantics: {
             type: 'group',
             fields: result
           }});
-          if (allSemantics.length === libraryNames.length) {
+          if (allSemantics.length === librariesUsed.length) {
             resolve(allSemantics);
           }
         });
       });
     });
     promise.then((results) => {
-      this.allSemantics = results;
-
-      results.forEach(result => {
+      this.allSemantics = results.filter(result => result.semantics.fields !== null);
+      this.allSemantics.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
         const currentLibrary = this.getSubParams(this.params, result.library) || this.params;
@@ -247,7 +251,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
           field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
           field.library = result.library;
         });
-
         // Flatten out the firstFilter to get a plain structure if there was a group in between
         if (fields.length > 0) {
           this.translations.push(fields);
@@ -364,17 +367,17 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @param {string} libraryName - Library name to create interaction for.
    * @param {object} params - Spare params for optional values later.
    */
-  BranchingScenarioEditor.prototype.createInteraction = function (libraryName, params = {}) {
+  BranchingScenarioEditor.prototype.createInteraction = function (node, params = {}) {
     const interaction = {
       content: {
         params: {},
-        library: libraryName,
+        library: node.type.library,
         subContentId: H5P.createUUID()
       },
       showContentTitle: false,
       contentId: this.getFreeContentId(),
-      nextContentId: -1,
-      contentTitle: libraryName // TODO: There's probably a better default
+      nextContentId: -1, // Default endscreen
+      contentTitle: node.type.library.split('.')[1] // TODO: There's probably a better default
     };
 
     return interaction;
