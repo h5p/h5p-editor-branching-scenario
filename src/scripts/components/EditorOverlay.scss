@@ -147,6 +147,26 @@
   margin: 0.7rem 0.2rem;
 }
 
+.editor-overlay .editor-overlay-footer {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-top: 0.042rem solid #eee;
+  clear: both;
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.editor-overlay .editor-path-dropzone {
+  width: 100%;
+  background-color: #d9eaf4;
+  border-color: #c3e3ee;
+  color: #335cb4;
+}
+
 .editor-overlay .editor-overlay-label {
   font-size: 0.6rem;
 }

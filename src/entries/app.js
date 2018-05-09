@@ -419,6 +419,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @param {object} interaction - BS interaction object.
    */
   BranchingScenarioEditor.prototype.saveInteraction = function(interaction) {
+    /*
+     * TODO: If those are not deleted, then saving doesn't work because of some
+     *       circles in the JSON structure.
+     *       The promblem still remains if the editor overlay is open and
+     *       someone clicks on the save button of the host system.
+     */
+    delete interaction.$form;
+    delete interaction.children;
   };
 
   /**

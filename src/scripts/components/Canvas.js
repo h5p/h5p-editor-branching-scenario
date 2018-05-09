@@ -34,42 +34,54 @@ export default class Canvas extends React.Component {
         type: {
           library: 'H5P.BranchingQuestion 1.0',
           params: {}
-        }
+        },
+        contentId: -1, // -1 might lead to confusion, negative values are end scenatios
+        contentTitle: 'the void'
       },
       {
         parent: 0,
         type: {
           library: 'H5P.InteractiveVideo 1.0',
           params: {}
-        }
+        },
+        contentId: 1,
+        contentTitle: 'Some nice IV action'
       },
       {
         parent: 0,
         type: {
           library: 'H5P.Text 1.0',
           params: {}
-        }
+        },
+        contentId: 2,
+        contentTitle: 'Just some text ...'
       },
       {
         parent: -1,
         type: {
           library: 'H5P.Video 1.0',
           params: {}
-        }
+        },
+        contentId: 0,
+        contentTitle: 'A video intro!'
       },
       {
         parent: 2,
         type: {
           library: 'H5P.Image 1.0',
           params: {}
-        }
+        },
+        contentId: 3,
+        contentTitle: 'What image?'
       },
       {
         parent: 2,
         type: {
           library: 'H5P.Image 1.0',
           params: {}
-        }
+        },
+        contentId: 4,
+        contentTitle: 'That image!'
       }
     ];
   }
@@ -307,17 +319,18 @@ export default class Canvas extends React.Component {
    * @param {string} [state] - Display state [active|inactive].
    * @return {object} React render object.
    */
-  renderEditorOverlay({state = 'inactive', form = {}} = {}) {
+  renderEditorOverlay({state = 'inactive', form = {}, content={}} = {}) {
     return (
       <EditorOverlay
-        onRef={ref => (this.child = ref)}
-        state={state}
-        editorContents={this.state.editorContents}
+        onRef={ ref => (this.child = ref) }
+        state={ state }
+        editorContents={ this.state.editorContents }
         form={form}
-        closeForm={this.toggleEditorOverlay.bind(this)}
-        saveData={this.props.saveData}
-        removeData={this.props.removeData}
-        main={this.props.main}
+        closeForm={ this.toggleEditorOverlay.bind(this) }
+        saveData={ this.props.saveData }
+        removeData={ this.props.removeData }
+        main={ this.props.main }
+        content={ content }
       />
     );
   }
@@ -418,7 +431,11 @@ export default class Canvas extends React.Component {
             />
           }
           { this.renderTree().nodes }
-          { this.renderEditorOverlay({state: this.state.editorOverlay}) }
+
+          { this.renderEditorOverlay(
+            {state: this.state.editorOverlay, content: this.state.content}
+          )}
+
           {/*
           <StartScreen
             handleClicked={ this.props.navigateToTutorial }

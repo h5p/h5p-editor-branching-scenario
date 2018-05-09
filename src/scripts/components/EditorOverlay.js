@@ -9,10 +9,15 @@ export default class EditorOverlay extends React.Component {
       icon: '',
       title: '',
       saveButton: "Save changes", // TODO: Needs to be translatable
-      closeButton: "close" // TODO: Needs to be translatable
+      closeButton: "close", // TODO: Needs to be translatable
+      nextContentId: -1,
+      showNextPathDropzone: false,
+      showNextPathChooser: false
     }
 
     this.refForm = React.createRef();
+    this.handleOptionChange = this.handleOptionChange.bind(this);
+    this.updateNextContentId = this.updateNextContentId.bind(this);
   }
 
   /*
@@ -80,7 +85,7 @@ export default class EditorOverlay extends React.Component {
    * @param {string} camel - Camel case.
    * @return {string} Kebab case.
    */
-  camelToKebab(camel) {
+  camelToKebab (camel) {
     return camel.split('').map((char, i) => {
   		if (i === 0) {
   			return char.toLowerCase();
@@ -92,13 +97,38 @@ export default class EditorOverlay extends React.Component {
 	   }).join('');
   }
 
+  handleOptionChange (event) {
+    switch (event.target.value) {
+      case 'end-scenario':
+        this.setState({
+          nextContentId: -1,
+          showNextPathDropzone: false,
+          showNextPathChooser: false
+        });
+        break;
+      case 'new-content':
+        this.setState({
+          showNextPathDropzone: true,
+          showNextPathChooser: false
+        });
+        // On drop, save this one, open new one
+        break;
+      case 'old-content':
+        this.setState({
+          showNextPathDropzone: false,
+          showNextPathChooser: true
+        });
+        break;
+    }
+  }
+
   /**
    * Check form for validity.
    *
    * @param {object} interaction - Interaction object.
    * @return {boolean} True if valid form entries.
    */
-  isValid(interaction) {
+  isValid (interaction) {
     var valid = true;
     var elementKids = interaction.children;
     for (var i = 0; i < elementKids.length; i++) {
@@ -118,8 +148,9 @@ export default class EditorOverlay extends React.Component {
       return;
     }
 
-    // Add title from title input field to content
+    // Add state to params
     this.interaction.contentTitle = this.state.title;
+    this.interaction.nextContentId = this.state.nextContentId;
 
     this.props.saveData(this.interaction);
     this.props.closeForm();
@@ -133,8 +164,44 @@ export default class EditorOverlay extends React.Component {
     this.props.closeForm();
   }
 
-  // TODO: The height of editor-overlay-content must be limited on the y axis (doesn't work with relative heights)
-  render() {
+  renderNextPathDropzone () {
+    return (
+      <div class="editor-path-dropzone">
+        Drag any content type from a menu on the left side and drop below this node to create new content/question
+      </div>
+    );
+  }
+
+  updateNextContentId (event) {
+    this.setState({nextContentId: event.target.value})
+  }
+
+  renderNextPathChooser () {
+    return (
+      <div>
+        <label htmlFor="nextPath">Select a path to send a user to</label>
+        <select name="nextPath" onChange={this.updateNextContentId}>
+          {this.props.content
+            .filter((node, index, array) => {
+              return (
+                node.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
+                index !== array.length - 1
+              )
+            })
+            .map((node, key) =>
+              <option
+                key={key}
+                value={ node.contentId }>
+                  {`${node.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${node.contentTitle}`}
+              </option>)
+          }
+        </select>
+      </div>
+    );
+  }
+
+  // TODO: The editor-overlay-branching-options could be put in their own component
+  render () {
     const className = `editor-overlay ${this.props.state}`;
     return (
       <div className={className} >
@@ -149,13 +216,32 @@ export default class EditorOverlay extends React.Component {
           </button>
           </span>
         </div>
+
         <div className='editor-overlay-content'>
-        <div>
-          <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
-          <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.updateTitle.bind(this)} />
+          <div>
+            <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
+            <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.updateTitle.bind(this)} />
+          </div>
+
+          <div className='editor-overlay-semantics' ref={this.refForm} />
+
+          <div className='editor-overlay-branching-options'>
+            <select onChange={this.handleOptionChange}>
+              <option value="end-scenario">End scenario here</option>
+              <option value="new-content">Send a viewer to a new content/question</option>
+              <option value="old-content">Send a viewer to an existing content/question</option>
+            </select>
+
+            { this.state.showNextPathDropzone &&
+              this.renderNextPathDropzone()
+            }
+
+            { this.state.showNextPathChooser &&
+              this.renderNextPathChooser()
+            }
+          </div>
         </div>
-        <div className='editor-overlay-semantics' ref={this.refForm} />
-        </div>
+
       </div>
     );
   }
