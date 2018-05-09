@@ -72,6 +72,7 @@ export default class Canvas extends React.Component {
         }
       }
     ];
+    this.state.content = [];
   }
 
   componentDidMount() {
@@ -146,6 +147,10 @@ export default class Canvas extends React.Component {
   }
 
   handleDropzoneClick = (newParent) => {
+    if (!this.state.placing) {
+      return;
+    }
+    
     this.setNewParent(this.state.placing, newParent);
     this.props.onInserted();
   }
@@ -390,6 +395,13 @@ export default class Canvas extends React.Component {
   render() {
     this.dropzones = [];
 
+    // Generate the tree
+    const tree = this.renderTree().nodes;
+    if (!tree.length) {
+      // No tree, use start screen instead
+
+    }
+
     return (
       <div className="wrapper">
 
@@ -413,13 +425,18 @@ export default class Canvas extends React.Component {
               handleCancel={ this.handleCancel }
             />
           }
-          { this.renderTree().nodes }
+          { tree }
+          { !tree.length &&
+            <StartScreen
+              handleClicked={ this.props.navigateToTutorial }
+            >
+              { this.renderDropzone(-1, {
+                  x: 40,
+                  y: 48
+                }) }
+            </StartScreen>
+          }
           { this.renderEditorOverlay({state: this.state.editorOverlay}) }
-          {/*
-          <StartScreen
-            handleClicked={ this.props.navigateToTutorial }
-          />
-          */}
         </div>
       </div>
     );

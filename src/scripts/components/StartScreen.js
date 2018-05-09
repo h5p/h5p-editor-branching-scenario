@@ -13,18 +13,14 @@ export default class StartScreen extends React.Component {
       <div className="startscreen-wrapper">
         <div className="startscreen-header">
           <h1>Your Branching Questions Set is empty</h1>
-          <p>To create content drag the icons from the left menu to the dropzone below</p>
-          <Dropzone
-            posX={345} // TODO: Set position depending on new tree drawing algorithm 
-            posY={150}
-            handleEntered={ () => {} } 
-          /> 
+          <p>To create content drag the icons from the left menu to the dropzone below</p> 
+          { this.props.children }
         </div>
         <div className="startscreen-footer">
           <p>Step by step <a onClick={this.props.handleClicked}>tutorial</a> on how to use Branching Question</p>
         </div>
-      </div> 
-    ); 
+      </div>
+    );
   }
 }
 
