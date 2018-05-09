@@ -20,3 +20,15 @@
   width: 100%;
   height: 100%;
 }
+
+.vertical-line,
+.horizontal-line {
+  position: absolute;
+  background: #c5cae0;
+}
+.vertical-line {
+  width: 2px;
+}
+.horizontal-line {
+  height: 2px;
+}
