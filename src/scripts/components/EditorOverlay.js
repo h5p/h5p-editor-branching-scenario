@@ -127,6 +127,8 @@ export default class EditorOverlay extends React.Component {
         });
         break;
     }
+
+    this.setState({branchingOptions: event.target.value});
   }
 
   /**
@@ -192,7 +194,10 @@ export default class EditorOverlay extends React.Component {
   }
 
   updateNextContentId (event) {
-    this.setState({nextContentId: event.target.value})
+    this.setState({
+      nextContentId: event.target.value,
+      nextPath: event.target.value
+    })
   }
 
   renderNextPathChooser () {

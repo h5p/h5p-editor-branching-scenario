@@ -215,7 +215,10 @@ export default class Draggable extends React.Component {
     const contentMenu = this.state.contentMenuActive ? (
       <SubMenu
         preview={ () => {this.setState({contentMenuActive: false});}}
-        edit={ () => {this.setState({contentMenuActive: false});}}
+        edit={ () => {
+          this.setState({contentMenuActive: false});
+          this.props.editContent(this.props.id);
+        }}
         delete={ () => {this.setState({contentMenuActive: false});}}
       />
     ) : '';

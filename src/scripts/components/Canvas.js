@@ -215,6 +215,7 @@ export default class Canvas extends React.Component {
             });
           }
           else {
+            // TODO: Check for dropbox in editor overlay
             data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent);
           }
           return true;
@@ -234,6 +235,11 @@ export default class Canvas extends React.Component {
 
     this.placeInTree(this.state.placing, nextContentId, parent);
     this.props.onInserted();
+  }
+
+  handleEditContent = (id) => {
+    const data = this.state.content[0];
+    this.props.main.openInteractionEditor(data);
   }
 
   getNewContentParams = () => {
@@ -378,7 +384,7 @@ export default class Canvas extends React.Component {
   renderDropzone(id, position, parent, num) {
     const nextContentId = parent ? undefined : id;
     num = num || 0;
-    return (
+    return ( this.state.editorOverlay === 'inactive' &&
       <Dropzone
         key={ id + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
@@ -499,6 +505,7 @@ export default class Canvas extends React.Component {
           onMove={ () => this.handleMove(id) }
           onDropped={ () => this.handleDropped(id) }
           contentClass={ libraryTitle }
+          editContent={ () => this.handleEditContent(id) }
         >
           { libraryTitle }
         </Draggable>
@@ -698,7 +705,7 @@ export default class Canvas extends React.Component {
   }
 
   render() {
-    console.log(this.state.content);
+    //console.log(this.state.content);
     this.dropzones = [];
 
     // Generate the tree
