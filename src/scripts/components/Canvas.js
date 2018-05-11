@@ -125,10 +125,6 @@ export default class Canvas extends React.Component {
       }
     ];
     //this.state.content = [];
-
-    // Handle document clicks (for exiting placing mode/state)
-    document.addEventListener('click', this.handleDocumentClick);
-    // TODO: Must be removed when changing content type…
   }
 
   handleDocumentClick = () => {
@@ -147,10 +143,15 @@ export default class Canvas extends React.Component {
 
   componentDidMount() {
     this.props.onRef(this);
+
+    // Handle document clicks (for exiting placing mode/state)
+    document.addEventListener('click', this.handleDocumentClick);
   }
 
   componentWillUnmount() {
     this.props.onRef(undefined);
+    
+    document.removeEventListener('click', this.handleDocumentClick);
   }
 
   componentWillReceiveProps(nextProps) {
