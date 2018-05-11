@@ -30,10 +30,11 @@ export default class Canvas extends React.Component {
         width: 121,
         height: 32,
         spacing: 29
-      }
+      },
+      //content: this.props.content
     };
 
-    // Hard-coded for now, but will come in through props.
+    //Hard-coded for now, but will come in through props.
     this.state.content = [
       { // NOTE: First element is always top node
         nextContentId: 1,
@@ -239,8 +240,13 @@ export default class Canvas extends React.Component {
     return {
       type: {
         library: this.state.library.name,
-        params: {}
-      }
+        params: {},
+        subContentId: H5P.createUUID()
+      },
+      //contentId: Is not set implicitly by position in array, should probably by set, too
+      contentTitle: this.state.library.name.split('.')[1], // TODO: There's probably a better default
+      showContentTitle: false,
+      //nextContentId: Will be set later, but should not be undefined (rather -1 for default endscreen)
     };
   }
 
@@ -360,6 +366,12 @@ export default class Canvas extends React.Component {
 
       return newState;
     });
+
+    // Set contentIds explicitly
+    this.state.content.forEach((item, index) => {
+      item.contentId = index
+    });
+
     return newNode;
   }
 
@@ -670,6 +682,7 @@ export default class Canvas extends React.Component {
   }
 
   render() {
+    console.log(this.state.content);
     this.dropzones = [];
 
     // Generate the tree
