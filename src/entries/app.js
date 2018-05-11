@@ -25,10 +25,12 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
 
     // TODO: Rename params.content.content to params.content.type in semantics
     //       and change code in BS respectively; remove this afterwards
-    this.params.content.forEach(content => {
-      content.type = Object.assign({}, content.content);
-      delete content.content;
-    });
+    if (this.params.content) {
+      this.params.content.forEach(content => {
+        content.type = Object.assign({}, content.content);
+        delete content.content;
+      });
+    }
 
     setValue(field, this.params);
 
@@ -59,7 +61,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       if (!Array.isArray(results) || results.some(result => typeof result !== 'string')) {
         return [];
       }
-
       Object.entries(params).forEach(entry => {
         // Library string
         if (entry[0] === 'library' && typeof entry[1] === 'string' && results.indexOf(entry[1]) === -1) {
