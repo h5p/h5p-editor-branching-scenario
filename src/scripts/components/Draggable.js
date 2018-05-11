@@ -14,6 +14,24 @@ export default class Draggable extends React.Component {
     }
   }
 
+  componentDidMount = () => {
+    window.addEventListener('mousedown', this.handleWindowMouseDown, false);
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener('mousedown', this.handleWindowMouseDown, false);
+  }
+
+  handleWindowMouseDown = (e) => {
+    if (e.target.className == 'content-menu-button' || e.target.className == 'content-menu-button active') {
+      return false;
+    }
+
+    this.setState({
+      contentMenuActive: false
+    });
+  }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.position && (
         nextProps.position.x !== this.state.position.x ||
@@ -157,25 +175,42 @@ export default class Draggable extends React.Component {
       <div className='draggable-tooltip'/>
     ) : '';
 
-    const contentMenu = this.state.contentMenuActive ?
-      (
-        <SubMenu
-          preview={ () => {console.log('previewing');}}
-          edit={ () => {console.log('editing');}}
-          delete={ () => {console.log('deleting');}}
-        />
-      ) : '';
-
     // Determine element class depending on state
     let elementClass = 'draggable';
-    let contentMenuButtonClass = 'content-menu-button';
+    let dropped = true;
     if (this.state.moving) {
       elementClass += ' selected';
 
       if (this.state.moving.started) {
         elementClass += ' dragging';
+        dropped = false;
       }
     }
+
+    let contentMenuButtonClass = 'content-menu-button';
+    if (this.state.contentMenuActive) {
+      contentMenuButtonClass += ' active';
+    }
+
+    const contentMenuButton = dropped ? (
+      <div className={ contentMenuButtonClass }
+        onMouseDown={() => {
+          this.setState(prevState => {
+            return {
+              contentMenuActive: !prevState.contentMenuActive
+            };
+          });
+        }}
+      />
+    ) : '';
+
+    const contentMenu = this.state.contentMenuActive ? (
+      <SubMenu
+        preview={ () => {this.setState({contentMenuActive: false});}}
+        edit={ () => {this.setState({contentMenuActive: false});}}
+        delete={ () => {this.setState({contentMenuActive: false});}}
+      />
+    ) : '';
 
     return (
       <div
@@ -190,15 +225,7 @@ export default class Draggable extends React.Component {
           >
             { this.props.children }
           </div>
-          <div className={ contentMenuButtonClass }
-            onMouseDown={() => {
-              this.setState(prevState => {
-                return {
-                  contentMenuActive: !prevState.contentMenuActive
-                };
-              });
-            }}
-          />
+          { contentMenuButton }
         </div>
         { contentMenu }
       </div>
