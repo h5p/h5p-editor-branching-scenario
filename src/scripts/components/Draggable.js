@@ -24,8 +24,8 @@ export default class Draggable extends React.Component {
   }
 
   handleWindowMouseDown = (e) => {
-    if (e.target.className == 'content-menu-button' || e.target.className == 'content-menu-button active') {
-      return false;
+    if (e.target == this.contentMenuButton.current) {
+      return
     }
 
     this.setState({
@@ -162,9 +162,6 @@ export default class Draggable extends React.Component {
     if (event.target !== this.contentMenuButton.current) {
       this.props.onPlacing();
     }
-
-    event.stopPropagation();
-    event.preventDefault();
   }
 
   render() {

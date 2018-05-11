@@ -6,8 +6,6 @@ export default class EditorOverlay extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log(this.props);
-
     this.state = {
       icon: '',
       title: '',
