@@ -121,6 +121,7 @@ export default class Editor extends React.Component {
           title="add content"
           className="bs-editor-content-tab has-submenu">
           <ContentTypeMenu
+            inserting={ this.state.inserting }
             libraries={ this.state.libraries } // TODO: Load libraries in this widget?
             onMouseDown={ this.handleMouseDown }
           />
