@@ -14,7 +14,7 @@ export default class Dropzone extends React.Component {
     }, {
       x: raw.x + raw.width,
       y: raw.y + raw.height
-    }];
+    }]
   }
 
   overlap(points) {
@@ -22,7 +22,7 @@ export default class Dropzone extends React.Component {
     return !(points[1].y < local[0].y ||
              points[0].y > local[1].y ||
              points[1].x < local[0].x ||
-             points[0].x > local[1].x );
+             points[0].x > local[1].x )
   }
 
   highlight() {

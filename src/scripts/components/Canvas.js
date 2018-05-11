@@ -122,22 +122,22 @@ export default class Canvas extends React.Component {
     const draggable = this['draggable-' + index];
     const points = draggable.getPoints();
     if (!this.dropzones.some(dropzone => {
-      if (!dropzone || dropzone === draggable) {
-        return; // Skip
-      }
+        if (!dropzone || dropzone === draggable) {
+          return; // Skip
+        }
 
-      if (dropzone.overlap(points)) {
-        if (dropzone instanceof Draggable) {
-          this.setState({
-            deleting: dropzone.props.index
-          });
+        if (dropzone.overlap(points)) {
+          if (dropzone instanceof Draggable) {
+            this.setState({
+              deleting: dropzone.props.index
+            });
+          }
+          else {
+            this.setNewParent(index, dropzone.props.parent);
+          }
+          return true;
         }
-        else {
-          this.setNewParent(index, dropzone.props.parent);
-        }
-        return true;
-      }
-    })) {
+      })) {
       this.setState({
         placing: null
       });
@@ -187,7 +187,7 @@ export default class Canvas extends React.Component {
       });
 
       // Set new parent to the one dictated by the dropzone
-      newState.content[index].parent = newParent;
+      newState.content[index].parent = newParent
       return newState;
     });
   }
@@ -239,7 +239,7 @@ export default class Canvas extends React.Component {
       let position = {
         x: x,
         y: y * 100
-      };
+      }
 
       if (subtreeWidth >= width) {
         // Center parent above subtree
@@ -251,7 +251,7 @@ export default class Canvas extends React.Component {
         <Draggable
           key={ index }
           index={ index }
-          ref={ element => { this['draggable-' + index] = element; if (this.state.placing !== null && this.state.placing !== index) this.dropzones.push(element); } }
+          ref={ element => { this['draggable-' + index] = element; if (this.state.placing !== null && this.state.placing !== index) this.dropzones.push(element) } }
           position={ position }
           width={ width }
           onPlacing={ () => this.handlePlacing(index) }

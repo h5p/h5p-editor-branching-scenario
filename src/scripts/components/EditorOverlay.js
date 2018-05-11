@@ -10,7 +10,7 @@ export default class EditorOverlay extends React.Component {
       title: '',
       saveButton: "Save changes", // TODO: Needs to be translatable
       closeButton: "close" // TODO: Needs to be translatable
-    };
+    }
 
     this.refForm = React.createRef();
   }
@@ -82,14 +82,14 @@ export default class EditorOverlay extends React.Component {
    */
   camelToKebab(camel) {
     return camel.split('').map((char, i) => {
-      if (i === 0) {
-        return char.toLowerCase();
-      }
+  		if (i === 0) {
+  			return char.toLowerCase();
+  		}
       if (char === char.toUpperCase()) {
-        return `-${char.toLowerCase()}`;
-      }
-      return char;
-    }).join('');
+  			return `-${char.toLowerCase()}`;
+  		}
+  		return char;
+	   }).join('');
   }
 
   /**
@@ -141,20 +141,20 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-header'>
           <span className={['editor-overlay-title', this.state.icon].join(' ')}>{this.state.title}</span>
           <span className="buttons">
-            <button className="buttonBlue" onClick={this.saveData}>
-              {this.state.saveButton}
-            </button>
-            <button className="button" onClick={this.removeData}>
-              {this.state.closeButton}
-            </button>
+          <button className="buttonBlue" onClick={this.saveData}>
+            {this.state.saveButton}
+          </button>
+          <button className="button" onClick={this.removeData}>
+            {this.state.closeButton}
+          </button>
           </span>
         </div>
         <div className='editor-overlay-content'>
-          <div>
-            <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
-            <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.updateTitle.bind(this)} />
-          </div>
-          <div className='editor-overlay-semantics' ref={this.refForm} />
+        <div>
+          <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
+          <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.updateTitle.bind(this)} />
+        </div>
+        <div className='editor-overlay-semantics' ref={this.refForm} />
         </div>
       </div>
     );

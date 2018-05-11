@@ -2,7 +2,7 @@
 
 .submenu {
   position: absolute;
-  left: calc(100% - 1.8rem);
+  left: 100px;
   top: 100%;
   color: black;
   background-color: #fff;
@@ -30,7 +30,6 @@
     background-color: #F1F3F6;
     font-weight: bold;
     border-bottom: solid 0.042rem #F1F3F6;
-    cursor: auto;
   }
 
   li:last-child {
@@ -53,9 +52,5 @@
     font-family: BSFont;
     content: $icon-delete;
     margin-right: 0.3em;
-  }
-
-  .active {
-    opacity: 1;
   }
 }
