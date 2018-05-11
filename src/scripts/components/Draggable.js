@@ -223,8 +223,7 @@ export default class Draggable extends React.Component {
         className={ elementClass }>
         { draggableToolTip }
         <div className='draggable-wrapper'>
-          <div className='draggable-label'
-          >
+          <div className={ 'draggable-label ' + this.props.contentClass }>
             { this.props.children }
           </div>
           { contentMenuButton }

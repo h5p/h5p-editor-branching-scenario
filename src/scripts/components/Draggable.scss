@@ -20,6 +20,28 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   z-index: 10;
+}
+
+.selected {
+  z-index: 20;
+}
+
+.active, .dragging {
+  z-index: 50;
+}
+
+.draggable-wrapper {
+  height: 100%;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.draggable-label {
+  margin: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:before {
     font-family: "BSFont";
@@ -49,26 +71,7 @@
   &.Video:before {
     content: $icon-video;
   }
-}
 
-.selected {
-  z-index: 20;
-}
-
-.active, .dragging {
-  z-index: 50;
-}
-
-.draggable-wrapper {
-  height: 100%;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
-  position: relative;
-  overflow: hidden;
-}
-
-.draggable-label {
-  margin: 0.5rem;
 }
 
 .content-menu-button {

@@ -385,6 +385,20 @@ export default class Canvas extends React.Component {
     );
   }
 
+  getLibraryTitle(library) {
+    if (!this.props.libraries) {
+      return library;
+    }
+
+    for (var i = 0; i < this.props.libraries.length; i++) {
+      if (this.props.libraries[i].name == library) {
+        return this.props.libraries[i].title;
+      }
+    }
+
+    return library;
+  }
+
   getBranchingChildren(content) {
     if (!content.type || !content.type.params ||
         !content.type.params.alternatives ||
@@ -459,6 +473,8 @@ export default class Canvas extends React.Component {
         position.x += ((subtree.x - x) / 2) - (this.state.nodeSpecs.width / 2);
       }
 
+      const libraryTitle = this.getLibraryTitle(content.type.library);
+
       // Draw node
       nodes.push(
         <Draggable
@@ -470,9 +486,9 @@ export default class Canvas extends React.Component {
           onPlacing={ () => this.handlePlacing(id) }
           onMove={ () => this.handleMove(id) }
           onDropped={ () => this.handleDropped(id) }
-          contentClass='test'
+          contentClass={ libraryTitle }
         >
-          { content.type.library }
+          { libraryTitle }
         </Draggable>
       );
 
@@ -686,7 +702,7 @@ export default class Canvas extends React.Component {
             width={ this.state.nodeSpecs.width }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
-            contentClass='new-node'
+            contentClass={ this.props.inserting.library.title }
             position={ this.props.inserting.position }
           >
             { this.props.inserting.library.title }
