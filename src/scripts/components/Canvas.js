@@ -12,6 +12,7 @@ export default class Canvas extends React.Component {
     super(props);
 
     this.state = {
+      clickHandeled: false,
       placing: null,
       deleting: null,
       editorOverlay: 'inactive',
@@ -118,7 +119,23 @@ export default class Canvas extends React.Component {
         contentTitle: 'That image!'
       }
     ];
-    this.state.content = [];
+    //this.state.content = [];
+
+    // Handle document clicks (for exiting placing mode/state)
+    const self = this;
+    document.addEventListener('click', function () {
+      if (self.state.clickHandeled) {
+        self.setState({
+          clickHandeled: false
+        });
+      }
+      else if (self.state.placing !== null) {
+        self.setState({
+          placing: null
+        });
+      }
+    });
+    // TODO: Must be removed when changing content type…
   }
 
   componentDidMount() {
@@ -138,9 +155,20 @@ export default class Canvas extends React.Component {
   }
 
   handlePlacing = (id) => {
-    this.setState({
-      placing: id
-    });
+    if (this.state.placing !== null && this.state.placing !== id) {
+      // Try to replace
+      this.setState({
+        clickHandeled: true,
+        deleting: id
+      });
+    }
+    else {
+      // Start placing
+      this.setState({
+        clickHandeled: true,
+        placing: id
+      });
+    }
   }
 
   handleMove = (id) => {
@@ -161,10 +189,6 @@ export default class Canvas extends React.Component {
   }
 
   handleDropped = (id) => {
-    /*let newState = {
-      placing: null
-    };*/
-
     // Check if the node overlaps with one of the drop zones
     const draggable = this['draggable-' + id];
     const points = draggable.getPoints();
