@@ -12,6 +12,7 @@ export default class Draggable extends React.Component {
     if (props.inserting) {
       this.libraryName = this.props.inserting.target.dataset.libraryName;
     }
+    this.contentMenu = React.createRef();
     this.contentMenuButton = React.createRef();
   }
 
@@ -24,7 +25,7 @@ export default class Draggable extends React.Component {
   }
 
   handleWindowMouseDown = (e) => {
-    if (e.target == this.contentMenuButton.current) {
+    if (e.target == this.contentMenuButton.current || e.target.className == 'edit-content') {
       return
     }
 
@@ -211,6 +212,7 @@ export default class Draggable extends React.Component {
 
     const contentMenu = this.state.contentMenuActive ? (
       <SubMenu
+        ref={ this.contentMenu }
         preview={ () => {this.setState({contentMenuActive: false});}}
         edit={ () => {
           this.setState({contentMenuActive: false});
