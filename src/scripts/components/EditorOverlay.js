@@ -11,7 +11,7 @@ export default class EditorOverlay extends React.Component {
       title: '',
       saveButton: "Save changes", // TODO: Needs to be translatable
       closeButton: "close", // TODO: Needs to be translatable
-      nextContentId: -1,
+      nextContentId: undefined,
       showNextPathDropzone: false,
       showNextPathChooser: false,
       nextPath: '',
@@ -29,19 +29,19 @@ export default class EditorOverlay extends React.Component {
    * (I know, you shouldn't), because the H5P core gives me DOM elements, not
    * something I can simply pass as a state.
    */
-  componentDidMount() {
+  componentDidMount () {
     this.props.onRef(this);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.onRef(undefined);
   }
 
-  reset() {
+  reset () {
     this.setState({
       icon: '',
       title: '',
-      nextContentId: -1,
+      //nextContentId: -1,
       showNextPathDropzone: false,
       showNextPathChooser: false,
       nextPath: '',
@@ -49,10 +49,9 @@ export default class EditorOverlay extends React.Component {
     });
   }
 
-  updateTitle(event) {
+  updateTitle (event) {
     const target = event.target;
     const value = target.value;
-
     this.setState({title: value});
   }
 
@@ -63,24 +62,17 @@ export default class EditorOverlay extends React.Component {
    */
   updateForm (interaction, elementFields) {
     this.reset();
+    // Holds the reference to the object we're modifying
     this.interaction = interaction || {};
 
-    if (!this.interaction.content) {
-      this.interaction.content = {};
-      //return; // TODO: Error handling
-    }
-    this.interaction.content.library = this.interaction.content.library || '';
-
-    const icon = `editor-overlay-icon-${this.camelToKebab(this.interaction.content.library.split('.')[1])}`;
-    const title = (this.interaction.getTitle) ? this.interaction.getTitle() : this.interaction.content.library.split('.')[1];
+    const icon = `editor-overlay-icon-${this.camelToKebab(this.interaction.type.library.split('.')[1])}`;
+    const title = this.interaction.type.library.split('.')[1];
     this.setState({icon: icon, title: title});
-
-    this.interaction.content.params = this.interaction.content.params || {};
 
     this.passReadies = false;
 
     // Attach the DOM to $form
-    H5PEditor.processSemanticsChunk(elementFields, this.interaction.content.params, this.interaction.$form, this.props.main);
+    H5PEditor.processSemanticsChunk(elementFields, this.interaction.type.params, this.interaction.$form, this.props.main);
     /*
      * React doesn't allow DOM or jQuery elements, so this is a workaround
      * to update the form overlay component's contents.
@@ -117,7 +109,7 @@ export default class EditorOverlay extends React.Component {
     switch (event.target.value) {
       case 'end-scenario':
         this.setState({
-          nextContentId: -1,
+          nextContentId: undefined, // TODO: Check if this causes trouble, should be -1 eventually, or changed in BS
           showNextPathDropzone: false,
           showNextPathChooser: false
         });
@@ -127,7 +119,6 @@ export default class EditorOverlay extends React.Component {
           showNextPathDropzone: true,
           showNextPathChooser: false
         });
-        // On drop, save this one, open new one
         break;
       case 'old-content':
         this.setState({
@@ -166,9 +157,11 @@ export default class EditorOverlay extends React.Component {
 
     // Add state to params
     this.interaction.contentTitle = this.state.title;
-    this.interaction.nextContentId = this.state.nextContentId;
 
-    this.props.saveData(this.interaction);
+    // Was used in old save routine
+    //this.interaction.nextContentId = this.state.nextContentId;
+    //this.props.saveData(this.interaction);
+
     this.props.closeForm();
   }
 
@@ -176,7 +169,12 @@ export default class EditorOverlay extends React.Component {
    * Remove data.
    */
   removeData = () => {
+    // TODO: Delete this via the delete state?
+    //this.props.canvas.state.content.splice(this.interaction.contentId, 1);
+
+    // TODO: Remove this after using canvas data structure
     this.props.removeData(this.interaction.contentId);
+
     this.props.closeForm();
   }
 
