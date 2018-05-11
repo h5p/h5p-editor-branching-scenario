@@ -150,7 +150,7 @@ export default class Canvas extends React.Component {
 
   componentWillUnmount() {
     this.props.onRef(undefined);
-    
+
     document.removeEventListener('click', this.handleDocumentClick);
   }
 
@@ -396,6 +396,14 @@ export default class Canvas extends React.Component {
 
   renderTree = (branch, x, y, parent) => {
     let nodes = [];
+
+    // Libraries must be loaded before tree can be drawn
+    if (!this.props.libraries) {
+      nodes.push(
+        <div key={ 'loading' } className="loading">Loading…</div>
+      );
+      branch = []; // Stops rendering
+    }
 
     // Set defaults
     if (branch === undefined) {

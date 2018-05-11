@@ -19,8 +19,30 @@ export default class Editor extends React.Component {
       activeIndex: 0,
       translations: props.translations,
       settings: props.settings,
-      libraries: props.libraries
+      libraries: null // Needs to be loaded via AJAX
     };
+  }
+
+  componentDidMount() {
+    // We need to load libraries details before rendering the canvas or menu
+    window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesLoaded);
+  }
+
+  handleLibrariesLoaded = (libraries) => {
+    let loadedLibraries = [];
+    for (var i = 0; i < libraries.length; i++) {
+      if (libraries[i].restricted !== true) {
+        loadedLibraries.push({
+          title: libraries[i].title,
+          name: libraries[i].name,
+          className: '' // TODO: Add className
+        });
+      }
+    }
+
+    this.setState({
+      libraries: loadedLibraries
+    });
   }
 
   /**
@@ -122,12 +144,13 @@ export default class Editor extends React.Component {
           className="bs-editor-content-tab has-submenu">
           <ContentTypeMenu
             inserting={ this.state.inserting }
-            libraries={ this.state.libraries } // TODO: Load libraries in this widget?
+            libraries={ this.state.libraries }
             onMouseDown={ this.handleMouseDown }
           />
           <Canvas
             inserting={ this.state.inserting }
             onInserted={ this.handleInserted }
+            libraries={ this.state.libraries }
             onRef={ref => (this.child = ref)}
             saveData={this.props.saveData}
             removeData={this.props.removeData}

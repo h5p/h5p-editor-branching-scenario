@@ -7,35 +7,6 @@ export default class ContentTypeMenu extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      active: props.active
-    };
-  }
-
-  componentDidMount() {
-    // Load the libraries
-    const self = this;
-    window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, function(libraries) {
-      // TODO: Move to Editor – Canvas needs to know the names
-
-      let loadedLibraries = [];
-      for (var i = 0; i < libraries.length; i++) {
-        if (libraries[i].restricted !== true) {
-          loadedLibraries.push({
-            title: libraries[i].title,
-            name: libraries[i].name
-          });
-        }
-      }
-
-      self.setState({
-        loadedLibraries: loadedLibraries
-      });
-    });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({ active: nextProps.active });
   }
 
   handleMouseDown = (event, library) => {
@@ -60,11 +31,13 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   renderDnDButtons() {
-    if (!this.state.loadedLibraries) {
-      return '';
+    if (!this.props.libraries) {
+      return (
+        <div className="loading">Loading…</div>
+      );
     }
 
-    let listItems = this.state.loadedLibraries.map(library => {
+    let listItems = this.props.libraries.map(library => {
 
       if (library.title === 'Branching Question') {
         return '';
