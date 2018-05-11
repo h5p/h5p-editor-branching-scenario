@@ -29,76 +29,77 @@ export default class Canvas extends React.Component {
 
     // Hard-coded for now, but will come in through props.
     this.state.content = [
-      {
-        parent: 3,
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 123,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                nextContentId: 123,
-                addFeedback: false
-              },
-              {
-                text: 'A3',
-                nextContentId: 123,
-                addFeedback: false
-              }
-            ]
-          }
-        }
-      },
-      {
-        parent: 0,
-        type: {
-          library: 'H5P.InteractiveVideo 1.0',
-          params: {}
-        }
-      },
-      {
-        parent: 0,
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 123,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                nextContentId: 123,
-                addFeedback: false
-              }
-            ]
-          }
-        }
-      },
-      {
-        parent: -1,
+      { // NOTE: First element is always top node
+        nextContentId: 1,
         type: {
           library: 'H5P.Video 1.0',
           params: {}
         }
       },
       {
-        parent: 2,
+        type: {
+          library: 'H5P.BranchingQuestion 1.0',
+          params: {
+            question: "<p>hello, who are you?</p>",
+            alternatives: [
+              {
+                text: 'A1',
+                nextContentId: 2,
+                addFeedback: false
+              },
+              {
+                text: 'A2',
+                addFeedback: false
+              },
+              {
+                text: 'A3',
+                nextContentId: 3,
+                addFeedback: false
+              }
+            ]
+          }
+        }
+      },
+      {
+        type: {
+          library: 'H5P.InteractiveVideo 1.0',
+          params: {}
+        }
+      },
+      {
+        type: {
+          library: 'H5P.BranchingQuestion 1.0',
+          params: {
+            question: "<p>hello, who are you?</p>",
+            alternatives: [
+              {
+                text: 'A1',
+                nextContentId: 4,
+                addFeedback: false
+              },
+              {
+                text: 'A2',
+                nextContentId: 5,
+                addFeedback: false
+              }
+            ]
+          }
+        }
+      },
+      {
+        nextContentId: 6,
         type: {
           library: 'H5P.Image 1.0',
           params: {}
         }
       },
       {
-        parent: 2,
+        type: {
+          library: 'H5P.Image 1.0',
+          params: {}
+        }
+      },
+      {
         type: {
           library: 'H5P.Image 1.0',
           params: {}
@@ -124,14 +125,14 @@ export default class Canvas extends React.Component {
     }
   }
 
-  handlePlacing = (index) => {
+  handlePlacing = (id) => {
     this.setState({
-      placing: index
+      placing: id
     });
   }
 
-  handleMove = (index) => {
-    const draggable = this['draggable-' + index];
+  handleMove = (id) => {
+    const draggable = this['draggable-' + id];
     const points = draggable.getPoints();
     this.dropzones.forEach(dropzone => {
       if (!dropzone || dropzone === draggable) {
@@ -147,13 +148,13 @@ export default class Canvas extends React.Component {
     });
   }
 
-  handleDropped = (index) => {
-    let newState = {
+  handleDropped = (id) => {
+    /*let newState = {
       placing: null
-    };
+    };*/
 
     // Check if the node overlaps with one of the drop zones
-    const draggable = this['draggable-' + index];
+    const draggable = this['draggable-' + id];
     const points = draggable.getPoints();
     let data;
     if (!this.dropzones.some(dropzone => {
@@ -164,11 +165,11 @@ export default class Canvas extends React.Component {
         if (dropzone.overlap(points)) {
           if (dropzone instanceof Draggable) {
             this.setState({
-              deleting: dropzone.props.index
+              deleting: dropzone.props.id
             });
           }
           else {
-            data = this.setNewParent(index, dropzone.props.parent, draggable.libraryName);
+            data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, draggable.libraryName);
           }
           return true;
         }
@@ -180,12 +181,12 @@ export default class Canvas extends React.Component {
     this.props.onInserted(data);
   }
 
-  handleDropzoneClick = (newParent) => {
-    if (!this.state.placing) {
+  handleDropzoneClick = (nextContentId, parent) => {
+    if (this.state.placing === null) {
       return;
     }
 
-    this.setNewParent(this.state.placing, newParent);
+    this.placeInTree(this.state.placing, nextContentId, parent, 'ChangeMe 0.1');
     this.props.onInserted();
   }
 
@@ -198,62 +199,171 @@ export default class Canvas extends React.Component {
     };
   }
 
-  setNewParent(index, newParent, library) {
+  contentIsBranching(content) {
+    return content.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
+  }
+
+  updateNextContentId(leaf, id, currentNextId, nextContentId, bumpIdsUntil) {
+    // Make old parent point directly to our old children
+    if (leaf.nextContentId === id) {
+      leaf.nextContentId = currentNextId;
+    }
+
+    // Make our new parent aware of us
+    if (nextContentId !== undefined && leaf.nextContentId === nextContentId) {
+      leaf.nextContentId = id;
+    }
+
+    // Bump IDs if array has changed
+    if (leaf.nextContentId < bumpIdsUntil) {
+      leaf.nextContentId++;
+    }
+  }
+
+  placeInTree(id, nextContentId, parent, library) {
     let newNode;
-    // Set new parent for node
     this.setState(prevState => {
       let newState = {
         placing: null,
         content: [...prevState.content]
       };
 
-      if (index === -1) {
-        // Insert new node
+      // Handle inserting of new node
+      if (id === -1) {
         newNode = this.getNewContentParams(library);
         newState.content.push(newNode);
-        index = newState.content.length - 1;
+        id = newState.content.length - 1;
+        if (id === 0) {
+          // This is the first node added, nothing more needs to be done.
+          return newState;
+        }
       }
 
-      newState.content.forEach(content => {
-        // We do not want to bring our current children with us, so we
-        // update our old children to use our old parent directly
-        if (content.parent === index) {
-          content.parent = newState.content[index].parent;
+      // When placing after a leaf node keep track of it so we can update it
+      // after processing the new content array
+      if (parent) {
+        parent = newState.content[parent];
+      }
+
+      const currentNextId = newState.content[id].nextContentId;
+      // TODO: What to do if we are a branching?
+
+      // Handle adding new top node before the current one
+      let bumpIdsUntil = -1;
+      if (nextContentId === 0) {
+        // We are the new top node, we must move to the top of the array
+        newState.content.splice(0, 0, newState.content[id]);
+
+        // Mark IDs for bumping due to array changes
+        bumpIdsUntil = id + 1;
+      }
+
+      // Handle moving current top node to somewhere else
+      if (id === 0) {
+        // Place our current next node at the top
+        newState.content.splice(0, 0, newState.content[currentNextId]);
+
+        // Mark IDs for bumping due to array changes
+        bumpIdsUntil = currentNextId + 1;
+      }
+
+      newState.content.forEach((content, index) => {
+        if (index === bumpIdsUntil) {
+          return; // Duplicate in array, must not be processed twice.
         }
 
-        // We want the children of our new parent to become our children
-        if (content.parent === newParent) {
-          content.parent = index;
+        if (this.contentIsBranching(content)) {
+          if (content.type.params &&
+              content.type.params.alternatives) {
+            content.type.params.alternatives.forEach(alternative =>
+              this.updateNextContentId(alternative, id, currentNextId, nextContentId, bumpIdsUntil));
+          }
+        }
+        else {
+          this.updateNextContentId(content, id, currentNextId, nextContentId, bumpIdsUntil);
         }
       });
 
-      // Set new parent to the one dictated by the dropzone
-      newState.content[index].parent = newParent
+      // Update parent directly when placing a new leaf node
+      if (parent) {
+        parent.nextContentId = (id === 0 ? 1 : id);
+        // TODO: What to do if we are branching?
+      }
+
+      // Continue handling new top node
+      if (nextContentId === 0) {
+        // Remove old entry
+        newState.content.splice(bumpIdsUntil, 1);
+
+        // Use the previous top node as children
+        newState.content[0].nextContentId = 1;
+        // TODO: What to do if we are branching?
+      }
+      else if (id === 0) {
+        // Remove duplicate entry
+        newState.content.splice(bumpIdsUntil, 1);
+
+        // Start using our new children
+        newState.content[1].nextContentId = nextContentId;
+        // TODO: What to do if we are branching?
+      }
+      else if (nextContentId !== undefined) {
+        // Start using our new children
+        newState.content[id].nextContentId = nextContentId;
+        // TODO: What to do if we are branching?
+      }
+
       return newState;
     });
     return newNode;
   }
 
-  renderDropzone(index, position, parent, num) {
-    parent = parent || index;
+  renderDropzone(id, position, parent, num) {
+    const nextContentId = parent ? undefined : id;
     num = num || 0;
     return (
       <Dropzone
-        key={ index + '-dz-' + num }
+        key={ id + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
+        nextContentId={ nextContentId }
         parent={ parent }
         position={ position }
-        onClick={ () => this.handleDropzoneClick(parent) }
+        onClick={ () => this.handleDropzoneClick(nextContentId, parent) }
       />
     );
   }
 
-  renderTree = (parent, x, y) => {
+  getBranchingChildren(content) {
+    if (!content.type || !content.type.params ||
+        !content.type.params.alternatives ||
+        !content.type.params.alternatives.length) {
+      return; // No alternatives today
+    }
+
+    let children = [];
+    content.type.params.alternatives.forEach(alternative => {
+      if (alternative.nextContentId !== undefined) {
+        children.push(alternative.nextContentId);
+      }
+    });
+
+    return children;
+  }
+
+  renderTree = (branch, x, y, parent) => {
     let nodes = [];
 
+    // Constants – should really be fetched from DOM ? TODO
+    const width = 121;
+    const height = 32;
+    const spacing = 29;
+
     // Set defaults
-    if (parent === undefined) {
-      parent = -1; // Starting parent
+    if (branch === undefined) {
+      branch = [];
+    }
+    else if (!Array.isArray(branch)) {
+      branch = [branch]; // Must always be array
     }
     if (x === undefined) {
       x = 0; // X level start
@@ -261,18 +371,22 @@ export default class Canvas extends React.Component {
     if (y === undefined) {
       y = 1; // Y level start
     }
-    const width = 121; // TODO: Constant or css value?
-    const height = 32;
-    const spacing = 29; // TODO: Constant or css value?
 
     let firstX, lastX;
-    this.state.content.forEach((content, index) => {
-      if (content.parent !== parent) {
-        return;
+    branch.forEach(id => {
+      const content = this.state.content[id];
+      if (!content) {
+        return; // Does not exist, simply skip.
       }
 
-      // Draw subtree
-      const subtree = this.renderTree(index, x, y + 1);
+      // Determine if we're a branching question
+      const contentIsBranching = (content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
+
+      // Determine if we have any children
+      const children = (contentIsBranching ? this.getBranchingChildren(content) : content.nextContentId);
+
+      // Draw subtree first so we know where to position the node
+      const subtree = this.renderTree(children, x, y + 1, id);
       const subtreeWidth = subtree.x - x;
 
       if (x !== 0) {
@@ -293,25 +407,25 @@ export default class Canvas extends React.Component {
       // Draw node
       nodes.push(
         <Draggable
-          key={ index }
-          index={ index }
-          ref={ element => { this['draggable-' + index] = element; if (this.state.placing !== null && this.state.placing !== index) this.dropzones.push(element) } }
+          key={ id }
+          id={ id }
+          ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element) } }
           position={ position }
           width={ width }
-          onPlacing={ () => this.handlePlacing(index) }
-          onMove={ () => this.handleMove(index) }
-          onDropped={ () => this.handleDropped(index) }
+          onPlacing={ () => this.handlePlacing(id) }
+          onMove={ () => this.handleMove(id) }
+          onDropped={ () => this.handleDropped(id) }
           contentClass='test'
         >
           { content.type.library }
         </Draggable>
       );
 
-      // Add vertical line above
+      // Add vertical line above (except for top node)
       const nodeCenter = position.x + (width / 2);
-      if (parent !== -1) {
+      if (id !== 0) {
         nodes.push(
-          <div key={ index + '-vabove' } className="vertical-line" style={ {
+          <div key={ id + '-vabove' } className="vertical-line" style={ {
             left: nodeCenter + 'px',
             top: (position.y - spacing) + 'px',
             height: spacing + 'px'
@@ -319,11 +433,11 @@ export default class Canvas extends React.Component {
         );
       }
 
-      // Special treatment for BQ
-      if (content.type.library.split(' ')[0] === 'H5P.BranchingQuestion') {
+      // Extra lines for BQ
+      if (contentIsBranching) {
         // Add vertical line below
         nodes.push(
-          <div key={ index + '-vbelow' } className="vertical-line" style={ {
+          <div key={ id + '-vbelow' } className="vertical-line" style={ {
             left: nodeCenter + 'px',
             top: (position.y + height) + 'px',
             height: spacing + 'px'
@@ -333,7 +447,7 @@ export default class Canvas extends React.Component {
         if (content.type.params.alternatives.length > 1) {
           // Add horizontal line below
           nodes.push(
-            <div key={ index + '-hbelow' } className="horizontal-line" style={ {
+            <div key={ id + '-hbelow' } className="horizontal-line" style={ {
               left: (x + (width / 2)) + 'px',
               top: (position.y + height + spacing) + 'px',
               width: subtree.dX + 'px'
@@ -343,23 +457,24 @@ export default class Canvas extends React.Component {
       }
 
       // Add dropzones when placing, except for below the one being moved
-      if (this.state.placing !== null && this.state.placing !== index) {
+      if (this.state.placing !== null && this.state.placing !== id) {
 
-        // Draw dropzone below node, but not above the one being moved
-        if (this.state.placing === -1 || this.state.content[this.state.placing].parent !== index) {
-          nodes.push(this.renderDropzone(index, {
+        // Add dropzone above
+        if (this.state.placing !== parent) {
+          nodes.push(this.renderDropzone(id, {
             x: position.x + 40, // TODO: Decide on spacing a better way?
-            y: position.y + 42
+            y: position.y - 52
           }));
         }
 
-        // Add extra drop zone above the first node
-        if (parent === -1) {
-          nodes.push(this.renderDropzone(index, {
-            x: position.x + 40,
-            y: position.y - 52
-          }, -1, 2));
+        // Add dropzone below if there's no subtree
+        if (!subtree.nodes.length) {
+          nodes.push(this.renderDropzone(id, {
+            x: position.x + 40, // TODO: Decide on spacing a better way?
+            y: position.y + 42
+          }, id, 1));
         }
+
       }
 
       // Increase same level offset + offset required by subtree
@@ -377,7 +492,7 @@ export default class Canvas extends React.Component {
     return {
       nodes: nodes,
       x: x,
-      dX: lastX - firstX // Width of this subtree level only (used for pretty trees)
+      dX: (firstX !== undefined ? lastX - firstX : 0) // Width of this subtree level only (used for pretty trees)
     };
   }
 
@@ -423,6 +538,7 @@ export default class Canvas extends React.Component {
   }
 
   handleDelete = () => {
+    return; // TODO: Remove when fixed
     // Set new parent for node
     this.setState(prevState => {
       let newState = {
@@ -486,7 +602,7 @@ export default class Canvas extends React.Component {
     this.dropzones = [];
 
     // Generate the tree
-    const tree = this.renderTree();
+    const tree = this.renderTree(0);
     this.treeWidth = tree.x;
 
     return (
@@ -520,7 +636,7 @@ export default class Canvas extends React.Component {
               handleClicked={ this.props.navigateToTutorial }
             >
               { this.renderDropzone(-1, {
-                  x: 363.19,
+                  x: 363.19, // TODO: Decide on spacing a better way?
                   y: 130
                 }) }
             </StartScreen>
