@@ -12,6 +12,7 @@ export default class Draggable extends React.Component {
     if (props.inserting) {
       this.libraryName = this.props.inserting.target.dataset.libraryName;
     }
+    this.contentMenuButton = React.createRef();
   }
 
   componentDidMount = () => {
@@ -157,7 +158,10 @@ export default class Draggable extends React.Component {
       startX: event.pageX,
       startY: event.pageY
     }));
-    this.props.onPlacing();
+
+    if (event.target !== this.contentMenuButton.current) {
+      this.props.onPlacing();
+    }
 
     event.stopPropagation();
     event.preventDefault();
@@ -195,7 +199,9 @@ export default class Draggable extends React.Component {
     }
 
     const contentMenuButton = dropped ? (
-      <div className={ contentMenuButtonClass }
+      <div
+        ref={ this.contentMenuButton }
+        className={ contentMenuButtonClass }
         onMouseDown={() => {
           this.setState(prevState => {
             return {
