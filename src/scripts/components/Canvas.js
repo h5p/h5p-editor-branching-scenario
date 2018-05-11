@@ -25,6 +25,11 @@ export default class Canvas extends React.Component {
         },
         content: {
         }
+      },
+      nodeSpecs: { // TODO: Get from DOM ?
+        width: 121,
+        height: 32,
+        spacing: 29
       }
     };
 
@@ -122,20 +127,22 @@ export default class Canvas extends React.Component {
     //this.state.content = [];
 
     // Handle document clicks (for exiting placing mode/state)
-    const self = this;
-    document.addEventListener('click', function () {
-      if (self.state.clickHandeled) {
-        self.setState({
-          clickHandeled: false
-        });
-      }
-      else if (self.state.placing !== null) {
-        self.setState({
-          placing: null
-        });
-      }
-    });
+    document.addEventListener('click', this.handleDocumentClick);
     // TODO: Must be removed when changing content type…
+  }
+
+  handleDocumentClick = () => {
+    if (this.state.clickHandeled) {
+      this.setState({
+        clickHandeled: false
+      });
+    }
+    else if (this.state.placing !== null) {
+      this.setState({
+        placing: null
+      });
+      this.props.onInserted();
+    }
   }
 
   componentDidMount() {
@@ -389,11 +396,6 @@ export default class Canvas extends React.Component {
   renderTree = (branch, x, y, parent) => {
     let nodes = [];
 
-    // Constants – should really be fetched from DOM ? TODO
-    const width = 121;
-    const height = 32;
-    const spacing = 29;
-
     // Set defaults
     if (branch === undefined) {
       branch = [];
@@ -426,7 +428,7 @@ export default class Canvas extends React.Component {
       const subtreeWidth = subtree.x - x;
 
       if (x !== 0) {
-        x += spacing; // Add spacing between nodes
+        x += this.state.nodeSpecs.spacing; // Add spacing between nodes
       }
 
       // Determine position of node
@@ -435,9 +437,9 @@ export default class Canvas extends React.Component {
         y: y * 100
       }
 
-      if (subtreeWidth >= width) {
+      if (subtreeWidth >= this.state.nodeSpecs.width) {
         // Center parent above subtree
-        position.x += ((subtree.x - x) / 2) - (width / 2);
+        position.x += ((subtree.x - x) / 2) - (this.state.nodeSpecs.width / 2);
       }
 
       // Draw node
@@ -447,7 +449,7 @@ export default class Canvas extends React.Component {
           id={ id }
           ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element) } }
           position={ position }
-          width={ width }
+          width={ this.state.nodeSpecs.width }
           onPlacing={ () => this.handlePlacing(id) }
           onMove={ () => this.handleMove(id) }
           onDropped={ () => this.handleDropped(id) }
@@ -458,13 +460,13 @@ export default class Canvas extends React.Component {
       );
 
       // Add vertical line above (except for top node)
-      const nodeCenter = position.x + (width / 2);
+      const nodeCenter = position.x + (this.state.nodeSpecs.width / 2);
       if (id !== 0) {
         nodes.push(
           <div key={ id + '-vabove' } className="vertical-line" style={ {
             left: nodeCenter + 'px',
-            top: (position.y - spacing) + 'px',
-            height: spacing + 'px'
+            top: (position.y - this.state.nodeSpecs.spacing) + 'px',
+            height: this.state.nodeSpecs.spacing + 'px'
           } }/>
         );
       }
@@ -475,8 +477,8 @@ export default class Canvas extends React.Component {
         nodes.push(
           <div key={ id + '-vbelow' } className="vertical-line" style={ {
             left: nodeCenter + 'px',
-            top: (position.y + height) + 'px',
-            height: spacing + 'px'
+            top: (position.y + this.state.nodeSpecs.height) + 'px',
+            height: this.state.nodeSpecs.spacing + 'px'
           } }/>
         );
 
@@ -484,8 +486,8 @@ export default class Canvas extends React.Component {
           // Add horizontal line below
           nodes.push(
             <div key={ id + '-hbelow' } className="horizontal-line" style={ {
-              left: (x + (width / 2)) + 'px',
-              top: (position.y + height + spacing) + 'px',
+              left: (x + (this.state.nodeSpecs.width / 2)) + 'px',
+              top: (position.y + this.state.nodeSpecs.height + this.state.nodeSpecs.spacing) + 'px',
               width: subtree.dX + 'px'
             } }/>
           );
@@ -514,7 +516,7 @@ export default class Canvas extends React.Component {
       }
 
       // Increase same level offset + offset required by subtree
-      x += (subtreeWidth >= width ? subtreeWidth : width);
+      x += (subtreeWidth >= this.state.nodeSpecs.width ? subtreeWidth : this.state.nodeSpecs.width);
 
       // Merge our trees
       nodes = nodes.concat(subtree.nodes);
@@ -663,12 +665,13 @@ export default class Canvas extends React.Component {
           <Draggable
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
+            width={ this.state.nodeSpecs.width }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
             contentClass='new-node'
             position={ this.props.inserting.position }
           >
-            New Node
+            { this.props.inserting.library.title }
           </Draggable>
         }
 

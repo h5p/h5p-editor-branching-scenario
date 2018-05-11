@@ -38,7 +38,7 @@ export default class ContentTypeMenu extends React.Component {
     this.setState({ active: nextProps.active });
   }
 
-  handleMouseDown = (event) => {
+  handleMouseDown = (event, library) => {
     if (event.button !== 0) {
       return; // Only handle left click
     }
@@ -51,7 +51,8 @@ export default class ContentTypeMenu extends React.Component {
       position: {
         x: raw.left - 1,
         y: raw.top - 58 // TODO: Determine where offset comes from
-      }
+      },
+      library: library
     });
 
     event.stopPropagation();
@@ -74,11 +75,15 @@ export default class ContentTypeMenu extends React.Component {
         return '';
       }
 
+      let className = library.title.replace(/\s/g, '');
+      if (this.props.inserting && this.props.inserting.library === library) {
+        className += ' greyout';
+      }
+
       return <li
         key={ Math.random() }
-        className={ library.title.replace(/\s/g, '') }
-        onMouseDown={ this.handleMouseDown }
-        data-library-name={ library.name }
+        className={ className }
+        onMouseDown={ event => this.handleMouseDown(event, library) }
       >
         { library.title }
       </li>;

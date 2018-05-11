@@ -105,4 +105,10 @@
   li.branching-question:before {
     content: '\E902';
   }
+
+  li.greyout {
+    border-color: #30333a;
+    background-color: #30333a;
+    color: #525358;
+  }
 }
