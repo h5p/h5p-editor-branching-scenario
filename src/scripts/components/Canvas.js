@@ -550,8 +550,19 @@ export default class Canvas extends React.Component {
     });
   }
 
+  updateNextContentIdAfterReplace(leaf, id, currentNextId) {
+    // Move current children of the moved node to grand parent
+    if (leaf.nextContentId === id) {
+      leaf.nextContentId = currentNextId;
+    }
+
+    // Decrease all next ID values larger than the deleted node
+    if (leaf.nextContentId > id) {
+      leaf.nextContentId--;
+    }
+  }
+
   handleDelete = () => {
-    return; // TODO: Remove when fixed
     // Set new parent for node
     this.setState(prevState => {
       let newState = {
@@ -560,32 +571,35 @@ export default class Canvas extends React.Component {
         content: [...prevState.content]
       };
 
-      let index = this.state.placing;
-      if (index === -1) {
+      let id = this.state.placing;
+      if (id === -1) {
         // Insert new node
-        newState.content.push(this.getNewContentParams());
-        index = newState.content.length - 1;
+        newState.content.push(this.getNewContentParams('ChangeMe 0.1'));
+        id = newState.content.length - 1;
       }
 
-      const grandParent = newState.content[index].parent;
+      const currentNextId = newState.content[id].nextContentId;
+      // TODO: What to do if we are a branching?
 
-      // Change parent for the moving node
-      newState.content[index].parent = newState.content[this.state.deleting].parent;
+      // Make their children our own
+      newState.content[id].nextContentId = newState.content[this.state.deleting].nextContentId;
+      // TODO: Handle branching scenario
 
       // Replace the node (preserves tree drawing order)
-      newState.content[this.state.deleting] = newState.content[index];
-      newState.content.splice(index, 1);
+      newState.content[this.state.deleting] = newState.content[id];
+      newState.content.splice(id, 1);
 
-      // Update all parents before splicing the array
+      // What are we doing?
       newState.content.forEach(content => {
-        // Move current children of the moved node to grand parent
-        if (content.parent === index) {
-          content.parent = grandParent;
+        if (this.contentIsBranching(content)) {
+          if (content.type.params &&
+              content.type.params.alternatives) {
+            content.type.params.alternatives.forEach(alternative =>
+              this.updateNextContentIdAfterReplace(alternative, id, currentNextId));
+          }
         }
-
-        // Decrease all parent values larger than the deleted node index
-        if (content.parent > index) {
-          content.parent--;
+        else {
+          this.updateNextContentIdAfterReplace(content, id, currentNextId);
         }
       });
 
