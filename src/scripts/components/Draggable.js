@@ -1,19 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Draggable.scss';
-import SubMenu from './SubMenu.js'
+import SubMenu from './SubMenu.js';
 
 export default class Draggable extends React.Component {
   constructor(props) {
     super(props);
-
+    
     this.state = props.inserting ? this.prepareMouseMove(props.inserting) : {};
     this.state.position = this.props.position;
+    this.state.contentMenuActive = false;  
+  }
+  
+  componentDidMount = () => {
+    window.addEventListener('mousedown', (e) => {
+      if (e.target.className == 'content-menu-button' || e.target.className == 'content-menu-button focused') {
+        return false;
+      }
+
+      this.setState({
+        contentMenuActive: false
+      });
+    }, false);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.position && (
-        nextProps.position.x !== this.state.position.x ||
+      nextProps.position.x !== this.state.position.x ||
         nextProps.position.y !== this.state.position.y)) {
       this.setState({
         position: {
@@ -32,7 +45,7 @@ export default class Draggable extends React.Component {
     }, {
       x: raw.x + raw.width,
       y: raw.y + raw.height
-    }]
+    }];
   }
 
   overlap(points) {
@@ -40,7 +53,7 @@ export default class Draggable extends React.Component {
     return !(points[1].y < local[0].y ||
              points[0].y > local[1].y ||
              points[1].x < local[0].x ||
-             points[0].x > local[1].x )
+             points[0].x > local[1].x );
   }
 
   highlight() {
@@ -51,7 +64,7 @@ export default class Draggable extends React.Component {
     this.refs.element.classList.remove('highlight');
   }
 
-  handleMouseUp = (event) => {
+  handleMouseUp = () => {
     if (this.state.moving.started) {
       this.setState({
         moving: null
@@ -77,6 +90,11 @@ export default class Draggable extends React.Component {
   }
 
   handleMouseMove = (event) => {
+    // Do not allow dragging while the submenu is open
+    if (this.state.contentMenuActive) {
+      return;
+    }
+
     let newState;
 
     if (!this.state.moving.started) {
@@ -91,7 +109,8 @@ export default class Draggable extends React.Component {
           moving: {
             started: true
           },
-          offset: this.determineOffset(this.refs.element.parentElement, event.pageX, event.pageY)
+          offset: this.determineOffset(this.refs.element.parentElement, event.pageX, event.pageY),
+          contentMenuActive: false
         };
 
         // Compensate for mouse position on element
@@ -151,6 +170,8 @@ export default class Draggable extends React.Component {
 
     // Determine element class depending on state
     let elementClass = 'draggable';
+    let contentMenuButtonClass = 'content-menu-button';
+
     if (this.state.moving) {
       elementClass += ' selected';
 
@@ -158,18 +179,50 @@ export default class Draggable extends React.Component {
         elementClass += ' dragging';
       }
     }
+    if (this.state.contentMenuActive) {
+      elementClass += ' focused';
+      contentMenuButtonClass += ' focused';
+    }
 
-    // TODO: Fix <li> inside <div> not really allowed
+    // TODO: Show tooltip on hover 
+    const draggableToolTip = this.state.showToolTip ? (
+      <div className='draggable-tooltip'/>
+    ) : '';
+
+    const contentMenu = this.state.contentMenuActive ?
+      (
+        <SubMenu 
+          preview={ () => {console.log('previewing');}}
+          edit={ () => {console.log('editing');}}
+          delete={ () => {console.log('deleting');}}
+        />
+      ) : '';
+
     return (
-      <div>
-        <li
-          ref={ 'element' }
-          onMouseDown={ this.handleMouseDown }
-          style={ draggableStyle }
-          className={ elementClass }>
-          { this.props.children }
-          { /*<SubMenu /> Work in progress */}  
-        </li>
+      <div
+        ref={ 'element' }
+        style={ draggableStyle }
+        onMouseDown={ this.handleMouseDown }
+        onMouseLeave={ () => {this.setState({showToolTip: false});}}
+        className={ elementClass }>
+        { draggableToolTip } 
+        <div className='draggable-wrapper'>
+          <div className='draggable-label'
+          >
+            { this.props.children }
+          </div>
+          <div className={ contentMenuButtonClass } 
+            onMouseDown={ () => {
+              this.setState(prevState => {
+                return {
+                  contentMenuActive: !prevState.contentMenuActive
+                };
+              });
+            }
+            }
+          />
+        </div>
+        { contentMenu } 
       </div>
     );
   }
