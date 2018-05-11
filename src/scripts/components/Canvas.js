@@ -17,8 +17,8 @@ export default class Canvas extends React.Component {
       editorOverlay: 'inactive',
       editorContents: {
         top: {
-          icon: "\ue91b", // TODO: Replace with actual icon
-          title: "Title of the Content", // TODO: Replace with actual title
+          icon: '',
+          title: '',
           saveButton: "Save changes",
           closeButton: "close"
         },
@@ -33,45 +33,91 @@ export default class Canvas extends React.Component {
         parent: 3,
         type: {
           library: 'H5P.BranchingQuestion 1.0',
-          params: {}
-        }
+          params: {
+            question: "<p>hello, who are you?</p>",
+            alternatives: [
+              {
+                text: 'A1',
+                nextContentId: 123,
+                addFeedback: false
+              },
+              {
+                text: 'A2',
+                nextContentId: 123,
+                addFeedback: false
+              },
+              {
+                text: 'A3',
+                nextContentId: 123,
+                addFeedback: false
+              }
+            ]
+          }
+        },
+        contentId: -1, // -1 might lead to confusion, negative values are end scenatios
+        contentTitle: 'the void'
       },
       {
         parent: 0,
         type: {
           library: 'H5P.InteractiveVideo 1.0',
           params: {}
-        }
+        },
+        contentId: 1,
+        contentTitle: 'Some nice IV action'
       },
       {
         parent: 0,
         type: {
-          library: 'H5P.Text 1.0',
-          params: {}
-        }
+          library: 'H5P.BranchingQuestion 1.0',
+          params: {
+            question: "<p>hello, who are you?</p>",
+            alternatives: [
+              {
+                text: 'A1',
+                nextContentId: 123,
+                addFeedback: false
+              },
+              {
+                text: 'A2',
+                nextContentId: 123,
+                addFeedback: false
+              }
+            ]
+          }
+        },
+        contentId: 2,
+        contentTitle: 'Just some text ...'
       },
       {
         parent: -1,
         type: {
           library: 'H5P.Video 1.0',
           params: {}
-        }
+        },
+        contentId: 0,
+        contentTitle: 'A video intro!'
       },
       {
         parent: 2,
         type: {
           library: 'H5P.Image 1.0',
           params: {}
-        }
+        },
+        contentId: 3,
+        contentTitle: 'What image?'
       },
       {
         parent: 2,
         type: {
           library: 'H5P.Image 1.0',
           params: {}
-        }
+        },
+        contentId: 4,
+        contentTitle: 'That image!'
       }
     ];
+    this.state.content = [];
   }
 
   componentDidMount() {
@@ -121,6 +167,7 @@ export default class Canvas extends React.Component {
     // Check if the node overlaps with one of the drop zones
     const draggable = this['draggable-' + index];
     const points = draggable.getPoints();
+    let data;
     if (!this.dropzones.some(dropzone => {
         if (!dropzone || dropzone === draggable) {
           return; // Skip
@@ -133,7 +180,7 @@ export default class Canvas extends React.Component {
             });
           }
           else {
-            this.setNewParent(index, dropzone.props.parent);
+            data = this.setNewParent(index, dropzone.props.parent, draggable.libraryName);
           }
           return true;
         }
@@ -142,24 +189,29 @@ export default class Canvas extends React.Component {
         placing: null
       });
     }
-    this.props.onInserted();
+    this.props.onInserted(data);
   }
 
   handleDropzoneClick = (newParent) => {
+    if (!this.state.placing) {
+      return;
+    }
+
     this.setNewParent(this.state.placing, newParent);
     this.props.onInserted();
   }
 
-  getNewContentParams() {
+  getNewContentParams(library) {
     return {
       type: {
-        library: 'H5P.NewNode 1.0',
+        library: library,
         params: {}
       }
     };
   }
 
-  setNewParent(index, newParent) {
+  setNewParent(index, newParent, library) {
+    let newNode;
     // Set new parent for node
     this.setState(prevState => {
       let newState = {
@@ -169,7 +221,8 @@ export default class Canvas extends React.Component {
 
       if (index === -1) {
         // Insert new node
-        newState.content.push(this.getNewContentParams());
+        newNode = this.getNewContentParams(library);
+        newState.content.push(newNode);
         index = newState.content.length - 1;
       }
 
@@ -190,6 +243,7 @@ export default class Canvas extends React.Component {
       newState.content[index].parent = newParent
       return newState;
     });
+    return newNode;
   }
 
   renderDropzone(index, position, parent, num) {
@@ -220,8 +274,10 @@ export default class Canvas extends React.Component {
       y = 1; // Y level start
     }
     const width = 121; // TODO: Constant or css value?
+    const height = 32;
     const spacing = 29; // TODO: Constant or css value?
 
+    let firstX, lastX;
     this.state.content.forEach((content, index) => {
       if (content.parent !== parent) {
         return;
@@ -263,6 +319,41 @@ export default class Canvas extends React.Component {
         </Draggable>
       );
 
+      // Add vertical line above
+      const nodeCenter = position.x + (width / 2);
+      if (parent !== -1) {
+        nodes.push(
+          <div key={ index + '-vabove' } className="vertical-line" style={ {
+            left: nodeCenter + 'px',
+            top: (position.y - spacing) + 'px',
+            height: spacing + 'px'
+          } }/>
+        );
+      }
+
+      // Special treatment for BQ
+      if (content.type.library.split(' ')[0] === 'H5P.BranchingQuestion') {
+        // Add vertical line below
+        nodes.push(
+          <div key={ index + '-vbelow' } className="vertical-line" style={ {
+            left: nodeCenter + 'px',
+            top: (position.y + height) + 'px',
+            height: spacing + 'px'
+          } }/>
+        );
+
+        if (content.type.params.alternatives.length > 1) {
+          // Add horizontal line below
+          nodes.push(
+            <div key={ index + '-hbelow' } className="horizontal-line" style={ {
+              left: (x + (width / 2)) + 'px',
+              top: (position.y + height + spacing) + 'px',
+              width: subtree.dX + 'px'
+            } }/>
+          );
+        }
+      }
+
       // Add dropzones when placing, except for below the one being moved
       if (this.state.placing !== null && this.state.placing !== index) {
 
@@ -288,13 +379,18 @@ export default class Canvas extends React.Component {
 
       // Merge our trees
       nodes = nodes.concat(subtree.nodes);
+
+      if (firstX === undefined) {
+        firstX = position.x;
+      }
+      lastX = position.x;
     });
 
     return {
       nodes: nodes,
-      x: x
+      x: x,
+      dX: lastX - firstX // Width of this subtree level only (used for pretty trees)
     };
-
   }
 
   /**
@@ -303,17 +399,18 @@ export default class Canvas extends React.Component {
    * @param {string} [state] - Display state [active|inactive].
    * @return {object} React render object.
    */
-  renderEditorOverlay({state = 'inactive', form = {}} = {}) {
+  renderEditorOverlay({state = 'inactive', form = {}, content={}} = {}) {
     return (
       <EditorOverlay
-        onRef={ref => (this.child = ref)}
-        state={state}
-        editorContents={this.state.editorContents}
+        onRef={ ref => (this.child = ref) }
+        state={ state }
+        editorContents={ this.state.editorContents }
         form={form}
-        closeForm={this.toggleEditorOverlay.bind(this)}
-        saveData={this.props.saveData}
-        removeData={this.props.removeData}
-        main={this.props.main}
+        closeForm={ this.toggleEditorOverlay.bind(this) }
+        saveData={ this.props.saveData }
+        removeData={ this.props.removeData }
+        main={ this.props.main }
+        content={ content }
       />
     );
   }
@@ -387,8 +484,23 @@ export default class Canvas extends React.Component {
     });
   }
 
+  componentDidUpdate() {
+
+    // Center the tree
+    if (this.treeWidth !== this.lastTreeWidth) {
+      this.lastTreeWidth = this.treeWidth;
+      this.refs.tree.style.marginLeft = '';
+      const raw = this.refs.tree.getBoundingClientRect();
+      this.refs.tree.style.marginLeft = ((raw.width - this.treeWidth) / 2) + 'px';
+    }
+  }
+
   render() {
     this.dropzones = [];
+
+    // Generate the tree
+    const tree = this.renderTree();
+    this.treeWidth = tree.x;
 
     return (
       <div className="wrapper">
@@ -413,13 +525,20 @@ export default class Canvas extends React.Component {
               handleCancel={ this.handleCancel }
             />
           }
-          { this.renderTree().nodes }
-          { this.renderEditorOverlay({state: this.state.editorOverlay}) }
-          {/*
-          <StartScreen
-            handleClicked={ this.props.navigateToTutorial }
-          />
-          */}
+          <div className="tree" ref={ 'tree' }>
+            { tree.nodes }
+          </div>
+          { !tree.nodes.length &&
+            <StartScreen
+              handleClicked={ this.props.navigateToTutorial }
+            >
+              { this.renderDropzone(-1, {
+                  x: 363.19,
+                  y: 130
+                }) }
+            </StartScreen>
+          }
+          { this.renderEditorOverlay({ state: this.state.editorOverlay, content: this.state.content }) }
         </div>
       </div>
     );

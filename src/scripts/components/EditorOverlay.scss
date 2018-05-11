@@ -6,15 +6,15 @@
   width: 80%;
   max-width: 80rem;
   max-height: 80%;
+  height: 80%;
   position: relative;
   transition: all 5s ease-in-out;
   transform: translate(-50%, -50%);
   left: 50%;
   top: 50%;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
-  z-index: 3;
   font-size: 0.7rem;
-  z-index:1001;
+  z-index:15;
   display: flex;
   flex-direction: column;
 }
@@ -35,9 +35,9 @@
   clear: both;
   position: relative;
   box-shadow: 0 2px 2px rgba(18, 14, 14, 0.1);
-  z-index: 1000;
   display: flex;
   flex-direction: row;
+  flex-shrink: 0;
   width: 100%;
 }
 
@@ -48,7 +48,6 @@
 .editor-overlay .editor-overlay-header .editor-overlay-title {
   padding-left: 1.3rem;
   box-sizing: border-box;
-  display: block;
   width: 100%;
   float: left;
   white-space: nowrap;
@@ -60,7 +59,6 @@
 
   &:before {
     float: inherit;
-    display: block;
     font-family: "BSFont";
     font-size: 1rem;
     margin-right: 0.3rem;
@@ -147,6 +145,25 @@
   margin: 0.7rem 0.2rem;
 }
 
+.editor-overlay .editor-overlay-footer {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-top: 0.042rem solid #eee;
+  clear: both;
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.editor-overlay .editor-path-dropzone {
+  width: 100%;
+  background-color: #d9eaf4;
+  border-color: #c3e3ee;
+  color: #335cb4;
+}
+
 .editor-overlay .editor-overlay-label {
   font-size: 0.6rem;
 }
@@ -154,4 +171,14 @@
 .editor-overlay .editor-overlay-label-red {
   margin-left: 0.25em;
   color: #da0001;
+}
+/* Add icons for IV overlay */
+.field.wizard .h5peditor-tab-a.h5peditor-tab-video:before {
+  content: '\e911';
+}
+.field.wizard .h5peditor-tab-a.h5peditor-tab-assets:before {
+  content: '\e917';
+}
+.field.wizard .h5peditor-tab-a.h5peditor-tab-summary:before {
+  content: '\e912';
 }

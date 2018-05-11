@@ -19,7 +19,7 @@
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  z-index: 1000;
+  z-index: 10;
 
   &:before {
     font-family: "BSFont";
@@ -29,7 +29,7 @@
     font-size: 0.875rem;
     margin-right: 0.6rem;
   }
-  
+
   &.Text:before {
     content: $icon-text;
   }
@@ -51,3 +51,6 @@
   }
 }
 
+.selected {
+  z-index: 20;
+}
