@@ -34,20 +34,15 @@ export default class Dropzone extends React.Component {
   }
 
   render() {
-    const style = {
-      left: this.props.position.x + 'px',
-      top: this.props.position.y + 'px'
-    };
-
-    let elementClass = 'dropzone';
-
     return (
       <div
         ref={ 'element' }
-        className={ elementClass }
-        style={ style }
+        className={ this.props.elementClass }
+        style={ this.props.style }
         onClick={ this.props.onClick }
-      />
+      >
+        { this.props.innerHTML }
+      </div>
     );
   }
 }

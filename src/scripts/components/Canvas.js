@@ -372,6 +372,13 @@ export default class Canvas extends React.Component {
         nextContentId={ nextContentId }
         parent={ parent }
         position={ position }
+        elementClass={ 'dropzone' }
+        style={
+          {
+            left: this.props.position.x + 'px',
+            top: this.props.position.y + 'px'
+          };
+        }
         onClick={ () => this.handleDropzoneClick(nextContentId, parent) }
       />
     );
@@ -704,7 +711,11 @@ export default class Canvas extends React.Component {
                 }) }
             </StartScreen>
           }
-          { this.renderEditorOverlay({ state: this.state.editorOverlay, content: this.state.content }) }
+          { this.renderEditorOverlay({
+            state: this.state.editorOverlay,
+            content: this.state.content,
+            canvas: this
+          }) }
         </div>
       </div>
     );

@@ -1,5 +1,6 @@
 import React from 'react';
 import './EditorOverlay.scss';
+import Dropzone from './Dropzone.js';
 
 export default class EditorOverlay extends React.Component {
   constructor(props) {
@@ -181,9 +182,14 @@ export default class EditorOverlay extends React.Component {
 
   renderNextPathDropzone () {
     return (
-      <div class="editor-path-dropzone">
-        Drag any content type from a menu on the left side and drop below this node to create new content/question
-      </div>
+      <Dropzone
+        // key={ id + '-dz-' + num }
+        ref={ element => this.props.canvas.dropzones.push(element) }
+        //nextContentId={ nextContentId }
+        //parent={ parent }
+        elementClass={ 'dropzone-dropzone-editor-path'}
+        innerHTML={ 'Drag any content type from a menu on the left side and drop it here to create new content/question' }
+      />
     );
   }
 
