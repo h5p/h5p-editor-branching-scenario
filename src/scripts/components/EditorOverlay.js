@@ -6,6 +6,8 @@ export default class EditorOverlay extends React.Component {
   constructor(props) {
     super(props);
 
+    console.log(this.props);
+
     this.state = {
       icon: '',
       title: '',
@@ -187,7 +189,7 @@ export default class EditorOverlay extends React.Component {
         ref={ element => this.props.canvas.dropzones.push(element) }
         //nextContentId={ nextContentId }
         //parent={ parent }
-        elementClass={ 'dropzone-dropzone-editor-path'}
+        elementClass={ 'dropzone-editor-path'}
         innerHTML={ 'Drag any content type from a menu on the left side and drop it here to create new content/question' }
       />
     );

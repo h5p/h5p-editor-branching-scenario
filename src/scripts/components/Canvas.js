@@ -376,9 +376,9 @@ export default class Canvas extends React.Component {
         elementClass={ 'dropzone' }
         style={
           {
-            left: this.props.position.x + 'px',
-            top: this.props.position.y + 'px'
-          };
+            left: position.x + 'px',
+            top: position.y + 'px'
+          }
         }
         onClick={ () => this.handleDropzoneClick(nextContentId, parent) }
       />
@@ -569,6 +569,7 @@ export default class Canvas extends React.Component {
         removeData={ this.props.removeData }
         main={ this.props.main }
         content={ content }
+        canvas={ this}
       />
     );
   }
@@ -714,8 +715,7 @@ export default class Canvas extends React.Component {
           }
           { this.renderEditorOverlay({
             state: this.state.editorOverlay,
-            content: this.state.content,
-            canvas: this
+            content: this.state.content
           }) }
         </div>
       </div>
