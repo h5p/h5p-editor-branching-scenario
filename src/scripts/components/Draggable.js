@@ -183,12 +183,14 @@ export default class Draggable extends React.Component {
 
       if (this.state.moving.started) {
         elementClass += ' dragging';
+        elementClass += ' active';
         dropped = false;
       }
     }
 
     let contentMenuButtonClass = 'content-menu-button';
     if (this.state.contentMenuActive) {
+      elementClass += ' active';
       contentMenuButtonClass += ' active';
     }
 
