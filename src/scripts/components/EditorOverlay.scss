@@ -13,9 +13,8 @@
   left: 50%;
   top: 50%;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
-  z-index: 3;
   font-size: 0.7rem;
-  z-index:1001;
+  z-index:15;
   display: flex;
   flex-direction: column;
 }
@@ -36,7 +35,6 @@
   clear: both;
   position: relative;
   box-shadow: 0 2px 2px rgba(18, 14, 14, 0.1);
-  z-index: 1000;
   display: flex;
   flex-direction: row;
   flex-shrink: 0;
@@ -154,7 +152,6 @@
   border-top: 0.042rem solid #eee;
   clear: both;
   position: relative;
-  z-index: 1000;
   display: flex;
   flex-shrink: 0;
   width: 100%;
