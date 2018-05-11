@@ -124,7 +124,7 @@ export default class Canvas extends React.Component {
         contentTitle: 'That image!'
       }
     ];
-    //this.state.content = [];
+    this.state.content = [];
   }
 
   handleDocumentClick = () => {
@@ -157,7 +157,8 @@ export default class Canvas extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.inserting) {
       this.setState({
-        placing: -1
+        placing: -1,
+        library: nextProps.inserting.library
       });
     }
   }
@@ -213,7 +214,7 @@ export default class Canvas extends React.Component {
             });
           }
           else {
-            data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, draggable.libraryName);
+            data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent);
           }
           return true;
         }
@@ -230,14 +231,14 @@ export default class Canvas extends React.Component {
       return;
     }
 
-    this.placeInTree(this.state.placing, nextContentId, parent, 'ChangeMe 0.1');
+    this.placeInTree(this.state.placing, nextContentId, parent);
     this.props.onInserted();
   }
 
-  getNewContentParams(library) {
+  getNewContentParams = () => {
     return {
       type: {
-        library: library,
+        library: this.state.library.name,
         params: {}
       }
     };
@@ -264,7 +265,7 @@ export default class Canvas extends React.Component {
     }
   }
 
-  placeInTree(id, nextContentId, parent, library) {
+  placeInTree(id, nextContentId, parent) {
     let newNode;
     this.setState(prevState => {
       let newState = {
@@ -274,7 +275,7 @@ export default class Canvas extends React.Component {
 
       // Handle inserting of new node
       if (id === -1) {
-        newNode = this.getNewContentParams(library);
+        newNode = this.getNewContentParams();
         newState.content.push(newNode);
         id = newState.content.length - 1;
         if (id === 0) {
@@ -616,7 +617,7 @@ export default class Canvas extends React.Component {
       let id = this.state.placing;
       if (id === -1) {
         // Insert new node
-        newState.content.push(this.getNewContentParams('ChangeMe 0.1'));
+        newState.content.push(this.getNewContentParams());
         id = newState.content.length - 1;
       }
 
