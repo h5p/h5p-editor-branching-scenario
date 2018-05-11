@@ -53,6 +53,8 @@ export default class EditorOverlay extends React.Component {
     const target = event.target;
     const value = target.value;
     this.setState({title: value});
+    this.interaction.contentTitle = value;
+    this.props.onChange()
   }
 
   /**
@@ -84,6 +86,13 @@ export default class EditorOverlay extends React.Component {
     this.interaction.children = this.props.main.children;
 
     this.refForm.current.innerHTML = '';
+
+    // Try to listen to everything in the form
+    // TODO: Also catch the CKEditor
+    this.interaction.$form.on('keypress click change blur', () => {
+      this.props.onChange();
+    });
+
     this.interaction.$form.appendTo(this.refForm.current);
   }
 
@@ -129,6 +138,7 @@ export default class EditorOverlay extends React.Component {
     }
 
     this.setState({branchingOptions: event.target.value});
+    this.props.onChange()
   }
 
   /**
@@ -157,12 +167,11 @@ export default class EditorOverlay extends React.Component {
       return;
     }
 
-    // Add state to params
-    this.interaction.contentTitle = this.state.title;
+    delete this.interaction.$form;
+    delete this.interaction.children;
+    this.props.onChange();
 
-    // Was used in old save routine
-    //this.interaction.nextContentId = this.state.nextContentId;
-    //this.props.saveData(this.interaction);
+    //this.props.saveData();
 
     this.props.closeForm();
   }
@@ -198,6 +207,7 @@ export default class EditorOverlay extends React.Component {
       nextContentId: event.target.value,
       nextPath: event.target.value
     })
+    this.props.onChange();
   }
 
   renderNextPathChooser () {
@@ -226,6 +236,10 @@ export default class EditorOverlay extends React.Component {
 
   // TODO: The editor-overlay-branching-options could be put in their own component
   render () {
+
+    // Update the params
+    this.props.onChange();
+
     const className = `editor-overlay ${this.props.state}`;
     return (
       <div className={className} >

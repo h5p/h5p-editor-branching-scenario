@@ -31,101 +31,8 @@ export default class Canvas extends React.Component {
         height: 32,
         spacing: 29
       },
-      //content: this.props.content
+      content: this.props.content
     };
-
-    //Hard-coded for now, but will come in through props.
-    this.state.content = [
-      { // NOTE: First element is always top node
-        nextContentId: 1,
-        type: {
-          library: 'H5P.Video 1.0',
-          params: {}
-        }
-      },
-      {
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 2,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                addFeedback: false
-              },
-              {
-                text: 'A3',
-                nextContentId: 3,
-                addFeedback: false
-              }
-            ]
-          }
-        },
-        contentId: -1, // -1 might lead to confusion, negative values are end scenatios
-        contentTitle: 'the void'
-      },
-      {
-        type: {
-          library: 'H5P.InteractiveVideo 1.0',
-          params: {}
-        },
-        contentId: 1,
-        contentTitle: 'Some nice IV action'
-      },
-      {
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 4,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                nextContentId: 5,
-                addFeedback: false
-              }
-            ]
-          }
-        },
-        contentId: 2,
-        contentTitle: 'Just some text ...'
-      },
-      {
-        nextContentId: 6,
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 0,
-        contentTitle: 'A video intro!'
-      },
-      {
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 3,
-        contentTitle: 'What image?'
-      },
-      {
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 4,
-        contentTitle: 'That image!'
-      }
-    ];
-    this.state.content = [];
   }
 
   handleDocumentClick = () => {
@@ -604,7 +511,11 @@ export default class Canvas extends React.Component {
         removeData={ this.props.removeData }
         main={ this.props.main }
         content={ content }
-        canvas={ this}
+        canvas={ this }
+        onChange={ () => {
+          this.props.main.params.content = this.state.content;
+          console.log(this.props.main.params.content, this.state.content);
+        } }
       />
     );
   }
@@ -705,7 +616,7 @@ export default class Canvas extends React.Component {
   }
 
   render() {
-    //console.log(this.state.content);
+    console.log(this.props.main.params.content, this.state.content);
     this.dropzones = [];
 
     // Generate the tree
