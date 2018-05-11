@@ -34,7 +34,7 @@ export default class Editor extends React.Component {
       if (libraries[i].restricted !== true) {
         loadedLibraries.push({
           title: libraries[i].title,
-          name: libraries[i].name,
+          name: libraries[i].uberName,
           className: '' // TODO: Add className
         });
       }
