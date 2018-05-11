@@ -1,4 +1,6 @@
 @import '../../styles/components/icons.scss';
+@import '../../styles/main.scss';
+
 
 .draggable {
   position:absolute;
@@ -53,4 +55,41 @@
 
 .selected {
   z-index: 20;
+}
+
+.draggable-wrapper {
+
+  overflow: hidden;
+}
+
+.content-menu-button {
+  top: 0em;
+  background: $red;
+  opacity: 0;
+  width: 1.9rem;
+  height: 2.1rem;
+  padding: 0.3rem;
+  cursor: pointer;
+  font-size: 1rem;
+  box-sizing: border-box;
+  position: absolute;
+  left: calc(100% - 1.8rem);
+  line-height: 1.3;
+  text-align: center;
+  color: white;
+  border-radius: 0 3px;
+  transition: all 0.2s ease;
+
+  &:before {
+    font-family: BSFont;
+    content: $icon-gear;
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &.focused {
+    opacity: 1;
+  }
 }
