@@ -94,6 +94,15 @@ export default class EditorOverlay extends React.Component {
       this.props.onChange();
     });
 
+    if (this.interaction.nextContentId) {
+      // TODO: The options for changing the next node might be restricted here
+      this.setState({
+        branchingOptions: 'old-content',
+        showNextPathChooser: true,
+        nextPath: this.interaction.nextContentId
+      });
+    }
+
     this.interaction.$form.appendTo(this.refForm.current);
   }
 
@@ -210,16 +219,16 @@ export default class EditorOverlay extends React.Component {
       <div>
         <label htmlFor="nextPath">Select a path to send a user to</label>
         <select name="nextPath" value={this.state.nextPath} onChange={this.updateNextContentId}>
-          {this.props.content
-            .filter((node, index, array) => {
+          { this.props.content
+            .filter((node, index) => {
               return (
                 node.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
-                index !== array.length - 1
+                  this.interaction.contentId !== node.contentId
               )
             })
-            .map((node, key) =>
+            .map(node =>
               <option
-                key={key}
+                key={ node.contentId }
                 value={ node.contentId }>
                   {`${node.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${node.contentTitle}`}
               </option>)
