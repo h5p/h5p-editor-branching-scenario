@@ -116,14 +116,19 @@ export default class Canvas extends React.Component {
         }
 
         if (dropzone.overlap(points)) {
-          if (dropzone instanceof Draggable) {
+          if (dropzone instanceof Draggable && this.state.editorOverlay === 'inactive') {
             this.setState({
               deleting: dropzone.props.id
             });
           }
-          else {
-            // TODO: Check for dropbox in editor overlay
+          if (this.state.editorOverlay === 'inactive') {
             data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent);
+          }
+          else {
+            const parentId = this.child.saveData();
+            if (parentId) {
+              data = this.placeInTree(id, dropzone.props.nextContentId, parentId);
+            }
           }
           return true;
         }

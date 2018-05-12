@@ -168,8 +168,10 @@ export default class EditorOverlay extends React.Component {
     return valid;
   }
 
-  /*
+  /**
    * Return data from the form to the callback function.
+   *
+   * @return {number} ContentId of saved interaction.
    */
   saveData = () => {
     // Check if all required form fields can be validated
@@ -179,8 +181,8 @@ export default class EditorOverlay extends React.Component {
 
     delete this.interaction.$form;
     this.props.onChange();
-
     this.props.closeForm();
+    return this.interaction.contentId;
   }
 
   /*
