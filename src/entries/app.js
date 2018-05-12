@@ -19,10 +19,24 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     this.field = field;
 
     this.elementFields = this.findField('content', this.field.fields);
-    this.libraries = this.findField('content', this.elementFields.field.fields).options;
+    this.libraries = this.findField('type', this.elementFields.field.fields).options;
 
     this.params = params || {};
+
+    // Defaults for translatable fields
+    this.endScreenButtonText = 'Restart the course';
+    this.proceedButtonText = "Proceed";
+    this.startScreenButtonText = "Start the course";
+    this.title = "Branching Scenario Main Title";
+
     this.params.content = this.params.content || [];
+
+    this.params.endScreens = this.params.endScreens || [];
+    this.params.endScreens[0] = this.params.endScreens[0] || {
+      endScreenTitle: '',
+      endScreenSubtitle: '',
+      contentId: -1
+    }
 
     // TODO: Rename params.content.content to params.content.type in semantics
     //       and change code in BS respectively; remove this afterwards

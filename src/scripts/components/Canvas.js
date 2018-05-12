@@ -514,7 +514,6 @@ export default class Canvas extends React.Component {
         canvas={ this }
         onChange={ () => {
           this.props.main.params.content = this.state.content;
-          console.log(this.props.main.params.content, this.state.content);
         } }
       />
     );
@@ -616,7 +615,6 @@ export default class Canvas extends React.Component {
   }
 
   render() {
-    console.log(this.props.main.params.content, this.state.content);
     this.dropzones = [];
 
     // Generate the tree
