@@ -148,6 +148,7 @@ export default class Editor extends React.Component {
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
             navigateToTutorial={this.navigateToTutorial}
+            openEditor={ this.handleInserted }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

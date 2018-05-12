@@ -146,7 +146,7 @@ export default class Canvas extends React.Component {
 
   handleEditContent = (id) => {
     const data = this.state.content[0];
-    this.props.main.openInteractionEditor(data);
+    this.props.openEditor(data);
   }
 
   getNewContentParams = () => {
@@ -507,10 +507,12 @@ export default class Canvas extends React.Component {
         editorContents={ this.state.editorContents }
         form={form}
         closeForm={ this.toggleEditorOverlay.bind(this) }
+        removeData={ () => {console.log('Remove this item if leaf');} }
         main={ this.props.main }
         content={ content }
         canvas={ this }
         onChange={ () => {
+          // Workaround for merging React with the save-by-reference principle
           this.props.main.params.content = this.state.content;
         } }
       />
