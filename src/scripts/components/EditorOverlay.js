@@ -54,7 +54,7 @@ export default class EditorOverlay extends React.Component {
     const value = target.value;
     this.setState({title: value});
     this.interaction.contentTitle = value;
-    this.props.onChange()
+    this.props.onChange();
   }
 
   /**
@@ -82,13 +82,10 @@ export default class EditorOverlay extends React.Component {
      *       needed and put this in the constructor. Makes more sense.
      */
 
-    // Keep track of form fields that have been populated by processSemanticsChunk
-    this.interaction.children = this.props.main.children;
-
     this.refForm.current.innerHTML = '';
 
     // Try to listen to everything in the form
-    // TODO: Also catch the CKEditor
+    // TODO: Also catch the CKEditor, Drag'n'Drop, etc.
     this.interaction.$form.on('keypress click change blur', () => {
       this.props.onChange();
     });
@@ -149,7 +146,7 @@ export default class EditorOverlay extends React.Component {
    */
   isValid (interaction) {
     var valid = true;
-    var elementKids = interaction.children;
+    var elementKids = this.props.main.children;
     for (var i = 0; i < elementKids.length; i++) {
       if (elementKids[i].validate() === false) {
         valid = false;
@@ -168,10 +165,7 @@ export default class EditorOverlay extends React.Component {
     }
 
     delete this.interaction.$form;
-    delete this.interaction.children;
     this.props.onChange();
-
-    //this.props.saveData();
 
     this.props.closeForm();
   }

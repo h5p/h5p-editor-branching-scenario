@@ -92,27 +92,19 @@ export default class Editor extends React.Component {
     return true;
   }
 
-  /**
-   * Update the form for editing an interaction
-   *
-   * @param {object} interaction - Parameters to set in form.
-   */
-  updateForm(interaction, elementFields) {
-    this.child.child.updateForm(interaction, elementFields);
-  }
-
   handleMouseDown = (event) => {
     this.setState({
       inserting: event
     });
   }
 
+  // TODO: This can be done smarter
   handleInserted = (data) => {
     if (data && !this.props.main.canvasDev) {
+      data.$form = H5P.jQuery('<div/>');
       // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
-      //const interaction = this.props.main.createInteraction(data);
-      //this.props.main.addInteraction(interaction);
-      this.props.main.openInteractionEditor(data);
+      this.child.child.updateForm(data, this.props.main.getSemantics(data.type.library));
+      this.child.toggleEditorOverlay(true);
     }
 
     this.setState({
@@ -153,7 +145,6 @@ export default class Editor extends React.Component {
             libraries={ this.state.libraries }
             onRef={ref => (this.child = ref)}
             saveData={this.props.saveData}
-            removeData={this.props.removeData}
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
             navigateToTutorial={this.navigateToTutorial}

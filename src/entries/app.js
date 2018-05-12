@@ -457,93 +457,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
-   * Get next free content Id.
-   *
-   * @return {number} Id to be used for new content.
-   */
-  BranchingScenarioEditor.prototype.getFreeContentId = function () {
-    if (!this.params.content || this.params.content.length === 0) {
-      return 1;
-    }
-    // Assume the last interaction has the highest id
-    return this.params.content[this.params.content.length - 1].contentId + 1;
-  };
-
-  /**
-   * Create new Interaction (could possibly be a class of its own).
-   * TODO: Remove when structure is held in Canvas.state.content
-   *
-   * @param {string} libraryName - Library name to create interaction for.
-   * @param {object} params - Spare params for optional values later.
-   */
-  BranchingScenarioEditor.prototype.createInteraction = function (node, params = {}) {
-    const interaction = {
-      content: {
-        params: {},
-        library: node.type.library,
-        subContentId: H5P.createUUID()
-      },
-      showContentTitle: false,
-      contentId: this.getFreeContentId(),
-      nextContentId: -1, // Default endscreen
-      contentTitle: node.type.library.split('.')[1] // TODO: There's probably a better default
-    };
-
-    return interaction;
-  };
-
-  /**
-   * Add interaction.
-   * TODO: Remove when structure is held in Canvas.state.content
-   *
-   * @param {object} interaction - BS interaction object.
-   */
-  BranchingScenarioEditor.prototype.addInteraction = function (interaction) {
-    this.params.content.push(interaction);
-  };
-
-  /**
-   * Remove interaction.
-   * TODO: Remove when structure is held in Canvas.state.content
-   *
-   * @param {number} contentId - if of the object to be removed
-   */
-  BranchingScenarioEditor.prototype.removeInteraction = function (contentId) {
-    this.params.content = this.params.content.filter(content => content.contentId !== contentId);
-  };
-
-  /**
-   * Open the interaction editor.
-   * TODO: Remove when structure is held in Canvas.state.content
-   *
-   * @param {object} interaction - BS interaction object.
-   */
-  BranchingScenarioEditor.prototype.openInteractionEditor = function (interaction) {
-    interaction.$form = H5P.jQuery('<div/>');
-    this.editor.updateForm(interaction, this.getSemantics(interaction.type.library));
-
-    this.editor.child.toggleEditorOverlay(true);
-  };
-
-  /**
-   * If there's something to be done on saving, do it here.
-   * TODO: Remove when structure is held in Canvas.state.content
-   *
-   * @param {object} interaction - BS interaction object.
-   */
-  BranchingScenarioEditor.prototype.saveInteraction = function(interaction) {
-    /*
-     * TODO: If those are not deleted, then saving doesn't work because of some
-     *       circles in the JSON structure.
-     *       The promblem still remains if the editor overlay is open and
-     *       someone clicks on the save button of the host system.
-     */
-    //delete interaction.$form;
-    //delete interaction.children;
-    //this.params.content = this.editor.child.state.content;
-  };
-
-  /**
    * Get semantics fields for a library.
    *
    * @param {string} libraryName - Library name.
@@ -634,8 +547,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         endImageChooser={ this.endImageChooser }
         updateParams={ this.updateParams.bind(this) }
         updateTranslations={ this.updateTranslations.bind(this) }
-        saveData={ this.saveInteraction.bind(this) }
-        removeData={ this.removeInteraction.bind(this) }
         content={ this.params.content }
       />), $wrapper.get(0)
     );

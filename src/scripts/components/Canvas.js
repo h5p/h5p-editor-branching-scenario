@@ -507,8 +507,6 @@ export default class Canvas extends React.Component {
         editorContents={ this.state.editorContents }
         form={form}
         closeForm={ this.toggleEditorOverlay.bind(this) }
-        saveData={ this.props.saveData }
-        removeData={ this.props.removeData }
         main={ this.props.main }
         content={ content }
         canvas={ this }
