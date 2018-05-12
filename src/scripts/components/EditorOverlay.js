@@ -61,14 +61,18 @@ export default class EditorOverlay extends React.Component {
    * Update the form for editing an interaction
    *
    * @param {object} interaction - Parameters to set in form.
+   * @param {object} elementFields - Semantics fields for validation.
+   * @param {object} extras - Additional parameters.
+   * @param {string} extras.state - Particular state.
    */
-  updateForm (interaction, elementFields) {
+  updateForm (interaction, elementFields, extras) {
     this.reset();
     // Holds the reference to the object we're modifying
     this.interaction = interaction || {};
+    this.extras = extras;
 
     const icon = `editor-overlay-icon-${this.camelToKebab(this.interaction.type.library.split('.')[1])}`;
-    const title = this.interaction.type.library.split('.')[1];
+    const title = this.interaction.contentTitle || this.interaction.type.library.split('.')[1];
     this.setState({icon: icon, title: title});
 
     this.passReadies = false;
@@ -174,12 +178,9 @@ export default class EditorOverlay extends React.Component {
    * Remove data.
    */
   removeData = () => {
-    // TODO: Delete this via the delete state?
-    //this.props.canvas.state.content.splice(this.interaction.contentId, 1);
-
-    // TODO: Remove this after using canvas data structure
-    this.props.removeData(this.interaction.contentId);
-
+    if (this.extras && this.extras.state === 'new') {
+      this.props.removeData(this.interaction.contentId);
+    }
     this.props.closeForm();
   }
 

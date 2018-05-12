@@ -100,10 +100,14 @@ export default class Editor extends React.Component {
 
   // TODO: This can be done smarter
   handleInserted = (data) => {
+    this.openEditor(data, {state: 'new'});
+  }
+
+  openEditor = (data, params) => {
     if (data && !this.props.main.canvasDev) {
       data.$form = H5P.jQuery('<div/>');
       // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
-      this.child.child.updateForm(data, this.props.main.getSemantics(data.type.library));
+      this.child.child.updateForm(data, this.props.main.getSemantics(data.type.library), params);
       this.child.toggleEditorOverlay(true);
     }
 
@@ -148,7 +152,7 @@ export default class Editor extends React.Component {
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
             navigateToTutorial={this.navigateToTutorial}
-            openEditor={ this.handleInserted }
+            openEditor={ this.openEditor }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

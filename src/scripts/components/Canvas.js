@@ -145,7 +145,7 @@ export default class Canvas extends React.Component {
   }
 
   handleEditContent = (id) => {
-    const data = this.state.content[0];
+    const data = this.state.content[id];
     this.props.openEditor(data);
   }
 
@@ -494,6 +494,19 @@ export default class Canvas extends React.Component {
   }
 
   /**
+   * Remove a leaf from the tree (if it's really a leaf).
+   * TODO: Can probably be replaced by general delete function
+   *
+   * @param {number} id - Id of the leaf.
+   *
+   */
+  removeLeaf = (id) => {
+    if (id < this.state.content.length && !this.state.content[id].nextContentId) {
+      this.state.content.splice(id, 1);
+    }
+  }
+
+  /**
    * Render the editor overlay.
    *
    * @param {string} [state] - Display state [active|inactive].
@@ -507,7 +520,7 @@ export default class Canvas extends React.Component {
         editorContents={ this.state.editorContents }
         form={form}
         closeForm={ this.toggleEditorOverlay.bind(this) }
-        removeData={ () => {console.log('Remove this item if leaf');} }
+        removeData={ this.removeLeaf }
         main={ this.props.main }
         content={ content }
         canvas={ this }
