@@ -38,107 +38,98 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       contentId: -1
     }
 
-    // TODO: Rename params.content.content to params.content.type in semantics
-    //       and change code in BS respectively; remove this afterwards
-    if (this.params.content) {
-      this.params.content.forEach(content => {
-        content.type = Object.assign({}, content.content);
-        delete content.content;
-      });
-    }
-
-    // For testing
-    this.params.content = [
-      { // NOTE: First element is always top node
-        nextContentId: 1,
-        type: {
-          library: 'H5P.Video 1.0',
-          params: {}
-        }
-      },
-      {
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 2,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                addFeedback: false
-              },
-              {
-                text: 'A3',
-                nextContentId: 3,
-                addFeedback: false
-              }
-            ]
-          }
-        },
-        contentId: -1, // -1 might lead to confusion, negative values are end scenatios
-        contentTitle: 'the void'
-      },
-      {
-        type: {
-          library: 'H5P.InteractiveVideo 1.0',
-          params: {}
-        },
-        contentId: 1,
-        contentTitle: 'Some nice IV action'
-      },
-      {
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 4,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                nextContentId: 5,
-                addFeedback: false
-              }
-            ]
-          }
-        },
-        contentId: 2,
-        contentTitle: 'Just some text ...'
-      },
-      {
-        nextContentId: 6,
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 0,
-        contentTitle: 'A video intro!'
-      },
-      {
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 3,
-        contentTitle: 'What image?'
-      },
-      {
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 4,
-        contentTitle: 'That image!'
-      }
-    ];
-    this.params.content = [];
+    // // For testing
+    // this.params.content = [
+    //   { // NOTE: First element is always top node
+    //     nextContentId: 1,
+    //     type: {
+    //       library: 'H5P.Video 1.0',
+    //       params: {}
+    //     }
+    //   },
+    //   {
+    //     type: {
+    //       library: 'H5P.BranchingQuestion 1.0',
+    //       params: {
+    //         question: "<p>hello, who are you?</p>",
+    //         alternatives: [
+    //           {
+    //             text: 'A1',
+    //             nextContentId: 2,
+    //             addFeedback: false
+    //           },
+    //           {
+    //             text: 'A2',
+    //             addFeedback: false
+    //           },
+    //           {
+    //             text: 'A3',
+    //             nextContentId: 3,
+    //             addFeedback: false
+    //           }
+    //         ]
+    //       }
+    //     },
+    //     contentId: -1, // -1 might lead to confusion, negative values are end scenatios
+    //     contentTitle: 'the void'
+    //   },
+    //   {
+    //     type: {
+    //       library: 'H5P.InteractiveVideo 1.0',
+    //       params: {}
+    //     },
+    //     contentId: 1,
+    //     contentTitle: 'Some nice IV action'
+    //   },
+    //   {
+    //     type: {
+    //       library: 'H5P.BranchingQuestion 1.0',
+    //       params: {
+    //         question: "<p>hello, who are you?</p>",
+    //         alternatives: [
+    //           {
+    //             text: 'A1',
+    //             nextContentId: 4,
+    //             addFeedback: false
+    //           },
+    //           {
+    //             text: 'A2',
+    //             nextContentId: 5,
+    //             addFeedback: false
+    //           }
+    //         ]
+    //       }
+    //     },
+    //     contentId: 2,
+    //     contentTitle: 'Just some text ...'
+    //   },
+    //   {
+    //     nextContentId: 6,
+    //     type: {
+    //       library: 'H5P.Image 1.0',
+    //       params: {}
+    //     },
+    //     contentId: 0,
+    //     contentTitle: 'A video intro!'
+    //   },
+    //   {
+    //     type: {
+    //       library: 'H5P.Image 1.0',
+    //       params: {}
+    //     },
+    //     contentId: 3,
+    //     contentTitle: 'What image?'
+    //   },
+    //   {
+    //     type: {
+    //       library: 'H5P.Image 1.0',
+    //       params: {}
+    //     },
+    //     contentId: 4,
+    //     contentTitle: 'That image!'
+    //   }
+    // ];
+    // this.params.content = [];
 
     setValue(field, this.params);
 
