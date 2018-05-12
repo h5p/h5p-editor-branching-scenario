@@ -403,7 +403,7 @@ export default class Canvas extends React.Component {
         position.x += ((subtree.x - x) / 2) - (this.state.nodeSpecs.width / 2);
       }
 
-      const libraryTitle = this.getLibraryTitle(content.type.library);
+      const libraryTitle = this.getLibraryTitle(content.type.library).trim();
 
       // Draw node
       nodes.push(
@@ -416,7 +416,7 @@ export default class Canvas extends React.Component {
           onPlacing={ () => this.handlePlacing(id) }
           onMove={ () => this.handleMove(id) }
           onDropped={ () => this.handleDropped(id) }
-          contentClass={ libraryTitle }
+          contentClass={ libraryTitle.replace(/ +/g, '') }
           editContent={ () => this.handleEditContent(id) }
         >
           { libraryTitle }
@@ -649,7 +649,7 @@ export default class Canvas extends React.Component {
             width={ this.state.nodeSpecs.width }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
-            contentClass={ this.props.inserting.library.title }
+            contentClass={ this.props.inserting.library.title.replace(/ +/g, '') }
             position={ this.props.inserting.position }
           >
             { this.props.inserting.library.title }
