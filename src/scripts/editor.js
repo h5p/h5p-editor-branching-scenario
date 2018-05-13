@@ -147,6 +147,7 @@ export default class Editor extends React.Component {
             inserting={ this.state.inserting }
             onInserted={ this.handleInserted }
             libraries={ this.state.libraries }
+            translations={ this.state.translations }
             onRef={ref => (this.child = ref)}
             saveData={this.props.saveData}
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?

@@ -392,7 +392,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
        */
     });
 
-
     // TODO: Match semantics with design
     // TODO: Sanitized access more elegantly
     this.params.startScreen = this.params.startScreen || {};
