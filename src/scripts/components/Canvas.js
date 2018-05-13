@@ -546,15 +546,15 @@ export default class Canvas extends React.Component {
    */
   toggleEditorOverlay(visibility) {
     if (visibility === true) {
-      visibility = 'active';
+      visibility = 'active'; // TODO: Visibility is usually hidden or visible, not active or inactive.
     }
     else if (visibility === false) {
-      visibility = 'inactive';
+      visibility = 'inactive'; // TODO: Seems like it would have been easier if this was a boolean value?
     }
     else {
       visibility = undefined;
     }
-    this.setState({
+    this.setState({ // TODO: Use prevState instead of this.state
       editorOverlay: visibility || ((this.state.editorOverlay === 'active') ? 'inactive' : 'active')
     });
   }
