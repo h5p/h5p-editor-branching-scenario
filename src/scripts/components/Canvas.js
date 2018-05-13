@@ -210,7 +210,7 @@ export default class Canvas extends React.Component {
 
       // When placing after a leaf node keep track of it so we can update it
       // after processing the new content array
-      if (parent) {
+      if (parent !== undefined) {
         parent = newState.content[parent];
       }
 
@@ -254,7 +254,7 @@ export default class Canvas extends React.Component {
       });
 
       // Update parent directly when placing a new leaf node
-      if (parent) {
+      if (parent !== undefined) {
         parent.nextContentId = (id === 0 ? 1 : id);
         // TODO: What to do if we are branching?
       }
@@ -294,7 +294,7 @@ export default class Canvas extends React.Component {
   }
 
   renderDropzone(id, position, parent, num) {
-    const nextContentId = parent ? undefined : id;
+    const nextContentId = (parent !== undefined) ? undefined : id;
     num = num || 0;
     return ( this.state.editorOverlay === 'inactive' &&
       <Dropzone
@@ -321,7 +321,7 @@ export default class Canvas extends React.Component {
     }
 
     for (var i = 0; i < this.props.libraries.length; i++) {
-      if (this.props.libraries[i].name == library) {
+      if (this.props.libraries[i].name === library) {
         return this.props.libraries[i].title;
       }
     }
