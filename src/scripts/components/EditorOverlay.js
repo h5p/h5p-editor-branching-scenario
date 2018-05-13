@@ -198,10 +198,7 @@ export default class EditorOverlay extends React.Component {
   renderNextPathDropzone () {
     return (
       <Dropzone
-        // key={ id + '-dz-' + num }
         ref={ element => this.props.canvas.dropzones.push(element) }
-        //nextContentId={ nextContentId }
-        //parent={ parent }
         elementClass={ 'dropzone-editor-path'}
         innerHTML={ 'Drag any content type from a menu on the left side and drop it here to create new content/question' }
       />
@@ -230,7 +227,7 @@ export default class EditorOverlay extends React.Component {
             })
             .map(node =>
               <option
-                key={ node.contentId }
+                key={ 'next-path-' + node.contentId }
                 value={ node.contentId }>
                   {`${node.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${node.contentTitle}`}
               </option>)
@@ -271,10 +268,10 @@ export default class EditorOverlay extends React.Component {
 
           <div className='editor-overlay-branching-options'>
             <select value={ this.state.branchingOptions } onChange={ this.handleOptionChange}>
-              <option value="end-scenario">End scenario here</option>
-              <option value="new-content">Send a viewer to a new content/question</option>
+              <option key="branching-option-0" value="end-scenario">End scenario here</option>
+              <option key="branching-option-1" value="new-content">Send a viewer to a new content/question</option>
               { this.props.content.length > 1 &&
-                <option value="old-content">Send a viewer to an existing content/question</option>
+                <option key="branching-option-2" value="old-content">Send a viewer to an existing content/question</option>
               }
             </select>
 
