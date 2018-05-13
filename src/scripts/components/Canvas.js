@@ -126,7 +126,7 @@ export default class Canvas extends React.Component {
           }
           else {
             const parentId = this.child.saveData();
-            if (parentId) {
+            if (parentId !== undefined) {
               data = this.placeInTree(id, dropzone.props.nextContentId, parentId);
             }
           }
@@ -161,10 +161,8 @@ export default class Canvas extends React.Component {
         params: {},
         subContentId: H5P.createUUID()
       },
-      //contentId: Is not set implicitly by position in array, should probably by set, too
       contentTitle: this.state.library.name.split('.')[1], // TODO: There's probably a better default
       showContentTitle: false,
-      //nextContentId: Will be set later, but should not be undefined (rather -1 for default endscreen)
     };
   }
 
