@@ -271,7 +271,7 @@ export default class Canvas extends React.Component {
         newState.content.splice(bumpIdsUntil, 1);
 
         // Start using our new children
-        newState.content[1].nextContentId = nextContentId;
+        newState.content[1].nextContentId = (nextContentId === 1 ? 2 : nextContentId);
         // TODO: What to do if we are branching?
       }
       else if (nextContentId !== undefined) {
