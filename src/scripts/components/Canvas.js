@@ -284,8 +284,9 @@ export default class Canvas extends React.Component {
     });
 
     // Set contentIds explicitly
+    // TODO: Mutating the state directly will go wrong and cause issues at one point, see https://reactjs.org/docs/react-component.html#state
     this.state.content.forEach((item, index) => {
-      item.contentId = index
+      item.contentId = index // TODO: Find a way to avoid having this extra variable to maintain all the time – I believe it's changed but not updated in more places than here.
     });
 
     return newNode;
@@ -414,7 +415,7 @@ export default class Canvas extends React.Component {
           onPlacing={ () => this.handlePlacing(id) }
           onMove={ () => this.handleMove(id) }
           onDropped={ () => this.handleDropped(id) }
-          contentClass={ libraryTitle.replace(/ +/g, '') }
+          contentClass={ libraryTitle.replace(/ +/g, '') } // TODO: Define className when libraries are loaded instead of redoing it for each draggable
           editContent={ () => this.handleEditContent(id) }
         >
           { libraryTitle }
@@ -503,8 +504,9 @@ export default class Canvas extends React.Component {
    * @param {number} id - Id of the leaf.
    *
    */
-  removeLeaf = (id) => {
+  removeLeaf = (id) => { // TODO: Functions that are used as event handlers should be prefixed handle*
     if (id < this.state.content.length && !this.state.content[id].nextContentId) {
+      // TODO: Stop mutating state directly
       this.state.content.splice(id, 1);
     }
   }
@@ -516,20 +518,22 @@ export default class Canvas extends React.Component {
    * @return {object} React render object.
    */
   renderEditorOverlay({state = 'inactive', form = {}, content={}} = {}) {
+    // TODO: Don't use a separate function for rendering when there's no need for extra operations – placing it directly in render makes it much easier to read.
     return (
-      <EditorOverlay
-        onRef={ ref => (this.child = ref) }
+      <EditorOverlay // TODO: It's quite difficult to see which content the overlay is being displayed for
+        onRef={ ref => (this.child = ref) } // TODO: Ideally we should use a state or property instead of a direct reference.
         state={ state }
         editorContents={ this.state.editorContents }
         form={form}
-        closeForm={ this.toggleEditorOverlay.bind(this) }
-        removeData={ this.removeLeaf }
+        closeForm={ this.toggleEditorOverlay.bind(this) } // TODO: No need to use .bind if the function decleared using = () => { }
+        removeData={ this.removeLeaf } // Event handlers passed in should be prefixed with on* to avoid confusion with data attributes.
         main={ this.props.main }
         content={ content }
-        canvas={ this }
+        canvas={ this } // TODO: This is a big no-no in React. The overlay should communicate through events. (In an ideal world the editor overlay should be reusable in other projects without <Canvas>)
         onChange={ () => {
           // Workaround for merging React with the save-by-reference principle
           this.props.main.params.content = this.state.content;
+          // TODO: Find a better way of handling this. Maybe an event retuning a new ref each time the state changes.
         } }
       />
     );
