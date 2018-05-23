@@ -111,33 +111,36 @@ export default class Canvas extends React.Component {
     const points = draggable.getPoints();
     let data;
     if (!this.dropzones.some(dropzone => {
-        if (!dropzone || dropzone === draggable) {
-          return; // Skip
-        }
+      if (!dropzone || dropzone === draggable) {
+        return; // Skip
+      }
 
-        if (dropzone.overlap(points)) {
-          if (dropzone instanceof Draggable && this.state.editorOverlay === 'inactive') {
-            this.setState({
-              deleting: dropzone.props.id
-            });
-          }
-          if (this.state.editorOverlay === 'inactive') {
-            data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent);
-          }
-          else {
-            const parentId = this.child.saveData();
-            if (parentId !== undefined) {
-              data = this.placeInTree(id, dropzone.props.nextContentId, parentId);
-            }
-          }
-          return true;
+      if (dropzone.overlap(points)) {
+        if (dropzone instanceof Draggable && this.state.editorOverlay === 'inactive') {
+          this.setState({
+            deleting: dropzone.props.id
+          });
         }
-      })) {
+        if (this.state.editorOverlay === 'inactive') {
+          data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent);
+        }
+        else {
+          const parentId = this.child.saveData();
+          if (parentId !== undefined) {
+            data = this.placeInTree(id, dropzone.props.nextContentId, parentId);
+          }
+        }
+        return true;
+      }
+    })) {
       this.setState({
         placing: null
       });
     }
-    this.props.onInserted(data);
+
+    if (this.state.deleting === null) {
+      this.props.onInserted(data);
+    }
   }
 
   handleDropzoneClick = (nextContentId, parent) => {
@@ -673,9 +676,9 @@ export default class Canvas extends React.Component {
               handleClicked={ this.props.navigateToTutorial }
             >
               { this.renderDropzone(-1, {
-                  x: 363.19, // TODO: Decide on spacing a better way?
-                  y: 130
-                }) }
+                x: 363.19, // TODO: Decide on spacing a better way?
+                y: 130
+              }) }
             </StartScreen>
           }
           { this.renderEditorOverlay({
