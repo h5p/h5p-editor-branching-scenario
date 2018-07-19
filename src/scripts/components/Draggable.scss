@@ -20,6 +20,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   z-index: 10;
+
+  &.BranchingQuestion {
+    background: #396ad1;
+    color: #fff;
+  }
 }
 
 .selected {

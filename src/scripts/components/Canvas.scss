@@ -36,3 +36,15 @@
 .horizontal-line {
   height: 2px;
 }
+.alternative-ball {
+  position: absolute;
+  background: #396ad1;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.625em;
+  width: 2.4em;
+  height: 2.4em;
+  line-height: 2.4;
+  text-align: center;
+  font-weight: bold;
+}

@@ -178,7 +178,7 @@ export default class Draggable extends React.Component {
     ) : '';
 
     // Determine element class depending on state
-    let elementClass = 'draggable';
+    let elementClass = this.props.contentClass + ' draggable';
     let dropped = true;
     if (this.state.moving) {
       elementClass += ' selected';

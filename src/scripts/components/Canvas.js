@@ -29,10 +29,107 @@ export default class Canvas extends React.Component {
       nodeSpecs: { // TODO: Get from DOM ?
         width: 121,
         height: 32,
-        spacing: 29
+        spacing: {
+          x: 29,
+          y: 16
+        }
       },
       content: this.props.content
     };
+
+/*
+    //Hard-coded for now, but will come in through props.
+    this.state.content = [
+      { // NOTE: First element is always top node
+        nextContentId: 1,
+        type: {
+          library: 'H5P.Video 1.0',
+          params: {}
+        }
+      },
+      {
+        type: {
+          library: 'H5P.BranchingQuestion 1.0',
+          params: {
+            question: "<p>hello, who are you?</p>",
+            alternatives: [
+              {
+                text: 'A1',
+                nextContentId: 2,
+                addFeedback: false
+              },
+              {
+                text: 'A2',
+                addFeedback: false
+              },
+              {
+                text: 'A3',
+                nextContentId: 3,
+                addFeedback: false
+              }
+            ]
+          }
+        },
+        contentId: -1, // -1 might lead to confusion, negative values are end scenatios
+        contentTitle: 'the void'
+      },
+      {
+        type: {
+          library: 'H5P.InteractiveVideo 1.0',
+          params: {}
+        },
+        contentId: 1,
+        contentTitle: 'Some nice IV action'
+      },
+      {
+        type: {
+          library: 'H5P.BranchingQuestion 1.0',
+          params: {
+            question: "<p>hello, who are you?</p>",
+            alternatives: [
+              {
+                text: 'A1',
+                nextContentId: 4,
+                addFeedback: false
+              },
+              {
+                text: 'A2',
+                nextContentId: 5,
+                addFeedback: false
+              }
+            ]
+          }
+        },
+        contentId: 2,
+        contentTitle: 'Just some text ...'
+      },
+      {
+        nextContentId: 6,
+        type: {
+          library: 'H5P.Image 1.0',
+          params: {}
+        },
+        contentId: 0,
+        contentTitle: 'A video intro!'
+      },
+      {
+        type: {
+          library: 'H5P.Image 1.0',
+          params: {}
+        },
+        contentId: 3,
+        contentTitle: 'What image?'
+      },
+      {
+        type: {
+          library: 'H5P.Image 1.0',
+          params: {}
+        },
+        contentId: 4,
+        contentTitle: 'That image!'
+      }
+    ];
+    */
   }
 
   handleDocumentClick = () => {
@@ -343,6 +440,9 @@ export default class Canvas extends React.Component {
       if (alternative.nextContentId !== undefined) {
         children.push(alternative.nextContentId);
       }
+      else {
+        children.push(-1);
+      }
     });
 
     return children;
@@ -370,69 +470,78 @@ export default class Canvas extends React.Component {
       x = 0; // X level start
     }
     if (y === undefined) {
-      y = 1; // Y level start
+      y = 100; // Y level start
     }
 
+    const parentIsBranching = (parent && this.state.content[parent].type.library.split(' ')[0] === 'H5P.BranchingQuestion');
+
     let firstX, lastX;
-    branch.forEach(id => {
+    branch.forEach((id, num) => {
+      const emptyAlternative = (parentIsBranching && id === -1);
       const content = this.state.content[id];
-      if (!content) {
+      if (!content && !emptyAlternative) {
         return; // Does not exist, simply skip.
       }
 
-      // Determine if we're a branching question
-      const contentIsBranching = (content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
+      // Add vertical spacing for each level
+      const branchY = y + ((parentIsBranching ? 8 : 5.5) * this.state.nodeSpecs.spacing.y); // *2 for the element itself
+
+      // Determine if we are or parent is a branching question
+      const contentIsBranching = (content && content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
       // Determine if we have any children
-      const children = (contentIsBranching ? this.getBranchingChildren(content) : content.nextContentId);
+      const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? content.nextContentId : null));
 
       // Draw subtree first so we know where to position the node
-      const subtree = this.renderTree(children, x, y + 1, id);
-      const subtreeWidth = subtree.x - x;
+      const subtree = children ? this.renderTree(children, x, branchY, id) : null;
+      const subtreeWidth = subtree ? subtree.x - x : 0;
 
       if (x !== 0) {
-        x += this.state.nodeSpecs.spacing; // Add spacing between nodes
+        x += this.state.nodeSpecs.spacing.x; // Add spacing between nodes
       }
 
       // Determine position of node
       let position = {
         x: x,
-        y: y * 100
-      }
+        y: branchY - (this.state.nodeSpecs.spacing.y * 2) // *2 for the element itself
+      };
 
       if (subtreeWidth >= this.state.nodeSpecs.width) {
         // Center parent above subtree
         position.x += ((subtree.x - x) / 2) - (this.state.nodeSpecs.width / 2);
       }
 
-      const libraryTitle = this.getLibraryTitle(content.type.library).trim();
+      if (content) {
+        const libraryTitle = this.getLibraryTitle(content.type.library).trim();
 
-      // Draw node
-      nodes.push(
-        <Draggable
-          key={ id }
-          id={ id }
-          ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element) } }
-          position={ position }
-          width={ this.state.nodeSpecs.width }
-          onPlacing={ () => this.handlePlacing(id) }
-          onMove={ () => this.handleMove(id) }
-          onDropped={ () => this.handleDropped(id) }
-          contentClass={ libraryTitle.replace(/ +/g, '') } // TODO: Define className when libraries are loaded instead of redoing it for each draggable
-          editContent={ () => this.handleEditContent(id) }
-        >
-          { libraryTitle }
-        </Draggable>
-      );
+        // Draw node
+        nodes.push(
+          <Draggable
+            key={ id }
+            id={ id }
+            ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
+            position={ position }
+            width={ this.state.nodeSpecs.width }
+            onPlacing={ () => this.handlePlacing(id) }
+            onMove={ () => this.handleMove(id) }
+            onDropped={ () => this.handleDropped(id) }
+            contentClass={ libraryTitle.replace(/ +/g, '') } // TODO: Define className when libraries are loaded instead of redoing it for each draggable
+            editContent={ () => this.handleEditContent(id) }
+          >
+            { libraryTitle }
+          </Draggable>
+        );
+      }
 
       // Add vertical line above (except for top node)
-      const nodeCenter = position.x + (this.state.nodeSpecs.width / 2);
-      if (id !== 0) {
+      const aboveLineHeight = this.state.nodeSpecs.spacing.y * 3.5; // *3.5 = enough room for DZ
+      const nodeCenter = position.x + (content ? (this.state.nodeSpecs.width / 2) : 21);
+      if (content && id !== 0) {
         nodes.push(
           <div key={ id + '-vabove' } className="vertical-line" style={ {
             left: nodeCenter + 'px',
-            top: (position.y - this.state.nodeSpecs.spacing) + 'px',
-            height: this.state.nodeSpecs.spacing + 'px'
+            top: (position.y - aboveLineHeight) + 'px',
+            height: aboveLineHeight + 'px'
           } }/>
         );
       }
@@ -444,7 +553,7 @@ export default class Canvas extends React.Component {
           <div key={ id + '-vbelow' } className="vertical-line" style={ {
             left: nodeCenter + 'px',
             top: (position.y + this.state.nodeSpecs.height) + 'px',
-            height: this.state.nodeSpecs.spacing + 'px'
+            height: (this.state.nodeSpecs.spacing.y / 2) + 'px'
           } }/>
         );
 
@@ -453,39 +562,57 @@ export default class Canvas extends React.Component {
           nodes.push(
             <div key={ id + '-hbelow' } className="horizontal-line" style={ {
               left: (x + (this.state.nodeSpecs.width / 2)) + 'px',
-              top: (position.y + this.state.nodeSpecs.height + this.state.nodeSpecs.spacing) + 'px',
+              top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
               width: subtree.dX + 'px'
             } }/>
-          );
+          ); // TODO: Almost perfect, sometimes off due to strange spacing in subtree - Try fixing subtree first
         }
+      }
+
+      if (parentIsBranching) {
+        nodes.push(
+          <div key={ id + '-vabovebs' } className="vertical-line" style={ {
+            left: nodeCenter + 'px',
+            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 2)) + 'px',
+            height: (this.state.nodeSpecs.spacing.y * 2) + 'px'
+          } }/>
+        );
+        nodes.push(
+          <div key={ id + '-abox' } className="alternative-ball" style={ {
+            left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) + 1) + 'px',
+            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
+          } }>A{ num + 1 }</div>
+        );
       }
 
       // Add dropzones when placing, except for below the one being moved
       if (this.state.placing !== null && this.state.placing !== id) {
+        const dzDistance = ((aboveLineHeight - 42) / 2);
 
         // Add dropzone above
         if (this.state.placing !== parent) {
           nodes.push(this.renderDropzone(id, {
-            x: position.x + 40, // TODO: Decide on spacing a better way?
-            y: position.y - 52
+            x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
+            y: position.y - 42 - dzDistance
           }));
         }
 
         // Add dropzone below if there's no subtree
-        if (!subtree.nodes.length) {
+        if (content && (!subtree || !subtree.nodes.length)) {
           nodes.push(this.renderDropzone(id, {
-            x: position.x + 40, // TODO: Decide on spacing a better way?
-            y: position.y + 42
+            x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
+            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance
           }, id, 1));
         }
-
       }
 
       // Increase same level offset + offset required by subtree
-      x += (subtreeWidth >= this.state.nodeSpecs.width ? subtreeWidth : this.state.nodeSpecs.width);
+      x += (subtreeWidth >= this.state.nodeSpecs.width ? subtreeWidth : (content ? this.state.nodeSpecs.width : 42));
 
-      // Merge our trees
-      nodes = nodes.concat(subtree.nodes);
+      if (subtree) {
+        // Merge our trees
+        nodes = nodes.concat(subtree.nodes);
+      }
 
       if (firstX === undefined) {
         firstX = position.x;
