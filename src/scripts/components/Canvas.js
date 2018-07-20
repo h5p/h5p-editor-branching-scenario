@@ -36,100 +36,6 @@ export default class Canvas extends React.Component {
       },
       content: this.props.content
     };
-
-/*
-    //Hard-coded for now, but will come in through props.
-    this.state.content = [
-      { // NOTE: First element is always top node
-        nextContentId: 1,
-        type: {
-          library: 'H5P.Video 1.0',
-          params: {}
-        }
-      },
-      {
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 2,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                addFeedback: false
-              },
-              {
-                text: 'A3',
-                nextContentId: 3,
-                addFeedback: false
-              }
-            ]
-          }
-        },
-        contentId: -1, // -1 might lead to confusion, negative values are end scenatios
-        contentTitle: 'the void'
-      },
-      {
-        type: {
-          library: 'H5P.InteractiveVideo 1.0',
-          params: {}
-        },
-        contentId: 1,
-        contentTitle: 'Some nice IV action'
-      },
-      {
-        type: {
-          library: 'H5P.BranchingQuestion 1.0',
-          params: {
-            question: "<p>hello, who are you?</p>",
-            alternatives: [
-              {
-                text: 'A1',
-                nextContentId: 4,
-                addFeedback: false
-              },
-              {
-                text: 'A2',
-                nextContentId: 5,
-                addFeedback: false
-              }
-            ]
-          }
-        },
-        contentId: 2,
-        contentTitle: 'Just some text ...'
-      },
-      {
-        nextContentId: 6,
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 0,
-        contentTitle: 'A video intro!'
-      },
-      {
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 3,
-        contentTitle: 'What image?'
-      },
-      {
-        type: {
-          library: 'H5P.Image 1.0',
-          params: {}
-        },
-        contentId: 4,
-        contentTitle: 'That image!'
-      }
-    ];
-    */
   }
 
   handleDocumentClick = () => {
@@ -173,7 +79,7 @@ export default class Canvas extends React.Component {
       // Try to replace
       this.setState({
         clickHandeled: true,
-        deleting: id
+        deleting: id  // TODO: Not if DZ is a BQ
       });
     }
     else {
@@ -215,7 +121,7 @@ export default class Canvas extends React.Component {
       if (dropzone.overlap(points)) {
         if (dropzone instanceof Draggable && this.state.editorOverlay === 'inactive') {
           this.setState({
-            deleting: dropzone.props.id
+            deleting: dropzone.props.id // TODO: Not if DZ is a BQ
           });
         }
         if (this.state.editorOverlay === 'inactive') {
@@ -381,7 +287,7 @@ export default class Canvas extends React.Component {
         // TODO: What to do if we are branching?
       }
       else {
-        newState.content[id].nextContentId = nextContentId;
+        newState.content[id].nextContentId = (nextContentId < 0 ? undefined : nextContentId);
       }
 
       return newState;
@@ -397,13 +303,13 @@ export default class Canvas extends React.Component {
   }
 
   renderDropzone(id, position, parent, num) {
-    const nextContentId = (parent === undefined || num > -1) ? id : undefined;
+    const nextContentId = (parent === undefined || id === -2) ? id : undefined;
     if (num === undefined) {
-      num = -1;
+      num = 0;
     }
     return ( this.state.editorOverlay === 'inactive' &&
       <Dropzone
-        key={ id + '-dz-' + num }
+        key={ (id === -1 ? 'f' : (id === -2 ? 'a' : id)) + '-dz-' + num} // TODO: Fix unique id
         ref={ element => this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
@@ -502,13 +408,13 @@ export default class Canvas extends React.Component {
       // Determine if we have any children
       const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? content.nextContentId : null));
 
+      if (x !== 0 && num > 0) {
+        x += this.state.nodeSpecs.spacing.x; // Add spacing between nodes
+      }
+
       // Draw subtree first so we know where to position the node
       const subtree = children ? this.renderTree(children, x, branchY, id) : null;
       const subtreeWidth = subtree ? subtree.x - x : 0;
-
-      if (x !== 0) {
-        x += this.state.nodeSpecs.spacing.x; // Add spacing between nodes
-      }
 
       // Determine position of node
       let position = {
@@ -537,6 +443,7 @@ export default class Canvas extends React.Component {
             onDropped={ () => this.handleDropped(id) }
             contentClass={ libraryTitle.replace(/ +/g, '') } // TODO: Define className when libraries are loaded instead of redoing it for each draggable
             editContent={ () => this.handleEditContent(id) }
+            disabled={ content.type.library.split(' ')[0] === 'H5P.BranchingQuestion' }
           >
             { libraryTitle }
           </Draggable>
@@ -579,15 +486,16 @@ export default class Canvas extends React.Component {
       }
 
       if (parentIsBranching) {
+        const lengthMultiplier = (branch.length > 1 ? 2 : 2.5);
         nodes.push(
-          <div key={ id + '-vabovebs-' + num } className="vertical-line" style={ {
+          <div key={ parent + '-vabovebs-' + num } className="vertical-line" style={ {
             left: nodeCenter + 'px',
-            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 2)) + 'px',
-            height: (this.state.nodeSpecs.spacing.y * 2) + 'px'
+            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * lengthMultiplier)) + 'px',
+            height: (this.state.nodeSpecs.spacing.y * lengthMultiplier) + 'px'
           } }/>
         );
         nodes.push(
-          <div key={ id + '-abox-' + num } className="alternative-ball" style={ {
+          <div key={ parent + '-abox-' + num } className="alternative-ball" style={ {
             left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) + 1) + 'px',
             top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
           } }>A{ num + 1 }</div>
@@ -598,12 +506,14 @@ export default class Canvas extends React.Component {
       if (this.state.placing !== null && this.state.placing !== id) {
         const dzDistance = ((aboveLineHeight - 42) / 2);
 
+        // TODO: Only render leafs when placing BQ, or add existing structure to BQ alternative?
+
         // Add dropzone above
         if (this.state.placing !== parent) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
             y: position.y - 42 - dzDistance
-          }, parentIsBranching ? parent : undefined, parentIsBranching ? num : -1));
+          }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0));
         }
 
         // Add dropzone below if there's no subtree
@@ -611,7 +521,7 @@ export default class Canvas extends React.Component {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
             y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance
-          }, id, -2));
+          }, id, 1));
         }
       }
 
