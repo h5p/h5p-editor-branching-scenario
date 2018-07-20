@@ -302,14 +302,14 @@ export default class Canvas extends React.Component {
     return newNode;
   }
 
-  renderDropzone(id, position, parent, num) {
-    const nextContentId = (parent === undefined || id === -2) ? id : undefined;
+  renderDropzone(id, position, parent, num, parentIsBranching) {
+    const nextContentId = (parent === undefined || parentIsBranching) ? id : undefined;
     if (num === undefined) {
       num = 0;
     }
     return ( this.state.editorOverlay === 'inactive' &&
       <Dropzone
-        key={ (id === -1 ? 'f' : (id === -2 ? 'a' : id)) + '-dz-' + num} // TODO: Fix unique id
+        key={ (id === -1 ? 'f' : (id === -2 ? 'a' + parent : id)) + '-dz-' + num} // TODO: Fix unique id
         ref={ element => this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
@@ -513,7 +513,7 @@ export default class Canvas extends React.Component {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
             y: position.y - 42 - dzDistance
-          }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0));
+          }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0, parentIsBranching));
         }
 
         // Add dropzone below if there's no subtree
