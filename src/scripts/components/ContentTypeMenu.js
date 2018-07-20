@@ -69,7 +69,24 @@ export default class ContentTypeMenu extends React.Component {
     );
   }
 
+  renderSecondButtons() {
+    if (!this.props.libraries) {
+      return (
+        <div className="loading">Loading…</div>
+      );
+    }
+
+    const bs = this.props.libraries.find(library => library.title === 'Branching Question');
+
+    return (
+      <ul className="content-type-buttons">
+        <li className="branching-question" title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
+      </ul>
+    );
+  }
+
   render() {
+    // TODO: Keep width constant during loading. Fix only one loading message for the entire menu?
     return (
       <div className="content-type-menu">
         <label className="label-info">
@@ -85,9 +102,7 @@ export default class ContentTypeMenu extends React.Component {
       Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>
           </Tooltip>
         </label>
-        <ul className="content-type-buttons">
-          <li className="branching-question" title="Add New Branching Question">Branching Question</li>
-        </ul>
+        { this.renderSecondButtons() }
       </div>
     );
   }

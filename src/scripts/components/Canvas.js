@@ -219,12 +219,12 @@ export default class Canvas extends React.Component {
           });
         }
         if (this.state.editorOverlay === 'inactive') {
-          data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent);
+          data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
         }
         else {
           const parentId = this.child.saveData();
           if (parentId !== undefined) {
-            data = this.placeInTree(id, dropzone.props.nextContentId, parentId);
+            data = this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
           }
         }
         return true;
@@ -240,12 +240,12 @@ export default class Canvas extends React.Component {
     }
   }
 
-  handleDropzoneClick = (nextContentId, parent) => {
+  handleDropzoneClick = (nextContentId, parent, alternative) => {
     if (this.state.placing === null) {
       return;
     }
 
-    this.placeInTree(this.state.placing, nextContentId, parent);
+    this.placeInTree(this.state.placing, nextContentId, parent, alternative);
     this.props.onInserted();
   }
 
@@ -273,7 +273,7 @@ export default class Canvas extends React.Component {
   updateNextContentId(leaf, id, currentNextId, nextContentId, bumpIdsUntil) {
     // Make old parent point directly to our old children
     if (leaf.nextContentId === id) {
-      leaf.nextContentId = currentNextId;
+      leaf.nextContentId = (currentNextId < 0 ? undefined : currentNextId);
     }
 
     // Make our new parent aware of us
@@ -287,8 +287,9 @@ export default class Canvas extends React.Component {
     }
   }
 
-  placeInTree(id, nextContentId, parent) {
-    let newNode;
+  placeInTree(id, nextContentId, parent, alternative) {
+    let newNode; // TODO: Find another way to get this data as it may not be there depending on when the state callback runs... e.g. adding a lastplacedId to the state or something
+
     this.setState(prevState => {
       let newState = {
         placing: null,
@@ -311,9 +312,10 @@ export default class Canvas extends React.Component {
       if (parent !== undefined) {
         parent = newState.content[parent];
       }
+      const parentIsBranching = (parent && parent.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
       const currentNextId = newState.content[id].nextContentId;
-      // TODO: What to do if we are a branching?
+      // TODO: Make as solution for Branching Question?
 
       // Handle adding new top node before the current one
       let bumpIdsUntil = -1;
@@ -353,8 +355,12 @@ export default class Canvas extends React.Component {
 
       // Update parent directly when placing a new leaf node
       if (parent !== undefined) {
-        parent.nextContentId = (id === 0 ? 1 : id);
-        // TODO: What to do if we are branching?
+        if (parentIsBranching) {
+          parent.type.params.alternatives[alternative].nextContentId = (id === 0 ? 1 : id);
+        }
+        else {
+          parent.nextContentId = (id === 0 ? 1 : id);
+        }
       }
 
       // Continue handling new top node
@@ -374,10 +380,8 @@ export default class Canvas extends React.Component {
         newState.content[1].nextContentId = (nextContentId === 1 ? 2 : nextContentId);
         // TODO: What to do if we are branching?
       }
-      else if (nextContentId !== undefined) {
-        // Start using our new children
+      else {
         newState.content[id].nextContentId = nextContentId;
-        // TODO: What to do if we are branching?
       }
 
       return newState;
@@ -386,21 +390,24 @@ export default class Canvas extends React.Component {
     // Set contentIds explicitly
     // TODO: Mutating the state directly will go wrong and cause issues at one point, see https://reactjs.org/docs/react-component.html#state
     this.state.content.forEach((item, index) => {
-      item.contentId = index // TODO: Find a way to avoid having this extra variable to maintain all the time – I believe it's changed but not updated in more places than here.
+      item.contentId = index; // TODO: Find a way to avoid having this extra variable to maintain all the time – I believe it's changed but not updated in more places than here.
     });
 
     return newNode;
   }
 
   renderDropzone(id, position, parent, num) {
-    const nextContentId = (parent !== undefined) ? undefined : id;
-    num = num || 0;
+    const nextContentId = (parent === undefined || num > -1) ? id : undefined;
+    if (num === undefined) {
+      num = -1;
+    }
     return ( this.state.editorOverlay === 'inactive' &&
       <Dropzone
         key={ id + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
+        alternative={ num }
         position={ position }
         elementClass={ 'dropzone' }
         style={
@@ -409,7 +416,7 @@ export default class Canvas extends React.Component {
             top: position.y + 'px'
           }
         }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent) }
+        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num) }
       />
     );
   }
@@ -437,11 +444,14 @@ export default class Canvas extends React.Component {
 
     let children = [];
     content.type.params.alternatives.forEach(alternative => {
-      if (alternative.nextContentId !== undefined) {
-        children.push(alternative.nextContentId);
+      if (alternative.nextContentId === -1) {
+        children.push(-1); // End screen
+      }
+      else if (alternative.nextContentId === undefined || this.state.content[alternative.nextContentId] === undefined) {
+        children.push(-2); // Empty alternative
       }
       else {
-        children.push(-1);
+        children.push(alternative.nextContentId); // Other question
       }
     });
 
@@ -452,7 +462,7 @@ export default class Canvas extends React.Component {
     let nodes = [];
 
     // Libraries must be loaded before tree can be drawn
-    if (!this.props.libraries || this.props.translations.lenght === 0) {
+    if (!this.props.libraries || this.props.translations.length === 0) {
       nodes.push(
         <div key={ 'loading' } className="loading">Loading…</div>
       );
@@ -473,11 +483,11 @@ export default class Canvas extends React.Component {
       y = 100; // Y level start
     }
 
-    const parentIsBranching = (parent && this.state.content[parent].type.library.split(' ')[0] === 'H5P.BranchingQuestion');
+    const parentIsBranching = (parent !== undefined && this.state.content[parent].type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
     let firstX, lastX;
     branch.forEach((id, num) => {
-      const emptyAlternative = (parentIsBranching && id === -1);
+      const emptyAlternative = (parentIsBranching && id === -2); // -1 = end screen, -2 = empty
       const content = this.state.content[id];
       if (!content && !emptyAlternative) {
         return; // Does not exist, simply skip.
@@ -535,7 +545,8 @@ export default class Canvas extends React.Component {
 
       // Add vertical line above (except for top node)
       const aboveLineHeight = this.state.nodeSpecs.spacing.y * 3.5; // *3.5 = enough room for DZ
-      const nodeCenter = position.x + (content ? (this.state.nodeSpecs.width / 2) : 21);
+      const nodeWidth = (content ? (this.state.nodeSpecs.width / 2) : 21); // Half width actually...
+      const nodeCenter = position.x + nodeWidth;
       if (content && id !== 0) {
         nodes.push(
           <div key={ id + '-vabove' } className="vertical-line" style={ {
@@ -547,7 +558,7 @@ export default class Canvas extends React.Component {
       }
 
       // Extra lines for BQ
-      if (contentIsBranching) {
+      if (contentIsBranching && content.type.params.alternatives && content.type.params.alternatives.length > 1) {
         // Add vertical line below
         nodes.push(
           <div key={ id + '-vbelow' } className="vertical-line" style={ {
@@ -557,28 +568,26 @@ export default class Canvas extends React.Component {
           } }/>
         );
 
-        if (content.type.params.alternatives.length > 1) {
-          // Add horizontal line below
-          nodes.push(
-            <div key={ id + '-hbelow' } className="horizontal-line" style={ {
-              left: (x + (this.state.nodeSpecs.width / 2)) + 'px',
-              top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
-              width: subtree.dX + 'px'
-            } }/>
-          ); // TODO: Almost perfect, sometimes off due to strange spacing in subtree - Try fixing subtree first
-        }
+        // Add horizontal line below
+        nodes.push(
+          <div key={ id + '-hbelow' } className="horizontal-line" style={ {
+            left: (x + (children[0] < 0 ? 42 / 2 : this.state.nodeSpecs.width / 2)) + 'px',
+            top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
+            width: subtree.dX + 'px'
+          } }/>
+        );
       }
 
       if (parentIsBranching) {
         nodes.push(
-          <div key={ id + '-vabovebs' } className="vertical-line" style={ {
+          <div key={ id + '-vabovebs-' + num } className="vertical-line" style={ {
             left: nodeCenter + 'px',
             top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 2)) + 'px',
             height: (this.state.nodeSpecs.spacing.y * 2) + 'px'
           } }/>
         );
         nodes.push(
-          <div key={ id + '-abox' } className="alternative-ball" style={ {
+          <div key={ id + '-abox-' + num } className="alternative-ball" style={ {
             left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) + 1) + 'px',
             top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
           } }>A{ num + 1 }</div>
@@ -594,7 +603,7 @@ export default class Canvas extends React.Component {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
             y: position.y - 42 - dzDistance
-          }));
+          }, parentIsBranching ? parent : undefined, parentIsBranching ? num : -1));
         }
 
         // Add dropzone below if there's no subtree
@@ -602,12 +611,13 @@ export default class Canvas extends React.Component {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
             y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance
-          }, id, 1));
+          }, id, -2));
         }
       }
 
       // Increase same level offset + offset required by subtree
-      x += (subtreeWidth >= this.state.nodeSpecs.width ? subtreeWidth : (content ? this.state.nodeSpecs.width : 42));
+      const elementWidth = (content ? this.state.nodeSpecs.width : 42);
+      x += (subtreeWidth >= this.state.nodeSpecs.width ? subtreeWidth : elementWidth);
 
       if (subtree) {
         // Merge our trees
@@ -615,9 +625,9 @@ export default class Canvas extends React.Component {
       }
 
       if (firstX === undefined) {
-        firstX = position.x;
+        firstX = position.x + nodeWidth;
       }
-      lastX = position.x;
+      lastX = position.x + nodeWidth;
     });
 
     return {
