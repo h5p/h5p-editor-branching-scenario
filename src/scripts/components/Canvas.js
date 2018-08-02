@@ -15,7 +15,7 @@ export default class Canvas extends React.Component {
       clickHandeled: false,
       placing: null,
       deleting: null,
-      editorOverlay: 'inactive',
+      editorOverlayVisible: false,
       editorContents: {
         top: {
           icon: '',
@@ -38,6 +38,24 @@ export default class Canvas extends React.Component {
     };
   }
 
+  componentDidMount() {
+    // Handle document clicks (for exiting placing mode/state)
+    document.addEventListener('click', this.handleDocumentClick);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleDocumentClick);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.inserting) {
+      this.setState({
+        placing: -1,
+        library: nextProps.inserting.library
+      });
+    }
+  }
+
   handleDocumentClick = () => {
     if (this.state.clickHandeled) {
       this.setState({
@@ -48,29 +66,7 @@ export default class Canvas extends React.Component {
       this.setState({
         placing: null
       });
-      this.props.onInserted();
-    }
-  }
-
-  componentDidMount() {
-    this.props.onRef(this);
-
-    // Handle document clicks (for exiting placing mode/state)
-    document.addEventListener('click', this.handleDocumentClick);
-  }
-
-  componentWillUnmount() {
-    this.props.onRef(undefined);
-
-    document.removeEventListener('click', this.handleDocumentClick);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.inserting) {
-      this.setState({
-        placing: -1,
-        library: nextProps.inserting.library
-      });
+      this.handleInserted();
     }
   }
 
@@ -119,16 +115,16 @@ export default class Canvas extends React.Component {
       }
 
       if (dropzone.overlap(points)) {
-        if (dropzone instanceof Draggable && this.state.editorOverlay === 'inactive') {
+        if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
           this.setState({
             deleting: dropzone.props.id // TODO: Not if DZ is a BQ
           });
         }
-        if (this.state.editorOverlay === 'inactive') {
+        if (!this.state.editorOverlayVisible) {
           data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
         }
         else {
-          const parentId = this.child.saveData();
+          const parentId = this.state.editorOverlay.handleSaveData(); // TODO: This should probably be done here
           if (parentId !== undefined) {
             data = this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
           }
@@ -142,7 +138,7 @@ export default class Canvas extends React.Component {
     }
 
     if (this.state.deleting === null) {
-      this.props.onInserted(data);
+      this.handleInserted(data);
     }
   }
 
@@ -152,12 +148,12 @@ export default class Canvas extends React.Component {
     }
 
     this.placeInTree(this.state.placing, nextContentId, parent, alternative);
-    this.props.onInserted();
+    this.handleInserted();
   }
 
   handleEditContent = (id) => {
     const data = this.state.content[id];
-    this.props.openEditor(data);
+    this.openEditor(data);
   }
 
   getNewContentParams = () => {
@@ -293,13 +289,17 @@ export default class Canvas extends React.Component {
       return newState;
     });
 
-    // Set contentIds explicitly
-    // TODO: Mutating the state directly will go wrong and cause issues at one point, see https://reactjs.org/docs/react-component.html#state
-    this.state.content.forEach((item, index) => {
-      item.contentId = index; // TODO: Find a way to avoid having this extra variable to maintain all the time – I believe it's changed but not updated in more places than here.
-    });
-
     return newNode;
+  }
+
+  /**
+   * Get Id of element. It's set implicitly by the position in the array.
+   *
+   * @param {object} contentItem - item to check for.
+   * @return {number} position or -1.
+   */
+  handleNeedNodeId = (contentItem) => {
+    return this.state.content.indexOf(contentItem);
   }
 
   renderDropzone(id, position, parent, num, parentIsBranching) {
@@ -307,7 +307,7 @@ export default class Canvas extends React.Component {
     if (num === undefined) {
       num = 0;
     }
-    return ( this.state.editorOverlay === 'inactive' &&
+    return ( !this.state.editorOverlayVisible &&
       <Dropzone
         key={ (id === -1 ? 'f' : (id === -2 ? 'a' + parent : id)) + '-dz-' + num} // TODO: Fix unique id
         ref={ element => this.dropzones.push(element) }
@@ -428,7 +428,7 @@ export default class Canvas extends React.Component {
       }
 
       if (content) {
-        const libraryTitle = this.getLibraryTitle(content.type.library).trim();
+        const libraryTitle = this.getLibraryTitle(content.type.library);
 
         // Draw node
         nodes.push(
@@ -441,7 +441,7 @@ export default class Canvas extends React.Component {
             onPlacing={ () => this.handlePlacing(id) }
             onMove={ () => this.handleMove(id) }
             onDropped={ () => this.handleDropped(id) }
-            contentClass={ libraryTitle.replace(/ +/g, '') } // TODO: Define className when libraries are loaded instead of redoing it for each draggable
+            contentClass={ libraryTitle }
             editContent={ () => this.handleEditContent(id) }
             disabled={ content.type.library.split(' ')[0] === 'H5P.BranchingQuestion' }
           >
@@ -554,39 +554,12 @@ export default class Canvas extends React.Component {
    * @param {number} id - Id of the leaf.
    *
    */
-  removeLeaf = (id) => { // TODO: Functions that are used as event handlers should be prefixed handle*
+  handleRemoveLeaf = (id) => {
     if (id < this.state.content.length && !this.state.content[id].nextContentId) {
-      // TODO: Stop mutating state directly
-      this.state.content.splice(id, 1);
+      this.setState((prevState) => {
+        prevState.content.splice(id, 1);
+      });
     }
-  }
-
-  /**
-   * Render the editor overlay.
-   *
-   * @param {string} [state] - Display state [active|inactive].
-   * @return {object} React render object.
-   */
-  renderEditorOverlay({state = 'inactive', form = {}, content={}} = {}) {
-    // TODO: Don't use a separate function for rendering when there's no need for extra operations – placing it directly in render makes it much easier to read.
-    return (
-      <EditorOverlay // TODO: It's quite difficult to see which content the overlay is being displayed for
-        onRef={ ref => (this.child = ref) } // TODO: Ideally we should use a state or property instead of a direct reference.
-        state={ state }
-        editorContents={ this.state.editorContents }
-        form={form}
-        closeForm={ this.toggleEditorOverlay.bind(this) } // TODO: No need to use .bind if the function decleared using = () => { }
-        removeData={ this.removeLeaf } // Event handlers passed in should be prefixed with on* to avoid confusion with data attributes.
-        main={ this.props.main }
-        content={ content }
-        canvas={ this } // TODO: This is a big no-no in React. The overlay should communicate through events. (In an ideal world the editor overlay should be reusable in other projects without <Canvas>)
-        onChange={ () => {
-          // Workaround for merging React with the save-by-reference principle
-          this.props.main.params.content = this.state.content;
-          // TODO: Find a better way of handling this. Maybe an event retuning a new ref each time the state changes.
-        } }
-      />
-    );
   }
 
   /**
@@ -594,18 +567,9 @@ export default class Canvas extends React.Component {
    *
    * @param {boolean} visibility - Override visibility toggling.
    */
-  toggleEditorOverlay(visibility) {
-    if (visibility === true) {
-      visibility = 'active'; // TODO: Visibility is usually hidden or visible, not active or inactive.
-    }
-    else if (visibility === false) {
-      visibility = 'inactive'; // TODO: Seems like it would have been easier if this was a boolean value?
-    }
-    else {
-      visibility = undefined;
-    }
-    this.setState({ // TODO: Use prevState instead of this.state
-      editorOverlay: visibility || ((this.state.editorOverlay === 'active') ? 'inactive' : 'active')
+  toggleEditorOverlay = (visibility) => {
+    this.setState((prevState) => {
+      return {editorOverlayVisible: visibility || !prevState.editorOverlayVisible};
     });
   }
 
@@ -684,6 +648,53 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * Add an element.
+   *
+   * @param {object} element - Element to add.
+   */
+  handlePushElement = (element) => {
+    this.dropzones.push(element);
+  }
+
+  /**
+   * Handle insertion of new data.
+   *
+   * @param {object} data - New data.
+   */
+  handleInserted = (data) => {
+    this.openEditor(data, {state: 'new'});
+  }
+
+  /**
+   * Open editor.
+   *
+   * @param {object} data - Data.
+   * @param {object} params - Params.
+   */
+  openEditor = (data, params) => {
+    if (data) {
+      data.$form = H5P.jQuery('<div/>');
+      // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
+      // TODO: Instead of updating an existing form, create a new one and destroy it after it was used
+      this.state.editorOverlay.updateForm(data, this.props.getSemantics(data.type.library), params);
+      this.toggleEditorOverlay(true);
+    }
+
+    this.props.onOpenEditor(null);
+  }
+
+  /**
+   * Set reference to Editor Overlay DOM.
+   *
+   * @param {object} ref - Reference.
+   */
+  handleRef = (ref) => {
+    this.setState({
+      editorOverlay: ref
+    });
+  }
+
   render() {
     this.dropzones = [];
 
@@ -728,10 +739,19 @@ export default class Canvas extends React.Component {
               }) }
             </StartScreen>
           }
-          { this.renderEditorOverlay({
-            state: this.state.editorOverlay,
-            content: this.state.content
-          }) }
+          <EditorOverlay // TODO: It's quite difficult to see which content the overlay is being displayed for
+            onRef={ this.handleRef }
+            visibility={ this.state.editorOverlayVisible }
+            editorContents={ this.state.editorContents }
+            form={{}}
+            onNextPathDrop={ this.handlePushElement }
+            handleNeedNodeId={ this.handleNeedNodeId }
+            closeForm={ this.toggleEditorOverlay }
+            onRemoveData={ this.handleRemoveLeaf }
+            main={ this.props.main }
+            content={ this.state.content }
+            onContentChanged={ this.props.onContentChanged(this.state.content) }
+          />
         </div>
       </div>
     );

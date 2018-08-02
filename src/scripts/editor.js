@@ -33,7 +33,7 @@ export default class Editor extends React.Component {
     for (var i = 0; i < libraries.length; i++) {
       if (libraries[i].restricted !== true) {
         loadedLibraries.push({
-          title: libraries[i].title,
+          title: libraries[i].title.replace(/ +/g, ''),
           name: libraries[i].uberName,
           className: '' // TODO: Add className
         });
@@ -98,33 +98,22 @@ export default class Editor extends React.Component {
     });
   }
 
-  // TODO: This can be done smarter
-  handleInserted = (data) => {
-    this.openEditor(data, {state: 'new'});
-  }
-
-  openEditor = (data, params) => {
-    if (data && !this.props.main.canvasDev) {
-      data.$form = H5P.jQuery('<div/>');
-      // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
-      this.child.child.updateForm(data, this.props.main.getSemantics(data.type.library), params);
-      this.child.toggleEditorOverlay(true);
-    }
-
-    this.setState({
-      inserting: null
-    });
-  }
-
   navigateToTutorial = () => {
     this.setState({
       activeIndex: 3
     });
   }
 
+  // Those can probably be merged into one abstract function
   setActiveIndex = (key) => {
     this.setState({
       activeIndex: key
+    });
+  }
+
+  handleOpenEditor = (inserting) => {
+    this.setState({
+      inserting: inserting
     });
   }
 
@@ -145,15 +134,15 @@ export default class Editor extends React.Component {
           />
           <Canvas
             inserting={ this.state.inserting }
-            onInserted={ this.handleInserted }
             libraries={ this.state.libraries }
             translations={ this.state.translations }
-            onRef={ref => (this.child = ref)}
             saveData={this.props.saveData}
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
             navigateToTutorial={this.navigateToTutorial}
-            openEditor={ this.openEditor }
+            onOpenEditor={ this.handleOpenEditor }
+            onContentChanged={ this.props.onContentChanged }
+            getSemantics={ this.props.getSemantics }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

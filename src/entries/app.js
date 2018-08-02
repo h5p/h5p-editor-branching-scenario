@@ -442,7 +442,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
    * @param {Object} data - Data from React components.
    */
   BranchingScenarioEditor.prototype.updateTranslations = function (data) {
-    // ;-)
     const weNeedToDigDeeper = function (root, path) {
       if (path.length === 0) {
         return root;
@@ -528,6 +527,16 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   /**
+   * Set content for H5P params after it has been changed.
+   * Workaround for merging React with save-by-reference principle
+   *
+   * @param {object} content - Content.
+   */
+  BranchingScenarioEditor.prototype.handleContentChanged = function (content) {
+    this.params.content = content;
+  };
+
+  /**
    * Append Editor to DOM.
    *
    * @param {jQuery} $wrapper - Container in DOM.
@@ -546,7 +555,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         endImageChooser={ this.endImageChooser }
         updateParams={ this.updateParams.bind(this) }
         updateTranslations={ this.updateTranslations.bind(this) }
-        content={ this.params.content }
+        onContentChanged={ this.handleContentChanged.bind(this) }
+        getSemantics={ this.getSemantics.bind(this) }
       />), $wrapper.get(0)
     );
   };

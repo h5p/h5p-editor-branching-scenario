@@ -19,8 +19,6 @@ export default class EditorOverlay extends React.Component {
     };
 
     this.refForm = React.createRef();
-    this.handleOptionChange = this.handleOptionChange.bind(this);
-    this.updateNextContentId = this.updateNextContentId.bind(this);
   }
 
   /*
@@ -49,12 +47,16 @@ export default class EditorOverlay extends React.Component {
     });
   }
 
-  updateTitle (event) {
-    const target = event.target;
-    const value = target.value;
+  /**
+   * Update title in header as it is changed in the title field.
+   *
+   * @param {object} event - Change event.
+   */
+  handleUpdateTitle = (event) => {
+    const value = event.target.value;
     this.setState({title: value});
     this.interaction.contentTitle = value;
-    this.props.onChange();
+    this.props.onContentChanged;
   }
 
   /**
@@ -91,7 +93,7 @@ export default class EditorOverlay extends React.Component {
     // Try to listen to everything in the form
     // TODO: Also catch the CKEditor, Drag'n'Drop, etc.
     this.interaction.$form.on('keypress click change blur', () => {
-      this.props.onChange();
+      this.props.onContentChanged;
     });
 
     if (this.interaction.nextContentId) {
@@ -124,7 +126,7 @@ export default class EditorOverlay extends React.Component {
 	   }).join('');
   }
 
-  handleOptionChange (event) {
+  handleOptionChange = (event) => {
     switch (event.target.value) {
       case 'end-scenario':
         this.setState({
@@ -148,7 +150,7 @@ export default class EditorOverlay extends React.Component {
     }
 
     this.setState({branchingOptions: event.target.value});
-    this.props.onChange()
+    this.props.onContentChanged
   }
 
   /**
@@ -173,24 +175,25 @@ export default class EditorOverlay extends React.Component {
    *
    * @return {number} ContentId of saved interaction.
    */
-  saveData = () => {
+  handleSaveData = () => {
     // Check if all required form fields can be validated
     if (!this.isValid(this.interaction)) {
       return;
     }
 
     delete this.interaction.$form;
-    this.props.onChange();
+    this.props.onContentChanged;
     this.props.closeForm();
-    return this.interaction.contentId;
+
+    return this.props.handleNeedNodeId(this.interaction);
   }
 
   /*
    * Remove data.
    */
-  removeData = () => {
+  handleRemoveData = () => {
     if (this.extras && this.extras.state === 'new') {
-      this.props.removeData(this.interaction.contentId);
+      this.props.onRemoveData(this.props.handleNeedNodeId(this.interaction));
     }
     this.props.closeForm();
   }
@@ -198,19 +201,19 @@ export default class EditorOverlay extends React.Component {
   renderNextPathDropzone () {
     return (
       <Dropzone
-        ref={ element => this.props.canvas.dropzones.push(element) }
+        ref={ element => this.props.onNextPathDrop(element) }
         elementClass={ 'dropzone-editor-path'}
         innerHTML={ 'Drag any content type from a menu on the left side and drop it here to create new content/question' }
       />
     );
   }
 
-  updateNextContentId (event) {
+  updateNextContentId = (event) => {
     this.setState({
       nextContentId: event.target.value,
       nextPath: event.target.value
     })
-    this.props.onChange();
+    this.props.onContentChanged;
   }
 
   renderNextPathChooser () {
@@ -222,13 +225,13 @@ export default class EditorOverlay extends React.Component {
             .filter((node, index) => {
               return (
                 node.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
-                  this.interaction.contentId !== node.contentId
+                  this.props.handleNeedNodeId(this.interaction) !== this.props.handleNeedNodeId(node)
               )
             })
             .map(node =>
               <option
-                key={ 'next-path-' + node.contentId }
-                value={ node.contentId }>
+                key={ 'next-path-' + this.props.handleNeedNodeId(node) }
+                value={ this.props.handleNeedNodeId(node) }>
                   {`${node.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${node.contentTitle}`}
               </option>)
           }
@@ -241,18 +244,20 @@ export default class EditorOverlay extends React.Component {
   render () {
 
     // Update the params
-    this.props.onChange();
+    this.props.onContentChanged;
 
-    const className = `editor-overlay ${this.props.state}`;
+    const visibilityClass = this.props.visibility ? 'active' : 'inactive';
+
+    const className = `editor-overlay ${visibilityClass}`;
     return (
       <div className={className} >
         <div className='editor-overlay-header'>
           <span className={['editor-overlay-title', this.state.icon].join(' ')}>{this.state.title}</span>
           <span className="buttons">
-          <button className="buttonBlue" onClick={this.saveData}>
+          <button className="buttonBlue" onClick={this.handleSaveData}>
             {this.state.saveButton}
           </button>
-          <button className="button" onClick={this.removeData}>
+          <button className="button" onClick={this.handleRemoveData}>
             {this.state.closeButton}
           </button>
           </span>
@@ -261,13 +266,13 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-content'>
           <div>
             <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
-            <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.updateTitle.bind(this)} />
+            <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.handleUpdateTitle} />
           </div>
 
           <div className='editor-overlay-semantics' ref={this.refForm} />
 
           <div className='editor-overlay-branching-options'>
-            <select value={ this.state.branchingOptions } onChange={ this.handleOptionChange}>
+            <select value={ this.state.branchingOptions } onChange={ this.handleOptionChange }>
               <option key="branching-option-0" value="end-scenario">End scenario here</option>
               <option key="branching-option-1" value="new-content">Send a viewer to a new content/question</option>
               { this.props.content.length > 1 &&
