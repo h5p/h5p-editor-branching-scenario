@@ -15,6 +15,7 @@ export default class Canvas extends React.Component {
       clickHandeled: false,
       placing: null,
       deleting: null,
+      inserting: null,
       editorOverlayVisible: false,
       editorContents: {
         top: {
@@ -66,7 +67,6 @@ export default class Canvas extends React.Component {
       this.setState({
         placing: null
       });
-      this.handleInserted();
     }
   }
 
@@ -108,7 +108,6 @@ export default class Canvas extends React.Component {
     // Check if the node overlaps with one of the drop zones
     const draggable = this['draggable-' + id];
     const points = draggable.getPoints();
-    let data;
     if (!this.dropzones.some(dropzone => {
       if (!dropzone || dropzone === draggable) {
         return; // Skip
@@ -121,12 +120,12 @@ export default class Canvas extends React.Component {
           });
         }
         if (!this.state.editorOverlayVisible) {
-          data = this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
+          this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
         }
         else {
           const parentId = this.state.editorOverlay.handleSaveData(); // TODO: This should probably be done here
           if (parentId !== undefined) {
-            data = this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
+            this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
           }
         }
         return true;
@@ -136,10 +135,6 @@ export default class Canvas extends React.Component {
         placing: null
       });
     }
-
-    if (this.state.deleting === null) {
-      this.handleInserted(data);
-    }
   }
 
   handleDropzoneClick = (nextContentId, parent, alternative) => {
@@ -148,12 +143,10 @@ export default class Canvas extends React.Component {
     }
 
     this.placeInTree(this.state.placing, nextContentId, parent, alternative);
-    this.handleInserted();
   }
 
   handleEditContent = (id) => {
-    const data = this.state.content[id];
-    this.openEditor(data);
+    this.openEditor(this.state.content[id]);
   }
 
   getNewContentParams = () => {
@@ -190,19 +183,18 @@ export default class Canvas extends React.Component {
   }
 
   placeInTree(id, nextContentId, parent, alternative) {
-    let newNode; // TODO: Find another way to get this data as it may not be there depending on when the state callback runs... e.g. adding a lastplacedId to the state or something
-
     this.setState(prevState => {
       let newState = {
         placing: null,
-        content: [...prevState.content]
+        inserting: null,
+        content: [...prevState.content],
       };
 
       // Handle inserting of new node
       if (id === -1) {
-        newNode = this.getNewContentParams();
-        newState.content.push(newNode);
+        newState.content.push(this.getNewContentParams());
         id = newState.content.length - 1;
+        newState.inserting = id;
         if (id === 0) {
           // This is the first node added, nothing more needs to be done.
           return newState;
@@ -287,9 +279,12 @@ export default class Canvas extends React.Component {
       }
 
       return newState;
+    }, () => {
+      if (this.state.inserting === null || this.state.deleting !== null) {
+        return;
+      }
+      this.handleInserted(this.state.content[this.state.inserting]);
     });
-
-    return newNode;
   }
 
   /**
