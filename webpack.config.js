@@ -33,7 +33,8 @@ var config = {
 };
 
 if (isDev) {
-  config.devtool = 'inline-source-map';
+  //config.devtool = 'inline-source-map';
+  config.devtool = 'cheap-module-eval-source-map';
 }
 
 module.exports = config;
