@@ -70,22 +70,22 @@ export default class Canvas extends React.Component {
     }
   }
 
-  handlePlacing = (id) => {
-    if (this.state.placing !== null && this.state.placing !== id) {
-      // Try to replace
-      this.setState({
-        clickHandeled: true,
-        deleting: id  // TODO: Not if DZ is a BQ
-      });
-    }
-    else {
-      // Start placing
-      this.setState({
-        clickHandeled: true,
-        placing: id
-      });
-    }
-  }
+  // handlePlacing = (id) => {
+  //   if (this.state.placing !== null && this.state.placing !== id) {
+  //     // Try to replace
+  //     this.setState({
+  //       clickHandeled: true,
+  //       deleting: id  // TODO: Not if DZ is a BQ
+  //     });
+  //   }
+  //   else {
+  //     // Start placing
+  //     this.setState({
+  //       clickHandeled: true,
+  //       placing: id
+  //     });
+  //   }
+  // }
 
   handleMove = (id) => {
     const draggable = this['draggable-' + id];
@@ -119,7 +119,7 @@ export default class Canvas extends React.Component {
             deleting: dropzone.props.id // TODO: Not if DZ is a BQ
           });
         }
-        if (!this.state.editorOverlayVisible) {
+        else if (!this.state.editorOverlayVisible) {
           this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
         }
         else {
@@ -186,7 +186,6 @@ export default class Canvas extends React.Component {
     this.setState(prevState => {
       let newState = {
         placing: null,
-        inserting: null,
         content: [...prevState.content],
       };
 
@@ -216,6 +215,7 @@ export default class Canvas extends React.Component {
       if (nextContentId === 0) {
         // We are the new top node, we must move to the top of the array
         newState.content.splice(0, 0, newState.content[id]);
+        newState.inserting = 0;
 
         // Mark IDs for bumping due to array changes
         bumpIdsUntil = id + 1;
@@ -433,7 +433,7 @@ export default class Canvas extends React.Component {
             ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
             position={ position }
             width={ this.state.nodeSpecs.width }
-            onPlacing={ () => this.handlePlacing(id) }
+            //onPlacing={ () => this.handlePlacing(id) }
             onMove={ () => this.handleMove(id) }
             onDropped={ () => this.handleDropped(id) }
             contentClass={ libraryTitle }
@@ -543,28 +543,15 @@ export default class Canvas extends React.Component {
   }
 
   /**
-   * Remove a leaf from the tree (if it's really a leaf).
-   * TODO: Can probably be replaced by general delete function
-   *
-   * @param {number} id - Id of the leaf.
-   *
-   */
-  handleRemoveLeaf = (id) => {
-    if (id < this.state.content.length && !this.state.content[id].nextContentId) {
-      this.setState((prevState) => {
-        prevState.content.splice(id, 1);
-      });
-    }
-  }
-
-  /**
    * Toggle the editor overlay.
    *
    * @param {boolean} visibility - Override visibility toggling.
    */
   toggleEditorOverlay = (visibility) => {
     this.setState((prevState) => {
-      return {editorOverlayVisible: visibility || !prevState.editorOverlayVisible};
+      return {
+        editorOverlayVisible: visibility || !prevState.editorOverlayVisible
+      };
     });
   }
 
@@ -586,10 +573,13 @@ export default class Canvas extends React.Component {
       let newState = {
         placing: null,
         deleting: null,
+        inserting: null,
         content: [...prevState.content]
       };
 
-      let id = this.state.placing;
+      let id = this.state.inserting;
+      // used for nodes that were added but then closed without saving
+      let deleting = this.state.deleting || id;
       if (id === -1) {
         // Insert new node
         newState.content.push(this.getNewContentParams());
@@ -600,11 +590,11 @@ export default class Canvas extends React.Component {
       // TODO: What to do if we are a branching?
 
       // Make their children our own
-      newState.content[id].nextContentId = newState.content[this.state.deleting].nextContentId;
+      newState.content[id].nextContentId = newState.content[deleting].nextContentId;
       // TODO: Handle branching scenario
 
       // Replace the node (preserves tree drawing order)
-      newState.content[this.state.deleting] = newState.content[id];
+      newState.content[deleting] = newState.content[id];
       newState.content.splice(id, 1);
 
       // What are we doing?
@@ -742,7 +732,7 @@ export default class Canvas extends React.Component {
             onNextPathDrop={ this.handlePushElement }
             handleNeedNodeId={ this.handleNeedNodeId }
             closeForm={ this.toggleEditorOverlay }
-            onRemoveData={ this.handleRemoveLeaf }
+            onRemoveData={ this.handleDelete }
             main={ this.props.main }
             content={ this.state.content }
             onContentChanged={ this.props.onContentChanged(this.state.content) }

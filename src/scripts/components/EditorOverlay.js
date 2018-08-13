@@ -193,7 +193,7 @@ export default class EditorOverlay extends React.Component {
    */
   handleRemoveData = () => {
     if (this.extras && this.extras.state === 'new') {
-      this.props.onRemoveData(this.props.handleNeedNodeId(this.interaction));
+      this.props.onRemoveData();
     }
     this.props.closeForm();
   }

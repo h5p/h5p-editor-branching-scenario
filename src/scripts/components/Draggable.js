@@ -9,6 +9,7 @@ export default class Draggable extends React.Component {
 
     this.state = props.inserting ? this.prepareMouseMove(props.inserting) : {};
     this.state.position = this.props.position;
+
     if (props.inserting) {
       this.libraryName = this.props.inserting.target.dataset.libraryName;
     }
@@ -160,9 +161,9 @@ export default class Draggable extends React.Component {
       startY: event.pageY
     }));
 
-    if (event.target !== this.contentMenuButton.current) {
-      this.props.onPlacing();
-    }
+    // if (event.target !== this.contentMenuButton.current) {
+    //   this.props.onPlacing();
+    // }
   }
 
   render() {
