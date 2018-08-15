@@ -359,8 +359,11 @@ export default class Canvas extends React.Component {
     return children;
   }
 
-  renderTree = (branch, x, y, parent) => {
+  renderTree = (branch, x, y, parent, renderedNodes) => {
     let nodes = [];
+
+    // Keep track of nodes that have already been rendered (there might be cycles)
+    renderedNodes = renderedNodes || [];
 
     // Libraries must be loaded before tree can be drawn
     if (!this.props.libraries || this.props.translations.length === 0) {
@@ -388,6 +391,11 @@ export default class Canvas extends React.Component {
 
     let firstX, lastX;
     branch.forEach((id, num) => {
+      if (renderedNodes.indexOf(id) !== -1) {
+        return; // Already rendered (cycle)
+      }
+      renderedNodes.push(id);
+
       const emptyAlternative = (parentIsBranching && id === -2); // -1 = end screen, -2 = empty
       const content = this.state.content[id];
       if (!content && !emptyAlternative) {
@@ -408,7 +416,7 @@ export default class Canvas extends React.Component {
       }
 
       // Draw subtree first so we know where to position the node
-      const subtree = children ? this.renderTree(children, x, branchY, id) : null;
+      const subtree = children ? this.renderTree(children, x, branchY, id, renderedNodes) : null;
       const subtreeWidth = subtree ? subtree.x - x : 0;
 
       // Determine position of node
