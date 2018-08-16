@@ -26,7 +26,10 @@ export default class Draggable extends React.Component {
   }
 
   handleWindowMouseDown = (e) => {
-    if (e.target == this.contentMenuButton.current || e.target.className == 'edit-content') {
+    if (e.target == this.contentMenuButton.current ||
+      e.target.className === 'edit-content' ||
+      e.target.className === 'delete'
+    ) {
       return
     }
 
@@ -161,9 +164,9 @@ export default class Draggable extends React.Component {
       startY: event.pageY
     }));
 
-    // if (event.target !== this.contentMenuButton.current) {
-    //   this.props.onPlacing();
-    // }
+    if (event.target !== this.contentMenuButton.current) {
+      this.props.onPlacing();
+    }
   }
 
   render() {
@@ -214,12 +217,17 @@ export default class Draggable extends React.Component {
     const contentMenu = this.state.contentMenuActive ? (
       <SubMenu
         ref={ this.contentMenu }
-        preview={ () => {this.setState({contentMenuActive: false});}}
+        preview={ () => {
+          this.setState({contentMenuActive: false});
+        }}
         edit={ () => {
           this.setState({contentMenuActive: false});
           this.props.editContent(this.props.id);
         }}
-        delete={ () => {this.setState({contentMenuActive: false});}}
+        delete={ () => {
+          this.setState({contentMenuActive: false});
+          this.props.deleteContent(this.props.id);
+        }}
       />
     ) : '';
 

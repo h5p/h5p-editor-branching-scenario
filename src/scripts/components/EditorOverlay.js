@@ -62,12 +62,13 @@ export default class EditorOverlay extends React.Component {
   /**
    * Update the form for editing an interaction
    *
+   * @param {number} contentId - ContentID.
    * @param {object} interaction - Parameters to set in form.
    * @param {object} elementFields - Semantics fields for validation.
    * @param {object} extras - Additional parameters.
    * @param {string} extras.state - Particular state.
    */
-  updateForm (interaction, elementFields, extras) {
+  updateForm (contentId, interaction, elementFields, extras) {
     this.reset();
     // Holds the reference to the object we're modifying
     this.interaction = interaction || {};
@@ -75,7 +76,7 @@ export default class EditorOverlay extends React.Component {
 
     const icon = `editor-overlay-icon-${this.camelToKebab(this.interaction.type.library.split('.')[1])}`;
     const title = this.interaction.contentTitle || this.interaction.type.library.split('.')[1];
-    this.setState({icon: icon, title: title});
+    this.setState({contentId: contentId, icon: icon, title: title});
 
     this.passReadies = false;
 
@@ -213,14 +214,14 @@ export default class EditorOverlay extends React.Component {
       nextContentId: event.target.value,
       nextPath: event.target.value
     })
-    this.props.onContentChanged;
+    this.props.onContentChanged(this.state.contentId, parseInt(event.target.value));
   }
 
   renderNextPathChooser () {
     return (
       <div>
         <label htmlFor="nextPath">Select a path to send a user to</label>
-        <select name="nextPath" value={this.state.nextPath} onChange={this.updateNextContentId}>
+        <select name="nextPath" value={this.state.nextPath} onChange={ this.updateNextContentId }>
           { this.props.content
             .filter((node, index) => {
               return (

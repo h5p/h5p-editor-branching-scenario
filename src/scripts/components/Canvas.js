@@ -70,22 +70,22 @@ export default class Canvas extends React.Component {
     }
   }
 
-  // handlePlacing = (id) => {
-  //   if (this.state.placing !== null && this.state.placing !== id) {
-  //     // Try to replace
-  //     this.setState({
-  //       clickHandeled: true,
-  //       deleting: id  // TODO: Not if DZ is a BQ
-  //     });
-  //   }
-  //   else {
-  //     // Start placing
-  //     this.setState({
-  //       clickHandeled: true,
-  //       placing: id
-  //     });
-  //   }
-  // }
+  handlePlacing = (id) => {
+    if (this.state.placing !== null && this.state.placing !== id) {
+      // Try to replace
+      this.setState({
+        clickHandeled: true,
+        deleting: id  // TODO: Not if DZ is a BQ
+      });
+    }
+    else {
+      // Start placing
+      this.setState({
+        clickHandeled: true,
+        placing: id
+      });
+    }
+  }
 
   handleMove = (id) => {
     const draggable = this['draggable-' + id];
@@ -114,15 +114,18 @@ export default class Canvas extends React.Component {
       }
 
       if (dropzone.overlap(points)) {
+        // Replace existing node
         if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
           this.setState({
             deleting: dropzone.props.id // TODO: Not if DZ is a BQ
           });
         }
         else if (!this.state.editorOverlayVisible) {
+          // New node position
           this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
         }
         else {
+          // Add next element in editor
           const parentId = this.state.editorOverlay.handleSaveData(); // TODO: This should probably be done here
           if (parentId !== undefined) {
             this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
@@ -146,7 +149,11 @@ export default class Canvas extends React.Component {
   }
 
   handleEditContent = (id) => {
-    this.openEditor(this.state.content[id]);
+    this.openEditor(id, this.state.content[id]);
+  }
+
+  handleDeleteContent = (id) => {
+    this.setState({deleting: id}, this.handleDelete);
   }
 
   getNewContentParams = () => {
@@ -165,10 +172,10 @@ export default class Canvas extends React.Component {
     return content.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
   }
 
-  updateNextContentId(leaf, id, currentNextId, nextContentId, bumpIdsUntil) {
+  updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil) {
     // Make old parent point directly to our old children
     if (leaf.nextContentId === id) {
-      leaf.nextContentId = (currentNextId < 0 ? undefined : currentNextId);
+      leaf.nextContentId = (nextId < 0 ? undefined : nextId);
     }
 
     // Make our new parent aware of us
@@ -182,6 +189,14 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * place a node in the tree (which isn't a tree technically).
+   *
+   * @param {number} id ID of node to be placed or -1 if new node.
+   * @param {number} nextContentId
+   * @param {number} parent
+   * @param {number} alternative
+   */
   placeInTree(id, nextContentId, parent, alternative) {
     this.setState(prevState => {
       let newState = {
@@ -200,14 +215,17 @@ export default class Canvas extends React.Component {
         }
       }
 
+      console.warn(`Trying to place ${id}, parent: ${parent}, alternative: ${alternative}, nextcontentID: ${nextContentId}`);
+
       // When placing after a leaf node keep track of it so we can update it
       // after processing the new content array
       if (parent !== undefined) {
         parent = newState.content[parent];
       }
+
       const parentIsBranching = (parent && parent.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
-      const currentNextId = newState.content[id].nextContentId;
+      const nextId = newState.content[id].nextContentId;
       // TODO: Make as solution for Branching Question?
 
       // Handle adding new top node before the current one
@@ -224,10 +242,10 @@ export default class Canvas extends React.Component {
       // Handle moving current top node to somewhere else
       if (id === 0) {
         // Place our current next node at the top
-        newState.content.splice(0, 0, newState.content[currentNextId]);
+        newState.content.splice(0, 0, newState.content[nextId]);
 
         // Mark IDs for bumping due to array changes
-        bumpIdsUntil = currentNextId + 1;
+        bumpIdsUntil = nextId + 1;
       }
 
       newState.content.forEach((content, index) => {
@@ -239,11 +257,11 @@ export default class Canvas extends React.Component {
           if (content.type.params &&
               content.type.params.alternatives) {
             content.type.params.alternatives.forEach(alternative =>
-              this.updateNextContentId(alternative, id, currentNextId, nextContentId, bumpIdsUntil));
+              this.updateNextContentId(alternative, id, nextId, nextContentId, bumpIdsUntil));
           }
         }
         else {
-          this.updateNextContentId(content, id, currentNextId, nextContentId, bumpIdsUntil);
+          this.updateNextContentId(content, id, nextId, nextContentId, bumpIdsUntil);
         }
       });
 
@@ -392,6 +410,7 @@ export default class Canvas extends React.Component {
     let firstX, lastX;
     branch.forEach((id, num) => {
       if (renderedNodes.indexOf(id) !== -1) {
+        console.warn(`Node ${id} was already rendered. Skipping it.`)
         return; // Already rendered (cycle)
       }
       renderedNodes.push(id);
@@ -441,11 +460,12 @@ export default class Canvas extends React.Component {
             ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
             position={ position }
             width={ this.state.nodeSpecs.width }
-            //onPlacing={ () => this.handlePlacing(id) }
+            onPlacing={ () => this.handlePlacing(id) }
             onMove={ () => this.handleMove(id) }
             onDropped={ () => this.handleDropped(id) }
             contentClass={ libraryTitle }
             editContent={ () => this.handleEditContent(id) }
+            deleteContent={ () => this.handleDeleteContent(id) }
             disabled={ content.type.library.split(' ')[0] === 'H5P.BranchingQuestion' }
           >
             { libraryTitle }
@@ -563,10 +583,10 @@ export default class Canvas extends React.Component {
     });
   }
 
-  updateNextContentIdAfterReplace(leaf, id, currentNextId) {
+  updateNextContentIdAfterReplace(leaf, id, nextId) {
     // Move current children of the moved node to grand parent
     if (leaf.nextContentId === id) {
-      leaf.nextContentId = currentNextId;
+      leaf.nextContentId = nextId;
     }
 
     // Decrease all next ID values larger than the deleted node
@@ -578,6 +598,7 @@ export default class Canvas extends React.Component {
   handleDelete = () => {
     // Set new parent for node
     this.setState(prevState => {
+
       let newState = {
         placing: null,
         deleting: null,
@@ -585,39 +606,72 @@ export default class Canvas extends React.Component {
         content: [...prevState.content]
       };
 
-      let id = this.state.inserting;
-      // used for nodes that were added but then closed without saving
-      let deleting = this.state.deleting || id;
-      if (id === -1) {
-        // Insert new node
-        newState.content.push(this.getNewContentParams());
-        id = newState.content.length - 1;
-      }
+      /**
+       * Delete node.
+       *
+       * @param {number} id Id of node to be removed.
+       * @param {boolean} removeChildren If true, remove children. Adopt otherwise.
+       */
+      const removeNode = (id, removeChildren=false) => {
+        const node = newState.content[id];
 
-      const currentNextId = newState.content[id].nextContentId;
-      // TODO: What to do if we are a branching?
-
-      // Make their children our own
-      newState.content[id].nextContentId = newState.content[deleting].nextContentId;
-      // TODO: Handle branching scenario
-
-      // Replace the node (preserves tree drawing order)
-      newState.content[deleting] = newState.content[id];
-      newState.content.splice(id, 1);
-
-      // What are we doing?
-      newState.content.forEach(content => {
-        if (this.contentIsBranching(content)) {
-          if (content.type.params &&
-              content.type.params.alternatives) {
-            content.type.params.alternatives.forEach(alternative =>
-              this.updateNextContentIdAfterReplace(alternative, id, currentNextId));
-          }
+        // Compile list of ids to be deleted
+        let deleteIds;
+        if (this.contentIsBranching(node)) {
+          // delete alternatives and node itself
+          deleteIds = node.type.params.alternatives.map(alt => alt.nextContentId).concat(id);
+          // also delete children
+          removeChildren = true;
         }
         else {
-          this.updateNextContentIdAfterReplace(content, id, currentNextId);
+          // delete only this node
+          deleteIds = [id];
         }
-      });
+
+        deleteIds.forEach(deleteId => {
+          if (deleteId === undefined || deleteId >= newState.content.length) {
+            return;
+          }
+
+          // The node to be removed
+          const deleteNode = newState.content[deleteId];
+          // Node to be removed loops backwards, don't save the link
+          const nextId = (deleteNode.nextContentId > deleteId) ? deleteNode.nextContentId : undefined;
+
+          // Update relevant links of all nodes to point to successor node
+          newState.content.forEach(node => {
+
+            // Get nodes
+            const affectedNodes = (this.contentIsBranching(node)) ?
+              node.type.params.alternatives :
+              [node];
+
+            affectedNodes.forEach(affectedNode => {
+              // Save successor
+              if (affectedNode.nextContentId === deleteId) {
+                affectedNode.nextContentId = nextId;
+              }
+              // Account for upcoming node removal
+              if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
+                affectedNode.nextContentId -= 1;
+              }
+            });
+          });
+
+          // Remove node
+          newState.content.splice(deleteId, 1);
+
+          // Purge children
+          if (removeChildren === true && nextId !== undefined) {
+            removeNode(nextId-1, removeChildren);
+          }
+        });
+      }
+
+      const id = (this.state.placing !== null) ? this.state.placing :
+        ((this.state.inserting !== null) ? this.state.inserting : this.state.deleting);
+
+      removeNode(id);
 
       return newState;
     });
@@ -656,21 +710,22 @@ export default class Canvas extends React.Component {
    * @param {object} data - New data.
    */
   handleInserted = (data) => {
-    this.openEditor(data, {state: 'new'});
+    this.openEditor(this.state.inserting, data, {state: 'new'});
   }
 
   /**
    * Open editor.
    *
+   * @param {number} contentId - ContentId.
    * @param {object} data - Data.
    * @param {object} params - Params.
    */
-  openEditor = (data, params) => {
+  openEditor = (contentId, data, params) => {
     if (data) {
       data.$form = H5P.jQuery('<div/>');
       // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
       // TODO: Instead of updating an existing form, create a new one and destroy it after it was used
-      this.state.editorOverlay.updateForm(data, this.props.getSemantics(data.type.library), params);
+      this.state.editorOverlay.updateForm(contentId, data, this.props.getSemantics(data.type.library), params);
       this.toggleEditorOverlay(true);
     }
 
@@ -682,10 +737,54 @@ export default class Canvas extends React.Component {
    *
    * @param {object} ref - Reference.
    */
-  handleRef = (ref) => {
+  handleRef = ref => {
     this.setState({
       editorOverlay: ref
     });
+  }
+
+  handleContentChanged = (contentId, nextContentId) => {
+    this.setState(prevState => {
+      prevState.content[contentId].nextContentId = nextContentId;
+    }, () => {this.props.onContentChanged(this.state.content);});
+  }
+
+  // For debugging
+  logNodes = caller => {
+    console.log('NODES', caller);
+    this.state.content.forEach((node, index) => {
+      const target = (this.contentIsBranching(node)) ?
+        node.type.params.alternatives.map(alt => alt.nextContentId).join(' | ') :
+        node.nextContentId;
+      console.log(`${index} --> ${target}`);
+    });
+    console.log(`Trace: ${this.traceBranch(0)
+      .map(id => (typeof id === 'number') ? `${id} (${this.state.content[id].contentTitle})` : id)
+      .join(' --> ')}`);
+    console.log('==========');
+  }
+
+  traceBranch = (start=0, done=[]) => {
+    if (this.state.content.length === 0) {
+      return done;
+    }
+    done.push(start);
+
+    const node = this.state.content[start];
+
+    const nextIds = (this.contentIsBranching(node)) ? node.type.params.alternatives.map(alt => alt.nextContentId) : [node.nextContentId];
+
+    nextIds.forEach(nextId => {
+      if (nextId !== undefined && nextId > -1) {
+        if (done.indexOf(nextId) === -1) {
+          return this.traceBranch(nextId, done);
+        }
+        done.push(`(${nextId})`)
+      }
+      return done;
+    });
+
+    return done;
   }
 
   render() {
@@ -693,6 +792,7 @@ export default class Canvas extends React.Component {
 
     // Generate the tree
     const tree = this.renderTree(0);
+    this.logNodes('render');
     this.treeWidth = tree.x;
 
     return (
@@ -707,6 +807,7 @@ export default class Canvas extends React.Component {
             onDropped={ () => this.handleDropped(-1) }
             contentClass={ this.props.inserting.library.title.replace(/ +/g, '') }
             position={ this.props.inserting.position }
+            onPlacing={ () => this.handlePlacing(-1) }
           >
             { this.props.inserting.library.title }
           </Draggable>
@@ -743,7 +844,7 @@ export default class Canvas extends React.Component {
             onRemoveData={ this.handleDelete }
             main={ this.props.main }
             content={ this.state.content }
-            onContentChanged={ this.props.onContentChanged(this.state.content) }
+            onContentChanged={ this.handleContentChanged }
           />
         </div>
       </div>

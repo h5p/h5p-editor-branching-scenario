@@ -24,5 +24,5 @@ export default class SubMenu extends React.Component {
 SubMenu.propTypes = {
   preview: PropTypes.func,
   edit: PropTypes.func,
-  delete: PropTypes.func
+  deleteMe: PropTypes.func
 };

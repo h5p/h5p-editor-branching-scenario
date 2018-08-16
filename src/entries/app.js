@@ -36,99 +36,253 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
       endScreenTitle: '',
       endScreenSubtitle: '',
       contentId: -1
-    }
+    };
 
-    // // For testing
-    // this.params.content = [
-    //   { // NOTE: First element is always top node
-    //     nextContentId: 1,
-    //     type: {
-    //       library: 'H5P.Video 1.0',
-    //       params: {}
-    //     }
-    //   },
-    //   {
-    //     type: {
-    //       library: 'H5P.BranchingQuestion 1.0',
-    //       params: {
-    //         question: "<p>hello, who are you?</p>",
-    //         alternatives: [
-    //           {
-    //             text: 'A1',
-    //             nextContentId: 2,
-    //             addFeedback: false
-    //           },
-    //           {
-    //             text: 'A2',
-    //             addFeedback: false
-    //           },
-    //           {
-    //             text: 'A3',
-    //             nextContentId: 3,
-    //             addFeedback: false
-    //           }
-    //         ]
-    //       }
-    //     },
-    //     contentId: -1, // -1 might lead to confusion, negative values are end scenatios
-    //     contentTitle: 'the void'
-    //   },
-    //   {
-    //     type: {
-    //       library: 'H5P.InteractiveVideo 1.0',
-    //       params: {}
-    //     },
-    //     contentId: 1,
-    //     contentTitle: 'Some nice IV action'
-    //   },
-    //   {
-    //     type: {
-    //       library: 'H5P.BranchingQuestion 1.0',
-    //       params: {
-    //         question: "<p>hello, who are you?</p>",
-    //         alternatives: [
-    //           {
-    //             text: 'A1',
-    //             nextContentId: 4,
-    //             addFeedback: false
-    //           },
-    //           {
-    //             text: 'A2',
-    //             nextContentId: 5,
-    //             addFeedback: false
-    //           }
-    //         ]
-    //       }
-    //     },
-    //     contentId: 2,
-    //     contentTitle: 'Just some text ...'
-    //   },
-    //   {
-    //     nextContentId: 6,
-    //     type: {
-    //       library: 'H5P.Image 1.0',
-    //       params: {}
-    //     },
-    //     contentId: 0,
-    //     contentTitle: 'A video intro!'
-    //   },
-    //   {
-    //     type: {
-    //       library: 'H5P.Image 1.0',
-    //       params: {}
-    //     },
-    //     contentId: 3,
-    //     contentTitle: 'What image?'
-    //   },
-    //   {
-    //     type: {
-    //       library: 'H5P.Image 1.0',
-    //       params: {}
-    //     },
-    //     contentId: 4,
-    //     contentTitle: 'That image!'
-    //   }
-    // ];
+    const testCases = {
+      empty: [
+      ],
+
+      // Simple path of 5 successive nodes
+      simplePath: [
+        {
+          contentTitle: 'Text 1',
+          nextContentId: 1,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 1"}
+          }
+        },
+        {
+          contentTitle: 'Text 2',
+          nextContentId: 2,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 2"}
+          }
+        },
+        {
+          contentTitle: 'Text 3',
+          nextContentId: 3,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 3"}
+          }
+        },
+        {
+          contentTitle: 'Text 4',
+          nextContentId: 4,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 4"}
+          }
+        },
+        {
+          contentTitle: 'Text 5',
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 5"}
+          }
+        }
+      ],
+
+      // 5 nodes with a cycle
+      cyclePath: [
+        {
+          contentTitle: 'Text 1',
+          nextContentId: 1,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 1"}
+          }
+        },
+        {
+          contentTitle: 'Text 2',
+          nextContentId: 2,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 2"}
+          }
+        },
+        {
+          contentTitle: 'Text 3',
+          nextContentId: 3,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 3"}
+          }
+        },
+        {
+          contentTitle: 'Text 4',
+          nextContentId: 4,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 4"}
+          }
+        },
+        {
+          contentTitle: 'Text 5',
+          nextContentId: 1,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 5"}
+          }
+        }
+      ],
+
+      // Simple branching
+      branching1: [
+        {
+          contentTitle: 'Text 1',
+          nextContentId: 1,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 1"}
+          }
+        },
+        {
+          type: {
+            library: 'H5P.BranchingQuestion 1.0',
+            params: {
+              question: "<p>hello, who are you?</p>",
+              alternatives: [
+                {
+                  text: 'A1',
+                  nextContentId: 2,
+                  addFeedback: false
+                },
+                {
+                  text: 'A2',
+                  nextContentId: 3,
+                  addFeedback: false
+                }
+              ]
+            }
+          },
+          contentTitle: 'branch'
+        },
+        {
+          contentTitle: 'Text 2',
+          nextContentId: 4,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 2"}
+          }
+        },
+        {
+          contentTitle: 'Text 3',
+          nextContentId: 4,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 4"}
+          }
+        },
+        {
+          contentTitle: 'Text 4',
+          nextContentId: 5,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 5"}
+          }
+        },
+        {
+          contentTitle: 'Text 6',
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 6"}
+          }
+        },
+      ],
+
+      // Branching
+      branching2: [
+        {
+          nextContentId: 1,
+          type: {
+            library: 'H5P.Video 1.3',
+            params: {}
+          }
+        },
+        {
+          type: {
+            library: 'H5P.BranchingQuestion 1.0',
+            params: {
+              question: "<p>hello, who are you?</p>",
+              alternatives: [
+                {
+                  text: 'A1',
+                  nextContentId: 2,
+                  addFeedback: false
+                },
+                {
+                  text: 'A2',
+                  //nextContentId: 6,
+                  addFeedback: false
+                },
+                {
+                  text: 'A3',
+                  nextContentId: 3,
+                  addFeedback: false
+                }
+              ]
+            }
+          },
+          contentTitle: 'the void'
+        },
+        {
+          type: {
+            library: 'H5P.InteractiveVideo 1.17',
+            params: {}
+          },
+          contentTitle: 'Some nice IV action'
+        },
+        {
+          type: {
+            library: 'H5P.BranchingQuestion 1.0',
+            params: {
+              question: "<p>hello, who are you?</p>",
+              alternatives: [
+                {
+                  text: 'A1',
+                  nextContentId: 4,
+                  addFeedback: false
+                },
+                {
+                  text: 'A2',
+                  nextContentId: 5,
+                  addFeedback: false
+                }
+              ]
+            }
+          },
+          contentTitle: 'Just some text ...'
+        },
+        {
+          nextContentId: 6,
+          type: {
+            library: 'H5P.Image 1.0',
+            params: {}
+          },
+          contentTitle: 'An image intro!'
+        },
+        {
+          type: {
+            library: 'H5P.Image 1.0',
+            params: {}
+          },
+          contentTitle: 'What image?'
+        },
+        {
+          type: {
+            library: 'H5P.Image 1.0',
+            params: {}
+          },
+          contentTitle: 'That image!'
+        }
+      ]
+    };
+
+    this.params.content = testCases.branching2;
+
     // this.params.content = [];
 
     setValue(field, this.params);
