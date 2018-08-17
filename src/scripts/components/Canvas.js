@@ -413,8 +413,6 @@ export default class Canvas extends React.Component {
         console.warn(`Node ${id} was already rendered. Skipping it.`)
         return; // Already rendered (cycle)
       }
-      renderedNodes.push(id);
-
       const emptyAlternative = (parentIsBranching && id === -2); // -1 = end screen, -2 = empty
       const content = this.state.content[id];
       if (!content && !emptyAlternative) {
@@ -609,62 +607,73 @@ export default class Canvas extends React.Component {
       /**
        * Delete node.
        *
-       * @param {number} id Id of node to be removed.
+       * @param {number[]} ids Id of node to be removed.
        * @param {boolean} removeChildren If true, remove children. Adopt otherwise.
        */
-      const removeNode = (id, removeChildren=false) => {
-        const node = newState.content[id];
-
-        // Compile list of ids to be deleted
-        let deleteIds;
-        if (this.contentIsBranching(node)) {
-          // delete alternatives and node itself
-          deleteIds = node.type.params.alternatives.map(alt => alt.nextContentId).concat(id);
-          // also delete children
-          removeChildren = true;
-        }
-        else {
-          // delete only this node
-          deleteIds = [id];
+      const removeNode = (ids, removeChildren=false) => {
+        if (typeof ids === 'number') {
+          ids = [ids];
         }
 
-        deleteIds.forEach(deleteId => {
-          if (deleteId === undefined || deleteId >= newState.content.length) {
-            return;
+        ids.forEach(id => {
+          const node = newState.content[id];
+          removeChildren = removeChildren || this.contentIsBranching(node);
+
+          // If node: delete this node. If BQ: delete this node and its children
+          let deleteIds;
+          if (this.contentIsBranching(node)) {
+            deleteIds = node.type.params.alternatives.map(alt => alt.nextContentId).concat(id);
+          }
+          else {
+            deleteIds = [id];
           }
 
-          // The node to be removed
-          const deleteNode = newState.content[deleteId];
-          // Node to be removed loops backwards, don't save the link
-          const nextId = (deleteNode.nextContentId > deleteId) ? deleteNode.nextContentId : undefined;
+          deleteIds = deleteIds
+            .filter(id => id !== undefined)
+            .sort((a, b) => b-a) // Delete nodes with highest id first to account for node removal
+            .forEach(deleteId => {
+              // node to be removed
+              const deleteNode = newState.content[deleteId];
 
-          // Update relevant links of all nodes to point to successor node
-          newState.content.forEach(node => {
+              // If node to be removed loops backwards or to itself, don't save the link
+              const successorId = (deleteNode.nextContentId > deleteId) ? deleteNode.nextContentId : undefined;
 
-            // Get nodes
-            const affectedNodes = (this.contentIsBranching(node)) ?
-              node.type.params.alternatives :
-              [node];
+              // Exchange all links pointing to node to be deleted to its successor instead.
+              newState.content.forEach(node => {
+                const affectedNodes = (this.contentIsBranching(node)) ?
+                  node.type.params.alternatives :
+                  [node];
 
-            affectedNodes.forEach(affectedNode => {
-              // Save successor
-              if (affectedNode.nextContentId === deleteId) {
-                affectedNode.nextContentId = nextId;
-              }
-              // Account for upcoming node removal
-              if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
-                affectedNode.nextContentId -= 1;
+                affectedNodes.forEach(affectedNode => {
+                  if (affectedNode.nextContentId === deleteId) {
+                    affectedNode.nextContentId = successorId;
+                  }
+                  // Account Id for upcoming node removal
+                  if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
+                    affectedNode.nextContentId -= 1;
+                  }
+                });
+              });
+
+              // Remove node
+              newState.content.splice(deleteId, 1);
+
+              // Purge children
+              if (removeChildren === true) {
+                let childrenIds;
+                if (this.contentIsBranching(deleteNode)) {
+                  childrenIds = deleteNode.type.params.alternatives.map(alt => alt.nextContentId);
+                }
+                else {
+                  childrenIds = [deleteNode.nextContentId];
+                }
+                childrenIds = childrenIds
+                  .filter(id => id > deleteId - 1) // Ignore backlinks
+                  .sort((a, b) => b - a); // Delete nodes with highest id first to account for node removal
+
+                removeNode(childrenIds, true);
               }
             });
-          });
-
-          // Remove node
-          newState.content.splice(deleteId, 1);
-
-          // Purge children
-          if (removeChildren === true && nextId !== undefined) {
-            removeNode(nextId-1, removeChildren);
-          }
         });
       }
 
@@ -764,6 +773,7 @@ export default class Canvas extends React.Component {
     console.log('==========');
   }
 
+  // For debugging
   traceBranch = (start=0, done=[]) => {
     if (this.state.content.length === 0) {
       return done;
