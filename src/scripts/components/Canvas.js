@@ -11,6 +11,18 @@ export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
 
+    // TODO: Should be passed by app
+    this.l10n = {};
+    this.l10n.dialogDelete = {
+      icon: 'icon-delete',
+      confirmationHeader: 'Delete Question',
+      confirmationQuestion: 'Are you sure you want to delete this content?',
+      confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
+      confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
+      textConfirm: 'Delete',
+      textCancel: 'Cancel'
+    }
+
     this.state = {
       clickHandeled: false,
       placing: null,
@@ -35,7 +47,8 @@ export default class Canvas extends React.Component {
           y: 16
         }
       },
-      content: this.props.content
+      content: this.props.content,
+      dialogDeleteDetails: this.l10n.dialogDelete.confirmationDetailsNO
     };
   }
 
@@ -153,7 +166,65 @@ export default class Canvas extends React.Component {
   }
 
   handleDeleteContent = (id) => {
-    this.setState({deleting: id}, this.handleDelete);
+    let deleteDetails;
+    let deleteDetailsList;
+    if (this.contentIsBranching(this.state.content[id])) {
+      const nodeTitles = this.getChildrenTitles(id)
+        .map((title, index) => <li key={index}>{title}</li>);
+
+      deleteDetails = this.l10n.dialogDelete.confirmationDetailsBQ;
+      deleteDetailsList = nodeTitles;
+    }
+    else {
+      deleteDetails = this.l10n.dialogDelete.confirmationDetailsNO;
+    }
+
+    this.setState({
+      deleting: id,
+      dialogDeleteDetails: deleteDetails,
+      dialogDeleteDetailsList: deleteDetailsList
+    });
+
+  }
+
+  /**
+   * Get titles of all children nodes sorted by ID.
+   *
+   * @param {number} start ID of start node.
+   * @return {string[]} Titles.
+   */
+  getChildrenTitles = (start) => {
+    return this.getChildrenIds(start)
+      .sort((a, b) => a - b)
+      .map(id => this.state.content[id].contentTitle || this.state.content[id].type.library);
+  }
+
+  /**
+   * Get IDs of all children nodes.
+   *
+   * @param {number} start ID of start node.
+   * @return {number[]} IDs.
+   */
+  getChildrenIds = (start) => {
+    const node = this.state.content[start];
+    let childrenIds = [];
+    let nextIds = [];
+
+    if (!this.contentIsBranching(node)) {
+      childrenIds.push(start);
+      nextIds = [node.nextContentId];
+    }
+    else {
+      nextIds = node.type.params.alternatives.map(alt => alt.nextContentId);
+    }
+
+    nextIds
+      .filter(id => id !== undefined && id > start) // id > start prevents loops
+      .forEach(id => {
+        childrenIds = childrenIds.concat(this.getChildrenIds(id));
+      });
+
+    return childrenIds;
   }
 
   getNewContentParams = () => {
@@ -214,8 +285,6 @@ export default class Canvas extends React.Component {
           return newState;
         }
       }
-
-      console.warn(`Trying to place ${id}, parent: ${parent}, alternative: ${alternative}, nextcontentID: ${nextContentId}`);
 
       // When placing after a leaf node keep track of it so we can update it
       // after processing the new content array
@@ -628,9 +697,9 @@ export default class Canvas extends React.Component {
             deleteIds = [id];
           }
 
-          deleteIds = deleteIds
+          deleteIds
             .filter(id => id !== undefined)
-            .sort((a, b) => b-a) // Delete nodes with highest id first to account for node removal
+            .sort((a, b) => b - a) // Delete nodes with highest id first to account for node removal
             .forEach(deleteId => {
               // node to be removed
               const deleteNode = newState.content[deleteId];
@@ -824,12 +893,6 @@ export default class Canvas extends React.Component {
         }
 
         <div className="canvas">
-          { this.state.deleting !== null &&
-            <ConfirmationDialog
-              handleDelete={ this.handleDelete }
-              handleCancel={ this.handleCancel }
-            />
-          }
           <div className="tree" ref={ 'tree' }>
             { tree.nodes }
           </div>
@@ -842,6 +905,19 @@ export default class Canvas extends React.Component {
                 y: 130
               }) }
             </StartScreen>
+          }
+          { this.state.deleting !== null &&
+            <ConfirmationDialog
+              icon={ this.l10n.dialogDelete.icon }
+              confirmationHeader={ this.l10n.dialogDelete.confirmationHeader }
+              confirmationQuestion={ this.l10n.dialogDelete.confirmationQuestion }
+              confirmationDetails={ this.state.dialogDeleteDetails }
+              confirmationDetailsList={ this.state.dialogDeleteDetailsList }
+              textConfirm= { this.l10n.dialogDelete.textConfirm }
+              textCancel={ this.l10n.dialogDelete.textCancel }
+              handleConfirm={ this.handleDelete }
+              handleCancel={ this.handleCancel }
+            />
           }
           <EditorOverlay // TODO: It's quite difficult to see which content the overlay is being displayed for
             onRef={ this.handleRef }

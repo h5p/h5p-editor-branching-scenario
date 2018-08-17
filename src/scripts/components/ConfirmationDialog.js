@@ -1,5 +1,5 @@
 import React from 'react';
-import './ConfirmationDialog.scss'; 
+import './ConfirmationDialog.scss';
 
 export default class ConfirmationDialog extends React.Component {
   constructor(props) {
@@ -9,20 +9,26 @@ export default class ConfirmationDialog extends React.Component {
   render() {
     return (
       <div className='confirmation-dialog'>
-        <div className='confirmation-dialog-header'> 
-          <span className='icon'/>
-          <span className='header-text'> 
-            Delete Question 
+        <div className='confirmation-dialog-header'>
+          <span className={ this.props.icon }/>
+          <span className='header-text'>
+            { this.props.confirmationHeader }
           </span>
         </div>
         <div className='confirmation-dialog-body'>
-          Are you sure you want to delete this content?
-          <div>
-            <a className='dialog-delete' onClick={ this.props.handleDelete }>Delete</a>
-            <a className='dialog-cancel' onClick={ this.props.handleCancel }>Cancel</a> 
+          <p className='confirmation-question'>{ this.props.confirmationQuestion }</p>
+          <div className='confirmation-details'>
+            <p>{ this.props.confirmationDetails }</p>
+            { this.props.confirmationDetailsList &&
+              <ul>{ this.props.confirmationDetailsList }</ul>
+            }
+          </div>
+          <div className='dialog-buttons'>
+            <a className='dialog-confirm' onClick={ this.props.handleConfirm }>{ this.props.textConfirm }</a>
+            <a className='dialog-cancel' onClick={ this.props.handleCancel }>{ this.props.textCancel }</a>
           </div>
         </div>
-      </div> 
+      </div>
     );
   }
 }
