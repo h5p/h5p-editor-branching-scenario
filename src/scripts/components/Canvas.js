@@ -11,16 +11,30 @@ export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO: Should be passed by app
-    this.l10n = {};
-    this.l10n.dialogDelete = {
-      icon: 'icon-delete',
-      confirmationHeader: 'Delete Question',
-      confirmationQuestion: 'Are you sure you want to delete this content?',
-      confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
-      confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
-      textConfirm: 'Delete',
-      textCancel: 'Cancel'
+    // TODO: The language strings should be passed by app
+    this.l10n = {
+      dialogDelete: {
+        icon: 'icon-delete',
+        confirmationHeader: 'Delete Question',
+        confirmationQuestion: 'Are you sure you want to delete this content?',
+        confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
+        confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
+        textConfirm: 'Delete',
+        textCancel: 'Cancel',
+        handleConfirm: this.handleDelete,
+        handleCancel: this.handleCancel
+      },
+      dialogReplace: {
+        icon: 'icon-replace',
+        confirmationHeader: 'Replace Question',
+        confirmationQuestion: 'Do you really want to replace this question?',
+        confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
+        confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
+        textConfirm: 'Replace',
+        textCancel: 'Cancel',
+        handleConfirm: this.handleDelete,
+        handleCancel: this.handleCancel
+      }
     }
 
     this.state = {
@@ -48,7 +62,7 @@ export default class Canvas extends React.Component {
         }
       },
       content: this.props.content,
-      dialogDeleteDetails: this.l10n.dialogDelete.confirmationDetailsNO
+      dialog: this.l10n.dialogDelete
     };
   }
 
@@ -70,25 +84,52 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * Build dialog contents.
+   *
+   * @param {number} id - ID of node in question.
+   * @param {object} params - Template params for particular case.
+   * @return {object} Dialog contents.
+   */
+  buildDialog = (id, params) => {
+    const dialog = params;
+    if (this.contentIsBranching(this.state.content[id])) {
+      const nodeTitles = this.getChildrenTitles(id)
+        .map((title, index) => <li key={index}>{title}</li>);
+
+      dialog.confirmationDetails = params.confirmationDetailsBQ;
+      dialog.confirmationDetailsList = nodeTitles;
+    }
+    else {
+      if (this.state.content[id].nextContentId) {
+        dialog.confirmationDetails = params.confirmationDetailsNO;
+      }
+    }
+    return dialog;
+  }
+
   handleDocumentClick = () => {
     if (this.state.clickHandeled) {
       this.setState({
         clickHandeled: false
       });
     }
-    else if (this.state.placing !== null) {
+    else if (this.state.placing !== null && this.state.deleting === null) {
       this.setState({
         placing: null
       });
     }
   }
 
+  /**
+   * @param {number} id - Dropzone ID.
+   */
   handlePlacing = (id) => {
     if (this.state.placing !== null && this.state.placing !== id) {
-      // Try to replace
       this.setState({
         clickHandeled: true,
-        deleting: id  // TODO: Not if DZ is a BQ
+        deleting: id,
+        dialog: this.buildDialog(id, this.l10n.dialogReplace)
       });
     }
     else {
@@ -129,9 +170,7 @@ export default class Canvas extends React.Component {
       if (dropzone.overlap(points)) {
         // Replace existing node
         if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
-          this.setState({
-            deleting: dropzone.props.id // TODO: Not if DZ is a BQ
-          });
+          this.handlePlacing(dropzone.props.id);
         }
         else if (!this.state.editorOverlayVisible) {
           // New node position
@@ -166,23 +205,9 @@ export default class Canvas extends React.Component {
   }
 
   handleDeleteContent = (id) => {
-    let deleteDetails;
-    let deleteDetailsList;
-    if (this.contentIsBranching(this.state.content[id])) {
-      const nodeTitles = this.getChildrenTitles(id)
-        .map((title, index) => <li key={index}>{title}</li>);
-
-      deleteDetails = this.l10n.dialogDelete.confirmationDetailsBQ;
-      deleteDetailsList = nodeTitles;
-    }
-    else {
-      deleteDetails = this.l10n.dialogDelete.confirmationDetailsNO;
-    }
-
     this.setState({
       deleting: id,
-      dialogDeleteDetails: deleteDetails,
-      dialogDeleteDetailsList: deleteDetailsList
+      dialog: this.buildDialog(id, this.l10n.dialogDelete)
     });
 
   }
@@ -370,7 +395,7 @@ export default class Canvas extends React.Component {
       if (this.state.inserting === null || this.state.deleting !== null) {
         return;
       }
-      this.handleInserted(this.state.content[this.state.inserting]);
+      this.handleInserted(this.state.inserting);
     });
   }
 
@@ -665,7 +690,6 @@ export default class Canvas extends React.Component {
   handleDelete = () => {
     // Set new parent for node
     this.setState(prevState => {
-
       let newState = {
         placing: null,
         deleting: null,
@@ -747,10 +771,18 @@ export default class Canvas extends React.Component {
         });
       }
 
-      const id = (this.state.placing !== null) ? this.state.placing :
-        ((this.state.inserting !== null) ? this.state.inserting : this.state.deleting);
-
-      removeNode(id);
+      if (prevState.placing === -1) {
+        // Replace node
+        const nextContentId = prevState.content[prevState.deleting].nextContentId;
+        newState.content[prevState.deleting] = this.getNewContentParams();
+        newState.content[prevState.deleting].nextContentId = nextContentId;
+      }
+      else {
+        // Delete node
+        const id = (prevState.placing !== null && prevState.placing !== -1) ? prevState.placing :
+          ((prevState.inserting !== null) ? prevState.inserting : prevState.deleting);
+        removeNode(id);
+      }
 
       return newState;
     });
@@ -786,10 +818,10 @@ export default class Canvas extends React.Component {
   /**
    * Handle insertion of new data.
    *
-   * @param {object} data - New data.
+   * @param {number} id - ID.
    */
-  handleInserted = (data) => {
-    this.openEditor(this.state.inserting, data, {state: 'new'});
+  handleInserted = (id) => {
+    this.openEditor(id, this.state.content[id], {state: 'new'});
   }
 
   /**
@@ -830,6 +862,7 @@ export default class Canvas extends React.Component {
 
   // For debugging
   logNodes = caller => {
+    //return;
     console.log('NODES', caller);
     this.state.content.forEach((node, index) => {
       const target = (this.contentIsBranching(node)) ?
@@ -909,15 +942,15 @@ export default class Canvas extends React.Component {
           }
           { this.state.deleting !== null &&
             <ConfirmationDialog
-              icon={ this.l10n.dialogDelete.icon }
-              confirmationHeader={ this.l10n.dialogDelete.confirmationHeader }
-              confirmationQuestion={ this.l10n.dialogDelete.confirmationQuestion }
-              confirmationDetails={ this.state.dialogDeleteDetails }
-              confirmationDetailsList={ this.state.dialogDeleteDetailsList }
-              textConfirm= { this.l10n.dialogDelete.textConfirm }
-              textCancel={ this.l10n.dialogDelete.textCancel }
-              handleConfirm={ this.handleDelete }
-              handleCancel={ this.handleCancel }
+              icon={ this.state.dialog.icon }
+              confirmationHeader={ this.state.dialog.confirmationHeader }
+              confirmationQuestion={ this.state.dialog.confirmationQuestion }
+              confirmationDetails={ this.state.dialog.confirmationDetails }
+              confirmationDetailsList={ this.state.dialog.confirmationDetailsList }
+              textConfirm= { this.state.dialog.textConfirm }
+              textCancel={ this.state.dialog.textCancel }
+              handleConfirm={ this.state.dialog.handleConfirm }
+              handleCancel={ this.state.dialog.handleCancel }
             />
           }
           <EditorOverlay // TODO: It's quite difficult to see which content the overlay is being displayed for

@@ -17,12 +17,14 @@ export default class ConfirmationDialog extends React.Component {
         </div>
         <div className='confirmation-dialog-body'>
           <p className='confirmation-question'>{ this.props.confirmationQuestion }</p>
-          <div className='confirmation-details'>
-            <p>{ this.props.confirmationDetails }</p>
-            { this.props.confirmationDetailsList &&
-              <ul>{ this.props.confirmationDetailsList }</ul>
-            }
-          </div>
+          { this.props.confirmationDetails &&
+            <div className='confirmation-details'>
+              <p>{ this.props.confirmationDetails }</p>
+              { this.props.confirmationDetailsList &&
+                <ul>{ this.props.confirmationDetailsList }</ul>
+              }
+            </div>
+          }
           <div className='dialog-buttons'>
             <a className='dialog-confirm' onClick={ this.props.handleConfirm }>{ this.props.textConfirm }</a>
             <a className='dialog-cancel' onClick={ this.props.handleCancel }>{ this.props.textCancel }</a>
