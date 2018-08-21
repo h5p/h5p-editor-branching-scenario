@@ -705,7 +705,8 @@ export default class Canvas extends React.Component {
               const deleteNode = newState.content[deleteId];
 
               // If node to be removed loops backwards or to itself, don't save the link
-              const successorId = (deleteNode.nextContentId > deleteId) ? deleteNode.nextContentId : undefined;
+              const successorIds = newState.content.map(node => node.nextContentId);
+              const successorId = (successorIds.indexOf(deleteNode.nextContentId) > successorIds.indexOf(deleteId)) ? deleteNode.nextContentId : undefined;
 
               // Exchange all links pointing to node to be deleted to its successor instead.
               newState.content.forEach(node => {
