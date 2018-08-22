@@ -416,7 +416,7 @@ export default class Canvas extends React.Component {
     }
     return ( !this.state.editorOverlayVisible &&
       <Dropzone
-        key={ (id === -1 ? 'f' : (id === -2 ? 'a' + parent : id)) + '-dz-' + num} // TODO: Fix unique id
+        key={ ((id < 0 && id !== -Infinity) ? 'f-' + id : (id === -Infinity ? 'a' + parent : id)) + '-dz-' + num} // TODO: Fix unique id
         ref={ element => this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
@@ -457,14 +457,12 @@ export default class Canvas extends React.Component {
 
     let children = [];
     content.type.params.alternatives.forEach(alternative => {
-      if (alternative.nextContentId === -1) {
-        children.push(-1); // End screen
-      }
-      else if (alternative.nextContentId === undefined || this.state.content[alternative.nextContentId] === undefined) {
-        children.push(-2); // Empty alternative
+      if (alternative.nextContentId === undefined || this.state.content[alternative.nextContentId] === undefined) {
+        //TODO: Should this be possible at all? Make them -1 (default end scenario) instead?
+        children.push(-Infinity); // Empty alternative.
       }
       else {
-        children.push(alternative.nextContentId); // Other question
+        children.push(alternative.nextContentId); // Other question or end scenario
       }
     });
 
@@ -504,11 +502,9 @@ export default class Canvas extends React.Component {
     let firstX, lastX;
     branch.forEach((id, num) => {
       let drawAboveLine = false;
-      const emptyAlternative = (parentIsBranching && id === -2); // -1 = end screen, -2 = empty
+      const emptyAlternative = (parentIsBranching && id === -Infinity); // negative = end screen, -Infinity = empty
+      const endingAlternative = (parentIsBranching && id < 0 && id !== -Infinity);
       const content = this.state.content[id];
-      if (!content && !emptyAlternative) {
-        return; // Does not exist, simply skip.
-      }
 
       // Add vertical spacing for each level
       const branchY = y + ((parentIsBranching ? 8 : 5.5) * this.state.nodeSpecs.spacing.y); // *2 for the element itself
@@ -526,6 +522,7 @@ export default class Canvas extends React.Component {
       // Draw subtree first so we know where to position the node
       const subtree = children ? this.renderTree(children, x, branchY, id, renderedNodes) : null;
       const subtreeWidth = subtree ? subtree.x - x : 0;
+
 
       // Determine position of node
       let position = {
@@ -609,8 +606,17 @@ export default class Canvas extends React.Component {
             height: (this.state.nodeSpecs.spacing.y * lengthMultiplier) + 'px'
           } }/>
         );
+
+        let alternativeBallClasses = 'alternative-ball';
+        if (!drawAboveLine && id > 0) {
+          alternativeBallClasses += ' loop';
+        }
+        if (id < 0) {
+          alternativeBallClasses += ' endscreen';
+        }
+
         nodes.push(
-          <div key={ parent + '-abox-' + num } className="alternative-ball" style={ {
+          <div key={ parent + '-abox-' + num } className={ alternativeBallClasses } style={ {
             left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) + 1) + 'px',
             top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
           } }>A{ num + 1 }</div>
