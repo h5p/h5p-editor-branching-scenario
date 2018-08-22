@@ -503,10 +503,7 @@ export default class Canvas extends React.Component {
 
     let firstX, lastX;
     branch.forEach((id, num) => {
-      if (renderedNodes.indexOf(id) !== -1) {
-        console.warn(`Node ${id} was already rendered. Skipping it.`)
-        return; // Already rendered (cycle)
-      }
+      let drawAboveLine = false;
       const emptyAlternative = (parentIsBranching && id === -2); // -1 = end screen, -2 = empty
       const content = this.state.content[id];
       if (!content && !emptyAlternative) {
@@ -541,7 +538,7 @@ export default class Canvas extends React.Component {
         position.x += ((subtree.x - x) / 2) - (this.state.nodeSpecs.width / 2);
       }
 
-      if (content) {
+      if (content && renderedNodes.indexOf(id) === -1) {
         const libraryTitle = this.getLibraryTitle(content.type.library);
 
         // Draw node
@@ -563,13 +560,16 @@ export default class Canvas extends React.Component {
             { libraryTitle }
           </Draggable>
         );
+        renderedNodes.push(id);
+        drawAboveLine = true;
       }
 
-      // Add vertical line above (except for top node)
-      const aboveLineHeight = this.state.nodeSpecs.spacing.y * 3.5; // *3.5 = enough room for DZ
       const nodeWidth = (content ? (this.state.nodeSpecs.width / 2) : 21); // Half width actually...
       const nodeCenter = position.x + nodeWidth;
-      if (content && id !== 0) {
+      const aboveLineHeight = this.state.nodeSpecs.spacing.y * 3.5; // *3.5 = enough room for DZ
+
+      // Add vertical line above (except for top node)
+      if (content && id !== 0 && drawAboveLine) {
         nodes.push(
           <div key={ id + '-vabove' } className="vertical-line" style={ {
             left: nodeCenter + 'px',
