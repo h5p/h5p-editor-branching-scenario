@@ -416,7 +416,7 @@ export default class Canvas extends React.Component {
     }
     return ( !this.state.editorOverlayVisible &&
       <Dropzone
-        key={ ((id < 0 && id !== -Infinity) ? 'f-' + id : (id === -Infinity ? 'a' + parent : id)) + '-dz-' + num} // TODO: Fix unique id
+        key={ ((id < 0) ? 'f-' + '-' + id : id) + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
@@ -457,13 +457,7 @@ export default class Canvas extends React.Component {
 
     let children = [];
     content.type.params.alternatives.forEach(alternative => {
-      if (alternative.nextContentId === undefined || this.state.content[alternative.nextContentId] === undefined) {
-        //TODO: Should this be possible at all? Make them -1 (default end scenario) instead?
-        children.push(-Infinity); // Empty alternative.
-      }
-      else {
-        children.push(alternative.nextContentId); // Other question or end scenario
-      }
+      children.push(alternative.nextContentId); // Other question or end scenario
     });
 
     return children;
@@ -502,8 +496,6 @@ export default class Canvas extends React.Component {
     let firstX, lastX;
     branch.forEach((id, num) => {
       let drawAboveLine = false;
-      const emptyAlternative = (parentIsBranching && id === -Infinity); // negative = end screen, -Infinity = empty
-      const endingAlternative = (parentIsBranching && id < 0 && id !== -Infinity);
       const content = this.state.content[id];
 
       // Add vertical spacing for each level
@@ -608,11 +600,19 @@ export default class Canvas extends React.Component {
         );
 
         let alternativeBallClasses = 'alternative-ball';
-        if (!drawAboveLine && id > 0) {
-          alternativeBallClasses += ' loop';
-        }
-        if (id < 0) {
-          alternativeBallClasses += ' endscreen';
+        if (!drawAboveLine) {
+          if (id > 0) {
+            // Loop to existing node
+            alternativeBallClasses += ' loop';
+          }
+          else if (id === -1) {
+            // Default end scenario
+            alternativeBallClasses += ' endscreen';
+          }
+          else if (id < -1) {
+            // Alternative end scenarios
+            alternativeBallClasses += ' endscreenCustom';
+          }
         }
 
         nodes.push(
@@ -623,8 +623,8 @@ export default class Canvas extends React.Component {
         );
       }
 
-      // Add dropzones when placing, except for below the one being moved
-      if (this.state.placing !== null && this.state.placing !== id) {
+      // Add dropzones when placing, except for below the one being moved and for end scenarios
+      if (this.state.placing !== null && this.state.placing !== id && id >= 0) {
         const dzDistance = ((aboveLineHeight - 42) / 2);
 
         // TODO: Only render leafs when placing BQ, or add existing structure to BQ alternative?
@@ -642,7 +642,7 @@ export default class Canvas extends React.Component {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
             y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance
-          }, id, 1));
+          }, id, parentIsBranching ? num + 1 : 1));
         }
       }
 
@@ -721,7 +721,9 @@ export default class Canvas extends React.Component {
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
           if (this.contentIsBranching(node)) {
-            deleteIds = node.type.params.alternatives.map(alt => alt.nextContentId).concat(id);
+            deleteIds = node.type.params.alternatives
+              .filter(alt => alt.nextContentId >= 0) // Filter end scenarios
+              .map(alt => alt.nextContentId).concat(id);
           }
           else {
             deleteIds = [id];
@@ -734,9 +736,12 @@ export default class Canvas extends React.Component {
               // node to be removed
               const deleteNode = newState.content[deleteId];
 
-              // If node to be removed loops backwards or to itself, don't save the link
+              // If node to be removed loops backwards or to itself, use default end scenario
               const successorIds = newState.content.map(node => node.nextContentId);
-              const successorId = (successorIds.indexOf(deleteNode.nextContentId) > successorIds.indexOf(deleteId)) ? deleteNode.nextContentId : undefined;
+              let successorId = -1;
+              if (deleteNode.nextContentId !== undefined && successorIds.indexOf(deleteNode.nextContentId) > successorIds.indexOf(deleteId)) {
+                successorId = deleteNode.nextContentId;
+              }
 
               // Exchange all links pointing to node to be deleted to its successor instead.
               newState.content.forEach(node => {
@@ -876,34 +881,7 @@ export default class Canvas extends React.Component {
         node.nextContentId;
       console.log(`${index} --> ${target}`);
     });
-    console.log(`Trace: ${this.traceBranch(0)
-      .map(id => (typeof id === 'number') ? `${id} (${this.state.content[id].contentTitle})` : id)
-      .join(' --> ')}`);
     console.log('==========');
-  }
-
-  // For debugging
-  traceBranch = (start=0, done=[]) => {
-    if (this.state.content.length === 0) {
-      return done;
-    }
-    done.push(start);
-
-    const node = this.state.content[start];
-
-    const nextIds = (this.contentIsBranching(node)) ? node.type.params.alternatives.map(alt => alt.nextContentId) : [node.nextContentId];
-
-    nextIds.forEach(nextId => {
-      if (nextId !== undefined && nextId > -1) {
-        if (done.indexOf(nextId) === -1) {
-          return this.traceBranch(nextId, done);
-        }
-        done.push(`(${nextId})`)
-      }
-      return done;
-    });
-
-    return done;
   }
 
   render() {

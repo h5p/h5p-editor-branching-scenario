@@ -60,10 +60,17 @@
   color: #f31635;
 }
 
+.alternative-ball.endscreen {
+  background-color: #f2f2f2;
+  background: #f2f2f2;
+  color: #1773DA;
+  border: solid 2px #1773DA;
+}
+
 .alternative-ball.loop::after {
   content: "\E906";
 }
 
-.alternative-ball.endscreen::after {
+.alternative-ball.endscreenCustom::after {
   content: "\E907";
 }
