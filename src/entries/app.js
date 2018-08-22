@@ -412,7 +412,17 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
     // For testing, line can be removed afterwards
     this.params.content = testCases.branching2;
 
-    // this.params.content = [];
+    // Sanitize missing nextContentId; can never be undefined
+    this.params.content.forEach(item => {
+      if (item.type.library.indexOf('H5P.BranchingQuestion') === 0) {
+        item.type.params.alternatives.forEach(alt =>
+          alt.nextContentId = alt.nextContentId || -1
+        );
+      }
+      else {
+        item.nextContentId = item.nextContentId || -1;
+      }
+    });
 
     setValue(field, this.params);
 
