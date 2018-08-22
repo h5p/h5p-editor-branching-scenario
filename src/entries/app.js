@@ -152,7 +152,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
                 },
                 {
                   text: 'A2',
-                  nextContentId: 3,
+                  nextContentId: 5,
                   addFeedback: false
                 }
               ]
@@ -170,10 +170,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
         },
         {
           contentTitle: 'Text 3',
-          nextContentId: 4,
           type: {
             library: 'H5P.AdvancedText 1.1',
-            params: {"text": "Text 4"}
+            params: {"text": "Text 3"}
           }
         },
         {
@@ -181,14 +180,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
           nextContentId: 5,
           type: {
             library: 'H5P.AdvancedText 1.1',
-            params: {"text": "Text 5"}
+            params: {"text": "Text 4"}
           }
         },
         {
-          contentTitle: 'Text 6',
+          contentTitle: 'Text 5',
           type: {
             library: 'H5P.AdvancedText 1.1',
-            params: {"text": "Text 6"}
+            params: {"text": "Text 5"}
           }
         },
       ],
@@ -278,9 +277,139 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
           },
           contentTitle: 'That image!'
         }
-      ]
+      ],
+
+      // Branching with Loop
+      branchingLoopAlternative: [
+        {
+          contentTitle: 'Text 1',
+          nextContentId: 1,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 1"}
+          }
+        },
+        {
+          type: {
+            library: 'H5P.BranchingQuestion 1.0',
+            params: {
+              question: "<p>hello, who are you?</p>",
+              alternatives: [
+                {
+                  text: 'A1',
+                  nextContentId: 2,
+                  addFeedback: false
+                },
+                {
+                  text: 'A2',
+                  nextContentId: 3,
+                  addFeedback: false
+                }
+              ]
+            }
+          },
+          contentTitle: 'branch'
+        },
+        {
+          contentTitle: 'Text 2',
+          nextContentId: 4,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 2"}
+          }
+        },
+        {
+          contentTitle: 'Text 3',
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 3"}
+          }
+        },
+        {
+          contentTitle: 'Text 4',
+          nextContentId: 5,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 4"}
+          }
+        },
+        {
+          contentTitle: 'Text 5',
+          nextContentId: 3,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 5"}
+          }
+        },
+      ],
+
+      // Branching with Loop
+      branchingEndScreenAlternative: [
+        {
+          contentTitle: 'Text 1',
+          nextContentId: 1,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 1"}
+          }
+        },
+        {
+          type: {
+            library: 'H5P.BranchingQuestion 1.0',
+            params: {
+              question: "<p>hello, who are you?</p>",
+              alternatives: [
+                {
+                  text: 'A1',
+                  nextContentId: 2,
+                  addFeedback: false
+                },
+                {
+                  text: 'A2',
+                  nextContentId: -99,
+                  addFeedback: false
+                }
+              ]
+            }
+          },
+          contentTitle: 'branch'
+        },
+        {
+          contentTitle: 'Text 2',
+          nextContentId: 4,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 2"}
+          }
+        },
+        {
+          contentTitle: 'Text 3',
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 3"}
+          }
+        },
+        {
+          contentTitle: 'Text 4',
+          nextContentId: 5,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 4"}
+          }
+        },
+        {
+          contentTitle: 'Text 5',
+          nextContentId: 3,
+          type: {
+            library: 'H5P.AdvancedText 1.1',
+            params: {"text": "Text 5"}
+          }
+        },
+      ],
+
     };
 
+    // For testing, line can be removed afterwards
     this.params.content = testCases.branching2;
 
     // this.params.content = [];
