@@ -105,6 +105,9 @@ export default class EditorOverlay extends React.Component {
         nextPath: this.interaction.nextContentId
       });
     }
+    else {
+      this.props.onContentChanged(contentId, -1);
+    }
 
     this.interaction.$form.appendTo(this.refForm.current);
   }
