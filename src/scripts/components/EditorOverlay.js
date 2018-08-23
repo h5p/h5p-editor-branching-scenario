@@ -134,7 +134,7 @@ export default class EditorOverlay extends React.Component {
     switch (event.target.value) {
       case 'end-scenario':
         this.setState({
-          nextContentId: undefined, // TODO: Check if this causes trouble, should be -1 eventually, or changed in BS
+          nextContentId: -1,
           showNextPathDropzone: false,
           showNextPathChooser: false
         });
