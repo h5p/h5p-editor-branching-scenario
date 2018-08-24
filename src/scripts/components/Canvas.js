@@ -81,6 +81,8 @@ export default class Canvas extends React.Component {
       content: this.props.content,
       dialog: this.l10n.dialogDelete
     };
+
+    console.log('%c Welcome back, Frode!', 'font: bold 50px OpenSans; text-align: center; padding: 0.75em; color: red; text-shadow: 2px 2px 0 rgb(217,31,38), 4px 4px 0 rgb(226,91,14), 6px 6px 0 rgb(245,221,8), 9px 9px 0 rgb(5,148,68), 11px 11px 0 rgb(2,135,206), 13px 13px 0 rgb(4,77,145), 15px 15px 0 rgb(42,21,113)');
   }
 
   componentDidMount() {
@@ -285,6 +287,10 @@ export default class Canvas extends React.Component {
     return content.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
   }
 
+  /**
+   * @param {number} id ID of node that was added/moved
+   * @param {number} nextContentId ID that needs to be updated
+   */
   updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil) {
     // Make old parent point directly to our old children
     if (leaf.nextContentId === id) {
@@ -306,9 +312,9 @@ export default class Canvas extends React.Component {
    * place a node in the tree (which isn't a tree technically).
    *
    * @param {number} id ID of node to be placed or -1 if new node.
-   * @param {number} nextContentId
-   * @param {number} parent
-   * @param {number} alternative
+   * @param {number} nextContentId ID of next node.
+   * @param {number} parent ID of the parent node.
+   * @param {number} alternative Number of dropzone alternative.
    */
   placeInTree(id, nextContentId, parent, alternative) {
     this.setState(prevState => {
@@ -337,7 +343,10 @@ export default class Canvas extends React.Component {
       const parentIsBranching = (parent && parent.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
       const nextId = newState.content[id].nextContentId;
-      // TODO: Make as solution for Branching Question?
+      // TODO: Make a solution for Branching Question. Here setState() is
+      // called twice, but only for BranchingQuestion content that's added.
+      // Crashes, because it still works on the old prevState. What causes
+      // this 2nd call?
 
       // Handle adding new top node before the current one
       let bumpIdsUntil = -1;
@@ -644,6 +653,7 @@ export default class Canvas extends React.Component {
           } }>A{ num + 1 }</div>
         );
 
+        // Add dropzone under empty BQ alternative
         if (this.state.placing !== null && !content) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
