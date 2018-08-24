@@ -621,6 +621,13 @@ export default class Canvas extends React.Component {
             top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
           } }>A{ num + 1 }</div>
         );
+
+        if (this.state.placing !== null && !content) {
+          nodes.push(this.renderDropzone(-1, {
+            x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
+            y: position.y - 1.25 * (aboveLineHeight - 42) - this.state.nodeSpecs.spacing.y * 2
+          }, parent, num));
+        }
       }
 
       // Add dropzones when placing, except for below the one being moved and for end scenarios
