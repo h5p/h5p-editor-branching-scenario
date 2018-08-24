@@ -404,7 +404,12 @@ export default class Canvas extends React.Component {
         // TODO: What to do if we are branching?
       }
       else {
-        newState.content[id].nextContentId = (nextContentId < 0 ? undefined : nextContentId);
+        if (this.contentIsBranching(newState.content[id])) {
+          // Nothing to do here?
+        }
+        else {
+          newState.content[id].nextContentId = (nextContentId < 0 ? undefined : nextContentId);
+        }
       }
 
       return newState;

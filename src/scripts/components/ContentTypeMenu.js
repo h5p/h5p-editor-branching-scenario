@@ -38,13 +38,12 @@ export default class ContentTypeMenu extends React.Component {
     }
 
     let listItems = this.props.libraries.map(library => {
-
-      if (library.title === 'Branching Question') {
+      if (library.title === 'BranchingQuestion') {
         return '';
       }
 
       // TODO: Temporarily excluded, because of crashing the editor for some reason
-      if (library.title === 'Course Presentation') {
+      if (library.title === 'CoursePresentation') {
         return '';
       }
 
@@ -75,8 +74,7 @@ export default class ContentTypeMenu extends React.Component {
         <div className="loading">Loading…</div>
       );
     }
-
-    const bs = this.props.libraries.find(library => library.title === 'Branching Question');
+    const bs = this.props.libraries.find(library => library.title === 'BranchingQuestion');
 
     return (
       <ul className="content-type-buttons">
