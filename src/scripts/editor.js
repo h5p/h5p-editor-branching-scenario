@@ -98,7 +98,13 @@ export default class Editor extends React.Component {
     });
   }
 
-  navigateToTutorial = () => {
+  handleOpenCanvas = () => {
+    this.setState({
+      activeIndex: 0
+    });
+  }
+
+  handleOpenTutorial = () => {
     this.setState({
       activeIndex: 3
     });
@@ -139,7 +145,7 @@ export default class Editor extends React.Component {
             saveData={this.props.saveData}
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
-            navigateToTutorial={this.navigateToTutorial}
+            handleOpenTutorial={ this.handleOpenTutorial }
             onOpenEditor={ this.handleOpenEditor }
             onContentChanged={ this.props.onContentChanged }
             getSemantics={ this.props.getSemantics }
@@ -160,7 +166,9 @@ export default class Editor extends React.Component {
           />
         </Tab>
         <Tab title="tutorial" className="bs-editor-tutorial-tab">
-          <TabViewTutorial />
+          <TabViewTutorial
+            handleOpenCanvas={ this.handleOpenCanvas }
+          />
         </Tab>
         <Tab title="metadata" className="bs-editor-metadata-tab">
           <TabViewMetadata

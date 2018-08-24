@@ -6,12 +6,13 @@ import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
+import QuickInfoMenu from './QuickInfoMenu';
 
 export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO: The language strings should be passed by app
+    // TODO: The language strings should be passed by app and sanitized before
     this.l10n = {
       dialogDelete: {
         icon: 'icon-delete',
@@ -34,6 +35,22 @@ export default class Canvas extends React.Component {
         textCancel: 'Cancel',
         handleConfirm: this.handleDelete,
         handleCancel: this.handleCancel
+      },
+      quickInfoMenu: {
+        show: 'Show',
+        hide: 'Hide',
+        quickInfo: 'Quick Info',
+        dropzoneTerm: 'Dropzone',
+        dropzoneText: 'It appears when you select or start dragging content',
+        contentTerm: 'Content',
+        branchingQuestionTerm: 'Branching Question',
+        branchingQuestionText: 'Each alternative can lead to different question/content.',
+        alternative: 'Alternative leads to another question/content.',
+        defaultEndScenario: 'Path ends here (with the default end scenario)',
+        customEndScenario: 'Path ends here (with the custom end scenario)',
+        existingQuestion: 'Path takes the learner to an existing question/content. Click to see where it leads to.',
+        stepByStep: 'Step by Step ',
+        tutorial: 'tutorial'
       }
     }
 
@@ -923,7 +940,7 @@ export default class Canvas extends React.Component {
           </div>
           { !tree.nodes.length &&
             <StartScreen
-              handleClicked={ this.props.navigateToTutorial }
+              handleClicked={ this.props.handleOpenTutorial }
             >
               { this.renderDropzone(-1, {
                 x: 363.19, // TODO: Decide on spacing a better way?
@@ -956,6 +973,11 @@ export default class Canvas extends React.Component {
             main={ this.props.main }
             content={ this.state.content }
             onContentChanged={ this.handleContentChanged }
+          />
+          <QuickInfoMenu
+            expanded = { false }
+            l10n = { this.l10n.quickInfoMenu }
+            handleOpenTutorial = { this.props.handleOpenTutorial }
           />
         </div>
       </div>
