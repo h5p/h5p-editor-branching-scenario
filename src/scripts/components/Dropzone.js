@@ -25,6 +25,30 @@ export default class Dropzone extends React.Component {
              points[0].x > local[1].x )
   }
 
+  /**
+   * Get intersecting area.
+   *
+   * @param {object[]} edges Edges of other item: [0] = upper left corner, [1] = lower right corner
+   * @param {float} edges.x X coordinate.
+   * @param {float} edges.y Y coordinate.
+   * @param {float} Intersection area.
+   */
+  intersection(edges) {
+    const local = this.getPoints();
+
+    const intersectionX = Math.min(local[1].x, edges[1].x) - Math.max(local[0].x, edges[0].x);
+    if (intersectionX <= 0) {
+      return 0;
+    }
+
+    const intersectionY = Math.min(local[1].y, edges[1].y) - Math.max(local[0].y, edges[0].y);
+    if (intersectionY <= 0) {
+      return 0;
+    }
+
+    return intersectionX * intersectionY;
+  }
+
   highlight() {
     this.refs.element.classList.add('highlight');
   }

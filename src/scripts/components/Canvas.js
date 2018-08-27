@@ -160,15 +160,40 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * Get intersections between dropzones and a draggable.
+   *
+   * @param {Draggable} draggable Draggable object.
+   * @return {object[]} intersecting objects ordered by intersecting area in decreasing order
+   */
+  getIntersections(draggable) {
+    const points = draggable.getPoints();
+
+    // Get largest intersections
+    return this.dropzones
+      .filter(dropzone => dropzone && dropzone !== draggable && dropzone.overlap(points))
+      .map(dropzone => {
+        return {
+          dropzone: dropzone,
+          intersection: dropzone.intersection(points)
+        };
+      })
+      .sort((a, b) => b.intersection - a.intersection)
+      .map(dropzone => dropzone.dropzone)
+  }
+
   handleMove = (id) => {
     const draggable = this['draggable-' + id];
     const points = draggable.getPoints();
+    const intersections = this.getIntersections(draggable);
+
+    // Highlight dropzones with largest intersection with draggable
     this.dropzones.forEach(dropzone => {
-      if (!dropzone || dropzone === draggable) {
+      if (!dropzone || dropzone === draggable || intersections.length === 0) {
         return; // Skip
       }
 
-      if (dropzone.overlap(points)) {
+      if (dropzone === intersections[0]) {
         dropzone.highlight();
       }
       else {
@@ -181,33 +206,33 @@ export default class Canvas extends React.Component {
     // Check if the node overlaps with one of the drop zones
     const draggable = this['draggable-' + id];
     const points = draggable.getPoints();
-    if (!this.dropzones.some(dropzone => {
-      if (!dropzone || dropzone === draggable) {
-        return; // Skip
-      }
 
-      if (dropzone.overlap(points)) {
-        // Replace existing node
-        if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
-          this.handlePlacing(dropzone.props.id);
-        }
-        else if (!this.state.editorOverlayVisible) {
-          // New node position
-          this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
-        }
-        else {
-          // Add next element in editor
-          const parentId = this.state.editorOverlay.handleSaveData(); // TODO: This should probably be done here
-          if (parentId !== undefined) {
-            this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
-          }
-        }
-        return true;
-      }
-    })) {
+    const intersections = this.getIntersections(draggable);
+
+    if (intersections.length === 0) {
       this.setState({
         placing: null
       });
+      return;
+    }
+
+    // Dropzone with largest intersection
+    const dropzone = intersections[0];
+
+    if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
+      // Replace existing node
+      this.handlePlacing(dropzone.props.id);
+    }
+    else if (!this.state.editorOverlayVisible) {
+      // Put existing node at new place
+      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
+    }
+    else {
+      // Add next element in editor
+      const parentId = this.state.editorOverlay.handleSaveData(); // TODO: This should probably be done here
+      if (parentId !== undefined) {
+        this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
+      }
     }
   }
 
