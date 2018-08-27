@@ -1021,9 +1021,9 @@ export default class Canvas extends React.Component {
             onContentChanged={ this.handleContentChanged }
           />
           <QuickInfoMenu
-            expanded = { false }
-            l10n = { this.l10n.quickInfoMenu }
-            handleOpenTutorial = { this.props.handleOpenTutorial }
+            expanded={ false }
+            l10n={ this.l10n.quickInfoMenu }
+            handleOpenTutorial={ this.props.handleOpenTutorial }
           />
         </div>
       </div>
