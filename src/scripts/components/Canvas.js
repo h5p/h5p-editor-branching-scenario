@@ -530,7 +530,14 @@ export default class Canvas extends React.Component {
       const content = this.state.content[id];
 
       // Add vertical spacing for each level
-      const branchY = y + ((parentIsBranching ? 8 : 5.5) * this.state.nodeSpecs.spacing.y); // *2 for the element itself
+      let distanceYFactor = parentIsBranching ? 5.5 : 3; // Normal distance, 2 would draw each element right underneath the previous one
+
+      // If placing, always keep the top node on its position and don't add space for node that has been clicked for moving.
+      if (this.state.placing !== null && id > 0 && this.state.placing !== id && this.state.placing !== parent) {
+        distanceYFactor += 2.5; // space for DZ
+      }
+
+      const branchY = y + distanceYFactor * this.state.nodeSpecs.spacing.y;
 
       // Determine if we are or parent is a branching question
       const contentIsBranching = (content && content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
@@ -545,7 +552,6 @@ export default class Canvas extends React.Component {
       // Draw subtree first so we know where to position the node
       const subtree = children ? this.renderTree(children, x, branchY, id, renderedNodes) : null;
       const subtreeWidth = subtree ? subtree.x - x : 0;
-
 
       // Determine position of node
       let position = {
@@ -586,7 +592,9 @@ export default class Canvas extends React.Component {
 
       const nodeWidth = (content ? (this.state.nodeSpecs.width / 2) : 21); // Half width actually...
       const nodeCenter = position.x + nodeWidth;
-      const aboveLineHeight = this.state.nodeSpecs.spacing.y * 3.5; // *3.5 = enough room for DZ
+
+      distanceYFactor -= parentIsBranching ? 4.5 : 2; // 2 = height factor of Draggable
+      const aboveLineHeight = this.state.nodeSpecs.spacing.y * distanceYFactor; // *3.5 = enough room for DZ
 
       // Add vertical line above (except for top node)
       if (content && id !== 0 && drawAboveLine) {
@@ -657,7 +665,7 @@ export default class Canvas extends React.Component {
         if (this.state.placing !== null && !content) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y - 1.25 * (aboveLineHeight - 42) - this.state.nodeSpecs.spacing.y * 2
+            y: position.y + 2 * this.state.nodeSpecs.spacing.y - 42
           }, parent, num));
         }
       }
@@ -666,13 +674,11 @@ export default class Canvas extends React.Component {
       if (this.state.placing !== null && this.state.placing !== id && id >= 0) {
         const dzDistance = ((aboveLineHeight - 42) / 2);
 
-        // TODO: Only render leafs when placing BQ, or add existing structure to BQ alternative?
-
         // Add dropzone above
         if (this.state.placing !== parent) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y - 42 - dzDistance
+            y: position.y - 42 - dzDistance - ((id === 0) ? (42 / 2) : 0)
           }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0, parentIsBranching));
         }
 
@@ -680,7 +686,7 @@ export default class Canvas extends React.Component {
         if (content && (!subtree || !subtree.nodes.length)) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance
+            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (42 / 2) : 0)
           }, id, parentIsBranching ? num + 1 : 1));
         }
       }
