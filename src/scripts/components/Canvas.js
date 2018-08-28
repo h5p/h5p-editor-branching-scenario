@@ -867,6 +867,8 @@ export default class Canvas extends React.Component {
       }
 
       return newState;
+    }, () => {
+      this.props.onContentChanged(this.state.content);
     });
   }
 
