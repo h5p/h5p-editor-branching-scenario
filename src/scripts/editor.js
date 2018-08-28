@@ -9,7 +9,6 @@ import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
 import TabViewMetadata from './components/TabViewMetadata';
-import EditorOverlay from './components/EditorOverlay';
 
 export default class Editor extends React.Component {
   constructor(props) {
@@ -67,7 +66,6 @@ export default class Editor extends React.Component {
   handleTranslationsChange = (event) => {
     const target = event.target;
     const value = target.value;
-    const name = target.name;
 
     const translations = this.state.translations;
 
@@ -143,7 +141,7 @@ export default class Editor extends React.Component {
             libraries={ this.state.libraries }
             translations={ this.state.translations }
             saveData={this.props.saveData}
-            main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
+            main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
             handleOpenTutorial={ this.handleOpenTutorial }
             onOpenEditor={ this.handleOpenEditor }

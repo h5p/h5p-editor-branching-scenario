@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './StartScreen.scss';
-import Dropzone from './Dropzone.js';
 
 export default class StartScreen extends React.Component {
   constructor(props) {
@@ -13,7 +12,7 @@ export default class StartScreen extends React.Component {
       <div className="startscreen-wrapper">
         <div className="startscreen-header">
           <h1>Your Branching Questions Set is empty</h1>
-          <p>To create content drag the icons from the left menu to the dropzone below</p> 
+          <p>To create content drag the icons from the left menu to the dropzone below</p>
           { this.props.children }
         </div>
         <div className="startscreen-footer">

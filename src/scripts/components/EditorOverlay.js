@@ -2,6 +2,7 @@ import React from 'react';
 import './EditorOverlay.scss';
 import Dropzone from './Dropzone.js';
 
+/*global H5PEditor*/
 export default class EditorOverlay extends React.Component {
   constructor(props) {
     super(props);
@@ -120,14 +121,14 @@ export default class EditorOverlay extends React.Component {
    */
   camelToKebab (camel) {
     return camel.split('').map((char, i) => {
-  		if (i === 0) {
-  			return char.toLowerCase();
-  		}
+      if (i === 0) {
+        return char.toLowerCase();
+      }
       if (char === char.toUpperCase()) {
-  			return `-${char.toLowerCase()}`;
-  		}
-  		return char;
-	   }).join('');
+        return `-${char.toLowerCase()}`;
+      }
+      return char;
+    }).join('');
   }
 
   handleOptionChange = (event) => {
@@ -154,16 +155,15 @@ export default class EditorOverlay extends React.Component {
     }
 
     this.setState({branchingOptions: event.target.value});
-    this.props.onContentChanged
+    this.props.onContentChanged;
   }
 
   /**
    * Check form for validity.
    *
-   * @param {object} interaction - Interaction object.
    * @return {boolean} True if valid form entries.
    */
-  isValid (interaction) {
+  isValid () {
     var valid = true;
     var elementKids = this.props.main.children;
     for (var i = 0; i < elementKids.length; i++) {
@@ -216,7 +216,7 @@ export default class EditorOverlay extends React.Component {
     this.setState({
       nextContentId: event.target.value,
       nextPath: event.target.value
-    })
+    });
     this.props.onContentChanged(this.state.contentId, parseInt(event.target.value));
   }
 
@@ -226,17 +226,17 @@ export default class EditorOverlay extends React.Component {
         <label htmlFor="nextPath">Select a path to send a user to</label>
         <select name="nextPath" value={this.state.nextPath} onChange={ this.updateNextContentId }>
           { this.props.content
-            .filter((node, index) => {
+            .filter((node) => {
               return (
                 node.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
                   this.props.handleNeedNodeId(this.interaction) !== this.props.handleNeedNodeId(node)
-              )
+              );
             })
             .map(node =>
               <option
                 key={ 'next-path-' + this.props.handleNeedNodeId(node) }
                 value={ this.props.handleNeedNodeId(node) }>
-                  {`${node.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${node.contentTitle}`}
+                {`${node.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${node.contentTitle}`}
               </option>)
           }
         </select>
@@ -258,12 +258,12 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-header'>
           <span className={['editor-overlay-title', this.state.icon].join(' ')}>{this.state.title}</span>
           <span className="buttons">
-          <button className="buttonBlue" onClick={this.handleSaveData}>
-            {this.state.saveButton}
-          </button>
-          <button className="button" onClick={this.handleRemoveData}>
-            {this.state.closeButton}
-          </button>
+            <button className="buttonBlue" onClick={this.handleSaveData}>
+              {this.state.saveButton}
+            </button>
+            <button className="button" onClick={this.handleRemoveData}>
+              {this.state.closeButton}
+            </button>
           </span>
         </div>
 

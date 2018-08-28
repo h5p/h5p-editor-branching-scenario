@@ -8,6 +8,7 @@ import ConfirmationDialog from './ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
 
+/*global H5P*/
 export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
@@ -52,7 +53,7 @@ export default class Canvas extends React.Component {
         stepByStep: 'Step by Step ',
         tutorial: 'tutorial'
       }
-    }
+    };
 
     this.state = {
       clickHandeled: false,
@@ -179,12 +180,11 @@ export default class Canvas extends React.Component {
         };
       })
       .sort((a, b) => b.intersection - a.intersection)
-      .map(dropzone => dropzone.dropzone)
+      .map(dropzone => dropzone.dropzone);
   }
 
   handleMove = (id) => {
     const draggable = this['draggable-' + id];
-    const points = draggable.getPoints();
     const intersections = this.getIntersections(draggable);
 
     // Highlight dropzones with largest intersection with draggable
@@ -205,8 +205,6 @@ export default class Canvas extends React.Component {
   handleDropped = (id) => {
     // Check if the node overlaps with one of the drop zones
     const draggable = this['draggable-' + id];
-    const points = draggable.getPoints();
-
     const intersections = this.getIntersections(draggable);
 
     if (intersections.length === 0) {
@@ -504,7 +502,7 @@ export default class Canvas extends React.Component {
     return library;
   }
 
-  getBranchingChildren(content) {
+  getBranchingChildren(content) {
     if (!content.type || !content.type.params ||
         !content.type.params.alternatives ||
         !content.type.params.alternatives.length) {
@@ -557,7 +555,7 @@ export default class Canvas extends React.Component {
       // Add vertical spacing for each level
       let distanceYFactor = parentIsBranching ? 8 : 5.5; // Normal distance, 2 would draw each element right underneath the previous one
 
-      // Code for "tree expansion"
+      // Alternate code for "tree expansion"
       // let distanceYFactor = parentIsBranching ? 5.5 : 3; // Normal distance, 2 would draw each element right underneath the previous one
       //
       // // If placing, always keep the top node on its position and don't add space for node that has been clicked for moving.
@@ -853,7 +851,7 @@ export default class Canvas extends React.Component {
               }
             });
         });
-      }
+      };
 
       if (prevState.placing === -1) {
         // Replace node

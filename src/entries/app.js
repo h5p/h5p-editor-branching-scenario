@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Editor from '../scripts/editor';
 
-/*global H5PEditor, H5P*/
-H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($) {
+/*global H5PEditor*/
+H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function () {
   /**
    * Initialize Branching Scenario editor.
    *
@@ -855,4 +855,4 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ($
   };
 
   return BranchingScenarioEditor;
-})(H5P.jQuery);
+})();

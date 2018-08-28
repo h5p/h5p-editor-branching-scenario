@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Draggable.scss';
-import SubMenu from './SubMenu.js'
+import SubMenu from './SubMenu.js';
 
 export default class Draggable extends React.Component {
   constructor(props) {
@@ -30,7 +30,7 @@ export default class Draggable extends React.Component {
       e.target.className === 'edit-content' ||
       e.target.className === 'delete'
     ) {
-      return
+      return;
     }
 
     this.setState({
@@ -40,7 +40,7 @@ export default class Draggable extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.position && (
-        nextProps.position.x !== this.state.position.x ||
+      nextProps.position.x !== this.state.position.x ||
         nextProps.position.y !== this.state.position.y)) {
       this.setState({
         position: {
@@ -59,15 +59,15 @@ export default class Draggable extends React.Component {
     }, {
       x: raw.x + raw.width,
       y: raw.y + raw.height
-    }]
+    }];
   }
 
   overlap(points) {
     const local = this.getPoints();
     return !(points[1].y < local[0].y ||
-             points[0].y > local[1].y ||
-             points[1].x < local[0].x ||
-             points[0].x > local[1].x )
+      points[0].y > local[1].y ||
+      points[1].x < local[0].x ||
+      points[0].x > local[1].x );
   }
 
   /**
@@ -102,7 +102,7 @@ export default class Draggable extends React.Component {
     this.refs.element.classList.remove('highlight');
   }
 
-  handleMouseUp = (event) => {
+  handleMouseUp = () => {
     if (this.state.moving.started) {
       this.setState({
         moving: null
@@ -113,7 +113,7 @@ export default class Draggable extends React.Component {
     window.removeEventListener('mousemove', this.handleMouseMove);
   }
 
-  determineOffset(element, x, y) {
+  determineOffset(element) {
     var style = window.getComputedStyle(element);
     if (style.position === 'relative') {
       const raw = element.getBoundingClientRect();
