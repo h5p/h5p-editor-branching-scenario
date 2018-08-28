@@ -555,12 +555,15 @@ export default class Canvas extends React.Component {
       const content = this.state.content[id];
 
       // Add vertical spacing for each level
-      let distanceYFactor = parentIsBranching ? 5.5 : 3; // Normal distance, 2 would draw each element right underneath the previous one
+      let distanceYFactor = parentIsBranching ? 8 : 5.5; // Normal distance, 2 would draw each element right underneath the previous one
 
-      // If placing, always keep the top node on its position and don't add space for node that has been clicked for moving.
-      if (this.state.placing !== null && id > 0 && this.state.placing !== id && this.state.placing !== parent) {
-        distanceYFactor += 2.5; // space for DZ
-      }
+      // Code for "tree expansion"
+      // let distanceYFactor = parentIsBranching ? 5.5 : 3; // Normal distance, 2 would draw each element right underneath the previous one
+      //
+      // // If placing, always keep the top node on its position and don't add space for node that has been clicked for moving.
+      // if (this.state.placing !== null && id > 0 && this.state.placing !== id && this.state.placing !== parent) {
+      //   distanceYFactor += 2.5; // space for DZ
+      // }
 
       const branchY = y + distanceYFactor * this.state.nodeSpecs.spacing.y;
 
