@@ -60,6 +60,7 @@ export default class Canvas extends React.Component {
       placing: null,
       deleting: null,
       inserting: null,
+      editing: null,
       editorOverlayVisible: false,
       editorContents: {
         top: {
@@ -221,13 +222,15 @@ export default class Canvas extends React.Component {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
     }
-    else if (!this.state.editorOverlayVisible) {
+    else if (!this.state.editing) {
       // Put existing node at new place
       this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
     }
     else {
       // Add next element in editor
-      const parentId = this.state.editorOverlay.handleSaveData(); // TODO: This should probably be done here
+      const parentId = this.state.editing;
+      // Here we retrieve the content from EditorOverlay, because CKEditor changes are not caught
+      this.handleFormSaved(this.state.editing, this.state.editorOverlay.state.content);
       if (parentId !== undefined) {
         this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
       }
@@ -243,7 +246,9 @@ export default class Canvas extends React.Component {
   }
 
   handleEditContent = (id) => {
-    this.openEditor(id, this.state.content[id]);
+    this.setState({
+      editing: id
+    });
   }
 
   handleDeleteContent = (id) => {
@@ -453,16 +458,6 @@ export default class Canvas extends React.Component {
     });
   }
 
-  /**
-   * Get Id of element. It's set implicitly by the position in the array.
-   *
-   * @param {object} contentItem - item to check for.
-   * @return {number} position or -1.
-   */
-  handleNeedNodeId = (contentItem) => {
-    return this.state.content.indexOf(contentItem);
-  }
-
   renderDropzone(id, position, parent, num, parentIsBranching) {
     const nextContentId = (parent === undefined || parentIsBranching) ? id : undefined;
     if (num === undefined) {
@@ -568,8 +563,11 @@ export default class Canvas extends React.Component {
       // Determine if we are or parent is a branching question
       const contentIsBranching = (content && content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
-      // Determine if we have any children
-      const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? content.nextContentId : null));
+      // Determine if we have any children that are not looping to upper nodes
+      let children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null));
+      if (children) {
+        children = children.filter(child => child > id);
+      }
 
       if (x !== 0 && num > 0) {
         x += this.state.nodeSpecs.spacing.x; // Add spacing between nodes
@@ -739,19 +737,6 @@ export default class Canvas extends React.Component {
     };
   }
 
-  /**
-   * Toggle the editor overlay.
-   *
-   * @param {boolean} visibility - Override visibility toggling.
-   */
-  toggleEditorOverlay = (visibility) => {
-    this.setState((prevState) => {
-      return {
-        editorOverlayVisible: visibility || !prevState.editorOverlayVisible
-      };
-    });
-  }
-
   updateNextContentIdAfterReplace(leaf, id, nextId) {
     // Move current children of the moved node to grand parent
     if (leaf.nextContentId === id) {
@@ -771,6 +756,7 @@ export default class Canvas extends React.Component {
         placing: null,
         deleting: null,
         inserting: null,
+        editing: null,
         content: [...prevState.content]
       };
 
@@ -859,10 +845,9 @@ export default class Canvas extends React.Component {
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
       }
-      else {
+      else if (prevState.deleting !== null || prevState.inserting !== null) {
         // Delete node
-        const id = (prevState.placing !== null && prevState.placing !== -1) ? prevState.placing :
-          ((prevState.inserting !== null) ? prevState.inserting : prevState.deleting);
+        const id = (prevState.inserting !== null) ? prevState.inserting : prevState.deleting;
         removeNode(id);
       }
 
@@ -875,12 +860,13 @@ export default class Canvas extends React.Component {
   handleCancel = () => {
     this.setState({
       placing: null,
-      deleting: null
+      deleting: null,
+      editing: null,
+      inserting: null
     });
   }
 
   componentDidUpdate() {
-
     // Center the tree
     if (this.treeWidth !== this.lastTreeWidth) {
       this.lastTreeWidth = this.treeWidth;
@@ -905,26 +891,9 @@ export default class Canvas extends React.Component {
    * @param {number} id - ID.
    */
   handleInserted = (id) => {
-    this.openEditor(id, this.state.content[id], {state: 'new'});
-  }
-
-  /**
-   * Open editor.
-   *
-   * @param {number} contentId - ContentId.
-   * @param {object} data - Data.
-   * @param {object} params - Params.
-   */
-  openEditor = (contentId, data, params) => {
-    if (data) {
-      data.$form = H5P.jQuery('<div/>');
-      // TODO: Check why process SemanticsChunk crashes here with CoursePresentation
-      // TODO: Instead of updating an existing form, create a new one and destroy it after it was used
-      this.state.editorOverlay.updateForm(contentId, data, this.props.getSemantics(data.type.library), params);
-      this.toggleEditorOverlay(true);
-    }
-
-    this.props.onOpenEditor(null);
+    this.setState({
+      editing: id
+    });
   }
 
   /**
@@ -938,15 +907,73 @@ export default class Canvas extends React.Component {
     });
   }
 
-  handleContentChanged = (contentId, nextContentId) => {
+  handleContentChanged = (id, content) => {
+    delete content.$form;
     this.setState(prevState => {
-      prevState.content[contentId].nextContentId = nextContentId;
+      prevState.content[id] = content;
     }, () => {this.props.onContentChanged(this.state.content);});
+  }
+
+  handleFormSaved = () => {
+    this.setState({
+      editing: null,
+      inserting: null
+    });
+  }
+
+  /**
+   * Check form for validity.
+   *
+   * @return {boolean} True if valid form entries.
+   */
+  isValid () {
+    var valid = true;
+    var elementKids = this.props.main.children;
+    for (var i = 0; i < elementKids.length; i++) {
+      if (elementKids[i].validate() === false) {
+        valid = false;
+      }
+    }
+    return valid;
+  }
+
+  /**
+   * Return data from the form to the callback function.
+   *
+   * @return {number} ContentId of saved interaction.
+   */
+  handleSaveData = (id, content) => {
+    // Check if all required form fields can be validated
+    if (!this.isValid()) {
+      return;
+    }
+
+    this.handleContentChanged(id, content);
+    this.handleFormSaved();
+
+    return id;
+  }
+
+  /**
+   * Convert camel case to kebab case.
+   *
+   * @param {string} camel - Camel case.
+   * @return {string} Kebab case.
+   */
+  camelToKebab (camel) {
+    return camel.split('').map((char, i) => {
+      if (i === 0) {
+        return char.toLowerCase();
+      }
+      if (char === char.toUpperCase()) {
+        return `-${char.toLowerCase()}`;
+      }
+      return char;
+    }).join('');
   }
 
   // For debugging
   logNodes = caller => {
-    //return;
     console.log('NODES', caller);
     this.state.content.forEach((node, index) => {
       const target = (this.contentIsBranching(node)) ?
@@ -964,6 +991,8 @@ export default class Canvas extends React.Component {
     const tree = this.renderTree(0);
     this.logNodes('render');
     this.treeWidth = tree.x;
+
+    const interaction = this.state.content[this.state.editing];
 
     return (
       <div className="wrapper">
@@ -1004,25 +1033,26 @@ export default class Canvas extends React.Component {
               confirmationQuestion={ this.state.dialog.confirmationQuestion }
               confirmationDetails={ this.state.dialog.confirmationDetails }
               confirmationDetailsList={ this.state.dialog.confirmationDetailsList }
-              textConfirm= { this.state.dialog.textConfirm }
+              textConfirm={ this.state.dialog.textConfirm }
               textCancel={ this.state.dialog.textCancel }
               handleConfirm={ this.state.dialog.handleConfirm }
               handleCancel={ this.state.dialog.handleCancel }
             />
           }
-          <EditorOverlay // TODO: It's quite difficult to see which content the overlay is being displayed for
-            onRef={ this.handleRef }
-            visibility={ this.state.editorOverlayVisible }
-            editorContents={ this.state.editorContents }
-            form={{}}
-            onNextPathDrop={ this.handlePushElement }
-            handleNeedNodeId={ this.handleNeedNodeId }
-            closeForm={ this.toggleEditorOverlay }
-            onRemoveData={ this.handleDelete }
-            main={ this.props.main }
-            content={ this.state.content }
-            onContentChanged={ this.handleContentChanged }
-          />
+          { this.state.editing !== null &&
+            <EditorOverlay
+              id={ this.state.editing }
+              content={ this.state.content }
+              elementFields={ interaction !== 'undefined' ? this.props.getSemantics(interaction.type.library) : undefined }
+              icon={ interaction !== 'undefined' ? `editor-overlay-icon-${this.camelToKebab(interaction.type.library.split('.')[1].split(' ')[0])}` : ''}
+              onRef={ this.handleRef }
+              onNextPathDrop={ this.handlePushElement }
+              onFormSaved={ this.handleSaveData }
+              onFormClosed={ this.handleDelete }
+              main={ this.props.main }
+              onContentChanged={ this.handleContentChanged }
+            />
+          }
           <QuickInfoMenu
             expanded={ false }
             l10n={ this.l10n.quickInfoMenu }

@@ -19,13 +19,6 @@
   flex-direction: column;
 }
 
-.editor-overlay.inactive {
-  display: none;
-}
-
-.editor-overlay.active {
-}
-
 .editor-overlay .editor-overlay-header {
   margin: 0;
   padding: 0;
@@ -64,7 +57,7 @@
     margin-right: 0.3rem;
   }
 
-  &.editor-overlay-icon-text:before {
+  &.editor-overlay-icon-advanced-text:before {
     content: $icon-text;
   }
 

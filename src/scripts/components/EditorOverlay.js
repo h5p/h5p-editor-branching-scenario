@@ -2,24 +2,31 @@ import React from 'react';
 import './EditorOverlay.scss';
 import Dropzone from './Dropzone.js';
 
-/*global H5PEditor*/
+/*global H5PEditor, H5P*/
 export default class EditorOverlay extends React.Component {
   constructor(props) {
     super(props);
 
+    this.refForm = React.createRef();
+    this.passReadies = false;
+
+    const content = this.props.content[this.props.id] || {};
+    content.contentTitle = content.contentTitle || content.type.library.split('.')[1];
+
+    content.$form = H5P.jQuery('<div/>');
+
+    // Attach the DOM to $form
+    H5PEditor.processSemanticsChunk(this.props.elementFields, content.type.params, content.$form, this.props.main);
+
+    // TODO: l10n object
     this.state = {
-      icon: '',
-      title: '',
       saveButton: "Save changes", // TODO: Needs to be translatable
       closeButton: "close", // TODO: Needs to be translatable
-      nextContentId: undefined,
       showNextPathDropzone: false,
-      showNextPathChooser: false,
-      nextPath: '',
-      branchingOptions: ''
+      showNextPathChooser: content.nextContentId > -1,
+      branchingOptions: (content.nextContentId > -1) ? "old-content" : 'end-scenario',
+      content: content
     };
-
-    this.refForm = React.createRef();
   }
 
   /*
@@ -30,22 +37,22 @@ export default class EditorOverlay extends React.Component {
    */
   componentDidMount () {
     this.props.onRef(this);
+
+    // Try to listen to everything in the form
+    // TODO: Also catch the CKEditor, Drag'n'Drop, etc.
+    this.state.content.$form.on('keypress click change blur', () => {
+      this.props.onContentChanged(this.props.id, this.state.content);
+    });
+
+    /*
+     * React doesn't allow DOM or jQuery elements, so this is a workaround
+     * to update the form overlay component's contents.
+     */
+    this.state.content.$form.appendTo(this.refForm.current);
   }
 
   componentWillUnmount () {
     this.props.onRef(undefined);
-  }
-
-  reset () {
-    this.setState({
-      icon: '',
-      title: '',
-      //nextContentId: -1,
-      showNextPathDropzone: false,
-      showNextPathChooser: false,
-      nextPath: '',
-      branchingOptions: ''
-    });
   }
 
   /**
@@ -55,80 +62,15 @@ export default class EditorOverlay extends React.Component {
    */
   handleUpdateTitle = (event) => {
     const value = event.target.value;
-    this.setState({title: value});
-    this.interaction.contentTitle = value;
-    this.props.onContentChanged;
-  }
 
-  /**
-   * Update the form for editing an interaction
-   *
-   * @param {number} contentId - ContentID.
-   * @param {object} interaction - Parameters to set in form.
-   * @param {object} elementFields - Semantics fields for validation.
-   * @param {object} extras - Additional parameters.
-   * @param {string} extras.state - Particular state.
-   */
-  updateForm (contentId, interaction, elementFields, extras) {
-    this.reset();
-    // Holds the reference to the object we're modifying
-    this.interaction = interaction || {};
-    this.extras = extras;
+    this.setState(prevState => {
+      const newState = prevState;
+      newState.content.contentTitle = value;
 
-    const icon = `editor-overlay-icon-${this.camelToKebab(this.interaction.type.library.split('.')[1])}`;
-    const title = this.interaction.contentTitle || this.interaction.type.library.split('.')[1];
-    this.setState({contentId: contentId, icon: icon, title: title});
-
-    this.passReadies = false;
-
-    // Attach the DOM to $form
-    H5PEditor.processSemanticsChunk(elementFields, this.interaction.type.params, this.interaction.$form, this.props.main);
-    /*
-     * React doesn't allow DOM or jQuery elements, so this is a workaround
-     * to update the form overlay component's contents.
-     * TODO: When working, don't keep the component, but create/destroy it as
-     *       needed and put this in the constructor. Makes more sense.
-     */
-
-    this.refForm.current.innerHTML = '';
-
-    // Try to listen to everything in the form
-    // TODO: Also catch the CKEditor, Drag'n'Drop, etc.
-    this.interaction.$form.on('keypress click change blur', () => {
-      this.props.onContentChanged;
+      return newState;
+    }, () => {
+      this.props.onContentChanged(this.props.id, this.state.content);
     });
-
-    if (this.interaction.nextContentId) {
-      // TODO: The options for changing the next node might be restricted here
-      this.setState({
-        branchingOptions: 'old-content',
-        showNextPathChooser: true,
-        nextPath: this.interaction.nextContentId
-      });
-    }
-    else {
-      this.props.onContentChanged(contentId, -1);
-    }
-
-    this.interaction.$form.appendTo(this.refForm.current);
-  }
-
-  /**
-   * Convert camel case to kebab case.
-   *
-   * @param {string} camel - Camel case.
-   * @return {string} Kebab case.
-   */
-  camelToKebab (camel) {
-    return camel.split('').map((char, i) => {
-      if (i === 0) {
-        return char.toLowerCase();
-      }
-      if (char === char.toUpperCase()) {
-        return `-${char.toLowerCase()}`;
-      }
-      return char;
-    }).join('');
   }
 
   handleOptionChange = (event) => {
@@ -137,69 +79,27 @@ export default class EditorOverlay extends React.Component {
         this.setState({
           nextContentId: -1,
           showNextPathDropzone: false,
-          showNextPathChooser: false
+          showNextPathChooser: false,
+          branchingOptions: event.target.value
         });
         break;
       case 'new-content':
         this.setState({
           showNextPathDropzone: true,
-          showNextPathChooser: false
+          showNextPathChooser: false,
+          branchingOptions: event.target.value
         });
         break;
       case 'old-content':
         this.setState({
           showNextPathDropzone: false,
-          showNextPathChooser: true
+          showNextPathChooser: true,
+          branchingOptions: event.target.value
         });
         break;
     }
 
-    this.setState({branchingOptions: event.target.value});
-    this.props.onContentChanged;
-  }
-
-  /**
-   * Check form for validity.
-   *
-   * @return {boolean} True if valid form entries.
-   */
-  isValid () {
-    var valid = true;
-    var elementKids = this.props.main.children;
-    for (var i = 0; i < elementKids.length; i++) {
-      if (elementKids[i].validate() === false) {
-        valid = false;
-      }
-    }
-    return valid;
-  }
-
-  /**
-   * Return data from the form to the callback function.
-   *
-   * @return {number} ContentId of saved interaction.
-   */
-  handleSaveData = () => {
-    // Check if all required form fields can be validated
-    if (!this.isValid(this.interaction)) {
-      return;
-    }
-
-    delete this.interaction.$form;
-    this.props.onContentChanged;
-    this.props.closeForm();
-
-    return this.props.handleNeedNodeId(this.interaction);
-  }
-
-  /*
-   * Remove data.
-   */
-  handleRemoveData = () => {
-    if (this.extras && this.extras.state === 'new') {
-      this.props.onRemoveData();
-    }
-    this.props.closeForm();
+    this.props.onContentChanged(this.props.id, this.state.content);
   }
 
   renderNextPathDropzone () {
@@ -213,30 +113,35 @@ export default class EditorOverlay extends React.Component {
   }
 
   updateNextContentId = (event) => {
-    this.setState({
-      nextContentId: event.target.value,
-      nextPath: event.target.value
+    const value = parseInt(event.target.value);
+
+    this.setState(prevState => {
+      const newState = prevState;
+      newState.content.nextContentId = value;
+
+      return newState;
+    }, () => {
+      this.props.onContentChanged(this.props.id, this.state.content);
     });
-    this.props.onContentChanged(this.state.contentId, parseInt(event.target.value));
   }
 
   renderNextPathChooser () {
     return (
       <div>
         <label htmlFor="nextPath">Select a path to send a user to</label>
-        <select name="nextPath" value={this.state.nextPath} onChange={ this.updateNextContentId }>
+        <select name="nextPath" value={ this.state.content.nextContentId } onChange={ this.updateNextContentId }>
           { this.props.content
-            .filter((node) => {
+            .filter((content) => {
               return (
-                node.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
-                  this.props.handleNeedNodeId(this.interaction) !== this.props.handleNeedNodeId(node)
+                content.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
+                  this.props.id !== this.props.content.indexOf(content)
               );
             })
-            .map(node =>
+            .map(content =>
               <option
-                key={ 'next-path-' + this.props.handleNeedNodeId(node) }
-                value={ this.props.handleNeedNodeId(node) }>
-                {`${node.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${node.contentTitle}`}
+                key={ 'next-path-' + this.props.content.indexOf(content) }
+                value={ this.props.content.indexOf(content) }>
+                {`${content.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${content.contentTitle}`}
               </option>)
           }
         </select>
@@ -246,23 +151,16 @@ export default class EditorOverlay extends React.Component {
 
   // TODO: The editor-overlay-branching-options could be put in their own component
   render () {
-
-    // Update the params
-    this.props.onContentChanged;
-
-    const visibilityClass = this.props.visibility ? 'active' : 'inactive';
-
-    const className = `editor-overlay ${visibilityClass}`;
     return (
-      <div className={className} >
+      <div className='editor-overlay'>
         <div className='editor-overlay-header'>
-          <span className={['editor-overlay-title', this.state.icon].join(' ')}>{this.state.title}</span>
+          <span className={ ['editor-overlay-title', this.props.icon].join(' ') }>{ this.state.content.contentTitle }</span>
           <span className="buttons">
-            <button className="buttonBlue" onClick={this.handleSaveData}>
-              {this.state.saveButton}
+            <button className="buttonBlue" onClick={ () => {this.props.onFormSaved(this.props.id, this.state.content);} }>
+              { this.state.saveButton }
             </button>
-            <button className="button" onClick={this.handleRemoveData}>
-              {this.state.closeButton}
+            <button className="button" onClick={ this.props.onFormClosed }>
+              { this.state.closeButton }
             </button>
           </span>
         </div>
@@ -270,10 +168,10 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-content'>
           <div>
             <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
-            <input name="title" className='editor-overlay-titlefield' type="text" value={this.state.title} onChange={this.handleUpdateTitle} />
+            <input name="title" className='editor-overlay-titlefield' type="text" value={ this.state.content.contentTitle } onChange={ this.handleUpdateTitle } />
           </div>
 
-          <div className='editor-overlay-semantics' ref={this.refForm} />
+          <div className='editor-overlay-semantics' ref={ this.refForm } />
 
           <div className='editor-overlay-branching-options'>
             <select value={ this.state.branchingOptions } onChange={ this.handleOptionChange }>
