@@ -564,17 +564,21 @@ export default class Canvas extends React.Component {
       const contentIsBranching = (content && content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
       // Determine if we have any children that are not looping to upper nodes
-      let children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null));
-      if (children) {
-        children = children.filter(child => child > id);
-      }
+      const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null));
 
       if (x !== 0 && num > 0) {
         x += this.state.nodeSpecs.spacing.x; // Add spacing between nodes
       }
 
+      // Exclude branches that are looping back to earlier nodes
+      let newChildren = children;
+      if (newChildren) {
+        newChildren = (typeof children === 'number' ? [children] : children)
+          .filter(child => child < 0 || child > id);
+      }
+
       // Draw subtree first so we know where to position the node
-      const subtree = children ? this.renderTree(children, x, branchY, id, renderedNodes) : null;
+      const subtree = newChildren ? this.renderTree(newChildren, x, branchY, id, renderedNodes) : null;
       const subtreeWidth = subtree ? subtree.x - x : 0;
 
       // Determine position of node

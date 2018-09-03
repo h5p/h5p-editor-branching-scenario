@@ -74,27 +74,34 @@ export default class EditorOverlay extends React.Component {
   }
 
   handleOptionChange = (event) => {
-    switch (event.target.value) {
+    const value = event.target.value;
+
+    switch (value) {
       case 'end-scenario':
         this.setState({
           nextContentId: -1,
           showNextPathDropzone: false,
           showNextPathChooser: false,
-          branchingOptions: event.target.value
+          branchingOptions: value
         });
         break;
       case 'new-content':
         this.setState({
           showNextPathDropzone: true,
           showNextPathChooser: false,
-          branchingOptions: event.target.value
+          branchingOptions: value
         });
         break;
       case 'old-content':
-        this.setState({
-          showNextPathDropzone: false,
-          showNextPathChooser: true,
-          branchingOptions: event.target.value
+        this.setState(prevState => {
+          const newState = prevState;
+
+          newState.showNextPathDropzone = false;
+          newState.showNextPathChooser = true;
+          newState.branchingOptions = value;
+          newState.content.nextContentId = (prevState.content.nextContentId < 0) ? 0 : prevState.content.nextContentId;
+
+          return newState;
         });
         break;
     }
@@ -113,7 +120,7 @@ export default class EditorOverlay extends React.Component {
   }
 
   updateNextContentId = (event) => {
-    const value = parseInt(event.target.value);
+    const value = (typeof event === 'number') ? event : parseInt(event.target.value);
 
     this.setState(prevState => {
       const newState = prevState;
