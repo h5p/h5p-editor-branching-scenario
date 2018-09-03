@@ -218,6 +218,16 @@ export default class Canvas extends React.Component {
     // Dropzone with largest intersection
     const dropzone = intersections[0];
 
+    // BranchingQuestion shall not replace BranchingQuestion
+    if (dropzone instanceof Draggable &&
+        dropzone.getContentClass() === 'BranchingQuestion' &&
+        draggable.getContentClass() === 'BranchingQuestion') {
+      this.setState({
+        placing: null
+      });
+      return;
+    }
+
     if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
@@ -993,7 +1003,10 @@ export default class Canvas extends React.Component {
 
     // Generate the tree
     const tree = this.renderTree(0);
-    this.logNodes('render');
+
+    // Beware: If you use this for debugging, for some reason setState will run
+    // twice in placeInTree if and only if you place BranchingQuestions
+    // this.logNodes('render');
     this.treeWidth = tree.x;
 
     const interaction = this.state.content[this.state.editing];

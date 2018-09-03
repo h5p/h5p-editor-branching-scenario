@@ -71,6 +71,15 @@ export default class Draggable extends React.Component {
   }
 
   /**
+   * Get content class name.
+   *
+   * @return {string} Content class name.
+   */
+  getContentClass() {
+    return this.props.contentClass;
+  }
+
+  /**
    * Get intersecting area.
    *
    * @param {object[]} edges Edges of other item: [0] = upper left corner, [1] = lower right corner
