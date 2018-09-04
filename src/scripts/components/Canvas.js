@@ -83,8 +83,6 @@ export default class Canvas extends React.Component {
       content: this.props.content,
       dialog: this.l10n.dialogDelete
     };
-
-    console.log('%c Welcome back, Frode!', 'font: bold 50px OpenSans; text-align: center; padding: 0.75em; color: red; text-shadow: 2px 2px 0 rgb(217,31,38), 4px 4px 0 rgb(226,91,14), 6px 6px 0 rgb(245,221,8), 9px 9px 0 rgb(5,148,68), 11px 11px 0 rgb(2,135,206), 13px 13px 0 rgb(4,77,145), 15px 15px 0 rgb(42,21,113)');
   }
 
   componentDidMount() {
