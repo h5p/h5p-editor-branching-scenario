@@ -18,6 +18,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     // Fields of semantics
     this.field = field;
 
+    this.setValue = setValue;
+
     this.elementFields = this.findField('content', this.field.fields);
     this.libraries = this.findField('type', this.elementFields.field.fields).options;
 
@@ -827,6 +829,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
    */
   BranchingScenarioEditor.prototype.handleContentChanged = function (content) {
     this.params.content = content;
+    this.setValue(this.field, this.params);
   };
 
   /**
