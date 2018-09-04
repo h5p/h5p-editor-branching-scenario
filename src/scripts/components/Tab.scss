@@ -44,7 +44,6 @@ input[type="button"], input[type="submit"] {
 
 form {
   height: 100%;
-  overflow-y: auto;
 }
 
 .tab-panel {
@@ -122,15 +121,6 @@ form {
 .tab-view-info {
   position: relative;
   display: block; }
-
-.tab-view-info::after {
-  font-family: BSFont;
-  top: 0;
-  font-size: 0.7rem;
-  content: "\1F6C8";
-  color: #6e6e6e;
-  cursor: pointer;
-  padding-left: 0.3rem; }
 
 .tab-view-info-tip {
   display: none;

@@ -26,6 +26,7 @@
 .tooltip {
   position: absolute;
   bottom: 98%;
+  top: auto;
   width: 15rem;
   background-color: #ffffff;
   z-index: 2000;
@@ -38,6 +39,11 @@
   font-size: 0.75rem;
   line-height: 0.9rem;
   color: #363b42;
+
+  &.below {
+    bottom: auto;
+    top: 120%;
+  }
 }
 
 .tooltip::before {

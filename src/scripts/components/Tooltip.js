@@ -6,35 +6,46 @@ export default class Tooltip extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       showTooltip: false
     };
   }
 
+  /**
+   * Handle click on button.
+   */
   handleClick = () => {
+    this.toggle();
+  }
+
+  /**
+   * Toogle tooltip.
+   *
+   * @param {boolean} [visible] If set, visibility will be set accordingly, toggled otherwise.
+   */
+  toggle = visible => {
     this.setState(prevState => ({
-      showTooltip: !prevState.showTooltip
+      showTooltip: typeof visible === 'boolean' ? visible : !prevState.showTooltip
     }));
   }
 
   render() {
-    if(this.state.showTooltip) {
-      return (
-        <div className="tooltip-wrapper">
-          <a className="tooltip-button" onClick={ this.handleClick }/>
-          <div className="tooltip">
-            { this.props.children }
-          </div>
-        </div>
-      );
-    }
-    else {
-      return (
-        <div className="tooltip-wrapper">
-          <a className="tooltip-button" onClick={ this.handleClick }/>
-        </div>
-      );
-    }
+    // Use to override default style
+    const tooltipClass = this.props.tooltipClass || 'tooltip';
+
+    return (
+      <div className="tooltip-wrapper">
+        <a ref={ 'button' } className="tooltip-button" onClick={ this.handleClick } />
+        { this.state.showTooltip &&
+          <div
+            ref={ 'tooltip' }
+            className={ tooltipClass }
+            dangerouslySetInnerHTML={ { __html: this.props.text } }
+          />
+        }
+      </div>
+    );
   }
 }
 
