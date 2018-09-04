@@ -991,8 +991,9 @@ export default class Canvas extends React.Component {
     console.log('NODES', caller);
     this.state.content.forEach((node, index) => {
       const target = (this.contentIsBranching(node)) ?
-        node.type.params.alternatives.map(alt => alt.nextContentId).join(' | ') :
-        node.nextContentId;
+        (node.type.params.alternatives ?
+          node.type.params.alternatives.map(alt => alt.nextContentId).join(' | ') :
+          -1) : node.nextContentId;
       console.log(`${index} --> ${target}`);
     });
     console.log('==========');
@@ -1004,9 +1005,9 @@ export default class Canvas extends React.Component {
     // Generate the tree
     const tree = this.renderTree(0);
 
-    // Beware: If you use this for debugging, for some reason setState will run
-    // twice in placeInTree if and only if you place BranchingQuestions
-    // this.logNodes('render');
+    // Usful for debugging tree rendering
+    this.logNodes('render');
+
     this.treeWidth = tree.x;
 
     const interaction = this.state.content[this.state.editing];
