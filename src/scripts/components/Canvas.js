@@ -479,7 +479,7 @@ export default class Canvas extends React.Component {
     }
     return ( !this.state.editorOverlayVisible &&
       <Dropzone
-        key={ ((id < 0) ? 'f-' + '-' + id : id) + '-dz-' + num }
+        key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
@@ -527,6 +527,10 @@ export default class Canvas extends React.Component {
   }
 
   renderTree = (branch, x, y, parent, renderedNodes) => {
+    if (branch === 0) {
+      this.traversedNodes = [];
+    }
+
     let nodes = [];
 
     // Keep track of nodes that have already been rendered (there might be cycles)
@@ -558,6 +562,9 @@ export default class Canvas extends React.Component {
 
     let firstX, lastX;
     branch.forEach((id, num) => {
+      if (id > -1) {
+        this.traversedNodes.push(id);
+      }
       let drawAboveLine = false;
       const content = this.state.content[id];
 
@@ -577,7 +584,7 @@ export default class Canvas extends React.Component {
       // Determine if we are or parent is a branching question
       const contentIsBranching = (content && content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
 
-      // Determine if we have any children that are not looping to upper nodes
+      // Determine if we have any children
       const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null));
 
       if (x !== 0 && num > 0) {
@@ -585,10 +592,11 @@ export default class Canvas extends React.Component {
       }
 
       // Exclude branches that are looping back to earlier nodes
+      // TODO: Alternatives that lead to existing nodes need to be drawn
       let newChildren = children;
       if (newChildren) {
         newChildren = (typeof children === 'number' ? [children] : children)
-          .filter(child => child < 0 || child > id || renderedNodes.indexOf(child) === -1 );
+          .filter(child => child < 0 || this.traversedNodes.indexOf(child) === -1);
       }
 
       // Draw subtree first so we know where to position the node
@@ -865,7 +873,7 @@ export default class Canvas extends React.Component {
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
       }
-      else if (prevState.editing !== null || prevState.deleting !== null) {
+      else if (prevState.editing !== null && prevState.placing === null || prevState.deleting !== null) {
         // Delete node
         removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
