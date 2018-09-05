@@ -1051,7 +1051,7 @@ export default class Canvas extends React.Component {
           }
           { this.state.deleting !== null &&
             <ConfirmationDialog
-              icon={ this.state.dialog.icon }
+              icon={ this.state.dialog.icon } // TODO: Just send the whole dialog object? Should probably be improved when the l10n is being fixed.
               confirmationHeader={ this.state.dialog.confirmationHeader }
               confirmationQuestion={ this.state.dialog.confirmationQuestion }
               confirmationDetails={ this.state.dialog.confirmationDetails }
