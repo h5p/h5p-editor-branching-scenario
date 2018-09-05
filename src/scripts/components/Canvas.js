@@ -372,6 +372,8 @@ export default class Canvas extends React.Component {
     this.setState(prevState => {
       let newState = {
         placing: null,
+        editing: null,
+        inserting: null,
         content: [...prevState.content],
       };
 
@@ -379,7 +381,7 @@ export default class Canvas extends React.Component {
       if (id === -1) {
         newState.content.push(this.getNewContentParams());
         id = newState.content.length - 1;
-        newState.inserting = id;
+        newState.editing = id;
         if (id === 0) {
           // This is the first node added, nothing more needs to be done.
           return newState;
@@ -401,6 +403,11 @@ export default class Canvas extends React.Component {
       if (nextContentId === 0) {
         // We are the new top node, we must move to the top of the array
         newState.content.splice(0, 0, newState.content[id]);
+
+        // We're in editing mode
+        if (newState.editing !== null) {
+          newState.editing = 0;
+        }
 
         // Mark IDs for bumping due to array changes
         bumpIdsUntil = id + 1;
@@ -462,11 +469,6 @@ export default class Canvas extends React.Component {
       }
 
       return newState;
-    }, () => {
-      if (this.state.inserting === null || this.state.deleting !== null) {
-        return;
-      }
-      this.handleInserted(this.state.inserting);
     });
   }
 
@@ -863,10 +865,9 @@ export default class Canvas extends React.Component {
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
       }
-      else if (prevState.deleting !== null || prevState.inserting !== null) {
+      else if (prevState.editing !== null || prevState.deleting !== null) {
         // Delete node
-        const id = (prevState.inserting !== null) ? prevState.inserting : prevState.deleting;
-        removeNode(id);
+        removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
 
       return newState;
@@ -1001,6 +1002,7 @@ export default class Canvas extends React.Component {
       console.log(`${index} --> ${target}`);
     });
     console.log('==========');
+    console.log('d:', this.state.deleting, 'e:',this.state.editing, 'i:', this.state.inserting, 'p:', this.state.placing);
     console.warn(this.state.content);
   }
 
