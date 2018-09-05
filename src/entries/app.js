@@ -412,7 +412,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     };
 
     // For testing, line can be removed afterwards
-    this.params.content = testCases.branching2;
+    // this.params.content = testCases.branching2;
 
     // Sanitize missing nextContentId; can never be undefined
     this.params.content.forEach(item => {
