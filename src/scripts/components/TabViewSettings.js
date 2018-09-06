@@ -1,5 +1,5 @@
 import React from 'react';
-import Tooltip from './Tooltip';
+import TooltipButton from './TooltipButton';
 
 export default class TabViewSettings extends React.Component {
   constructor (props) {
@@ -10,12 +10,10 @@ export default class TabViewSettings extends React.Component {
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      infoTooltipStartingScreen: 'Starting screen is an intro screen that should give a learner additional information about the course',
-      infoTooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
-      infoTooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
+      tooltipStartingScreen: 'Starting screen is an intro screen that should give a learner additional information about the course',
+      tooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
+      tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
     };
-
-    this.infoTooltips = [];
   }
 
   componentDidMount () {
@@ -52,8 +50,6 @@ export default class TabViewSettings extends React.Component {
       this.props.onChange(event);
     });
 
-    document.addEventListener('click', this.handleDocumentClick);
-
     // Allow buttons inside labels being clickable
     const manualFocus = document.getElementsByClassName('manual-focus');
     for (let i = 0; i < manualFocus.length; i++) {
@@ -63,42 +59,6 @@ export default class TabViewSettings extends React.Component {
           document.getElementById(manualFocus[i].htmlFor).focus();
         }
       });
-    }
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleDocumentClick);
-  }
-
-  /**
-   * Handle closing those info tooltips that are open if dismissed
-   *
-   * @param {Event} event Click event.
-   */
-  handleDocumentClick = (event) => {
-    this.infoTooltips
-      .filter(tooltip => {
-        return tooltip.refs.tooltip !== undefined &&
-          tooltip.refs.tooltip !== event.target &&
-          tooltip.refs.button !== event.target;
-      })
-      .forEach(tooltip => {
-        tooltip.toggle(false);
-      });
-  }
-
-  /**
-   * Set reference to tooltip info.
-   *
-   * @param {object} ref - Reference.
-   * @param {boolean} add - If true, ref will be added, else removed.
-   */
-  handleRef = (ref, add) => {
-    if (add === true) {
-      this.infoTooltips.push(ref);
-    }
-    else {
-      this.infoTooltips = this.infoTooltips.filter(tooltip => tooltip !== ref);
     }
   }
 
@@ -112,10 +72,9 @@ export default class TabViewSettings extends React.Component {
             <fieldset>
               <legend className="tab-view-info">
                 Configure starting screen
-                <Tooltip
-                  text={ this.l10n.infoTooltipStartingScreen }
+                <TooltipButton
+                  text={ this.l10n.tooltipStartingScreen }
                   tooltipClass={ 'tooltip below' }
-                  onRef={ this.handleRef }
                 />
               </legend>
               <label htmlFor="startTitle">Course title</label>
@@ -146,9 +105,8 @@ export default class TabViewSettings extends React.Component {
             <fieldset>
               <legend className="tab-view-info">
                 Configure the default "End Scenario" screen
-                <Tooltip
-                  text={ this.l10n.infoTooltipEndScenario }
-                  onRef={ this.handleRef }
+                <TooltipButton
+                  text={ this.l10n.tooltipEndScenario }
                 />
               </legend>
               <label htmlFor="endScore">Score for the default end scenario</label>
@@ -161,9 +119,8 @@ export default class TabViewSettings extends React.Component {
               />
               <label className="tab-view-info manual-focus" htmlFor="endFeedback">
                 Textual feedback for the user
-                <Tooltip
-                  text={ this.l10n.infoTooltipEndFeedback }
-                  onRef={ this.handleRef }
+                <TooltipButton
+                  text={ this.l10n.tooltipEndFeedback }
                 />
               </label>
               <input

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './ContentTypeMenu.scss';
-import Tooltip from './Tooltip';
+import TooltipButton from './TooltipButton';
 
 export default class ContentTypeMenu extends React.Component {
 
@@ -10,51 +10,9 @@ export default class ContentTypeMenu extends React.Component {
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      infoTooltipInfo: 'Add Informational content to the <strong>Branching Question Set.</strong>',
-      infoTooltipBranching: 'Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>'
+      tooltipInfo: 'Add Informational content to the <strong>Branching Question Set.</strong>',
+      tooltipBranching: 'Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>'
     };
-
-    this.infoTooltips = [];
-  }
-
-  componentDidMount() {
-    document.addEventListener('click', this.handleDocumentClick);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleDocumentClick);
-  }
-
-  /**
-   * Set reference to tooltip info.
-   *
-   * @param {object} ref - Reference.
-   * @param {boolean} add - If true, ref will be added, else removed.
-   */
-  handleRef = (ref, add) => {
-    if (add === true) {
-      this.infoTooltips.push(ref);
-    }
-    else {
-      this.infoTooltips = this.infoTooltips.filter(tooltip => tooltip !== ref);
-    }
-  }
-
-  /**
-   * Handle closing those info tooltips that are open if dismissed
-   *
-   * @param {Event} event Click event.
-   */
-  handleDocumentClick = (event) => {
-    this.infoTooltips
-      .filter(tooltip => {
-        return tooltip.refs.tooltip !== undefined &&
-          tooltip.refs.tooltip !== event.target &&
-          tooltip.refs.button !== event.target;
-      })
-      .forEach(tooltip => {
-        tooltip.toggle(false);
-      });
   }
 
   handleMouseDown = (event, library) => {
@@ -137,18 +95,16 @@ export default class ContentTypeMenu extends React.Component {
       <div className="content-type-menu">
         <label className="label-info">
           Info Content
-          <Tooltip
-            text={ this.l10n.infoTooltipInfo }
+          <TooltipButton
+            text={ this.l10n.tooltipInfo }
             tooltipClass={ 'tooltip below' }
-            onRef={ this.handleRef }
           />
         </label>
         { this.renderDnDButtons() }
         <label className="label-info">
           Branching Content
-          <Tooltip
-            text={ this.l10n.infoTooltipBranching }
-            onRef={ this.handleRef }
+          <TooltipButton
+            text={ this.l10n.tooltipBranching }
           />
         </label>
         { this.renderSecondButtons() }
