@@ -600,10 +600,6 @@ export default class Canvas extends React.Component {
       const hasBeenDrawn = (renderedNodes.indexOf(id) !== -1);
       renderedNodes.push(id);
 
-      if (hasBeenDrawn) {
-        console.log('hasBeenDrawn', id);
-      }
-
       // Add vertical spacing for each level
       let distanceYFactor = parentIsBranching ? 8 : 5.5; // Normal distance, 2 would draw each element right underneath the previous one
 
