@@ -361,7 +361,7 @@ export default class Canvas extends React.Component {
     }
 
     // Make our new parent aware of us
-    if (nextContentId !== undefined && leaf.nextContentId === nextContentId) {
+    if (nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
       leaf.nextContentId = id;
     }
 
@@ -439,7 +439,7 @@ export default class Canvas extends React.Component {
         // We are the new top node, we must move to the top of the array
         newState.content.splice(0, 0, newState.content[id]);
 
-        // We're in editing mode
+        // Update and use correct ID for editing
         if (newState.editing !== null) {
           newState.editing = 0;
         }
