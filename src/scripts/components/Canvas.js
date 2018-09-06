@@ -219,10 +219,8 @@ export default class Canvas extends React.Component {
     // Dropzone with largest intersection
     const dropzone = intersections[0];
 
-    // BranchingQuestion shall not replace BranchingQuestion
-    if (dropzone instanceof Draggable &&
-        dropzone.getContentClass() === 'BranchingQuestion' &&
-        draggable.getContentClass() === 'BranchingQuestion') {
+    // BranchingQuestion shall not be replacable by anything
+    if (dropzone instanceof Draggable && dropzone.getContentClass() === 'BranchingQuestion') {
       this.setState({
         placing: null
       });
@@ -234,7 +232,7 @@ export default class Canvas extends React.Component {
       this.handlePlacing(dropzone.props.id);
     }
     else if (!this.state.editing) {
-      // Put existing node at new place
+      // Put new node or put existing node at new place
       this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
     }
     else {
@@ -341,9 +339,30 @@ export default class Canvas extends React.Component {
       leaf.nextContentId = id;
     }
 
-    // Bump IDs if array has changed
-    if (leaf.nextContentId < bumpIdsUntil) {
+    // Bump IDs of non-end-scenario-nodes if array has changed
+    if (leaf.nextContentId >= 0 && leaf.nextContentId < bumpIdsUntil) {
       leaf.nextContentId++;
+    }
+  }
+
+  /**
+   * Attach child to existing node.
+   *
+   * @param {object} content Content node.
+   * @param {number} id Id of child node.
+   */
+  attachChild = (content, nextContentId) => {
+    if (nextContentId === undefined || nextContentId < 0) {
+      nextContentId = -1;
+    }
+    if (Canvas.isBranching(content)) {
+      content.type.params.alternatives = (content.type.params.alternatives || []);
+      content.type.params.alternatives.push({
+        nextContentId: nextContentId
+      });
+    }
+    else {
+      content.nextContentId = nextContentId;
     }
   }
 
@@ -359,6 +378,8 @@ export default class Canvas extends React.Component {
     this.setState(prevState => {
       let newState = {
         placing: null,
+        editing: null,
+        inserting: null,
         content: [...prevState.content],
       };
 
@@ -366,7 +387,7 @@ export default class Canvas extends React.Component {
       if (id === -1) {
         newState.content.push(this.getNewContentParams());
         id = newState.content.length - 1;
-        newState.inserting = id;
+        newState.editing = id;
         if (id === 0) {
           if (!Canvas.isBranching(newState.content[0])) {
             newState.content[0].nextContentId = -1; // Use default end scenario as default end scenario
@@ -385,17 +406,17 @@ export default class Canvas extends React.Component {
       const parentIsBranching = (parent && Canvas.isBranching(parent));
 
       const nextId = newState.content[id].nextContentId;
-      // TODO: Make a solution for Branching Question. Here setState() is
-      // called twice, but only for BranchingQuestion content that's added.
-      // Crashes, because it still works on the old prevState. What causes
-      // this 2nd call?
 
       // Handle adding new top node before the current one
       let bumpIdsUntil = -1;
       if (nextContentId === 0) {
         // We are the new top node, we must move to the top of the array
         newState.content.splice(0, 0, newState.content[id]);
-        newState.inserting = 0;
+
+        // We're in editing mode
+        if (newState.editing !== null) {
+          newState.editing = 0;
+        }
 
         // Mark IDs for bumping due to array changes
         bumpIdsUntil = id + 1;
@@ -443,32 +464,20 @@ export default class Canvas extends React.Component {
         newState.content.splice(bumpIdsUntil, 1);
 
         // Use the previous top node as children
-        newState.content[0].nextContentId = 1;
-        // TODO: What to do if we are branching?
+        this.attachChild(newState.content[0], 1);
       }
       else if (id === 0) {
         // Remove duplicate entry
         newState.content.splice(bumpIdsUntil, 1);
 
         // Start using our new children
-        newState.content[1].nextContentId = (nextContentId === 1 ? 2 : nextContentId);
-        // TODO: What to do if we are branching?
+        this.attachChild(newState.content[1], nextContentId === 1 ? 2 : nextContentId);
       }
       else {
-        if (Canvas.isBranching(newState.content[id])) {
-          // Nothing to do here?
-        }
-        else {
-          newState.content[id].nextContentId = (nextContentId === undefined || nextContentId < 0 ? -1 : nextContentId);
-        }
+        this.attachChild(newState.content[id], nextContentId);
       }
 
       return newState;
-    }, () => {
-      if (this.state.inserting === null || this.state.deleting !== null) {
-        return;
-      }
-      this.handleInserted(this.state.inserting);
     });
   }
 
@@ -479,7 +488,7 @@ export default class Canvas extends React.Component {
     }
     return ( !this.state.editorOverlayVisible &&
       <Dropzone
-        key={ ((id < 0) ? 'f-' + '-' + id : id) + '-dz-' + num }
+        key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
@@ -527,6 +536,10 @@ export default class Canvas extends React.Component {
   }
 
   renderTree = (branch, x, y, parent, renderedNodes) => {
+    if (branch === 0) {
+      this.traversedNodes = [];
+    }
+
     let nodes = [];
 
     // Keep track of nodes that have already been rendered (there might be cycles)
@@ -558,6 +571,9 @@ export default class Canvas extends React.Component {
 
     let firstX, lastX;
     branch.forEach((id, num) => {
+      if (id > -1) {
+        this.traversedNodes.push(id);
+      }
       let drawAboveLine = false;
       const content = this.state.content[id];
 
@@ -577,7 +593,7 @@ export default class Canvas extends React.Component {
       // Determine if we are or parent is a branching question
       const contentIsBranching = (content && Canvas.isBranching(content));
 
-      // Determine if we have any children that are not looping to upper nodes
+      // Determine if we have any children
       const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null));
 
       if (x !== 0 && num > 0) {
@@ -585,10 +601,11 @@ export default class Canvas extends React.Component {
       }
 
       // Exclude branches that are looping back to earlier nodes
+      // TODO: Alternatives that lead to existing nodes need to be drawn
       let newChildren = children;
       if (newChildren) {
         newChildren = (typeof children === 'number' ? [children] : children)
-          .filter(child => child < 0 || child > id);
+          .filter(child => child < 0 || this.traversedNodes.indexOf(child) === -1);
       }
 
       // Draw subtree first so we know where to position the node
@@ -711,7 +728,8 @@ export default class Canvas extends React.Component {
         if (this.state.placing !== null && !content) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y + 2 * this.state.nodeSpecs.spacing.y - 42
+            y: position.y - 42 - ((aboveLineHeight - 42) / 2) // for fixed tree
+            // y: position.y - 42 + 2 * this.state.nodeSpecs.spacing.y // for expandable tree
           }, parent, num));
         }
       }
@@ -724,7 +742,8 @@ export default class Canvas extends React.Component {
         if (this.state.placing !== parent) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y - 42 - dzDistance - ((id === 0) ? (42 / 2) : 0)
+            y: position.y - 42 - dzDistance // for fixed tree
+            // y: position.y - 42 - dzDistance - ((id === 0) ? (42 / 2) : 0) // for expandable tree
           }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0, parentIsBranching));
         }
 
@@ -867,10 +886,9 @@ export default class Canvas extends React.Component {
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
       }
-      else if (prevState.deleting !== null || prevState.inserting !== null) {
+      else if (prevState.editing !== null && prevState.placing === null || prevState.deleting !== null) {
         // Delete node
-        const id = (prevState.inserting !== null) ? prevState.inserting : prevState.deleting;
-        removeNode(id);
+        removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
 
       return newState;
@@ -1033,6 +1051,8 @@ export default class Canvas extends React.Component {
       console.log(`${index} --> ${target}`);
     });
     console.log('==========');
+    console.log('d:', this.state.deleting, 'e:',this.state.editing, 'i:', this.state.inserting, 'p:', this.state.placing);
+    console.warn(this.state.content);
   }
 
   render() {
