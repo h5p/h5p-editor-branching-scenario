@@ -417,7 +417,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     // Sanitize missing nextContentId; can never be undefined
     this.params.content.forEach(item => {
       if (item.type.library.indexOf('H5P.BranchingQuestion') === 0) {
-        item.type.params.alternatives.forEach(alt =>
+        item.type.params.branchingQuestion.alternatives.forEach(alt =>
           alt.nextContentId = alt.nextContentId || -1
         );
       }

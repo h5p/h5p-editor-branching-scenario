@@ -1,6 +1,9 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import './EditorOverlay.scss';
 import Dropzone from './Dropzone.js';
+import BranchingOptions from "./content-type-editor/BranchingOptions";
+import BranchingQuestionOptions from "./content-type-editor/BranchingQuestionOptions";
 
 /*global H5PEditor, H5P*/
 export default class EditorOverlay extends React.Component {
@@ -12,6 +15,9 @@ export default class EditorOverlay extends React.Component {
 
     const content = this.props.content[this.props.id] || {};
     content.contentTitle = content.contentTitle || content.type.library.split('.')[1];
+
+    const library = content.type.library.split(' ')[0];
+    this.isBranchingQuestion = library === 'H5P.BranchingQuestion';
 
     content.$form = H5P.jQuery('<div/>');
 
@@ -27,6 +33,49 @@ export default class EditorOverlay extends React.Component {
       branchingOptions: (content.nextContentId > -1) ? "old-content" : 'end-scenario',
       content: content
     };
+
+    this.validAlternatives = this.props.content.map((content, index) => {
+      return Object.assign({}, content, {contentId: index});
+    }).filter((alt, index) => {
+      return alt.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
+        this.props.id !== index;
+    });
+
+    if (this.isBranchingQuestion) {
+      // TODO: refactor
+      const widget = this.props.main.children[0];
+
+      if (widget && widget.setAlternatives) {
+        widget.setAlternatives(
+          (nextContentId, selectorWrapper, listIndex) => {
+            const branchingUpdated = (value) => {
+              widget.setNextContentId(listIndex, value);
+            };
+
+            ReactDOM.render((
+              <BranchingQuestionOptions
+                handleOptionChange={this.handleOptionChange.bind(this)}
+                value={this.state.branchingOptions}
+                content={this.props.content}
+                showNextPathChooser={this.state.showNextPathChooser}
+                showNextPathDropzone={this.state.showNextPathDropzone}
+                renderNextPathDropzone={this.renderNextPathDropzone.bind(this)}
+                renderNextPathChooser={this.renderNextPathChooser.bind(this)}
+                onNextPathDrop={this.props.onNextPathDrop.bind(this)}
+                nextContentId={nextContentId}
+                validAlternatives={this.validAlternatives}
+                branchingUpdated={branchingUpdated}
+                alternativeIndex={listIndex}
+              />
+            ), selectorWrapper);
+
+            // Set default value to end scenario
+            if (nextContentId === '') {
+              widget.setNextContentId(listIndex, -1);
+            }
+          });
+      }
+    }
   }
 
   /*
@@ -35,7 +84,7 @@ export default class EditorOverlay extends React.Component {
    * (I know, you shouldn't), because the H5P core gives me DOM elements, not
    * something I can simply pass as a state.
    */
-  componentDidMount () {
+  componentDidMount() {
     this.props.onRef(this);
 
     // Try to listen to everything in the form
@@ -51,7 +100,7 @@ export default class EditorOverlay extends React.Component {
     this.state.content.$form.appendTo(this.refForm.current);
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.onRef(undefined);
   }
 
@@ -71,7 +120,7 @@ export default class EditorOverlay extends React.Component {
     }, () => {
       this.props.onContentChanged(this.props.id, this.state.content);
     });
-  }
+  };
 
   handleOptionChange = (event) => {
     const value = event.target.value;
@@ -107,14 +156,14 @@ export default class EditorOverlay extends React.Component {
     }
 
     this.props.onContentChanged(this.props.id, this.state.content);
-  }
+  };
 
-  renderNextPathDropzone () {
+  renderNextPathDropzone() {
     return (
       <Dropzone
-        ref={ element => this.props.onNextPathDrop(element) }
-        elementClass={ 'dropzone-editor-path'}
-        innerHTML={ 'Drag any content type from a menu on the left side and drop it here to create new content/question' }
+        ref={element => this.props.onNextPathDrop(element)}
+        elementClass={'dropzone-editor-path'}
+        innerHTML={'Drag any content type from a menu on the left side and drop it here to create new content/question'}
       />
     );
   }
@@ -130,26 +179,20 @@ export default class EditorOverlay extends React.Component {
     }, () => {
       this.props.onContentChanged(this.props.id, this.state.content);
     });
-  }
+  };
 
-  renderNextPathChooser () {
+  renderNextPathChooser() {
     return (
       <div>
         <label htmlFor="nextPath">Select a path to send a user to</label>
-        <select name="nextPath" value={ this.state.content.nextContentId } onChange={ this.updateNextContentId }>
-          { this.props.content
-            .filter((content) => {
-              return (
-                content.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
-                  this.props.id !== this.props.content.indexOf(content)
-              );
-            })
-            .map(content =>
+        <select name="nextPath" value={this.state.content.nextContentId} onChange={this.updateNextContentId}>
+          {
+            this.validAlternatives.map(content => (
               <option
-                key={ 'next-path-' + this.props.content.indexOf(content) }
-                value={ this.props.content.indexOf(content) }>
-                {`${content.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${content.contentTitle}`}
-              </option>)
+                key={'next-path-' + this.props.content.indexOf(content)}
+                value={this.props.content.indexOf(content)}>{`${content.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${content.contentTitle}`}
+              </option>
+            ))
           }
         </select>
       </div>
@@ -157,46 +200,50 @@ export default class EditorOverlay extends React.Component {
   }
 
   // TODO: The editor-overlay-branching-options could be put in their own component
-  render () {
+  render() {
     return (
       <div className='editor-overlay'>
         <div className='editor-overlay-header'>
-          <span className={ ['editor-overlay-title', this.props.icon].join(' ') }>{ this.state.content.contentTitle }</span>
+          <span
+            className={['editor-overlay-title', this.props.icon].join(' ')}
+          >{this.state.content.contentTitle}</span>
           <span className="buttons">
-            <button className="buttonBlue" onClick={ () => {this.props.onFormSaved(this.props.id, this.state.content);} }>
-              { this.state.saveButton }
-            </button>
-            <button className="button" onClick={ this.props.onFormClosed }>
-              { this.state.closeButton }
-            </button>
+            <button
+              className="buttonBlue"
+              onClick={() => {
+                this.props.onFormSaved(this.props.id, this.state.content);
+              }}
+            >{this.state.saveButton}</button>
+            <button
+              className="button"
+              onClick={this.props.onFormClosed}
+            >{this.state.closeButton}</button>
           </span>
         </div>
 
         <div className='editor-overlay-content'>
           <div>
-            <label className="editor-overlay-label" htmlFor="title">Title<span className="editor-overlay-label-red">*</span></label>
-            <input name="title" className='editor-overlay-titlefield' type="text" value={ this.state.content.contentTitle } onChange={ this.handleUpdateTitle } />
+            <label className="editor-overlay-label" htmlFor="title">Title<span
+              className="editor-overlay-label-red">*</span></label>
+            <input
+              name="title" className='editor-overlay-titlefield' type="text"
+              value={this.state.content.contentTitle} onChange={this.handleUpdateTitle}/>
           </div>
 
-          <div className='editor-overlay-semantics' ref={ this.refForm } />
+          <div className='editor-overlay-semantics' ref={this.refForm}/>
 
-          <div className='editor-overlay-branching-options'>
-            <select value={ this.state.branchingOptions } onChange={ this.handleOptionChange }>
-              <option key="branching-option-0" value="end-scenario">End scenario here</option>
-              <option key="branching-option-1" value="new-content">Send a viewer to a new content/question</option>
-              { this.props.content.length > 1 &&
-                <option key="branching-option-2" value="old-content">Send a viewer to an existing content/question</option>
-              }
-            </select>
-
-            { this.state.showNextPathDropzone &&
-              this.renderNextPathDropzone()
-            }
-
-            { this.state.showNextPathChooser &&
-              this.renderNextPathChooser()
-            }
-          </div>
+          {
+            !this.isBranchingQuestion &&
+            <BranchingOptions
+              handleOptionChange={this.handleOptionChange.bind(this)}
+              value={this.state.branchingOptions}
+              content={this.props.content}
+              showNextPathChooser={this.state.showNextPathChooser}
+              showNextPathDropzone={this.state.showNextPathDropzone}
+              renderNextPathDropzone={this.renderNextPathDropzone.bind(this)}
+              renderNextPathChooser={this.renderNextPathChooser.bind(this)}
+            />
+          }
         </div>
 
       </div>
