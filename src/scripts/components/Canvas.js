@@ -641,7 +641,7 @@ export default class Canvas extends React.Component {
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const libraryTitle = this.getLibraryTitle(content.type.library);
-        if ((content.nextContentId !== undefined && content.nextContentId === this.props.highlight) || this.props.highlight === id) {
+        if ((content.nextContentId !== undefined && content.nextContentId < 0 && content.nextContentId === this.props.highlight) || this.props.highlight === id) {
           highlightCurrentNode = true;
         }
 
