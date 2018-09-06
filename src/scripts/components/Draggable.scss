@@ -95,18 +95,17 @@
   text-align: center;
   color: white;
   border-radius: 0 3px;
-  transition: all 0.2s ease;
+  transition: visibility 0s linear 0.1s, opacity 0.1s linear;
+  visibility: hidden;
 
   &:before {
     font-family: BSFont;
     content: $icon-gear;
   }
-
-  &:hover {
-    opacity: 1;
-  }
-
-  &.active {
-    opacity: 1;
-  }
+}
+.content-menu-button.active,
+.draggable:hover .content-menu-button {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
 }

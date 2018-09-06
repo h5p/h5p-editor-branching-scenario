@@ -88,6 +88,9 @@ export default class Canvas extends React.Component {
   componentDidMount() {
     // Handle document clicks (for exiting placing mode/state)
     document.addEventListener('click', this.handleDocumentClick);
+
+    // Trigger the initial default end scenarios count
+    this.props.onContentChanged(null, this.countDefaultEndScenarios());
   }
 
   componentWillUnmount() {
@@ -112,7 +115,7 @@ export default class Canvas extends React.Component {
    */
   buildDialog = (id, params) => {
     const dialog = params;
-    if (this.contentIsBranching(this.state.content[id])) {
+    if (Canvas.isBranching(this.state.content[id])) {
       const nodeTitles = this.getChildrenTitles(id)
         .map((title, index) => <li key={index}>{title}</li>);
 
@@ -288,7 +291,7 @@ export default class Canvas extends React.Component {
     let childrenIds = [];
     let nextIds = [];
 
-    if (!this.contentIsBranching(node)) {
+    if (!Canvas.isBranching(node)) {
       childrenIds.push(start);
       nextIds = [node.nextContentId];
     }
@@ -313,12 +316,38 @@ export default class Canvas extends React.Component {
         subContentId: H5P.createUUID()
       },
       contentTitle: this.state.library.name.split('.')[1], // TODO: There's probably a better default
-      showContentTitle: false,
+      showContentTitle: false
     };
   }
 
-  contentIsBranching(content) {
+  static isBranching(content) {
     return content.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
+  }
+
+  /**
+   * Removes any HTML from the given string.
+   * @return {string}
+   */
+  static stripHTML(html) {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  }
+
+  /**
+   * Determines a useful tooltip for the content
+   * @param {Object} content
+   * @return {string}
+   */
+  static getTooltip(content) {
+    switch (content.type.library.split(' ')[0]) {
+      case 'H5P.AdvancedText':
+        return Canvas.stripHTML(content.type.params.text);
+      case 'H5P.BranchingQuestion':
+        return Canvas.stripHTML(content.type.params.question);
+      default:
+        return content.type.metadata ? content.type.metadata.title : undefined;
+    }
   }
 
   /**
@@ -349,7 +378,10 @@ export default class Canvas extends React.Component {
    * @param {number} id Id of child node.
    */
   attachChild = (content, nextContentId) => {
-    if (this.contentIsBranching(content)) {
+    if (nextContentId === undefined || nextContentId < 0) {
+      nextContentId = -1;
+    }
+    if (Canvas.isBranching(content)) {
       content.type.params.alternatives = (content.type.params.alternatives || []);
       content.type.params.alternatives.push({
         nextContentId: nextContentId
@@ -383,6 +415,9 @@ export default class Canvas extends React.Component {
         id = newState.content.length - 1;
         newState.editing = id;
         if (id === 0) {
+          if (!Canvas.isBranching(newState.content[0])) {
+            newState.content[0].nextContentId = -1; // Use default end scenario as default end scenario
+          }
           // This is the first node added, nothing more needs to be done.
           return newState;
         }
@@ -394,7 +429,7 @@ export default class Canvas extends React.Component {
         parent = newState.content[parent];
       }
 
-      const parentIsBranching = (parent && parent.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
+      const parentIsBranching = (parent && Canvas.isBranching(parent));
 
       const nextId = newState.content[id].nextContentId;
 
@@ -427,7 +462,7 @@ export default class Canvas extends React.Component {
           return; // Duplicate in array, must not be processed twice.
         }
 
-        if (this.contentIsBranching(content)) {
+        if (Canvas.isBranching(content)) {
           if (content.type.params &&
               content.type.params.alternatives) {
             content.type.params.alternatives.forEach(alternative =>
@@ -465,7 +500,7 @@ export default class Canvas extends React.Component {
         this.attachChild(newState.content[1], nextContentId === 1 ? 2 : nextContentId);
       }
       else {
-        this.attachChild(newState.content[id], nextContentId < 0 ? undefined : nextContentId);
+        this.attachChild(newState.content[id], nextContentId);
       }
 
       return newState;
@@ -558,7 +593,7 @@ export default class Canvas extends React.Component {
       y = 100; // Y level start
     }
 
-    const parentIsBranching = (parent !== undefined && this.state.content[parent].type.library.split(' ')[0] === 'H5P.BranchingQuestion');
+    const parentIsBranching = (parent !== undefined && Canvas.isBranching(this.state.content[parent]));
 
     let firstX, lastX;
     branch.forEach((id, num) => {
@@ -582,7 +617,7 @@ export default class Canvas extends React.Component {
       const branchY = y + distanceYFactor * this.state.nodeSpecs.spacing.y;
 
       // Determine if we are or parent is a branching question
-      const contentIsBranching = (content && content.type.library.split(' ')[0] === 'H5P.BranchingQuestion');
+      const contentIsBranching = (content && Canvas.isBranching(content));
 
       // Determine if we have any children
       const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null));
@@ -622,6 +657,7 @@ export default class Canvas extends React.Component {
           <Draggable
             key={ id }
             id={ id }
+            highlight={ this.props.highlight && this.props.highlight === content.nextContentId }
             ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
             position={ position }
             width={ this.state.nodeSpecs.width }
@@ -631,7 +667,8 @@ export default class Canvas extends React.Component {
             contentClass={ libraryTitle }
             editContent={ () => this.handleEditContent(id) }
             deleteContent={ () => this.handleDeleteContent(id) }
-            disabled={ content.type.library.split(' ')[0] === 'H5P.BranchingQuestion' }
+            disabled={ contentIsBranching }
+            tooltip={ Canvas.getTooltip(content) }
           >
             { libraryTitle }
           </Draggable>
@@ -703,12 +740,22 @@ export default class Canvas extends React.Component {
             alternativeBallClasses += ' endscreenCustom';
           }
         }
+        if (this.props.highlight && this.props.highlight === id) {
+          alternativeBallClasses += ' on-top-of-things';
+        }
 
         nodes.push(
-          <div key={ parent + '-abox-' + num } className={ alternativeBallClasses } style={ {
-            left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) + 1) + 'px',
-            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
-          } }>A{ num + 1 }</div>
+          <div key={ parent + '-abox-' + num }
+            className={ alternativeBallClasses }
+            aria-label={ 'Alternative ' + (num + 1) }
+            style={ {
+              left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) - 1) + 'px',
+              top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
+            } }>A{ num + 1 }
+            <div className="dark-tooltip">
+              <div className="dark-text-wrap">{ this.state.content[parent].type.params.alternatives[num].text }</div>
+            </div>
+          </div>
         );
 
         // Add dropzone under empty BQ alternative
@@ -801,11 +848,11 @@ export default class Canvas extends React.Component {
 
         ids.forEach(id => {
           const node = newState.content[id];
-          removeChildren = removeChildren || this.contentIsBranching(node);
+          removeChildren = removeChildren || Canvas.isBranching(node);
 
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
-          if (this.contentIsBranching(node)) {
+          if (Canvas.isBranching(node)) {
             deleteIds = node.type.params.alternatives
               .filter(alt => alt.nextContentId >= 0) // Filter end scenarios
               .map(alt => alt.nextContentId).concat(id);
@@ -830,7 +877,7 @@ export default class Canvas extends React.Component {
 
               // Exchange all links pointing to node to be deleted to its successor instead.
               newState.content.forEach(node => {
-                const affectedNodes = (this.contentIsBranching(node)) ?
+                const affectedNodes = (Canvas.isBranching(node)) ?
                   node.type.params.alternatives :
                   [node];
 
@@ -851,7 +898,7 @@ export default class Canvas extends React.Component {
               // Purge children
               if (removeChildren === true) {
                 let childrenIds;
-                if (this.contentIsBranching(deleteNode)) {
+                if (Canvas.isBranching(deleteNode)) {
                   childrenIds = deleteNode.type.params.alternatives.map(alt => alt.nextContentId);
                 }
                 else {
@@ -879,9 +926,7 @@ export default class Canvas extends React.Component {
       }
 
       return newState;
-    }, () => {
-      this.props.onContentChanged(this.state.content);
-    });
+    }, this.contentChanged);
   }
 
   handleCancel = () => {
@@ -938,7 +983,7 @@ export default class Canvas extends React.Component {
     delete content.$form;
     this.setState(prevState => {
       prevState.content[id] = content;
-    }, () => {this.props.onContentChanged(this.state.content);});
+    }, this.contentChanged);
   }
 
   handleFormSaved = () => {
@@ -946,6 +991,36 @@ export default class Canvas extends React.Component {
       editing: null,
       inserting: null
     });
+  }
+
+  /**
+   * Go through content state and count how many default end scenarios
+   * that are present.
+   *
+   * @return {number}
+   */
+  countDefaultEndScenarios = () => {
+    let numMissingEndScenarios = 0;
+    this.state.content.forEach(content => {
+      if (Canvas.isBranching(content)) {
+        content.type.params.alternatives.forEach(alternative => {
+          if (alternative.nextContentId === -1) {
+            numMissingEndScenarios++;
+          }
+        });
+      }
+      else if (content.nextContentId === -1) {
+        numMissingEndScenarios++;
+      }
+    });
+    return numMissingEndScenarios;
+  }
+
+  /**
+   * Trigger callbacks after the content state has changed
+   */
+  contentChanged = () => {
+    this.props.onContentChanged(this.state.content, this.countDefaultEndScenarios());
   }
 
   /**
@@ -1003,7 +1078,7 @@ export default class Canvas extends React.Component {
   logNodes = caller => {
     console.log('NODES', caller);
     this.state.content.forEach((node, index) => {
-      const target = (this.contentIsBranching(node)) ?
+      const target = (Canvas.isBranching(node)) ?
         (node.type.params.alternatives ?
           node.type.params.alternatives.map(alt => alt.nextContentId).join(' | ') :
           -1) : node.nextContentId;

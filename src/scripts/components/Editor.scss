@@ -1,0 +1,28 @@
+.click-overlay,
+.dark-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+.dark-overlay {
+  background-color: rgba(0,0,0,0.85);
+  z-index: 21;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: visibility 0s linear 50ms, opacity 50ms linear;
+}
+.dark-overlay.visible {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+.click-overlay {
+  z-index: 22;
+}
+.on-top-of-things,
+.draggable.on-top-of-things {
+  z-index: 22;
+}

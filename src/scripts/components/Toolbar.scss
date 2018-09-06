@@ -1,0 +1,63 @@
+.toolbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2em;
+  background-color: #191e22;
+  color: #e9ebee;
+}
+.missing-end-scenarios {
+  border: #1773DA solid 2px;
+  color: #1773DA;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  text-align: center;
+  float: right;
+  line-height: 1.45em;
+  cursor: pointer;
+  margin-top: 0.25em;
+  font-size: 0.875em;
+  margin-right: 0.25em;
+}
+.info-popup {
+  position: absolute;
+  width: 20em;
+  bottom: 0;
+  right: 1em;
+  padding: 1em 2.5em 1em 1.5em;
+  color: #000;
+  background: #fff;
+  font-size: 0.875em;
+  box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: visibility 0s linear 0.1s, opacity 0.1s linear, bottom 0.1s linear;
+}
+.info-popup.visible {
+  visibility: visible;
+  opacity: 1;
+  bottom: 3em;
+  transition-delay: 0s;
+}
+.highlight-end-scenarios-button {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #1773DA;
+}
+.close-info-popup-button {
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  line-height: 1em;
+  cursor: pointer;
+  right: 0.5em;
+  top: 0.5em;
+}
+.close-info-popup-button:after {
+  font-family: "BSFont";
+  content: "\e90a";
+}

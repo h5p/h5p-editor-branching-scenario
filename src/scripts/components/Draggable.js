@@ -233,6 +233,10 @@ export default class Draggable extends React.Component {
       contentMenuButtonClass += ' active';
     }
 
+    if (this.props.highlight) {
+      elementClass += ' on-top-of-things';
+    }
+
     const contentMenuButton = dropped ? (
       <div
         ref={ this.contentMenuButton }
@@ -278,6 +282,11 @@ export default class Draggable extends React.Component {
           </div>
           { contentMenuButton }
         </div>
+        { this.props.tooltip &&
+          <div className="dark-tooltip">
+            <div className="dark-text-wrap">{ this.props.tooltip }</div>
+          </div>
+        }
         { contentMenu }
       </div>
     );
@@ -290,5 +299,6 @@ Draggable.propTypes = {
   width: PropTypes.number,
   contentClass: PropTypes.string,
   content: PropTypes.string,
-  inserting: PropTypes.object
+  inserting: PropTypes.object,
+  highlight: PropTypes.bool
 };
