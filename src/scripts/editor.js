@@ -1,10 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import './components/Editor.scss';
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';
 import ContentTypeMenu from './components/ContentTypeMenu';
 import Canvas from './components/Canvas';
+import Toolbar from './components/Toolbar';
 import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
@@ -18,7 +20,8 @@ export default class Editor extends React.Component {
       activeIndex: 0,
       translations: props.translations,
       settings: props.settings,
-      libraries: null // Needs to be loaded via AJAX
+      libraries: null, // Needs to be loaded via AJAX
+      numDefaultEndScenarios: 0
     };
   }
 
@@ -121,6 +124,20 @@ export default class Editor extends React.Component {
     });
   }
 
+  handleHighlight = () => {
+    this.setState({ highlight: -1 });
+  }
+
+  handleContentChanged = (content, numDefaultEndScenarios) => {
+    if (content) {
+      this.props.onContentChanged(content);
+    }
+
+    this.setState({
+      numDefaultEndScenarios: numDefaultEndScenarios
+    });
+  }
+
   render() {
     return (
       <Tabs className="tab-view-wrapper"
@@ -145,9 +162,18 @@ export default class Editor extends React.Component {
             content={ this.props.content }
             handleOpenTutorial={ this.handleOpenTutorial }
             onOpenEditor={ this.handleOpenEditor }
-            onContentChanged={ this.props.onContentChanged }
+            onContentChanged={ this.handleContentChanged }
             getSemantics={ this.props.getSemantics }
+            highlight={ this.state.highlight }
           />
+          <Toolbar
+            numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
+            onHighlight={ this.handleHighlight }
+          />
+          <div className={ 'dark-overlay' + (this.state.highlight ? ' visible' : '') }/>
+          { this.state.highlight &&
+            <div className="click-overlay" onClick={ () => this.setState({ highlight: null }) }/>
+          }
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
           <TabViewSettings
