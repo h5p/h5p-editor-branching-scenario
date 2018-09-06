@@ -93,6 +93,7 @@ export default class BranchingQuestionOptions extends React.Component {
             elementClass={'dropzone-editor-path'}
             innerHTML={'Drag any content type from a menu on the left side and drop it here to create new content/question'}
             alternative={this.props.alternativeIndex}
+            type={ 'nextPathDrop' }
           />
         }
 

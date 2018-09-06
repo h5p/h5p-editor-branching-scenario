@@ -164,6 +164,7 @@ export default class EditorOverlay extends React.Component {
         ref={element => this.props.onNextPathDrop(element)}
         elementClass={'dropzone-editor-path'}
         innerHTML={'Drag any content type from a menu on the left side and drop it here to create new content/question'}
+        type={ 'nextPathDrop' }
       />
     );
   }

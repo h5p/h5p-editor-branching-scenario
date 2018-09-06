@@ -172,8 +172,15 @@ export default class Canvas extends React.Component {
   getIntersections(draggable) {
     const points = draggable.getPoints();
 
+    let dropzones = this.dropzones;
+
+    // Only use next path dropzones
+    if (this.state.editing) {
+      dropzones = dropzones.filter(dropzone => dropzone instanceof Dropzone && dropzone.getType() === 'nextPathDrop');
+    }
+
     // Get largest intersections
-    return this.dropzones
+    return dropzones
       .filter(dropzone => dropzone && dropzone !== draggable && dropzone.overlap(points))
       .map(dropzone => {
         return {
