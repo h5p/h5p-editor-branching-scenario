@@ -16,9 +16,6 @@ export default class TabViewSettings extends React.Component {
     };
 
     this.infoTooltips = [];
-    this.infoTooltipStartingScreen = this.createInfoTooltip(this.l10n.infoTooltipStartingScreen, 'tooltip below');
-    this.infoTooltipEndScenario = this.createInfoTooltip(this.l10n.infoTooltipEndScenario);
-    this.infoTooltipEndFeedback = this.createInfoTooltip(this.l10n.infoTooltipEndFeedback);
   }
 
   componentDidMount () {
@@ -58,7 +55,7 @@ export default class TabViewSettings extends React.Component {
     document.addEventListener('click', this.handleDocumentClick);
 
     // Allow buttons inside labels being clickable
-    const manualFocus = document.getElementsByClassName('manualFocus');
+    const manualFocus = document.getElementsByClassName('manual-focus');
     for (let i = 0; i < manualFocus.length; i++) {
       manualFocus[i].addEventListener('click', event => {
         event.preventDefault();
@@ -71,25 +68,6 @@ export default class TabViewSettings extends React.Component {
 
   componentWillUnmount() {
     document.removeEventListener('click', this.handleDocumentClick);
-  }
-
-  /**
-   * Create info tooltip component.
-   *
-   * @param {string} text Text to show in component. Should be validated!
-   * @param {string} tooltipClass Classes for tooltip as 'foo bar batz'.
-   * @return {JSX} Component.
-   */
-  createInfoTooltip = (text, tooltipClass) => {
-    return (
-      <Tooltip
-        ref={ tooltip => {
-          this.infoTooltips.push(tooltip);
-        } }
-        text={ text }
-        tooltipClass={ tooltipClass }
-      />
-    );
   }
 
   /**
@@ -109,6 +87,21 @@ export default class TabViewSettings extends React.Component {
       });
   }
 
+  /**
+   * Set reference to tooltip info.
+   *
+   * @param {object} ref - Reference.
+   * @param {boolean} add - If true, ref will be added, else removed.
+   */
+  handleRef = (ref, add) => {
+    if (add === true) {
+      this.infoTooltips.push(ref);
+    }
+    else {
+      this.infoTooltips = this.infoTooltips.filter(tooltip => tooltip !== ref);
+    }
+  }
+
   render () {
     return (
       <div id="settings" className="tab tab-view-full-page large-padding">
@@ -118,7 +111,12 @@ export default class TabViewSettings extends React.Component {
           <form>
             <fieldset>
               <legend className="tab-view-info">
-                Configure starting screen { this.infoTooltipStartingScreen }
+                Configure starting screen
+                <Tooltip
+                  text={ this.l10n.infoTooltipStartingScreen }
+                  tooltipClass={ 'tooltip below' }
+                  onRef={ this.handleRef }
+                />
               </legend>
               <label htmlFor="startTitle">Course title</label>
               <input
@@ -147,7 +145,11 @@ export default class TabViewSettings extends React.Component {
             </fieldset>
             <fieldset>
               <legend className="tab-view-info">
-                Configure the default "End Scenario" screen { this.infoTooltipEndScenario }
+                Configure the default "End Scenario" screen
+                <Tooltip
+                  text={ this.l10n.infoTooltipEndScenario }
+                  onRef={ this.handleRef }
+                />
               </legend>
               <label htmlFor="endScore">Score for the default end scenario</label>
               <input
@@ -157,8 +159,12 @@ export default class TabViewSettings extends React.Component {
                 value={ this.props.value.endScore }
                 onChange={ this.props.onChange }
               />
-              <label className="tab-view-info manualFocus" htmlFor="endFeedback">
-                Textual feedback for the user { this.infoTooltipEndFeedback }
+              <label className="tab-view-info manual-focus" htmlFor="endFeedback">
+                Textual feedback for the user
+                <Tooltip
+                  text={ this.l10n.infoTooltipEndFeedback }
+                  onRef={ this.handleRef }
+                />
               </label>
               <input
                 id="endFeedback"

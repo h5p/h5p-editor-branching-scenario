@@ -12,6 +12,14 @@ export default class Tooltip extends React.Component {
     };
   }
 
+  componentDidMount () {
+    this.props.onRef(this, true);
+  }
+
+  componentWillUnmount () {
+    this.props.onRef(this);
+  }
+
   /**
    * Handle click on button.
    */

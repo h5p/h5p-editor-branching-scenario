@@ -15,8 +15,6 @@ export default class ContentTypeMenu extends React.Component {
     };
 
     this.infoTooltips = [];
-    this.infoTooltipInfo = this.createInfoTooltip(this.l10n.infoTooltipInfo, 'tooltip below');
-    this.infoTooltipBranching = this.createInfoTooltip(this.l10n.infoTooltipBranching);
   }
 
   componentDidMount() {
@@ -28,22 +26,18 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   /**
-   * Create info tooltip component.
+   * Set reference to tooltip info.
    *
-   * @param {string} text Text to show in component. Should be validated!
-   * @param {string} tooltipClass Classes for tooltip as 'foo bar batz'.
-   * @return {JSX} Component.
+   * @param {object} ref - Reference.
+   * @param {boolean} add - If true, ref will be added, else removed.
    */
-  createInfoTooltip = (text, tooltipClass) => {
-    return (
-      <Tooltip
-        ref={ tooltip => {
-          this.infoTooltips.push(tooltip);
-        } }
-        text={ text }
-        tooltipClass={ tooltipClass }
-      />
-    );
+  handleRef = (ref, add) => {
+    if (add === true) {
+      this.infoTooltips.push(ref);
+    }
+    else {
+      this.infoTooltips = this.infoTooltips.filter(tooltip => tooltip !== ref);
+    }
   }
 
   /**
@@ -139,15 +133,23 @@ export default class ContentTypeMenu extends React.Component {
 
   render() {
     // TODO: Keep width constant during loading. Fix only one loading message for the entire menu?
-    // TODO: l10n
     return (
       <div className="content-type-menu">
         <label className="label-info">
-          Info Content { this.infoTooltipInfo }
+          Info Content
+          <Tooltip
+            text={ this.l10n.infoTooltipInfo }
+            tooltipClass={ 'tooltip below' }
+            onRef={ this.handleRef }
+          />
         </label>
         { this.renderDnDButtons() }
         <label className="label-info">
-          Branching Content { this.infoTooltipBranching }
+          Branching Content
+          <Tooltip
+            text={ this.l10n.infoTooltipBranching }
+            onRef={ this.handleRef }
+          />
         </label>
         { this.renderSecondButtons() }
       </div>
