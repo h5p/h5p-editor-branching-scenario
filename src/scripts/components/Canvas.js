@@ -325,6 +325,32 @@ export default class Canvas extends React.Component {
   }
 
   /**
+   * Removes any HTML from the given string.
+   * @return {string}
+   */
+  static stripHTML(html) {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  }
+
+  /**
+   * Determines a useful tooltip for the content
+   * @param {Object} content
+   * @return {string}
+   */
+  static getTooltip(content) {
+    switch (content.type.library.split(' ')[0]) {
+      case 'H5P.AdvancedText':
+        return Canvas.stripHTML(content.type.params.text);
+      case 'H5P.BranchingQuestion':
+        return Canvas.stripHTML(content.type.params.question);
+      default:
+        return content.type.metadata ? content.type.metadata.title : undefined;
+    }
+  }
+
+  /**
    * @param {number} id ID of node that was added/moved
    * @param {number} nextContentId ID that needs to be updated
    */
@@ -641,7 +667,8 @@ export default class Canvas extends React.Component {
             contentClass={ libraryTitle }
             editContent={ () => this.handleEditContent(id) }
             deleteContent={ () => this.handleDeleteContent(id) }
-            disabled={ Canvas.isBranching(content) }
+            disabled={ contentIsBranching }
+            tooltip={ Canvas.getTooltip(content) }
           >
             { libraryTitle }
           </Draggable>
@@ -718,10 +745,17 @@ export default class Canvas extends React.Component {
         }
 
         nodes.push(
-          <div key={ parent + '-abox-' + num } className={ alternativeBallClasses } style={ {
-            left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) + 1) + 'px',
-            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
-          } }>A{ num + 1 }</div>
+          <div key={ parent + '-abox-' + num }
+            className={ alternativeBallClasses }
+            aria-label={ 'Alternative ' + (num + 1) }
+            style={ {
+              left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) - 1) + 'px',
+              top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
+            } }>A{ num + 1 }
+            <div className="dark-tooltip">
+              <div className="dark-text-wrap">{ this.state.content[parent].type.params.alternatives[num].text }</div>
+            </div>
+          </div>
         );
 
         // Add dropzone under empty BQ alternative

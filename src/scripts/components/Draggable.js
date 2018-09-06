@@ -282,6 +282,11 @@ export default class Draggable extends React.Component {
           </div>
           { contentMenuButton }
         </div>
+        { this.props.tooltip &&
+          <div className="dark-tooltip">
+            <div className="dark-text-wrap">{ this.props.tooltip }</div>
+          </div>
+        }
         { contentMenu }
       </div>
     );
