@@ -11,27 +11,6 @@ export default class Toolbar extends React.Component {
     };
   }
 
-  componentDidMount = () => {
-
-  }
-
-  componentWillUnmount = () => {
-
-  }
-
-  componentWillReceiveProps(nextProps) {
-    /*if (nextProps.position && (
-      nextProps.position.x !== this.state.position.x ||
-        nextProps.position.y !== this.state.position.y)) {
-      this.setState({
-        position: {
-          x: nextProps.position.x,
-          y: nextProps.position.y
-        }
-      });
-    }*/
-  }
-
   handleShowPopup = () => {
     this.setState({ showInfoPopup: true });
   }
