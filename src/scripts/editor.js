@@ -21,7 +21,8 @@ export default class Editor extends React.Component {
       translations: props.translations,
       settings: props.settings,
       libraries: null, // Needs to be loaded via AJAX
-      numDefaultEndScenarios: 0
+      numDefaultEndScenarios: 0,
+      highlight: null
     };
   }
 
@@ -124,8 +125,8 @@ export default class Editor extends React.Component {
     });
   }
 
-  handleHighlight = () => {
-    this.setState({ highlight: -1 });
+  handleHighlight = (id) => {
+    this.setState({ highlight: id });
   }
 
   handleContentChanged = (content, numDefaultEndScenarios) => {
@@ -164,14 +165,15 @@ export default class Editor extends React.Component {
             onOpenEditor={ this.handleOpenEditor }
             onContentChanged={ this.handleContentChanged }
             getSemantics={ this.props.getSemantics }
+            onHighlight={ this.handleHighlight }
             highlight={ this.state.highlight }
           />
           <Toolbar
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
             onHighlight={ this.handleHighlight }
           />
-          <div className={ 'dark-overlay' + (this.state.highlight ? ' visible' : '') }/>
-          { this.state.highlight &&
+          <div className={ 'dark-overlay' + (this.state.highlight !== null ? ' visible' : '') }/>
+          { this.state.highlight !== null &&
             <div className="click-overlay" onClick={ () => this.setState({ highlight: null }) }/>
           }
         </Tab>

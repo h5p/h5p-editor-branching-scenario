@@ -1,5 +1,5 @@
 import React from 'react';
-import Tooltip from './Tooltip';
+import TooltipButton from './TooltipButton';
 
 export default class TabViewSettings extends React.Component {
   constructor (props) {
@@ -10,15 +10,10 @@ export default class TabViewSettings extends React.Component {
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      infoTooltipStartingScreen: 'Starting screen is an intro screen that should give a learner additional information about the course',
-      infoTooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
-      infoTooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
+      tooltipStartingScreen: 'Starting screen is an intro screen that should give a learner additional information about the course',
+      tooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
+      tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
     };
-
-    this.infoTooltips = [];
-    this.infoTooltipStartingScreen = this.createInfoTooltip(this.l10n.infoTooltipStartingScreen, 'tooltip below');
-    this.infoTooltipEndScenario = this.createInfoTooltip(this.l10n.infoTooltipEndScenario);
-    this.infoTooltipEndFeedback = this.createInfoTooltip(this.l10n.infoTooltipEndFeedback);
   }
 
   componentDidMount () {
@@ -55,10 +50,8 @@ export default class TabViewSettings extends React.Component {
       this.props.onChange(event);
     });
 
-    document.addEventListener('click', this.handleDocumentClick);
-
     // Allow buttons inside labels being clickable
-    const manualFocus = document.getElementsByClassName('manualFocus');
+    const manualFocus = document.getElementsByClassName('manual-focus');
     for (let i = 0; i < manualFocus.length; i++) {
       manualFocus[i].addEventListener('click', event => {
         event.preventDefault();
@@ -67,46 +60,6 @@ export default class TabViewSettings extends React.Component {
         }
       });
     }
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleDocumentClick);
-  }
-
-  /**
-   * Create info tooltip component.
-   *
-   * @param {string} text Text to show in component. Should be validated!
-   * @param {string} tooltipClass Classes for tooltip as 'foo bar batz'.
-   * @return {JSX} Component.
-   */
-  createInfoTooltip = (text, tooltipClass) => {
-    return (
-      <Tooltip
-        ref={ tooltip => {
-          this.infoTooltips.push(tooltip);
-        } }
-        text={ text }
-        tooltipClass={ tooltipClass }
-      />
-    );
-  }
-
-  /**
-   * Handle closing those info tooltips that are open if dismissed
-   *
-   * @param {Event} event Click event.
-   */
-  handleDocumentClick = (event) => {
-    this.infoTooltips
-      .filter(tooltip => {
-        return tooltip.refs.tooltip !== undefined &&
-          tooltip.refs.tooltip !== event.target &&
-          tooltip.refs.button !== event.target;
-      })
-      .forEach(tooltip => {
-        tooltip.toggle(false);
-      });
   }
 
   render () {
@@ -118,7 +71,11 @@ export default class TabViewSettings extends React.Component {
           <form>
             <fieldset>
               <legend className="tab-view-info">
-                Configure starting screen { this.infoTooltipStartingScreen }
+                Configure starting screen
+                <TooltipButton
+                  text={ this.l10n.tooltipStartingScreen }
+                  tooltipClass={ 'tooltip below' }
+                />
               </legend>
               <label htmlFor="startTitle">Course title</label>
               <input
@@ -147,7 +104,10 @@ export default class TabViewSettings extends React.Component {
             </fieldset>
             <fieldset>
               <legend className="tab-view-info">
-                Configure the default "End Scenario" screen { this.infoTooltipEndScenario }
+                Configure the default "End Scenario" screen
+                <TooltipButton
+                  text={ this.l10n.tooltipEndScenario }
+                />
               </legend>
               <label htmlFor="endScore">Score for the default end scenario</label>
               <input
@@ -157,8 +117,11 @@ export default class TabViewSettings extends React.Component {
                 value={ this.props.value.endScore }
                 onChange={ this.props.onChange }
               />
-              <label className="tab-view-info manualFocus" htmlFor="endFeedback">
-                Textual feedback for the user { this.infoTooltipEndFeedback }
+              <label className="tab-view-info manual-focus" htmlFor="endFeedback">
+                Textual feedback for the user
+                <TooltipButton
+                  text={ this.l10n.tooltipEndFeedback }
+                />
               </label>
               <input
                 id="endFeedback"

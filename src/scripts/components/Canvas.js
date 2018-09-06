@@ -361,7 +361,7 @@ export default class Canvas extends React.Component {
     }
 
     // Make our new parent aware of us
-    if (nextContentId !== undefined && leaf.nextContentId === nextContentId) {
+    if (nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
       leaf.nextContentId = id;
     }
 
@@ -444,7 +444,7 @@ export default class Canvas extends React.Component {
         // We are the new top node, we must move to the top of the array
         newState.content.splice(0, 0, newState.content[id]);
 
-        // We're in editing mode
+        // Update and use correct ID for editing
         if (newState.editing !== null) {
           newState.editing = 0;
         }
@@ -570,14 +570,12 @@ export default class Canvas extends React.Component {
   }
 
   renderTree = (branch, x, y, parent, renderedNodes) => {
-    if (branch === 0) {
-      this.traversedNodes = [];
-    }
-
     let nodes = [];
 
-    // Keep track of nodes that have already been rendered (there might be cycles)
-    renderedNodes = renderedNodes || [];
+    // Avoid drawing the same node twice by keeping track the nodes that have been drawn.
+    if (!renderedNodes) {
+      renderedNodes = [];
+    }
 
     // Libraries must be loaded before tree can be drawn
     if (!this.props.libraries || this.props.translations.length === 0) {
@@ -605,11 +603,10 @@ export default class Canvas extends React.Component {
 
     let firstX, lastX;
     branch.forEach((id, num) => {
-      if (id > -1) {
-        this.traversedNodes.push(id);
-      }
       let drawAboveLine = false;
       const content = this.state.content[id];
+      const hasBeenDrawn = (renderedNodes.indexOf(id) !== -1);
+      renderedNodes.push(id);
 
       // Add vertical spacing for each level
       let distanceYFactor = parentIsBranching ? 8 : 5.5; // Normal distance, 2 would draw each element right underneath the previous one
@@ -628,22 +625,14 @@ export default class Canvas extends React.Component {
       const contentIsBranching = (content && Canvas.isBranching(content));
 
       // Determine if we have any children
-      const children = (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null));
+      const children = (hasBeenDrawn ? null : (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.nextContentId] : null)));
 
       if (x !== 0 && num > 0) {
         x += this.state.nodeSpecs.spacing.x; // Add spacing between nodes
       }
 
-      // Exclude branches that are looping back to earlier nodes
-      // TODO: Alternatives that lead to existing nodes need to be drawn
-      let newChildren = children;
-      if (newChildren) {
-        newChildren = (typeof children === 'number' ? [children] : children)
-          .filter(child => child < 0 || this.traversedNodes.indexOf(child) === -1);
-      }
-
       // Draw subtree first so we know where to position the node
-      const subtree = newChildren ? this.renderTree(newChildren, x, branchY, id, renderedNodes) : null;
+      const subtree = children ? this.renderTree(children, x, branchY, id, renderedNodes) : null;
       const subtreeWidth = subtree ? subtree.x - x : 0;
 
       // Determine position of node
@@ -657,15 +646,19 @@ export default class Canvas extends React.Component {
         position.x += ((subtree.x - x) / 2) - (this.state.nodeSpecs.width / 2);
       }
 
-      if (content && renderedNodes.indexOf(id) === -1) {
+      let highlightCurrentNode = false;
+      if (content && !hasBeenDrawn) {
         const libraryTitle = this.getLibraryTitle(content.type.library);
+        if ((content.nextContentId !== undefined && content.nextContentId < 0 && content.nextContentId === this.props.highlight) || this.props.highlight === id) {
+          highlightCurrentNode = true;
+        }
 
         // Draw node
         nodes.push(
           <Draggable
             key={ id }
             id={ id }
-            highlight={ this.props.highlight && this.props.highlight === content.nextContentId }
+            highlight={ highlightCurrentNode }
             ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
             position={ position }
             width={ this.state.nodeSpecs.width }
@@ -681,7 +674,6 @@ export default class Canvas extends React.Component {
             { libraryTitle }
           </Draggable>
         );
-        renderedNodes.push(id);
         drawAboveLine = true;
       }
 
@@ -703,7 +695,8 @@ export default class Canvas extends React.Component {
       }
 
       // Extra lines for BQ
-      if (contentIsBranching &&
+      if (!hasBeenDrawn &&
+        contentIsBranching &&
         content.type.params.branchingQuestion &&
         content.type.params.branchingQuestion.alternatives &&
         content.type.params.branchingQuestion.alternatives.length > 1) {
@@ -738,7 +731,7 @@ export default class Canvas extends React.Component {
 
         let alternativeBallClasses = 'alternative-ball';
         if (!drawAboveLine) {
-          if (id > 0) {
+          if (id > -1) {
             // Loop to existing node
             alternativeBallClasses += ' loop';
           }
@@ -751,7 +744,7 @@ export default class Canvas extends React.Component {
             alternativeBallClasses += ' endscreenCustom';
           }
         }
-        if (this.props.highlight && this.props.highlight === id) {
+        if (this.props.highlight !== null && this.props.highlight === id && !highlightCurrentNode) {
           alternativeBallClasses += ' on-top-of-things';
         }
 
@@ -759,6 +752,7 @@ export default class Canvas extends React.Component {
           <div key={ parent + '-abox-' + num }
             className={ alternativeBallClasses }
             aria-label={ 'Alternative ' + (num + 1) }
+            onClick={ () => this.handleBallTouch(hasBeenDrawn ? id : -1) }
             style={ {
               left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) - 1) + 'px',
               top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
@@ -770,7 +764,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative
-        if (this.state.placing !== null && !content) {
+        if (!hasBeenDrawn && this.state.placing !== null && !content) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
             y: position.y - 42 - ((aboveLineHeight - 42) / 2) // for fixed tree
@@ -780,7 +774,7 @@ export default class Canvas extends React.Component {
       }
 
       // Add dropzones when placing, except for below the one being moved and for end scenarios
-      if (this.state.placing !== null && this.state.placing !== id && id >= 0) {
+      if (!hasBeenDrawn && this.state.placing !== null && this.state.placing !== id && id >= 0) {
         const dzDistance = ((aboveLineHeight - 42) / 2);
 
         // Add dropzone above
@@ -832,6 +826,12 @@ export default class Canvas extends React.Component {
     // Decrease all next ID values larger than the deleted node
     if (leaf.nextContentId > id) {
       leaf.nextContentId--;
+    }
+  }
+
+  handleBallTouch = (id) => {
+    if (id > -1) {
+      this.props.onHighlight(id);
     }
   }
 

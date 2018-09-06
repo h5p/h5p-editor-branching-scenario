@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './ContentTypeMenu.scss';
-import Tooltip from './Tooltip';
+import TooltipButton from './TooltipButton';
 
 export default class ContentTypeMenu extends React.Component {
 
@@ -10,57 +10,9 @@ export default class ContentTypeMenu extends React.Component {
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      infoTooltipInfo: 'Add Informational content to the <strong>Branching Question Set.</strong>',
-      infoTooltipBranching: 'Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>'
+      tooltipInfo: 'Add Informational content to the <strong>Branching Question Set.</strong>',
+      tooltipBranching: 'Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>'
     };
-
-    this.infoTooltips = [];
-    this.infoTooltipInfo = this.createInfoTooltip(this.l10n.infoTooltipInfo, 'tooltip below');
-    this.infoTooltipBranching = this.createInfoTooltip(this.l10n.infoTooltipBranching);
-  }
-
-  componentDidMount() {
-    document.addEventListener('click', this.handleDocumentClick);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleDocumentClick);
-  }
-
-  /**
-   * Create info tooltip component.
-   *
-   * @param {string} text Text to show in component. Should be validated!
-   * @param {string} tooltipClass Classes for tooltip as 'foo bar batz'.
-   * @return {JSX} Component.
-   */
-  createInfoTooltip = (text, tooltipClass) => {
-    return (
-      <Tooltip
-        ref={ tooltip => {
-          this.infoTooltips.push(tooltip);
-        } }
-        text={ text }
-        tooltipClass={ tooltipClass }
-      />
-    );
-  }
-
-  /**
-   * Handle closing those info tooltips that are open if dismissed
-   *
-   * @param {Event} event Click event.
-   */
-  handleDocumentClick = (event) => {
-    this.infoTooltips
-      .filter(tooltip => {
-        return tooltip.refs.tooltip !== undefined &&
-          tooltip.refs.tooltip !== event.target &&
-          tooltip.refs.button !== event.target;
-      })
-      .forEach(tooltip => {
-        tooltip.toggle(false);
-      });
   }
 
   handleMouseDown = (event, library) => {
@@ -139,15 +91,21 @@ export default class ContentTypeMenu extends React.Component {
 
   render() {
     // TODO: Keep width constant during loading. Fix only one loading message for the entire menu?
-    // TODO: l10n
     return (
       <div className="content-type-menu">
         <label className="label-info">
-          Info Content { this.infoTooltipInfo }
+          Info Content
+          <TooltipButton
+            text={ this.l10n.tooltipInfo }
+            tooltipClass={ 'tooltip below' }
+          />
         </label>
         { this.renderDnDButtons() }
         <label className="label-info">
-          Branching Content { this.infoTooltipBranching }
+          Branching Content
+          <TooltipButton
+            text={ this.l10n.tooltipBranching }
+          />
         </label>
         { this.renderSecondButtons() }
       </div>
