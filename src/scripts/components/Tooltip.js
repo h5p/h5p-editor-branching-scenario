@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import './Tooltip.scss';
 
 export default class Tooltip extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -12,22 +11,23 @@ export default class Tooltip extends React.Component {
     };
   }
 
-  /**
-   * Handle click on button.
-   */
-  handleClick = () => {
-    this.toggle();
+  componentDidMount() {
+    document.addEventListener('click', this.handleDocumentClick);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleDocumentClick);
   }
 
   /**
-   * Toogle tooltip.
+   * Handle closing on dismissal.
    *
-   * @param {boolean} [visible] If set, visibility will be set accordingly, toggled otherwise.
+   * @param {Event} event Click event.
    */
-  toggle = visible => {
-    this.setState(prevState => ({
-      showTooltip: typeof visible === 'boolean' ? visible : !prevState.showTooltip
-    }));
+  handleDocumentClick = (event) => {
+    if (event.target !== this.refs.tooltip) {
+      this.props.onClose();
+    }
   }
 
   render() {
@@ -35,16 +35,11 @@ export default class Tooltip extends React.Component {
     const tooltipClass = this.props.tooltipClass || 'tooltip';
 
     return (
-      <div className="tooltip-wrapper">
-        <a ref={ 'button' } className="tooltip-button" onClick={ this.handleClick } />
-        { this.state.showTooltip &&
-          <div
-            ref={ 'tooltip' }
-            className={ tooltipClass }
-            dangerouslySetInnerHTML={ { __html: this.props.text } }
-          />
-        }
-      </div>
+      <div
+        ref={ 'tooltip' }
+        className={ tooltipClass }
+        dangerouslySetInnerHTML={ { __html: this.props.text } }
+      />
     );
   }
 }
