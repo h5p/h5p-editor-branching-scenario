@@ -188,9 +188,9 @@ export default class EditorOverlay extends React.Component {
         <label htmlFor="nextPath">Select a path to send a user to</label>
         <select name="nextPath" value={this.state.content.nextContentId} onChange={this.updateNextContentId}>
           {
-            this.validAlternatives.map(content => (
+            this.validAlternatives.map((content, index) => (
               <option
-                key={'next-path-' + this.props.content.indexOf(content)}
+                key={'next-path-' + index}
                 value={this.props.content.indexOf(content)}>{`${content.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${content.contentTitle}`}
               </option>
             ))
