@@ -797,7 +797,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative
-        if (!hasBeenDrawn && this.state.placing !== null && !content) {
+        if (this.state.placing !== null && !content) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
