@@ -1,6 +1,7 @@
 {
   "globals": {
-    "H5P": true
+    "H5P": true,
+    "H5PEditor": true
   },
   "env": {
     "browser": true,
