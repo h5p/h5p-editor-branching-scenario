@@ -10,14 +10,21 @@
   height: 100%;
   background-color: $background-gray;
   position: relative;
+  overflow: hidden;
 
   .loading {
     padding: 1rem;
   }
 }
 
-.tree {
+.treewrap {
   position: relative;
+  width: 100%;
+  height: 100%;
+}
+.nodetree {
+  position: absolute;
+  transform-origin: top left;
 }
 
 .start-canvas {
