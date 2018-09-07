@@ -64,6 +64,14 @@ export default class BranchingQuestionOptions extends React.Component {
   render() {
     return (
       <div className='editor-overlay-branching-options'>
+        <div className='field text importance-low'>
+          <div className='h5p-editor-flex-wrapper'>
+            <label className='h5peditor-label-wrapper'>
+              <span className='h5peditor-label'>Next content</span>
+            </label>
+          </div>
+          <div className='h5peditor-field-description'>If you select a value it is recommended to provide a feedback after each alternatives that leads to a new content. This will ensure a better learning experience for the viewer.</div>
+        </div>
         <select
           onChange={this.handleMainOptionChange.bind(this)}
         >
