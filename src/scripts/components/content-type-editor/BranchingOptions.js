@@ -91,7 +91,7 @@ export default class BranchingOptions extends React.Component {
             value="end-scenario"
           >End scenario here</option>
           {
-            this.props.validAlternatives.length > 1 &&
+            this.props.validAlternatives.length > 0 &&
             <option
               key="old-content"
               value="old-content"
