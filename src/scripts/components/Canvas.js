@@ -271,6 +271,20 @@ export default class Canvas extends React.Component {
     });
   }
 
+  /**
+   * Copy content to clipboard.
+   *
+   * @param {number} id Content id.
+   */
+  handleCopyContent = (id) => {
+    const content = this.state.content[id];
+    H5P.clipboardify({
+      library: content.type.library,
+      params: content.type.params,
+      metadata: content.type.metadata
+    });
+  }
+
   handleDeleteContent = (id) => {
     this.setState({
       deleting: id,
@@ -680,8 +694,9 @@ export default class Canvas extends React.Component {
             onMove={ () => this.handleMove(id) }
             onDropped={ () => this.handleDropped(id) }
             contentClass={ libraryTitle }
-            editContent={ () => this.handleEditContent(id) }
-            deleteContent={ () => this.handleDeleteContent(id) }
+            onEditContent={ this.handleEditContent }
+            onCopyContent={ this.handleCopyContent }
+            onDeleteContent={ this.handleDeleteContent }
             disabled={ contentIsBranching }
             tooltip={ Canvas.getTooltip(content) }
           >

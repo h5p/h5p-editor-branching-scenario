@@ -13,16 +13,18 @@ export default class SubMenu extends React.Component {
     return (
       <ul className={ elementClass }>
         <li>Content Options</li>
-        <li className='start-preview' onClick={ this.props.preview }>Start preview</li>
-        <li className='edit-content' onClick={ this.props.edit }>Edit content</li>
-        <li className='delete' onClick={ this.props.delete }>Delete</li>
+        <li className='start-preview' onClick={ this.props.onPreview }>Start preview</li>
+        <li className='edit-content' onClick={ this.props.onEdit }>Edit content</li>
+        <li className='copy-content' onClick={ this.props.onCopy }>Copy to a clipboard</li>
+        <li className='delete-content' onClick={ this.props.onDelete }>Delete</li>
       </ul>
     );
   }
 }
 
 SubMenu.propTypes = {
-  preview: PropTypes.func,
-  edit: PropTypes.func,
-  deleteMe: PropTypes.func
+  onPreview: PropTypes.func,
+  onEdit: PropTypes.func,
+  onCopy: PropTypes.func,
+  onDelete: PropTypes.func
 };
