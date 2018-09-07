@@ -1,5 +1,4 @@
 import React from 'react';
-import Dropzone from "../Dropzone";
 import './BranchingQuestionEditor.scss';
 
 // TODO: Merge with BranchingOptions.js and refactor
@@ -11,9 +10,7 @@ export default class BranchingQuestionOptions extends React.Component {
     const nextContentId = parseInt(this.props.nextContentId);
 
     this.state = {
-      showNextPathDropzone: false,
-      showNextPathChooser: nextContentId >= 0,
-      existingContentId: nextContentId, // TODO: Merge these options
+      existingContentId: nextContentId,
     };
   }
 
@@ -32,36 +29,38 @@ export default class BranchingQuestionOptions extends React.Component {
   }
 
   handleMainOptionChange(e) {
-    var newValue = e.target.value;
+    const newValue = e.target.value;
     switch (newValue) {
-      case 'end-scenario':
-        this.props.branchingUpdated(-1);
-        this.setState({
-          showNextPathDropzone: false,
-          showNextPathChooser: false,
-        });
-        break;
-
       case 'new-content':
         this.setState({
-          showNextPathDropzone: true,
-          showNextPathChooser: false,
+          existingContentId: undefined,
         });
+        this.props.branchingUpdated(-1);
+        break;
 
+      case 'end-scenario':
+        this.setState({
+          existingContentId: -1,
+        });
+        this.props.branchingUpdated(-1);
         break;
 
       case 'old-content':
         this.setState({
-          showNextPathDropzone: false,
-          showNextPathChooser: true,
+          existingContentId: this.props.validAlternatives[0].contentId,
         });
-        var nextContentId = this.props.validAlternatives[0].contentId;
-        this.props.branchingUpdated(nextContentId);
+        this.props.branchingUpdated(this.props.validAlternatives[0].contentId);
         break;
     }
   }
 
   render() {
+    const mainSelectorValue = this.state.existingContentId >= 0
+      ? 'old-content'
+      : (this.state.existingContentId === -1
+        ? 'end-scenario'
+        : 'new-content');
+
     return (
       <div className='editor-overlay-branching-options'>
         <div className='field text importance-low'>
@@ -73,40 +72,27 @@ export default class BranchingQuestionOptions extends React.Component {
           <div className='h5peditor-field-description'>If you select a value it is recommended to provide a feedback after each alternatives that leads to a new content. This will ensure a better learning experience for the viewer.</div>
         </div>
         <select
+          value={mainSelectorValue}
           onChange={this.handleMainOptionChange.bind(this)}
         >
           <option
-            key="branching-option-0"
-            value="end-scenario"
-          >End scenario here
-          </option>
-          <option
-            key="branching-option-1"
+            key="default"
             value="new-content"
-          >Send a viewer to a new content/question
-          </option>
+          > - </option>
+          <option
+            key="end-scenario"
+            value="end-scenario"
+          >End scenario here</option>
           {
             this.props.content.length > 1 &&
             <option
-              key="branching-option-2"
+              key="old-content"
               value="old-content"
             >Send a viewer to an existing content/question</option>
           }
         </select>
-
         {
-          this.state.showNextPathDropzone &&
-          <Dropzone
-            ref={element => this.props.onNextPathDrop(element)}
-            elementClass={'dropzone-editor-path'}
-            innerHTML={'Drag any content type from a menu on the left side and drop it here to create new content/question'}
-            alternative={this.props.alternativeIndex}
-            type={ 'nextPathDrop' }
-          />
-        }
-
-        {
-          this.state.showNextPathChooser &&
+          this.state.existingContentId >= 0 &&
           <div>
             <label htmlFor="nextPath">Select a path to send a user to</label>
             <select
