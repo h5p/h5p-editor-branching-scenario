@@ -3,12 +3,12 @@
 .dropzone {
   position: absolute;
   width: 2.6em;
-  height: 2.6em;
+  height: 2em;
   padding-top: 0.3rem;
   box-sizing: border-box;
   color: #1773DA;
   background-color: #c4ddf9;
-  border: dashed 2px #1773DA;
+  border: dotted 2px #1773DA;
   cursor: pointer;
   text-align: center;
 
@@ -16,7 +16,7 @@
     font-family: 'BSFont';
     content: $icon-plus-2;
     font-size: 1.5em;
-    font-weight: 800;
+    line-height: 0.75em;
   }
 
   &:hover, &.highlight {
