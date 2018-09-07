@@ -85,7 +85,17 @@ export default class Canvas extends React.Component {
         height: 32
       },
       content: this.props.content,
-      dialog: this.l10n.dialogDelete
+      dialog: this.l10n.dialogDelete,
+      panning: {
+        x: 0,
+        y: 0
+      },
+      offset: {
+        x: 0,
+        y: 0
+      },
+      center: true,
+      scale: 1.5
     };
   }
 
@@ -627,12 +637,12 @@ export default class Canvas extends React.Component {
       x = 0; // X level start
     }
     if (y === undefined) {
-      y = 100; // Y level start
+      y = 0; // Y level start
     }
 
     const parentIsBranching = (parent !== undefined && Canvas.isBranching(this.state.content[parent]));
 
-    let firstX, lastX;
+    let firstX, lastX, bigY = y + (this.state.nodeSpecs.spacing.y * 7.5); // The highest we'll ever be
     branch.forEach((id, num) => {
       let drawAboveLine = false;
       const content = this.state.content[id];
@@ -800,7 +810,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative
-        if (!hasBeenDrawn && this.state.placing !== null && !content) {
+        if (this.state.placing !== null && !content) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
@@ -838,6 +848,10 @@ export default class Canvas extends React.Component {
       if (subtree) {
         // Merge our trees
         nodes = nodes.concat(subtree.nodes);
+
+        if (subtree.y > bigY) {
+          bigY = subtree.y;
+        }
       }
 
       if (firstX === undefined) {
@@ -849,6 +863,7 @@ export default class Canvas extends React.Component {
     return {
       nodes: nodes,
       x: x,
+      y: bigY,
       dX: (firstX !== undefined ? lastX - firstX : 0) // Width of this subtree level only (used for pretty trees)
     };
   }
@@ -987,11 +1002,15 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.treeWidth !== this.lastTreeWidth) {
-      this.lastTreeWidth = this.treeWidth;
-      this.refs.tree.style.marginLeft = '';
-      const raw = this.refs.tree.getBoundingClientRect();
-      this.refs.tree.style.marginLeft = ((raw.width - this.treeWidth) / 2) + 'px';
+    if (this.state.center && this.refs.tree && this['draggable-1']) {
+      const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.state.scale) / 2);
+      this.setState({
+        center: false,
+        panning: {
+          x: (center - (this['draggable-0'].props.position.x * this.state.scale)),
+          y: 0
+        }
+      });
     }
   }
 
@@ -1121,6 +1140,121 @@ export default class Canvas extends React.Component {
     }).join('');
   }
 
+  handleMouseDown = (event) => {
+    if (event.button !== 0) {
+      return; // Only handle left click
+    }
+
+    this.setState(this.prepareMouseMove({
+      startX: event.pageX,
+      startY: event.pageY
+    }));
+  }
+
+  prepareMouseMove = (element) => {
+    window.addEventListener('mouseup', this.handleMouseUp);
+    window.addEventListener('mousemove', this.handleMouseMove);
+    return {
+      moving: element
+    };
+  }
+
+  handleMouseUp = () => {
+    if (this.state.moving.started) {
+      this.setState({
+        moving: null
+      });
+    }
+    window.removeEventListener('mouseup', this.handleMouseUp);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+  }
+
+  handleMouseMove = (event) => {
+    let newState;
+
+    if (!this.state.moving.started) {
+      // Element has not started moving yet (might be clicking)
+
+      const threshold = 5; // Only start moving after passing threshold value
+      if (event.pageX > this.state.moving.startX + threshold ||
+          event.pageX < this.state.moving.startX - threshold ||
+          event.pageY > this.state.moving.startY + threshold ||
+          event.pageY < this.state.moving.startY - threshold) {
+        newState = {
+          moving: {
+            ...this.state.moving,
+            started: true
+          },
+          offset: this.state.panning
+        };
+        // TODO: Disable text select!
+      }
+      else {
+        return; // Not passed threshold value yet
+      }
+    }
+
+    // Determine if new state has been set already
+    newState = newState || {};
+
+    // Use newest offset if possible
+    let offset = (newState.offset ? newState.offset : this.state.offset);
+
+    // Update element position
+    newState.panning = {
+      x: (event.pageX - this.state.moving.startX) + offset.x,
+      y: (event.pageY - this.state.moving.startY) + offset.y
+    };
+
+    // Limits, you have to have them
+    const treewrapRect = this.refs.treewrap.getBoundingClientRect();
+    const treeRect = this.refs.tree.getBoundingClientRect();
+
+    const wideLoad = (treeRect.width > treewrapRect.width);
+    const highLoad = (treeRect.height > treewrapRect.height);
+
+    const padding = (this.state.scale * 64); // Allow exceeding by this much
+
+    // Limit X movement
+    if (wideLoad) {
+      if (newState.panning.x > padding) {
+        newState.panning.x = padding; // Max X
+      }
+      else if ((treewrapRect.width - newState.panning.x - padding) > treeRect.width) {
+        newState.panning.x = (treewrapRect.width - treeRect.width - padding); // Min X
+      }
+    }
+    else {
+      if (newState.panning.x < 0) {
+        newState.panning.x = 0; // Min X
+      }
+      else if ((newState.panning.x + treeRect.width) > treewrapRect.width) {
+        newState.panning.x = (treewrapRect.width - treeRect.width); // Max X
+      }
+    }
+
+    // Limit Y movement
+    if (highLoad) {
+      if (newState.panning.y > padding) {
+        newState.panning.y = padding; // Max Y
+      }
+      else if ((treewrapRect.height - newState.panning.y - padding) > treeRect.height) {
+        newState.panning.y = (treewrapRect.height - treeRect.height - padding); // Min Y
+      }
+    }
+    else {
+      if (newState.panning.y < 0) {
+        newState.panning.y = 0; // Min Y
+      }
+      else if ((newState.panning.y + treeRect.height) > treewrapRect.height) {
+        newState.panning.y = (treewrapRect.height - treeRect.height); // Max Y
+      }
+    }
+
+
+    this.setState(newState);
+  }
+
   // For debugging
   logNodes = caller => {
     console.log('NODES', caller);
@@ -1143,9 +1277,7 @@ export default class Canvas extends React.Component {
     const tree = this.renderTree(0);
 
     // Usful for debugging tree rendering
-    this.logNodes('render');
-
-    this.treeWidth = tree.x;
+    //this.logNodes('render');
 
     const interaction = this.state.content[this.state.editing];
 
@@ -1168,8 +1300,26 @@ export default class Canvas extends React.Component {
         }
 
         <div className="canvas">
-          <div className="tree" ref={ 'tree' }>
-            { tree.nodes }
+          <div
+            className="treewrap"
+            onMouseDown={ this.handleMouseDown }
+            ref={ 'treewrap' }
+            style={ {
+              transform: ''
+            } }
+          >
+            <div
+              className="nodetree"
+              ref={ 'tree' }
+              style={ {
+                width: tree.x + 'px',
+                height: tree.y + 'px',
+                transform: 'translate(' + this.state.panning.x + 'px,' + this.state.panning.y + 'px) scale(' + this.state.scale + ',' + this.state.scale + ')'
+              } }
+            >
+              { tree.nodes }
+              <div className={ 'dark-overlay' + (this.props.highlight !== null ? ' visible' : '') }/>
+            </div>
           </div>
           { !tree.nodes.length &&
             <StartScreen

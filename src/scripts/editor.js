@@ -177,10 +177,6 @@ export default class Editor extends React.Component {
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
             onHighlight={ this.handleHighlight }
           />
-          <div className={ 'dark-overlay' + (this.state.highlight !== null ? ' visible' : '') }/>
-          { this.state.highlight !== null &&
-            <div className="click-overlay" onClick={ () => this.setState({ highlight: null }) }/>
-          }
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
           <TabViewSettings
