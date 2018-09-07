@@ -277,12 +277,8 @@ export default class Canvas extends React.Component {
    * @param {number} id Content id.
    */
   handleCopyContent = (id) => {
-    const content = this.state.content[id];
-    H5P.clipboardify({
-      library: content.type.library,
-      params: content.type.params,
-      metadata: content.type.metadata
-    });
+    const clipboardItem = new H5P.ClipboardItem(this.state.content[id], 'type', 'H5PEditor.BranchingScenario');
+    H5P.clipboardify(clipboardItem);
   }
 
   handleDeleteContent = (id) => {
