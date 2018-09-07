@@ -1,9 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './EditorOverlay.scss';
-import Dropzone from './Dropzone.js';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
-import BranchingQuestionOptions from "./content-type-editor/BranchingQuestionOptions";
 
 /*global H5PEditor, H5P*/
 export default class EditorOverlay extends React.Component {
@@ -26,11 +24,6 @@ export default class EditorOverlay extends React.Component {
 
     // TODO: l10n object
     this.state = {
-      saveButton: "Save changes", // TODO: Needs to be translatable
-      closeButton: "close", // TODO: Needs to be translatable
-      showNextPathDropzone: false,
-      showNextPathChooser: content.nextContentId > -1,
-      branchingOptions: (content.nextContentId > -1) ? "old-content" : 'end-scenario',
       content: content
     };
 
@@ -41,37 +34,39 @@ export default class EditorOverlay extends React.Component {
         this.props.id !== index;
     });
 
-    if (this.isBranchingQuestion) {
-      // TODO: refactor
-      const widget = this.props.main.children[0];
+    this.addBranchingOptionsToEditor();
+  }
 
-      if (widget && widget.setAlternatives) {
-        widget.setAlternatives(
+  /**
+   * Adds branching options to content
+   * For Branching Question this means that the branching options
+   * must be added to each alternative that can be chosen
+   */
+  addBranchingOptionsToEditor() {
+    if (this.isBranchingQuestion) {
+      const branchingQuestionEditor = this.props.main.children[0];
+
+      if (branchingQuestionEditor && branchingQuestionEditor.setAlternatives) {
+
+        // Add <BranchingOptions> to each alternative in Branching Question
+        branchingQuestionEditor.setAlternatives(
           (nextContentId, selectorWrapper, listIndex) => {
             const branchingUpdated = (value) => {
-              widget.setNextContentId(listIndex, value);
+              branchingQuestionEditor.setNextContentId(listIndex, value);
             };
 
             ReactDOM.render((
-              <BranchingQuestionOptions
-                handleOptionChange={this.handleOptionChange.bind(this)}
-                value={this.state.branchingOptions}
-                content={this.props.content}
-                showNextPathChooser={this.state.showNextPathChooser}
-                showNextPathDropzone={this.state.showNextPathDropzone}
-                renderNextPathDropzone={this.renderNextPathDropzone.bind(this)}
-                renderNextPathChooser={this.renderNextPathChooser.bind(this)}
-                onNextPathDrop={this.props.onNextPathDrop.bind(this)}
+              <BranchingOptions
                 nextContentId={nextContentId}
                 validAlternatives={this.validAlternatives}
-                branchingUpdated={branchingUpdated}
+                onChangeContent={branchingUpdated}
                 alternativeIndex={listIndex}
               />
             ), selectorWrapper);
 
             // Set default value to end scenario
             if (nextContentId === '') {
-              widget.setNextContentId(listIndex, -1);
+              branchingQuestionEditor.setNextContentId(listIndex, -1);
             }
           });
       }
@@ -122,56 +117,7 @@ export default class EditorOverlay extends React.Component {
     });
   };
 
-  handleOptionChange = (event) => {
-    const value = event.target.value;
-
-    switch (value) {
-      case 'end-scenario':
-        this.setState({
-          nextContentId: -1,
-          showNextPathDropzone: false,
-          showNextPathChooser: false,
-          branchingOptions: value
-        });
-        break;
-      case 'new-content':
-        this.setState({
-          showNextPathDropzone: true,
-          showNextPathChooser: false,
-          branchingOptions: value
-        });
-        break;
-      case 'old-content':
-        this.setState(prevState => {
-          const newState = prevState;
-
-          newState.showNextPathDropzone = false;
-          newState.showNextPathChooser = true;
-          newState.branchingOptions = value;
-          newState.content.nextContentId = (prevState.content.nextContentId < 0) ? 0 : prevState.content.nextContentId;
-
-          return newState;
-        });
-        break;
-    }
-
-    this.props.onContentChanged(this.props.id, this.state.content);
-  };
-
-  renderNextPathDropzone() {
-    return (
-      <Dropzone
-        ref={element => this.props.onNextPathDrop(element)}
-        elementClass={'dropzone-editor-path'}
-        innerHTML={'Drag any content type from a menu on the left side and drop it here to create new content/question'}
-        type={ 'nextPathDrop' }
-      />
-    );
-  }
-
-  updateNextContentId = (event) => {
-    const value = (typeof event === 'number') ? event : parseInt(event.target.value);
-
+  updateNextContentId = (value) => {
     this.setState(prevState => {
       const newState = prevState;
       newState.content.nextContentId = value;
@@ -182,25 +128,6 @@ export default class EditorOverlay extends React.Component {
     });
   };
 
-  renderNextPathChooser() {
-    return (
-      <div>
-        <label htmlFor="nextPath">Select a path to send a user to</label>
-        <select name="nextPath" value={this.state.content.nextContentId} onChange={this.updateNextContentId}>
-          {
-            this.validAlternatives.map((content, index) => (
-              <option
-                key={'next-path-' + index}
-                value={this.props.content.indexOf(content)}>{`${content.type.library.split(' ')[0].split('.')[1].replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')}: ${content.contentTitle}`}
-              </option>
-            ))
-          }
-        </select>
-      </div>
-    );
-  }
-
-  // TODO: The editor-overlay-branching-options could be put in their own component
   render() {
     return (
       <div className='editor-overlay'>
@@ -214,11 +141,11 @@ export default class EditorOverlay extends React.Component {
               onClick={() => {
                 this.props.onFormSaved(this.props.id, this.state.content);
               }}
-            >{this.state.saveButton}</button>
+            >Save changes</button>
             <button
               className="button"
               onClick={this.props.onFormClosed}
-            >{this.state.closeButton}</button>
+            >Close</button>
           </span>
         </div>
 
@@ -236,13 +163,9 @@ export default class EditorOverlay extends React.Component {
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              handleOptionChange={this.handleOptionChange.bind(this)}
-              value={this.state.branchingOptions}
-              content={this.props.content}
-              showNextPathChooser={this.state.showNextPathChooser}
-              showNextPathDropzone={this.state.showNextPathDropzone}
-              renderNextPathDropzone={this.renderNextPathDropzone.bind(this)}
-              renderNextPathChooser={this.renderNextPathChooser.bind(this)}
+              nextContentId={this.state.content.nextContentId}
+              validAlternatives={this.validAlternatives}
+              onChangeContent={this.updateNextContentId.bind(this)}
             />
           }
         </div>
