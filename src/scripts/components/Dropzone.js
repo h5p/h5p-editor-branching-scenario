@@ -57,6 +57,15 @@ export default class Dropzone extends React.Component {
     this.refs.element.classList.remove('highlight');
   }
 
+  /**
+   * Get type.
+   *
+   * @return {string} Type.
+   */
+  getType = () => {
+    return this.props.type;
+  }
+
   render() {
     return (
       <div
@@ -64,6 +73,7 @@ export default class Dropzone extends React.Component {
         className={ this.props.elementClass }
         style={ this.props.style }
         onClick={ this.props.onClick }
+        type={ this.props.type }
       >
         { this.props.innerHTML }
       </div>

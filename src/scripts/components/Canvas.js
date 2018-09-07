@@ -176,8 +176,15 @@ export default class Canvas extends React.Component {
   getIntersections(draggable) {
     const points = draggable.getPoints();
 
+    let dropzones = this.dropzones;
+
+    // Only use next path dropzones
+    if (this.state.editing) {
+      dropzones = dropzones.filter(dropzone => dropzone instanceof Dropzone && dropzone.getType() === 'nextPathDrop');
+    }
+
     // Get largest intersections
-    return this.dropzones
+    return dropzones
       .filter(dropzone => dropzone && dropzone !== draggable && dropzone.overlap(points))
       .map(dropzone => {
         return {
@@ -300,7 +307,7 @@ export default class Canvas extends React.Component {
       nextIds = [node.nextContentId];
     }
     else {
-      nextIds = node.type.params.alternatives.map(alt => alt.nextContentId);
+      nextIds = node.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId);
     }
 
     nextIds
@@ -348,7 +355,10 @@ export default class Canvas extends React.Component {
       case 'H5P.AdvancedText':
         return Canvas.stripHTML(content.type.params.text);
       case 'H5P.BranchingQuestion':
-        return Canvas.stripHTML(content.type.params.question);
+        return (content.type.params.branchingQuestion
+          && content.type.params.branchingQuestion.question)
+          ? Canvas.stripHTML(content.type.params.branchingQuestion.question)
+          : undefined;
       default:
         return content.type.metadata ? content.type.metadata.title : undefined;
     }
@@ -386,10 +396,15 @@ export default class Canvas extends React.Component {
       nextContentId = -1;
     }
     if (Canvas.isBranching(content)) {
-      content.type.params.alternatives = (content.type.params.alternatives || []);
-      content.type.params.alternatives.push({
-        nextContentId: nextContentId
-      });
+      if (content.type.params
+        && content.type.params.branchingQuestion
+        && content.type.params.branchingQuestion.alternatives
+      ) {
+        content.type.params.branchingQuestion.alternatives = (content.type.params.branchingQuestion.alternatives || []);
+        content.type.params.branchingQuestion.alternatives.push({
+          nextContentId: nextContentId
+        });
+      }
     }
     else {
       content.nextContentId = nextContentId;
@@ -467,9 +482,11 @@ export default class Canvas extends React.Component {
         }
 
         if (Canvas.isBranching(content)) {
-          if (content.type.params &&
-              content.type.params.alternatives) {
-            content.type.params.alternatives.forEach(alternative =>
+          var hasAlternatives = content.type.params
+            && content.type.params.branchingQuestion
+            && content.type.params.branchingQuestion.alternatives;
+          if (hasAlternatives) {
+            content.type.params.branchingQuestion.alternatives.forEach(alternative =>
               this.updateNextContentId(alternative, id, nextId, nextContentId, bumpIdsUntil));
           }
         }
@@ -481,7 +498,7 @@ export default class Canvas extends React.Component {
       // Update parent directly when placing a new leaf node
       if (parent !== undefined) {
         if (parentIsBranching) {
-          parent.type.params.alternatives[alternative].nextContentId = (id === 0 ? 1 : id);
+          parent.type.params.branchingQuestion.alternatives[alternative].nextContentId = (id === 0 ? 1 : id);
         }
         else {
           parent.nextContentId = (id === 0 ? 1 : id);
@@ -552,13 +569,14 @@ export default class Canvas extends React.Component {
 
   getBranchingChildren(content) {
     if (!content.type || !content.type.params ||
-        !content.type.params.alternatives ||
-        !content.type.params.alternatives.length) {
+        !content.type.params.branchingQuestion ||
+        !content.type.params.branchingQuestion.alternatives ||
+        !content.type.params.branchingQuestion.alternatives.length) {
       return; // No alternatives today
     }
 
     let children = [];
-    content.type.params.alternatives.forEach(alternative => {
+    content.type.params.branchingQuestion.alternatives.forEach(alternative => {
       children.push(alternative.nextContentId); // Other question or end scenario
     });
 
@@ -691,7 +709,11 @@ export default class Canvas extends React.Component {
       }
 
       // Extra lines for BQ
-      if (!hasBeenDrawn && contentIsBranching && content.type.params.alternatives && content.type.params.alternatives.length > 1) {
+      if (!hasBeenDrawn &&
+        contentIsBranching &&
+        content.type.params.branchingQuestion &&
+        content.type.params.branchingQuestion.alternatives &&
+        content.type.params.branchingQuestion.alternatives.length > 1) {
         // Add vertical line below
         nodes.push(
           <div key={ id + '-vbelow' } className="vertical-line" style={ {
@@ -754,7 +776,7 @@ export default class Canvas extends React.Component {
               top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
             } }>A{ num + 1 }
             <div className="dark-tooltip">
-              <div className="dark-text-wrap">{ this.state.content[parent].type.params.alternatives[num].text }</div>
+              <div className="dark-text-wrap">{ this.state.content[parent].type.params.branchingQuestion.alternatives[num].text }</div>
             </div>
           </div>
         );
@@ -860,7 +882,7 @@ export default class Canvas extends React.Component {
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
           if (Canvas.isBranching(node)) {
-            deleteIds = node.type.params.alternatives
+            deleteIds = node.type.params.branchingQuestion.alternatives
               .filter(alt => alt.nextContentId >= 0) // Filter end scenarios
               .map(alt => alt.nextContentId).concat(id);
           }
@@ -885,7 +907,7 @@ export default class Canvas extends React.Component {
               // Exchange all links pointing to node to be deleted to its successor instead.
               newState.content.forEach(node => {
                 const affectedNodes = (Canvas.isBranching(node)) ?
-                  node.type.params.alternatives :
+                  node.type.params.branchingQuestion.alternatives :
                   [node];
 
                 affectedNodes.forEach(affectedNode => {
@@ -906,7 +928,7 @@ export default class Canvas extends React.Component {
               if (removeChildren === true) {
                 let childrenIds;
                 if (Canvas.isBranching(deleteNode)) {
-                  childrenIds = deleteNode.type.params.alternatives.map(alt => alt.nextContentId);
+                  childrenIds = deleteNode.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId);
                 }
                 else {
                   childrenIds = [deleteNode.nextContentId];
@@ -1010,7 +1032,7 @@ export default class Canvas extends React.Component {
     let numMissingEndScenarios = 0;
     this.state.content.forEach(content => {
       if (Canvas.isBranching(content)) {
-        content.type.params.alternatives.forEach(alternative => {
+        content.type.params.branchingQuestion.alternatives.forEach(alternative => {
           if (alternative.nextContentId === -1) {
             numMissingEndScenarios++;
           }
@@ -1086,8 +1108,8 @@ export default class Canvas extends React.Component {
     console.log('NODES', caller);
     this.state.content.forEach((node, index) => {
       const target = (Canvas.isBranching(node)) ?
-        (node.type.params.alternatives ?
-          node.type.params.alternatives.map(alt => alt.nextContentId).join(' | ') :
+        (node.type.params.branchingQuestion && node.type.params.branchingQuestion.alternatives ?
+          node.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId).join(' | ') :
           -1) : node.nextContentId;
       console.log(`${index} --> ${target}`);
     });
