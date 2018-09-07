@@ -351,7 +351,10 @@ export default class Canvas extends React.Component {
       case 'H5P.AdvancedText':
         return Canvas.stripHTML(content.type.params.text);
       case 'H5P.BranchingQuestion':
-        return Canvas.stripHTML(content.type.params.branchingQuestion.question);
+        return (content.type.params.branchingQuestion
+          && content.type.params.branchingQuestion.question)
+          ? Canvas.stripHTML(content.type.params.branchingQuestion.question)
+          : undefined;
       default:
         return content.type.metadata ? content.type.metadata.title : undefined;
     }
