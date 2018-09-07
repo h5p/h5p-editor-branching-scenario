@@ -80,6 +80,10 @@ export default class Canvas extends React.Component {
           y: 16
         }
       },
+      dzSpecs: {
+        width: 42,
+        height: 32
+      },
       content: this.props.content,
       dialog: this.l10n.dialogDelete
     };
@@ -619,7 +623,7 @@ export default class Canvas extends React.Component {
       renderedNodes.push(id);
 
       // Add vertical spacing for each level
-      let distanceYFactor = parentIsBranching ? 8 : 5.5; // Normal distance, 2 would draw each element right underneath the previous one
+      let distanceYFactor = parentIsBranching ? 7.5 : 5; // Normal distance, 2 would draw each element right underneath the previous one
 
       // Alternate code for "tree expansion"
       // let distanceYFactor = parentIsBranching ? 5.5 : 3; // Normal distance, 2 would draw each element right underneath the previous one
@@ -722,7 +726,7 @@ export default class Canvas extends React.Component {
         // Add horizontal line below
         nodes.push(
           <div key={ id + '-hbelow' } className="horizontal-line" style={ {
-            left: (x + (children[0] < 0 ? 42 / 2 : this.state.nodeSpecs.width / 2)) + 'px',
+            left: (x + (children[0] < 0 ? this.state.dzSpecs.width / 2 : this.state.nodeSpecs.width / 2)) + 'px',
             top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
             width: subtree.dX + 'px'
           } }/>
@@ -738,6 +742,8 @@ export default class Canvas extends React.Component {
             height: (this.state.nodeSpecs.spacing.y * lengthMultiplier) + 'px'
           } }/>
         );
+
+        const key = parent + '-abox-' + num;
 
         let alternativeBallClasses = 'alternative-ball';
         if (!drawAboveLine) {
@@ -755,14 +761,16 @@ export default class Canvas extends React.Component {
           }
         }
         if (this.props.highlight !== null && this.props.highlight === id && !highlightCurrentNode) {
-          alternativeBallClasses += ' on-top-of-things';
+          if (this.props.onlyThisBall === null || this.props.onlyThisBall === key) {
+            alternativeBallClasses += ' on-top-of-things';
+          }
         }
 
         nodes.push(
-          <div key={ parent + '-abox-' + num }
+          <div key={ key }
             className={ alternativeBallClasses }
             aria-label={ 'Alternative ' + (num + 1) }
-            onClick={ () => this.handleBallTouch(hasBeenDrawn ? id : -1) }
+            onClick={ () => this.handleBallTouch(hasBeenDrawn ? id : -1, key) }
             style={ {
               left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) - 1) + 'px',
               top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
@@ -776,8 +784,8 @@ export default class Canvas extends React.Component {
         // Add dropzone under empty BQ alternative
         if (!hasBeenDrawn && this.state.placing !== null && !content) {
           nodes.push(this.renderDropzone(-1, {
-            x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y - 42 - ((aboveLineHeight - 42) / 2) // for fixed tree
+            x: nodeCenter - (this.state.dzSpecs.width / 2),
+            y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
             // y: position.y - 42 + 2 * this.state.nodeSpecs.spacing.y // for expandable tree
           }, parent, num));
         }
@@ -785,13 +793,13 @@ export default class Canvas extends React.Component {
 
       // Add dropzones when placing, except for below the one being moved and for end scenarios
       if (!hasBeenDrawn && this.state.placing !== null && this.state.placing !== id && id >= 0) {
-        const dzDistance = ((aboveLineHeight - 42) / 2);
+        const dzDistance = ((aboveLineHeight - this.state.dzSpecs.height) / 2);
 
         // Add dropzone above
         if (this.state.placing !== parent) {
           nodes.push(this.renderDropzone(id, {
-            x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y - 42 - dzDistance // for fixed tree
+            x: nodeCenter - (this.state.dzSpecs.width / 2),
+            y: position.y - this.state.dzSpecs.height - dzDistance // for fixed tree
             // y: position.y - 42 - dzDistance - ((id === 0) ? (42 / 2) : 0) // for expandable tree
           }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0, parentIsBranching));
         }
@@ -799,14 +807,14 @@ export default class Canvas extends React.Component {
         // Add dropzone below if there's no subtree
         if (content && (!subtree || !subtree.nodes.length)) {
           nodes.push(this.renderDropzone(id, {
-            x: nodeCenter - (42 / 2), // 42 = size of DZ  TODO: Get from somewhere?
-            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (42 / 2) : 0)
+            x: nodeCenter - (this.state.dzSpecs.width / 2),
+            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (this.state.dzSpecs.height / 2) : 0)
           }, id, parentIsBranching ? num + 1 : 1));
         }
       }
 
       // Increase same level offset + offset required by subtree
-      const elementWidth = (content ? this.state.nodeSpecs.width : 42);
+      const elementWidth = (content ? this.state.nodeSpecs.width : this.state.dzSpecs.width);
       x += (subtreeWidth >= this.state.nodeSpecs.width ? subtreeWidth : elementWidth);
 
       if (subtree) {
@@ -839,9 +847,9 @@ export default class Canvas extends React.Component {
     }
   }
 
-  handleBallTouch = (id) => {
+  handleBallTouch = (id, onlyThisBall) => {
     if (id > -1) {
-      this.props.onHighlight(id);
+      this.props.onHighlight(id, onlyThisBall);
     }
   }
 
@@ -1195,5 +1203,7 @@ export default class Canvas extends React.Component {
 
 Canvas.propTypes = {
   width: PropTypes.number,
-  inserting: PropTypes.object
+  inserting: PropTypes.object,
+  highlight: PropTypes.number,
+  onlyThisBall: PropTypes.string
 };

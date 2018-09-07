@@ -22,7 +22,8 @@ export default class Editor extends React.Component {
       settings: props.settings,
       libraries: null, // Needs to be loaded via AJAX
       numDefaultEndScenarios: 0,
-      highlight: null
+      highlight: null,
+      onlyThisBall: null
     };
   }
 
@@ -125,8 +126,11 @@ export default class Editor extends React.Component {
     });
   }
 
-  handleHighlight = (id) => {
-    this.setState({ highlight: id });
+  handleHighlight = (id, onlyThisBall) => {
+    this.setState({
+      highlight: id,
+      onlyThisBall: onlyThisBall === undefined ? null : onlyThisBall
+    });
   }
 
   handleContentChanged = (content, numDefaultEndScenarios) => {
@@ -167,6 +171,7 @@ export default class Editor extends React.Component {
             getSemantics={ this.props.getSemantics }
             onHighlight={ this.handleHighlight }
             highlight={ this.state.highlight }
+            onlyThisBall={ this.state.onlyThisBall }
           />
           <Toolbar
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
