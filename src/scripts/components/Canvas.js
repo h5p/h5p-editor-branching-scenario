@@ -244,7 +244,7 @@ export default class Canvas extends React.Component {
     }
     else if (!this.state.editing) {
       // Put new node or put existing node at new place
-      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
+      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, draggable.props.inserting.defaults);
     }
     else {
       // Add next element in editor
@@ -257,12 +257,11 @@ export default class Canvas extends React.Component {
     }
   }
 
-  handleDropzoneClick = (nextContentId, parent, alternative) => {
+  handleDropzoneClick = (nextContentId, parent, alternative, defaults) => {
     if (this.state.placing === null) {
       return;
     }
-
-    this.placeInTree(this.state.placing, nextContentId, parent, alternative);
+    this.placeInTree(this.state.placing, nextContentId, parent, alternative, defaults);
   }
 
   handleEditContent = (id) => {
@@ -428,8 +427,11 @@ export default class Canvas extends React.Component {
    * @param {number} nextContentId ID of next node.
    * @param {number} parent ID of the parent node.
    * @param {number} alternative Number of dropzone alternative.
+   * @param {object} [defaults] Default values for content.
+   * @param {object} [defaults.params] Content params.
+   * @param {object} [defaults.specific] Specific form options.
    */
-  placeInTree(id, nextContentId, parent, alternative) {
+  placeInTree(id, nextContentId, parent, alternative, defaults = {}) {
     this.setState(prevState => {
       let newState = {
         placing: null,
@@ -438,9 +440,14 @@ export default class Canvas extends React.Component {
         content: [...prevState.content],
       };
 
+      defaults.specific = defaults.specific || {};
+
       // Handle inserting of new node
       if (id === -1) {
-        newState.content.push(this.getNewContentParams());
+        const defaultParams = this.getNewContentParams();
+        defaultParams.type.params = defaults.params || defaultParams.type.params;
+        defaultParams.contentTitle = defaults.specific.contentTitle || defaultParams.contentTitle;
+        newState.content.push(defaultParams);
         id = newState.content.length - 1;
         newState.editing = id;
         if (id === 0) {
@@ -558,7 +565,7 @@ export default class Canvas extends React.Component {
             top: position.y + 'px'
           }
         }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num) }
+        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num, this.props.inserting.defaults) }
       />
     );
   }
