@@ -30,8 +30,7 @@ export default class EditorOverlay extends React.Component {
     this.validAlternatives = this.props.content.map((content, index) => {
       return Object.assign({}, content, {contentId: index});
     }).filter((alt, index) => {
-      return alt.type.library.split(' ')[0] !== 'H5P.BranchingQuestion' &&
-        this.props.id !== index;
+      return this.props.id !== index;
     });
 
     this.addBranchingOptionsToEditor();
