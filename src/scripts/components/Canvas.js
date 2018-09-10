@@ -7,6 +7,7 @@ import Dropzone from './Dropzone.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
+import BlockInteractionOverlay from './BlockInteractionOverlay';
 
 /*global H5P*/
 export default class Canvas extends React.Component {
@@ -61,7 +62,7 @@ export default class Canvas extends React.Component {
       deleting: null,
       inserting: null,
       editing: null,
-      editorOverlayVisible: false,
+      freshContent: false,
       editorContents: {
         top: {
           icon: '',
@@ -167,6 +168,7 @@ export default class Canvas extends React.Component {
         deleting: id,
         dialog: this.buildDialog(id, this.l10n.dialogReplace)
       });
+      this.props.onDropped();
     }
     else {
       // Start placing
@@ -234,6 +236,7 @@ export default class Canvas extends React.Component {
       this.setState({
         placing: null
       });
+      this.props.onDropped();
       return;
     }
 
@@ -248,13 +251,13 @@ export default class Canvas extends React.Component {
       return;
     }
 
-    if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
+    if (dropzone instanceof Draggable && !this.state.editing) {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
     }
     else if (!this.state.editing) {
       // Put new node or put existing node at new place
-      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
+      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, draggable.props.inserting.defaults);
     }
     else {
       // Add next element in editor
@@ -267,12 +270,11 @@ export default class Canvas extends React.Component {
     }
   }
 
-  handleDropzoneClick = (nextContentId, parent, alternative) => {
+  handleDropzoneClick = (nextContentId, parent, alternative, defaults) => {
     if (this.state.placing === null) {
       return;
     }
-
-    this.placeInTree(this.state.placing, nextContentId, parent, alternative);
+    this.placeInTree(this.state.placing, nextContentId, parent, alternative, defaults);
   }
 
   handleEditContent = (id) => {
@@ -287,12 +289,8 @@ export default class Canvas extends React.Component {
    * @param {number} id Content id.
    */
   handleCopyContent = (id) => {
-    const content = this.state.content[id];
-    H5P.clipboardify({
-      library: content.type.library,
-      params: content.type.params,
-      metadata: content.type.metadata
-    });
+    const clipboardItem = new H5P.ClipboardItem(this.state.content[id], 'type', 'H5PEditor.BranchingScenario');
+    H5P.clipboardify(clipboardItem);
   }
 
   handleDeleteContent = (id) => {
@@ -423,6 +421,7 @@ export default class Canvas extends React.Component {
       if (content.type.params
         && content.type.params.branchingQuestion
         && content.type.params.branchingQuestion.alternatives
+        && !content.type.params.branchingQuestion.alternatives.some(alt => alt.nextContentId === -1)
       ) {
         content.type.params.branchingQuestion.alternatives = (content.type.params.branchingQuestion.alternatives || []);
         content.type.params.branchingQuestion.alternatives.push({
@@ -442,8 +441,11 @@ export default class Canvas extends React.Component {
    * @param {number} nextContentId ID of next node.
    * @param {number} parent ID of the parent node.
    * @param {number} alternative Number of dropzone alternative.
+   * @param {object} [defaults] Default values for content.
+   * @param {object} [defaults.params] Content params.
+   * @param {object} [defaults.specific] Specific form options.
    */
-  placeInTree(id, nextContentId, parent, alternative) {
+  placeInTree(id, nextContentId, parent, alternative, defaults = {}) {
     this.setState(prevState => {
       let newState = {
         placing: null,
@@ -452,9 +454,15 @@ export default class Canvas extends React.Component {
         content: [...prevState.content],
       };
 
+      defaults.specific = defaults.specific || {};
+
       // Handle inserting of new node
       if (id === -1) {
-        newState.content.push(this.getNewContentParams());
+        newState.freshContent = true;
+        const defaultParams = this.getNewContentParams();
+        defaultParams.type.params = defaults.params || defaultParams.type.params;
+        defaultParams.contentTitle = defaults.specific.contentTitle || defaultParams.contentTitle;
+        newState.content.push(defaultParams);
         id = newState.content.length - 1;
         newState.editing = id;
         if (id === 0) {
@@ -464,6 +472,9 @@ export default class Canvas extends React.Component {
           // This is the first node added, nothing more needs to be done.
           return newState;
         }
+      }
+      else {
+        newState.freshContent = false;
       }
 
       // When placing after a leaf node keep track of it so we can update it
@@ -548,6 +559,7 @@ export default class Canvas extends React.Component {
         this.attachChild(newState.content[id], nextContentId);
       }
 
+      this.props.onDropped();
       return newState;
     });
   }
@@ -557,7 +569,9 @@ export default class Canvas extends React.Component {
     if (num === undefined) {
       num = 0;
     }
-    return ( !this.state.editorOverlayVisible &&
+
+    const defaults = (this.props.inserting) ? this.props.inserting.defaults : {};
+    return ( !this.state.editing &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
@@ -572,7 +586,7 @@ export default class Canvas extends React.Component {
             top: position.y + 'px'
           }
         }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num) }
+        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num, defaults) }
       />
     );
   }
@@ -979,8 +993,9 @@ export default class Canvas extends React.Component {
         const nextContentId = prevState.content[prevState.deleting].nextContentId;
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
+        newState.editing = prevState.deleting;
       }
-      else if (prevState.editing !== null && prevState.placing === null || prevState.deleting !== null) {
+      else if (prevState.editing !== null && prevState.freshContent === true || prevState.deleting !== null) {
         // Delete node
         removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
@@ -1170,6 +1185,7 @@ export default class Canvas extends React.Component {
     }
     window.removeEventListener('mouseup', this.handleMouseUp);
     window.removeEventListener('mousemove', this.handleMouseMove);
+    this.props.onDropped();
   }
 
   handleMouseMove = (event) => {
@@ -1280,14 +1296,16 @@ export default class Canvas extends React.Component {
     const tree = this.renderTree(0);
 
     // Usful for debugging tree rendering
-    //this.logNodes('render');
+    // this.logNodes('render');
 
     const interaction = this.state.content[this.state.editing];
 
     return (
       <div className="wrapper">
-
-        { !! this.props.inserting &&
+        { (this.state.deleting !== null || this.state.editing !== null) &&
+          <BlockInteractionOverlay />
+        }
+        { !! this.props.inserting && this.state.placing &&
           <Draggable
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
@@ -1302,7 +1320,6 @@ export default class Canvas extends React.Component {
             { this.props.inserting.library.title }
           </Draggable>
         }
-
         <div className="canvas">
           <div
             className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }

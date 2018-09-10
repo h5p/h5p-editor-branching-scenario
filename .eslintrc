@@ -1,4 +1,8 @@
 {
+  "globals": {
+    "H5P": true,
+    "H5PEditor": true
+  },
   "env": {
     "browser": true,
     "es6": true
@@ -13,7 +17,7 @@
     "sourceType": "module"
   },
   "plugins": [
-    "babel", 
+    "babel",
     "react"
   ],
   "rules": {

@@ -1,8 +1,4 @@
-@font-face {
-  font-family: "BSFont";
-  src: url('../../styles/fonts/bs.eot');
-  src: url('../../styles/fonts/bs.woff');
-}
+@import '../../styles/main.scss';
 
 .content-type-menu {
   display: inline-block;
@@ -109,6 +105,20 @@
 
   li.branching-question:before {
     content: '\E902';
+  }
+
+  li.reuse-question {
+    &.disabled {
+      border: initial;
+      background: #2B2F36;
+      opacity: 0.3;
+      cursor: auto;
+    }
+
+    &:before {
+      font-family: "CopyPaste";
+      content: $icon-paste;
+    }
   }
 
   li.greyout {

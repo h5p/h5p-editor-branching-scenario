@@ -144,6 +144,16 @@ export default class Editor extends React.Component {
     });
   }
 
+
+  /**
+   * Handle inserting in Canvas
+   */
+  handleInsertingDone = () => {
+    this.setState({
+      inserting: null
+    });
+  }
+
   render() {
     return (
       <Tabs className="tab-view-wrapper"
@@ -173,6 +183,7 @@ export default class Editor extends React.Component {
             onHighlight={ this.handleHighlight }
             highlight={ this.state.highlight }
             onlyThisBall={ this.state.onlyThisBall }
+            onDropped={ this.handleInsertingDone }
           />
           <Toolbar
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
