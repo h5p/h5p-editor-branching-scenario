@@ -418,6 +418,7 @@ export default class Canvas extends React.Component {
       if (content.type.params
         && content.type.params.branchingQuestion
         && content.type.params.branchingQuestion.alternatives
+        && !content.type.params.branchingQuestion.alternatives.some(alt => alt.nextContentId === -1)
       ) {
         content.type.params.branchingQuestion.alternatives = (content.type.params.branchingQuestion.alternatives || []);
         content.type.params.branchingQuestion.alternatives.push({
