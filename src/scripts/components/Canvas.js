@@ -168,6 +168,7 @@ export default class Canvas extends React.Component {
         deleting: id,
         dialog: this.buildDialog(id, this.l10n.dialogReplace)
       });
+      this.props.onDropped();
     }
     else {
       // Start placing
@@ -991,6 +992,7 @@ export default class Canvas extends React.Component {
         const nextContentId = prevState.content[prevState.deleting].nextContentId;
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
+        newState.editing = prevState.deleting;
       }
       else if (prevState.editing !== null && prevState.freshContent === true || prevState.deleting !== null) {
         // Delete node
