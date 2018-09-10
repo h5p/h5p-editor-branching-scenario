@@ -1194,7 +1194,6 @@ export default class Canvas extends React.Component {
           },
           offset: this.state.panning
         };
-        // TODO: Disable text select!
       }
       else {
         return; // Not passed threshold value yet

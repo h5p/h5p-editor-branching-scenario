@@ -211,7 +211,6 @@ export default class Draggable extends React.Component {
       width: this.props.width + 'px'
     };
 
-    // TODO: Show tooltip on hover
     const draggableToolTip = this.state.showToolTip ? (
       <div className='draggable-tooltip'/>
     ) : '';
