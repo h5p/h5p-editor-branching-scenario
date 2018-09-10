@@ -1287,7 +1287,7 @@ export default class Canvas extends React.Component {
 
     return (
       <div className="wrapper">
-        { (this.state.deleting || this.state.editing) &&
+        { (this.state.deleting !== null || this.state.editing !== null) &&
           <BlockInteractionOverlay />
         }
         { !! this.props.inserting && this.state.placing &&
