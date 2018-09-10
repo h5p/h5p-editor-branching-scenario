@@ -136,11 +136,11 @@
 
 .dark .draggable {
   box-shadow: 0 0 4px 1px #1773DA;
+  pointer-events: none;
 }
 .dark .fade {
   opacity: 0.15;
   box-shadow: none;
-  pointer-events: none;
 }
 
 .click-overlay {
