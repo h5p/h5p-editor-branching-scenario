@@ -1170,6 +1170,7 @@ export default class Canvas extends React.Component {
     }
     window.removeEventListener('mouseup', this.handleMouseUp);
     window.removeEventListener('mousemove', this.handleMouseMove);
+    this.props.onDropped();
   }
 
   handleMouseMove = (event) => {
