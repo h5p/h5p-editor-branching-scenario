@@ -7,6 +7,7 @@ import Dropzone from './Dropzone.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
+import BlockInteractionOverlay from './BlockInteractionOverlay';
 
 /*global H5P*/
 export default class Canvas extends React.Component {
@@ -1285,7 +1286,9 @@ export default class Canvas extends React.Component {
 
     return (
       <div className="wrapper">
-
+        { (this.state.deleting || this.state.editing) &&
+          <BlockInteractionOverlay />
+        }
         { !! this.props.inserting && this.state.placing &&
           <Draggable
             inserting={ this.props.inserting }
@@ -1300,7 +1303,6 @@ export default class Canvas extends React.Component {
             { this.props.inserting.library.title }
           </Draggable>
         }
-
         <div className="canvas">
           <div
             className="treewrap"
