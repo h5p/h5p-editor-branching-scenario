@@ -710,7 +710,7 @@ export default class Canvas extends React.Component {
           <Draggable
             key={ id }
             id={ id }
-            highlight={ highlightCurrentNode }
+            fade={ this.props.highlight !== null && !highlightCurrentNode }
             ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
             position={ position }
             width={ this.state.nodeSpecs.width }
@@ -723,6 +723,7 @@ export default class Canvas extends React.Component {
             onDeleteContent={ this.handleDeleteContent }
             disabled={ contentIsBranching }
             tooltip={ Canvas.getTooltip(content) }
+            scale={ this.state.scale }
           >
             { libraryTitle }
           </Draggable>
@@ -738,11 +739,12 @@ export default class Canvas extends React.Component {
 
       // Add vertical line above (except for top node)
       if (content && id !== 0 && drawAboveLine) {
+        const compensation = (parentIsBranching ? 3 : 0);
         nodes.push(
-          <div key={ id + '-vabove' } className="vertical-line" style={ {
+          <div key={ id + '-vabove' } className={ 'vertical-line 1' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
-            top: (position.y - aboveLineHeight) + 'px',
-            height: aboveLineHeight + 'px'
+            top: (position.y - aboveLineHeight + compensation) + 'px',
+            height: (aboveLineHeight - compensation) + 'px'
           } }/>
         );
       }
@@ -755,7 +757,7 @@ export default class Canvas extends React.Component {
         content.type.params.branchingQuestion.alternatives.length > 1) {
         // Add vertical line below
         nodes.push(
-          <div key={ id + '-vbelow' } className="vertical-line" style={ {
+          <div key={ id + '-vbelow' } className={ 'vertical-line 2' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
             top: (position.y + this.state.nodeSpecs.height) + 'px',
             height: (this.state.nodeSpecs.spacing.y / 2) + 'px'
@@ -764,21 +766,20 @@ export default class Canvas extends React.Component {
 
         // Add horizontal line below
         nodes.push(
-          <div key={ id + '-hbelow' } className="horizontal-line" style={ {
+          <div key={ id + '-hbelow' } className={ 'horizontal-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: (x + (children[0] < 0 ? this.state.dzSpecs.width / 2 : this.state.nodeSpecs.width / 2)) + 'px',
             top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
-            width: subtree.dX + 'px'
+            width: (subtree.dX + 2) + 'px'
           } }/>
         );
       }
 
       if (parentIsBranching) {
-        const lengthMultiplier = (branch.length > 1 ? 2 : 2.5);
         nodes.push(
-          <div key={ parent + '-vabovebs-' + num } className="vertical-line" style={ {
+          <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line 3' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
-            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * lengthMultiplier)) + 'px',
-            height: (this.state.nodeSpecs.spacing.y * lengthMultiplier) + 'px'
+            top: ((position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 2 : 0)) + 'px',
+            height: (this.state.nodeSpecs.spacing.y * (branch.length > 1 ? 0.375 : 1)) + 'px'
           } }/>
         );
 
@@ -799,9 +800,9 @@ export default class Canvas extends React.Component {
             alternativeBallClasses += ' endscreenCustom';
           }
         }
-        if (this.props.highlight !== null && this.props.highlight === id && !highlightCurrentNode) {
-          if (this.props.onlyThisBall === null || this.props.onlyThisBall === key) {
-            alternativeBallClasses += ' on-top-of-things';
+        if (this.props.highlight !== null && (this.props.highlight !== id || highlightCurrentNode)) {
+          if (this.props.onlyThisBall === null || this.props.onlyThisBall !== key) {
+            alternativeBallClasses += ' fade';
           }
         }
 
@@ -1015,16 +1016,13 @@ export default class Canvas extends React.Component {
   componentDidUpdate() {
     // Center the tree
     if (this.state.center && this.refs.tree && this['draggable-1']) {
-      const treeClientRect = this.refs.treewrap.getBoundingClientRect();
-      const center = (treeClientRect.width / 2) - ((this.state.nodeSpecs.width * this.state.scale) / 2);
+      const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.state.scale) / 2);
       this.setState({
         center: false,
         panning: {
           x: (center - (this['draggable-0'].props.position.x * this.state.scale)),
-          y: 0,
-        },
-        width: treeClientRect.width,
-        height: treeClientRect.height
+          y: 0
+        }
       });
     }
   }
@@ -1156,7 +1154,7 @@ export default class Canvas extends React.Component {
   }
 
   handleMouseDown = (event) => {
-    if (event.button !== 0 || this.props.highlight) {
+    if (event.button !== 0 || event.defaultPrevented || this.props.highlight) {
       return; // Only handle left click
     }
 
@@ -1179,6 +1177,11 @@ export default class Canvas extends React.Component {
       this.setState({
         moving: null
       });
+      document.body.style.userSelect = ''; // Enable text select
+    }
+    else {
+      // Turn off highlight on "click"
+      this.props.onHighlight(null);
     }
     window.removeEventListener('mouseup', this.handleMouseUp);
     window.removeEventListener('mousemove', this.handleMouseMove);
@@ -1203,6 +1206,7 @@ export default class Canvas extends React.Component {
           },
           offset: this.state.panning
         };
+        document.body.style.userSelect = 'none'; // Disable text select
       }
       else {
         return; // Not passed threshold value yet
@@ -1311,13 +1315,14 @@ export default class Canvas extends React.Component {
             contentClass={ this.props.inserting.library.title.replace(/ +/g, '') }
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
+            scale={ this.state.scale }
           >
             { this.props.inserting.library.title }
           </Draggable>
         }
         <div className="canvas">
           <div
-            className="treewrap"
+            className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
             onMouseDown={ this.handleMouseDown }
             ref={ 'treewrap' }
             style={ {
@@ -1334,15 +1339,6 @@ export default class Canvas extends React.Component {
               } }
             >
               { tree.nodes }
-              <div
-                className={ 'dark-overlay' + (this.props.highlight !== null ? ' visible' : '') }
-                style={ {
-                  width: this.state.width + 'px',
-                  height: this.state.height + 'px',
-                  top: -this.state.panning.y + 'px',
-                  left: -this.state.panning.x + 'px'
-                } }
-              />
             </div>
           </div>
           { !tree.nodes.length &&
