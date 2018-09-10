@@ -21,10 +21,17 @@
   position: relative;
   width: 100%;
   height: 100%;
+  &.dark {
+    background-color: rgba(0,0,0,0.85);
+  }
 }
 .nodetree {
   position: absolute;
   transform-origin: top left;
+  backface-visibility: hidden;
+}
+.nodetree > * {
+  transition: opacity 50ms linear;
 }
 
 .start-canvas {
@@ -125,4 +132,22 @@
   max-width: 30em;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dark .draggable {
+  box-shadow: 0 0 4px 1px #1773DA;
+}
+.dark .fade {
+  opacity: 0.15;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.click-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 22;
 }

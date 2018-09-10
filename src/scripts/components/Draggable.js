@@ -175,6 +175,7 @@ export default class Draggable extends React.Component {
       x: event.pageX - offset.x,
       y: event.pageY - offset.y
     };
+//    (1/this.props.scale)
 
     this.setState(newState);
     this.props.onMove();
@@ -201,6 +202,7 @@ export default class Draggable extends React.Component {
     if (event.target !== this.contentMenuButton.current) {
       this.props.onPlacing();
     }
+    event.preventDefault();
   }
 
   render() {
@@ -234,8 +236,8 @@ export default class Draggable extends React.Component {
       contentMenuButtonClass += ' active';
     }
 
-    if (this.props.highlight) {
-      elementClass += ' on-top-of-things';
+    if (this.props.fade) {
+      elementClass += ' fade';
     }
 
     const contentMenuButton = dropped ? (
@@ -305,5 +307,6 @@ Draggable.propTypes = {
   contentClass: PropTypes.string,
   content: PropTypes.string,
   inserting: PropTypes.object,
-  highlight: PropTypes.bool
+  fade: PropTypes.bool,
+  scale: PropTypes.number
 };
