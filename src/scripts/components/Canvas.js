@@ -234,6 +234,7 @@ export default class Canvas extends React.Component {
       this.setState({
         placing: null
       });
+      this.props.onDropped();
       return;
     }
 
@@ -1285,7 +1286,7 @@ export default class Canvas extends React.Component {
     return (
       <div className="wrapper">
 
-        { !! this.props.inserting &&
+        { !! this.props.inserting && this.state.placing &&
           <Draggable
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
