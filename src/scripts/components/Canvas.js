@@ -554,6 +554,7 @@ export default class Canvas extends React.Component {
         this.attachChild(newState.content[id], nextContentId);
       }
 
+      this.props.onDropped();
       return newState;
     });
   }
@@ -563,6 +564,8 @@ export default class Canvas extends React.Component {
     if (num === undefined) {
       num = 0;
     }
+
+    const defaults = (this.props.inserting) ? this.props.inserting.defaults : {};
     return ( !this.state.editorOverlayVisible &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
@@ -578,7 +581,7 @@ export default class Canvas extends React.Component {
             top: position.y + 'px'
           }
         }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num, this.props.inserting.defaults) }
+        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num, defaults) }
       />
     );
   }
