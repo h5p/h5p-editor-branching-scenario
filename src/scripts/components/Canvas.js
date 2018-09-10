@@ -1279,7 +1279,7 @@ export default class Canvas extends React.Component {
     const tree = this.renderTree(0);
 
     // Usful for debugging tree rendering
-    //this.logNodes('render');
+    // this.logNodes('render');
 
     const interaction = this.state.content[this.state.editing];
 

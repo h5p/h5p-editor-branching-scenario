@@ -212,7 +212,6 @@ export default class ContentTypeMenu extends React.Component {
           ref={ 'reuse-button' }
           className={ 'reuse-question' + ((!this.state.canPaste.canPaste) ? ' disabled' : '') }
           title="Add from clipboard"
-          // TODO: Add toast here when disabled
           onMouseDown={ event => this.handleMouseDown(event, 'reuse') }
         >
           From a clipboard
