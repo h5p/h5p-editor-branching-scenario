@@ -62,6 +62,7 @@ export default class Canvas extends React.Component {
       deleting: null,
       inserting: null,
       editing: null,
+      freshContent: false,
       editorOverlayVisible: false,
       editorContents: {
         top: {
@@ -457,6 +458,7 @@ export default class Canvas extends React.Component {
 
       // Handle inserting of new node
       if (id === -1) {
+        newState.freshContent = true;
         const defaultParams = this.getNewContentParams();
         defaultParams.type.params = defaults.params || defaultParams.type.params;
         defaultParams.contentTitle = defaults.specific.contentTitle || defaultParams.contentTitle;
@@ -470,6 +472,9 @@ export default class Canvas extends React.Component {
           // This is the first node added, nothing more needs to be done.
           return newState;
         }
+      }
+      else {
+        newState.freshContent = false;
       }
 
       // When placing after a leaf node keep track of it so we can update it
@@ -988,7 +993,7 @@ export default class Canvas extends React.Component {
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
       }
-      else if (prevState.editing !== null && prevState.placing === null || prevState.deleting !== null) {
+      else if (prevState.editing !== null && prevState.freshContent === true || prevState.deleting !== null) {
         // Delete node
         removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
