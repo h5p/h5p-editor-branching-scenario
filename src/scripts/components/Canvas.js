@@ -63,7 +63,6 @@ export default class Canvas extends React.Component {
       inserting: null,
       editing: null,
       freshContent: false,
-      editorOverlayVisible: false,
       editorContents: {
         top: {
           icon: '',
@@ -251,7 +250,7 @@ export default class Canvas extends React.Component {
       return;
     }
 
-    if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
+    if (dropzone instanceof Draggable && !this.state.editing) {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
     }
@@ -571,7 +570,7 @@ export default class Canvas extends React.Component {
     }
 
     const defaults = (this.props.inserting) ? this.props.inserting.defaults : {};
-    return ( !this.state.editorOverlayVisible &&
+    return ( !this.state.editing &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
