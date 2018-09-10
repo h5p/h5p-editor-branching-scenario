@@ -182,6 +182,9 @@ export default class Draggable extends React.Component {
   }
 
   prepareMouseMove = (element) => {
+    if (this.props.highlight) {
+      return;
+    }
     window.addEventListener('mouseup', this.handleMouseUp);
     window.addEventListener('mousemove', this.handleMouseMove);
     return {
@@ -285,7 +288,9 @@ export default class Draggable extends React.Component {
           <div className={ 'draggable-label ' + this.props.contentClass }>
             { this.props.children }
           </div>
-          { contentMenuButton }
+          { !this.props.highlight &&
+            contentMenuButton
+          }
         </div>
         { this.props.tooltip &&
           <div className="dark-tooltip">

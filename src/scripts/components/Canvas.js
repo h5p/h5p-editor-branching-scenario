@@ -1015,13 +1015,16 @@ export default class Canvas extends React.Component {
   componentDidUpdate() {
     // Center the tree
     if (this.state.center && this.refs.tree && this['draggable-1']) {
-      const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.state.scale) / 2);
+      const treeClientRect = this.refs.treewrap.getBoundingClientRect();
+      const center = (treeClientRect.width / 2) - ((this.state.nodeSpecs.width * this.state.scale) / 2);
       this.setState({
         center: false,
         panning: {
           x: (center - (this['draggable-0'].props.position.x * this.state.scale)),
-          y: 0
-        }
+          y: 0,
+        },
+        width: treeClientRect.width,
+        height: treeClientRect.height
       });
     }
   }
@@ -1153,7 +1156,7 @@ export default class Canvas extends React.Component {
   }
 
   handleMouseDown = (event) => {
-    if (event.button !== 0) {
+    if (event.button !== 0 || this.props.highlight) {
       return; // Only handle left click
     }
 
@@ -1331,7 +1334,15 @@ export default class Canvas extends React.Component {
               } }
             >
               { tree.nodes }
-              <div className={ 'dark-overlay' + (this.props.highlight !== null ? ' visible' : '') }/>
+              <div
+                className={ 'dark-overlay' + (this.props.highlight !== null ? ' visible' : '') }
+                style={ {
+                  width: this.state.width + 'px',
+                  height: this.state.height + 'px',
+                  top: -this.state.panning.y + 'px',
+                  left: -this.state.panning.x + 'px'
+                } }
+              />
             </div>
           </div>
           { !tree.nodes.length &&
