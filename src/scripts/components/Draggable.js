@@ -1,127 +1,41 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+
 import './Draggable.scss';
-import SubMenu from './SubMenu.js';
 
 export default class Draggable extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = props.inserting ? this.prepareMouseMove(props.inserting) : {};
-    this.state.position = this.props.position;
-    this.state.contentMenuActive = false;
-
-    if (props.inserting) {
-      this.libraryName = this.props.inserting.target.dataset.libraryName;
-    }
-    this.contentMenu = React.createRef();
-    this.contentMenuButton = React.createRef();
+    this.state = props.started ? this.prepareMouseMove(props.started) : {
+      moving: null
+    };
   }
 
-  componentDidMount = () => {
-    window.addEventListener('mousedown', this.handleWindowMouseDown, false);
-  }
-
-  componentWillUnmount = () => {
-    window.removeEventListener('mousedown', this.handleWindowMouseDown, false);
-  }
-
-  handleWindowMouseDown = (e) => {
-    if (e.target === this.contentMenuButton.current ||
-      e.target.className === 'edit-content' ||
-      e.target.className === 'copy-content' ||
-      e.target.className === 'delete-content'
-    ) {
-      return;
+  handleMouseDown = (event) => {
+    if (event.button !== 0 || this.props.disabled || event.defaultPrevented) {
+      return; // Only handle left click
     }
 
-    this.setState({
-      contentMenuActive: false
-    });
-  }
+    // Prevent the default behavior
+    event.preventDefault();
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.position && (
-      nextProps.position.x !== this.state.position.x ||
-        nextProps.position.y !== this.state.position.y)) {
-      this.setState({
-        position: {
-          x: nextProps.position.x,
-          y: nextProps.position.y
-        }
-      });
+    this.setState(this.prepareMouseMove({
+      startX: event.pageX,
+      startY: event.pageY
+    }));
+
+    if (this.props.onStarted) {
+      this.props.onStarted();
     }
   }
 
-  getPoints() {
-    const raw = this.refs.element.getBoundingClientRect();
-    return [{
-      x: raw.x,
-      y: raw.y
-    }, {
-      x: raw.x + raw.width,
-      y: raw.y + raw.height
-    }];
-  }
-
-  overlap(points) {
-    const local = this.getPoints();
-    return !(points[1].y < local[0].y ||
-      points[0].y > local[1].y ||
-      points[1].x < local[0].x ||
-      points[0].x > local[1].x );
-  }
-
-  /**
-   * Get content class name.
-   *
-   * @return {string} Content class name.
-   */
-  getContentClass() {
-    return this.props.contentClass;
-  }
-
-  /**
-   * Get intersecting area.
-   *
-   * @param {object[]} edges Edges of other item: [0] = upper left corner, [1] = lower right corner
-   * @param {float} edges.x X coordinate.
-   * @param {float} edges.y Y coordinate.
-   * @param {float} Intersection area.
-   */
-  intersection(edges) {
-    const local = this.getPoints();
-
-    const intersectionX = Math.min(local[1].x, edges[1].x) - Math.max(local[0].x, edges[0].x);
-    if (intersectionX <= 0) {
-      return 0;
-    }
-
-    const intersectionY = Math.min(local[1].y, edges[1].y) - Math.max(local[0].y, edges[0].y);
-    if (intersectionY <= 0) {
-      return 0;
-    }
-
-    return intersectionX * intersectionY;
-  }
-
-  highlight() {
-    this.refs.element.classList.add('highlight');
-  }
-
-  dehighlight() {
-    this.refs.element.classList.remove('highlight');
-  }
-
-  handleMouseUp = () => {
-    if (this.state.moving.started) {
-      this.setState({
-        moving: null
-      });
-      this.props.onDropped();
-    }
-    window.removeEventListener('mouseup', this.handleMouseUp);
-    window.removeEventListener('mousemove', this.handleMouseMove);
+  prepareMouseMove = (element) => {
+    window.addEventListener('mouseup', this.handleMouseUp);
+    window.addEventListener('mousemove', this.handleMouseMove);
+    return {
+      moving: element
+    };
   }
 
   handleMouseMove = (event) => {
@@ -142,7 +56,7 @@ export default class Draggable extends React.Component {
           },
           offset: this.props.position
         };
-
+        document.body.style.userSelect = 'none'; // Disable text select
       }
       else {
         return; // Not passed threshold value yet
@@ -155,8 +69,8 @@ export default class Draggable extends React.Component {
     // Use newest offset if possible
     let offset = (newState.offset ? newState.offset : this.state.offset);
 
-    // Scale mouse movement to fit with Canvas scale
-    const scale = (1 / this.props.scale);
+    // Scale mouse movement to fit with external scale
+    const scale = this.props.scale ? (1 / this.props.scale) : 1;
 
     // Update element position
     newState.position = {
@@ -164,135 +78,54 @@ export default class Draggable extends React.Component {
       y: ((event.pageY - this.state.moving.startY) * scale) + offset.y
     };
 
+    if (this.props.limits) {
+      // Enforce limits for the dragging
+      this.props.limits(newState.position);
+    }
+
     this.setState(newState);
-    this.props.onMove();
+    if (this.props.onMoved) {
+      this.props.onMoved(newState.position);
+    }
   }
 
-  prepareMouseMove = (element) => {
-    window.addEventListener('mouseup', this.handleMouseUp);
-    window.addEventListener('mousemove', this.handleMouseMove);
-    return {
-      moving: element
-    };
+  handleMouseUp = () => {
+    const moved = this.state.moving.started;
+    if (moved) {
+      this.setState({
+        moving: null
+      });
+      document.body.style.userSelect = ''; // Enable text select again
+    }
+    window.removeEventListener('mouseup', this.handleMouseUp);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+
+    // Trigger stopped event when we're done moving
+    if (this.props.onStopped) {
+      this.props.onStopped(moved);
+    }
   }
 
-  handleMouseDown = (event) => {
-    if (event.button !== 0 || this.props.disabled) {
-      return; // Only handle left click
-    }
-
-    this.setState(this.prepareMouseMove({
-      startX: event.pageX,
-      startY: event.pageY
-    }));
-
-    if (event.target !== this.contentMenuButton.current && this.state.contentMenuActive === false) {
-      this.props.onPlacing();
-    }
-    event.preventDefault();
+  getBoundingClientRect = () => {
+    return this.refs.element.getBoundingClientRect();
   }
 
   render() {
-    const draggableStyle = {
-      left: this.state.position.x + 'px',
-      top: this.state.position.y + 'px',
-      width: this.props.width + 'px'
-    };
-
-    const draggableToolTip = this.state.showToolTip ? (
-      <div className='draggable-tooltip'/>
-    ) : '';
-
-    // Determine element class depending on state
-    let elementClass = this.props.contentClass + ' draggable';
-    let dropped = true;
-    if (this.state.moving) {
-      elementClass += ' selected';
-
-      if (this.state.moving.started) {
-        elementClass += ' dragging';
-        elementClass += ' active';
-        dropped = false;
-      }
-    }
-
-    let contentMenuButtonClass = 'content-menu-button';
-    if (this.state.contentMenuActive) {
-      elementClass += ' active';
-      contentMenuButtonClass += ' active';
-    }
-
-    if (this.props.fade) {
-      elementClass += ' fade';
-    }
-
-    const contentMenuButton = dropped ? (
-      <div
-        ref={ this.contentMenuButton }
-        className={ contentMenuButtonClass }
-        onMouseDown={() => {
-          this.setState(prevState => {
-            return {
-              contentMenuActive: !prevState.contentMenuActive
-            };
-          });
-        }}
-      />
-    ) : '';
-
-    const contentMenu = this.state.contentMenuActive ? (
-      <SubMenu
-        ref={ this.contentMenu }
-        onPreview={ () => {
-          this.setState({contentMenuActive: false});
-        }}
-        onEdit={ () => {
-          this.setState({contentMenuActive: false});
-          this.props.onEditContent(this.props.id);
-        }}
-        onCopy={ () => {
-          this.setState({contentMenuActive: false});
-          this.props.onCopyContent(this.props.id);
-        }}
-        onDelete={ () => {
-          this.setState({contentMenuActive: false});
-          this.props.onDeleteContent(this.props.id);
-        }}
-      />
-    ) : '';
-
     return (
-      <div
-        ref={ 'element' }
-        style={ draggableStyle }
-        onMouseDown={ this.handleMouseDown }
-        onMouseLeave={ () => {this.setState({showToolTip: false});}}
-        className={ elementClass }>
-        { draggableToolTip }
-        <div className='draggable-wrapper'>
-          <div className={ 'draggable-label ' + this.props.contentClass }>
-            { this.props.children }
-          </div>
-          { contentMenuButton }
-        </div>
-        { this.props.tooltip &&
-          <div className="dark-tooltip">
-            <div className="dark-text-wrap">{ this.props.tooltip }</div>
-          </div>
-        }
-        { contentMenu }
+      <div ref='element' className={ this.props.className } onMouseDown={ this.handleMouseDown } style={ this.props.style }>
+        { this.props.children }
       </div>
     );
   }
 }
 
 Draggable.propTypes = {
-  yPos: PropTypes.number,
-  xPos: PropTypes.number,
-  width: PropTypes.number,
-  contentClass: PropTypes.string,
-  content: PropTypes.string,
-  inserting: PropTypes.object,
-  fade: PropTypes.bool,
-  scale: PropTypes.number
+  className: PropTypes.string,
+  position: PropTypes.object,
+  style: PropTypes.object,
+  disabled: PropTypes.bool,
+  limits: PropTypes.func,
+  onStarted: PropTypes.func,
+  onMoved: PropTypes.func,
+  onStopped: PropTypes.func
 };

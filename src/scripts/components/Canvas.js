@@ -4,6 +4,7 @@ import './Canvas.scss';
 import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
+import Content from './Content.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
@@ -73,7 +74,7 @@ export default class Canvas extends React.Component {
         content: {
         }
       },
-      nodeSpecs: { // TODO: Get from DOM ?
+      nodeSpecs: {
         width: 121,
         height: 32,
         spacing: {
@@ -88,10 +89,6 @@ export default class Canvas extends React.Component {
       content: this.props.content,
       dialog: this.l10n.dialogDelete,
       panning: {
-        x: 0,
-        y: 0
-      },
-      offset: {
         x: 0,
         y: 0
       },
@@ -182,7 +179,7 @@ export default class Canvas extends React.Component {
   /**
    * Get intersections between dropzones and a draggable.
    *
-   * @param {Draggable} draggable Draggable object.
+   * @param {Content} draggable
    * @return {object[]} intersecting objects ordered by intersecting area in decreasing order
    */
   getIntersections(draggable) {
@@ -219,10 +216,10 @@ export default class Canvas extends React.Component {
       }
 
       if (dropzone === intersections[0]) {
-        dropzone.highlight();
+        //dropzone.highlight(); TODO: Use state
       }
       else {
-        dropzone.dehighlight();
+        //dropzone.dehighlight(); TODO: Use state
       }
     });
   }
@@ -244,14 +241,14 @@ export default class Canvas extends React.Component {
     const dropzone = intersections[0];
 
     // BranchingQuestion shall not be replacable by anything
-    if (dropzone instanceof Draggable && dropzone.getContentClass() === 'BranchingQuestion') {
+    if (dropzone instanceof Content && dropzone.getContentClass() === 'BranchingQuestion') {
       this.setState({
         placing: null
       });
       return;
     }
 
-    if (dropzone instanceof Draggable && !this.state.editing) {
+    if (dropzone instanceof Content && !this.state.editing) {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
     }
@@ -707,7 +704,7 @@ export default class Canvas extends React.Component {
 
         // Draw node
         nodes.push(
-          <Draggable
+          <Content
             key={ id }
             id={ id }
             fade={ this.props.highlight !== null && !highlightCurrentNode }
@@ -726,7 +723,7 @@ export default class Canvas extends React.Component {
             scale={ this.state.scale }
           >
             { libraryTitle }
-          </Draggable>
+          </Content>
         );
         drawAboveLine = true;
       }
@@ -1153,78 +1150,7 @@ export default class Canvas extends React.Component {
     }).join('');
   }
 
-  handleMouseDown = (event) => {
-    if (event.button !== 0 || event.defaultPrevented) {
-      return; // Only handle left click
-    }
-
-    this.setState(this.prepareMouseMove({
-      startX: event.pageX,
-      startY: event.pageY
-    }));
-  }
-
-  prepareMouseMove = (element) => {
-    window.addEventListener('mouseup', this.handleMouseUp);
-    window.addEventListener('mousemove', this.handleMouseMove);
-    return {
-      moving: element
-    };
-  }
-
-  handleMouseUp = () => {
-    if (this.state.moving.started) {
-      this.setState({
-        moving: null
-      });
-      document.body.style.userSelect = ''; // Enable text select
-    }
-    else {
-      // Turn off highlight on "click"
-      this.props.onHighlight(null);
-    }
-    window.removeEventListener('mouseup', this.handleMouseUp);
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    this.props.onDropped();
-  }
-
-  handleMouseMove = (event) => {
-    let newState;
-
-    if (!this.state.moving.started) {
-      // Element has not started moving yet (might be clicking)
-
-      const threshold = 5; // Only start moving after passing threshold value
-      if (event.pageX > this.state.moving.startX + threshold ||
-          event.pageX < this.state.moving.startX - threshold ||
-          event.pageY > this.state.moving.startY + threshold ||
-          event.pageY < this.state.moving.startY - threshold) {
-        newState = {
-          moving: {
-            ...this.state.moving,
-            started: true
-          },
-          offset: this.state.panning
-        };
-        document.body.style.userSelect = 'none'; // Disable text select
-      }
-      else {
-        return; // Not passed threshold value yet
-      }
-    }
-
-    // Determine if new state has been set already
-    newState = newState || {};
-
-    // Use newest offset if possible
-    let offset = (newState.offset ? newState.offset : this.state.offset);
-
-    // Update element position
-    newState.panning = {
-      x: (event.pageX - this.state.moving.startX) + offset.x,
-      y: (event.pageY - this.state.moving.startY) + offset.y
-    };
-
+  panningLimits = (position) => {
     // Limits, you have to have them
     const treewrapRect = this.refs.treewrap.getBoundingClientRect();
     const treeRect = this.refs.tree.getBoundingClientRect();
@@ -1236,42 +1162,39 @@ export default class Canvas extends React.Component {
 
     // Limit X movement
     if (wideLoad) {
-      if (newState.panning.x > padding) {
-        newState.panning.x = padding; // Max X
+      if (position.x > padding) {
+        position.x = padding; // Max X
       }
-      else if ((treewrapRect.width - newState.panning.x - padding) > treeRect.width) {
-        newState.panning.x = (treewrapRect.width - treeRect.width - padding); // Min X
+      else if ((treewrapRect.width - position.x - padding) > treeRect.width) {
+        position.x = (treewrapRect.width - treeRect.width - padding); // Min X
       }
     }
     else {
-      if (newState.panning.x < 0) {
-        newState.panning.x = 0; // Min X
+      if (position.x < 0) {
+        position.x = 0; // Min X
       }
-      else if ((newState.panning.x + treeRect.width) > treewrapRect.width) {
-        newState.panning.x = (treewrapRect.width - treeRect.width); // Max X
+      else if ((position.x + treeRect.width) > treewrapRect.width) {
+        position.x = (treewrapRect.width - treeRect.width); // Max X
       }
     }
 
     // Limit Y movement
     if (highLoad) {
-      if (newState.panning.y > padding) {
-        newState.panning.y = padding; // Max Y
+      if (position.y > padding) {
+        position.y = padding; // Max Y
       }
-      else if ((treewrapRect.height - newState.panning.y - padding) > treeRect.height) {
-        newState.panning.y = (treewrapRect.height - treeRect.height - padding); // Min Y
+      else if ((treewrapRect.height - position.y - padding) > treeRect.height) {
+        position.y = (treewrapRect.height - treeRect.height - padding); // Min Y
       }
     }
     else {
-      if (newState.panning.y < 0) {
-        newState.panning.y = 0; // Min Y
+      if (position.y < 0) {
+        position.y = 0; // Min Y
       }
-      else if ((newState.panning.y + treeRect.height) > treewrapRect.height) {
-        newState.panning.y = (treewrapRect.height - treeRect.height); // Max Y
+      else if ((position.y + treeRect.height) > treewrapRect.height) {
+        position.y = (treewrapRect.height - treeRect.height); // Max Y
       }
     }
-
-
-    this.setState(newState);
   }
 
   // For debugging
@@ -1306,7 +1229,7 @@ export default class Canvas extends React.Component {
           <BlockInteractionOverlay />
         }
         { !! this.props.inserting && this.state.placing &&
-          <Draggable
+          <Content
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
             width={ this.state.nodeSpecs.width }
@@ -1318,16 +1241,16 @@ export default class Canvas extends React.Component {
             scale={ this.state.scale }
           >
             { this.props.inserting.library.title }
-          </Draggable>
+          </Content>
         }
         <div className="canvas">
-          <div
-            className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
-            onMouseDown={ this.handleMouseDown }
+          <Draggable
             ref={ 'treewrap' }
-            style={ {
-              transform: ''
-            } }
+            className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
+            position={ this.state.panning }
+            limits={ this.panningLimits }
+            onMoved={ position => { this.setState({panning: position}); } }
+            onStopped={ moved => { if (moved) { this.props.onHighlight(null); } this.props.onDropped(); } }
           >
             <div
               className="nodetree"
@@ -1340,7 +1263,7 @@ export default class Canvas extends React.Component {
             >
               { tree.nodes }
             </div>
-          </div>
+          </Draggable>
           { !tree.nodes.length &&
             <StartScreen
               handleClicked={ this.props.handleOpenTutorial }
