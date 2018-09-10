@@ -124,20 +124,6 @@ export default class Draggable extends React.Component {
     window.removeEventListener('mousemove', this.handleMouseMove);
   }
 
-  determineOffset(element) {
-    var style = window.getComputedStyle(element);
-    if (style.position === 'relative') {
-      const raw = element.getBoundingClientRect();
-      return {
-        x: raw.left,
-        y: raw.top
-      };
-    }
-    else if (element.parentElement) {
-      return this.determineOffset(element.parentElement);
-    }
-  }
-
   handleMouseMove = (event) => {
     let newState;
 
@@ -151,14 +137,12 @@ export default class Draggable extends React.Component {
           event.pageY < this.state.moving.startY - threshold) {
         newState = {
           moving: {
+            ...this.state.moving,
             started: true
           },
-          offset: this.determineOffset(this.refs.element.parentElement, event.pageX, event.pageY)
+          offset: this.props.position
         };
 
-        // Compensate for mouse position on element
-        newState.offset.x += event.pageX - this.props.position.x - newState.offset.x;
-        newState.offset.y += event.pageY - this.props.position.y - newState.offset.y;
       }
       else {
         return; // Not passed threshold value yet
@@ -171,12 +155,14 @@ export default class Draggable extends React.Component {
     // Use newest offset if possible
     let offset = (newState.offset ? newState.offset : this.state.offset);
 
+    // Scale mouse movement to fit with Canvas scale
+    const scale = (1 / this.props.scale);
+
     // Update element position
     newState.position = {
-      x: event.pageX - offset.x,
-      y: event.pageY - offset.y
+      x: ((event.pageX - this.state.moving.startX) * scale) + offset.x,
+      y: ((event.pageY - this.state.moving.startY) * scale) + offset.y
     };
-//    (1/this.props.scale)
 
     this.setState(newState);
     this.props.onMove();
