@@ -92,6 +92,12 @@ export default class Content extends React.Component {
     this.props.onMove();
   }
 
+  handleStopped = (moved) => {
+    if (moved) {
+      this.props.onDropped();
+    }
+  }
+
   handleMenuButtonClick = () => {
     if (!this.state.contentMenuActive) {
       this.setState({
@@ -170,7 +176,7 @@ export default class Content extends React.Component {
         position={ this.state.position }
         onStarted={ this.props.onPlacing }
         onMoved={ this.handleMoved }
-        onStopped={ this.props.onDropped }
+        onStopped={ this.handleStopped }
       >
         <div className='draggable-wrapper'>
           <div className={ 'draggable-label ' + this.props.contentClass }>

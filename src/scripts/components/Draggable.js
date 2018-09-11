@@ -18,7 +18,7 @@ export default class Draggable extends React.Component {
     }
 
     // Prevent the default behavior
-    event.preventDefault();
+    event.preventDefault(); // TODO: This breaks mouseup outside of window, find another solution! 
 
     this.setState(this.prepareMouseMove({
       startX: event.pageX,
