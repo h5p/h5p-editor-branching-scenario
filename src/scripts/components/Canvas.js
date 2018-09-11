@@ -254,9 +254,15 @@ export default class Canvas extends React.Component {
     }
     else if (!this.state.editing) {
       // Put new node or put existing node at new place
-      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, draggable.props.inserting.defaults);
+      const defaults = (draggable.props.inserting) ? draggable.props.inserting.defaults : undefined;
+
+      // TODO: If an existing node is removed, we'd have to determine the "correct" parent to update its
+      //       next node to -1. The "correct" parent should probably be the one with the shortest path
+      //       from the top node to the current node?
+      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, defaults);
     }
     else {
+      // TODO: Check if this is still needed
       // Add next element in editor
       const parentId = this.state.editing;
       // Here we retrieve the content from EditorOverlay, because CKEditor changes are not caught
@@ -627,7 +633,7 @@ export default class Canvas extends React.Component {
     }
 
     // Libraries must be loaded before tree can be drawn
-    if (!this.props.libraries || this.props.translations.length === 0) {
+    if (!this.props.libraries) {
       nodes.push(
         <div key={ 'loading' } className="loading">Loading…</div>
       );

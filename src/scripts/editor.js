@@ -18,7 +18,6 @@ export default class Editor extends React.Component {
 
     this.state = {
       activeIndex: 0,
-      translations: props.translations,
       settings: props.settings,
       libraries: null, // Needs to be loaded via AJAX
       numDefaultEndScenarios: 0,
@@ -66,23 +65,6 @@ export default class Editor extends React.Component {
     this.setState({settings: settings});
 
     this.props.updateParams(settings);
-  }
-
-  handleTranslationsChange = (event) => {
-    const target = event.target;
-    const value = target.value;
-
-    const translations = this.state.translations;
-
-    // TODO: Change the data structure of translations!!!
-    const pathItems = target.name.split('/');
-    const affectedItem = translations
-      .reduce((a, b) => a.concat(b), [])
-      .filter(t => t.library === pathItems[0] && t.name === pathItems[pathItems.length - 1]);
-    affectedItem[0].translation = value;
-    this.setState({translations: translations});
-
-    this.props.updateTranslations(affectedItem[0]);
   }
 
   /**
@@ -178,7 +160,6 @@ export default class Editor extends React.Component {
           <Canvas
             inserting={ this.state.inserting }
             libraries={ this.state.libraries }
-            translations={ this.state.translations }
             saveData={this.props.saveData}
             main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
@@ -206,8 +187,7 @@ export default class Editor extends React.Component {
         </Tab>
         <Tab title="translations" className="bs-editor-translations-tab">
           <TabViewTranslations
-            translations={this.state.translations}
-            onChange={this.handleTranslationsChange}
+            parent={this.props.parent}
           />
         </Tab>
         <Tab title="tutorial" className="bs-editor-tutorial-tab">
