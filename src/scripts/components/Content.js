@@ -51,6 +51,14 @@ export default class Content extends React.Component {
       points[0].x > local[1].x );
   }
 
+  highlight() {
+    this.refs.element.refs.element.classList.add('highlight');
+  }
+
+  dehighlight() {
+    this.refs.element.refs.element.classList.remove('highlight');
+  }
+
   /**
    * Get content class name.
    *

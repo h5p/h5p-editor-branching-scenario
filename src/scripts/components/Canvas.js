@@ -232,10 +232,10 @@ export default class Canvas extends React.Component {
       }
 
       if (dropzone === intersections[0]) {
-        //dropzone.highlight(); TODO: Use state
+        dropzone.highlight();
       }
       else {
-        //dropzone.dehighlight(); TODO: Use state
+        dropzone.dehighlight();
       }
     });
   }

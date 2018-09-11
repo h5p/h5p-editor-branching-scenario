@@ -135,7 +135,8 @@
   text-overflow: ellipsis;
 }
 
-.dark .draggable {
+.dark .draggable,
+.draggable.highlight {
   box-shadow: 0 0 4px 1px #1773DA;
   pointer-events: none;
 }
