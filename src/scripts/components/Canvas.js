@@ -468,20 +468,22 @@ export default class Canvas extends React.Component {
     if (nextContentId === undefined || nextContentId < 0) {
       nextContentId = -1;
     }
-    if (Canvas.isBranching(content)) {
-      if (content.type.params
-        && content.type.params.branchingQuestion
-        && content.type.params.branchingQuestion.alternatives
-        && !content.type.params.branchingQuestion.alternatives.some(alt => alt.nextContentId === -1)
-      ) {
-        content.type.params.branchingQuestion.alternatives = (content.type.params.branchingQuestion.alternatives || []);
-        content.type.params.branchingQuestion.alternatives.push({
-          nextContentId: nextContentId
-        });
-      }
-    }
-    else {
+
+    if (!Canvas.isBranching(content)) {
       content.nextContentId = nextContentId;
+      return;
+    }
+
+    // Fill up empty alternatives first before creating new one
+    if (nextContentId > -1) {
+      const alternatives = content.type.params.branchingQuestion.alternatives;
+      const pos = alternatives.map(alt => alt.nextContentId).indexOf(-1);
+      if (pos === -1) {
+        alternatives.push({nextContentId: nextContentId});
+      }
+      else {
+        alternatives[pos] = {nextContentId: nextContentId};
+      }
     }
   }
 
