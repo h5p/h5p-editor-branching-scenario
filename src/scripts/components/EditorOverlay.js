@@ -17,10 +17,18 @@ export default class EditorOverlay extends React.Component {
     const library = content.type.library.split(' ')[0];
     this.isBranchingQuestion = library === 'H5P.BranchingQuestion';
 
-    content.$form = H5P.jQuery('<div/>');
+    if (!content.$form) {
+      content.$form = H5P.jQuery('<div/>');
 
-    // Attach the DOM to $form
-    H5PEditor.processSemanticsChunk(this.props.elementFields, content.type.params, content.$form, this.props.main);
+      // Attach the DOM to $form
+      H5PEditor.processSemanticsChunk(
+        this.props.elementFields,
+        content.type.params,
+        content.$form,
+        this.props.main,
+        content.type.library
+      );
+    }
 
     // TODO: l10n object
     this.state = {

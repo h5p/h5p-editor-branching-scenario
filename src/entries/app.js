@@ -581,6 +581,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
           field.library = result.library;
         });
       });
+      this.buildContentEditorForms();
     });
 
     // TODO: Match semantics with design
@@ -613,6 +614,28 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     const field2 = this.field.fields[2].field.fields[2];
     this.endImageChooser = new H5PEditor.widgets.image(this, field2, this.settings.endImage, () => {});
   }
+
+  /**
+   * Build editors for existing content, so common fields are available
+   * on load
+   */
+  BranchingScenarioEditor.prototype.buildContentEditorForms = function () {
+    // Render all forms up front, so common fields are available
+    this.params.content.forEach((contentParams) => {
+      var elementFields = this.getSemantics(contentParams.type.library);
+      var $form = H5P.jQuery('<div/>');
+      H5PEditor.processSemanticsChunk(
+        elementFields,
+        contentParams.type.params,
+        $form,
+        this,
+        contentParams.type.library
+      );
+
+      contentParams.$form = $form;
+    });
+  };
+
 
   /**
    * Update parameters with values delivered by React components.
