@@ -428,8 +428,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
     setValue(field, this.params);
 
-    this.translations = [];
-
     // Switch to activate/deactivate the editor popup. Useful for canvas development.
     this.canvasDev = false;
     document.addEventListener('keydown', event => {
@@ -440,42 +438,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     });
 
     /**
-     * Get all the machine names of libraries used in params.
-     *
-     * Will recursively look for "library" property and return Array of contents.
-     * Could well be generalized and become a filter function.
-     *
-     * Does NOT yet meet the design requirements! Needs nested libraries for
-     * subcontent.
-     *
-     * @param {object} [params] - Parameters.
-     * @return {object[]} Array of machine names of libraries used.
-     */
-    const getLibraryNames = function (params = {}, results = []) {
-      if (!Array.isArray(results) || results.some(result => typeof result !== 'string')) {
-        return [];
-      }
-      Object.entries(params).forEach(entry => {
-        // Library string
-        if (entry[0] === 'library' && typeof entry[1] === 'string' && results.indexOf(entry[1]) === -1) {
-          results.push(entry[1]);
-        }
-        // JSON content
-        if (typeof entry[1] === 'object' && !Array.isArray(entry[1])) {
-          return getLibraryNames(entry[1], results);
-        }
-        // Array content
-        if (typeof entry[1] === 'object' && Array.isArray(entry[1])) {
-          entry[1].forEach(item => {
-            return getLibraryNames(item, results);
-          });
-        }
-      });
-
-      return results;
-    };
-
-    /**
      * Flatten semantics.
      * Unsanitized. Will keep track of the old path, so it can be "reverted" later.
      *
@@ -483,7 +445,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
      * @param {object[]} [path] - Start path to be added.
      * @return {object[]} Flattened semantics.
      */
-    const flattenSemantics = function(field, path = []) {
+    const flattenSemantics = function (field, path = []) {
       if (!Array.isArray(field)) {
         field = [field];
       }
@@ -585,37 +547,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       return flatSemantics.filter(semantic => andOrOr(semantic, filters, mode));
     };
 
-    /**
-     * Filter params for a particular keys and return string values.
-     * Can fail if there are multiple duplicate property names. It'd be better
-     * to synchronize parsing params with semantics in order to get the
-     * correct field.
-     *
-     * @param {object} params - Parameters to check.
-     * @param {string} key - Property to look for.
-     * @return {object[]} Values found for key.
-     */
-    const guessTranslationTexts = function (params, key) {
-      if (typeof params !== 'object') {
-        return;
-      }
-      if (typeof key !== 'string') {
-        return;
-      }
-
-      let results = [];
-
-      for (let param in params) {
-        if (typeof params[param] === 'object') {
-          results = results.concat(guessTranslationTexts(params[param], key));
-        }
-        if (param === key && typeof params[param] === 'string') {
-          results.push(params[param]);
-        }
-      }
-      return results;
-    };
-
     /*
      * This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
      * Also: IE 11 doesn't support promises (and async/await) and'd need a Polyfill or an oldfashioned
@@ -624,11 +555,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
      * This complete approach is crap.
      */
     const promise = new Promise(resolve => {
-      // Get ALL library names that are used inside the file, including subcontent
-      let librariesUsed = getLibraryNames(this.params, [parent.currentLibrary]);
-
       // Add all libraries that are not used but options in semantics
-      librariesUsed = librariesUsed.concat(this.libraries).filter((library, index, array) => array.indexOf(library) === index);
+      let librariesUsed = this.libraries.filter((library, index, array) => array.indexOf(library) === index);
 
       const allSemantics = [];
       librariesUsed.forEach(libraryName => {
@@ -648,43 +576,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       this.allSemantics.forEach(result => {
         // Can contain "common" group fields with further "common" text fields nested inside
         const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
-        const currentLibrary = this.getSubParams(this.params, result.library) || this.params;
         let fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
         fields.forEach(field => {
-          field.translation = guessTranslationTexts(currentLibrary, field.name)[0];
           field.library = result.library;
         });
-        // Flatten out the firstFilter to get a plain structure if there was a group in between
-        if (fields.length > 0) {
-          this.translations.push(fields);
-        }
       });
-      /*
-       * this.translations now contains all translatable fields as
-       *
-       * [
-       *   {
-       *     fields: [
-       *       {name: ..., library: ..., translation: ...},
-       *       {name: ..., library: ..., translation: ...}
-       *     ]
-       *   }
-       * ]
-       *
-       * BUT the procedure can be slow and delay populating the translation fields.
-       * There must be a smarter way (in core) -- at least when replacing the old editor!
-       */
-
-      // Update ReactDOM
-      if (this.editor) {
-        this.editor.setState({translations: this.translations});
-      }
-
-      /*
-       * TODO: The editor core still attaches the common fields to the main form,
-       *       but they are hidden via CSS. Could be removed alltogether now
-       *       from allSemantics.
-       */
     });
 
     // TODO: Match semantics with design
@@ -732,24 +628,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
   };
 
   /**
-   * Update translations
-   *
-   * @param {Object} data - Data from React components.
-   */
-  BranchingScenarioEditor.prototype.updateTranslations = function (data) {
-    const weNeedToDigDeeper = function (root, path) {
-      if (path.length === 0) {
-        return root;
-      }
-      return weNeedToDigDeeper(root[path[0]], path.slice(1));
-    };
-
-    // Get the reference to the position we need to update -- and update it
-    const path = weNeedToDigDeeper(this.getSubParams(this.params, data.library) || this.params, data.path);
-    path[data.name] = data.translation;
-  };
-
-  /**
    * Get semantics fields for a library.
    *
    * @param {string} libraryName - Library name.
@@ -762,31 +640,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       elementFields = testLibrary.semantics.fields;
     }
     return elementFields;
-  };
-
-  /**
-   * Get parameters of subcontent.
-   *
-   * @param {object} params - Params to start looking.
-   * @param {string} libraryName - LibraryName to look for.
-   * @return {object} Params.
-   */
-  BranchingScenarioEditor.prototype.getSubParams = function (params, libraryName) {
-    if (!params || typeof params !== 'object') {
-      return;
-    }
-    if (typeof libraryName !== 'string') {
-      return;
-    }
-
-    let results;
-    if (params.library === libraryName && params.params) {
-      results = params.params;
-    }
-    for (let param in params) {
-      results = results || this.getSubParams(params[param], libraryName);
-    }
-    return results;
   };
 
   /**
@@ -843,14 +696,13 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.editor = ReactDOM.render(
       (<Editor
         main={this} // hacky
+        parent={this.parent}
         content={ this.params.content }
-        translations={ this.translations }
         libraries={ this.libraries }
         settings={ this.settings }
         startImageChooser={ this.startImageChooser }
         endImageChooser={ this.endImageChooser }
         updateParams={ this.updateParams.bind(this) }
-        updateTranslations={ this.updateTranslations.bind(this) }
         onContentChanged={ this.handleContentChanged.bind(this) }
         getSemantics={ this.getSemantics.bind(this) }
       />), $wrapper.get(0)

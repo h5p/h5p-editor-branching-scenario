@@ -622,7 +622,7 @@ export default class Canvas extends React.Component {
     }
 
     // Libraries must be loaded before tree can be drawn
-    if (!this.props.libraries || this.props.translations.length === 0) {
+    if (!this.props.libraries) {
       nodes.push(
         <div key={ 'loading' } className="loading">Loading…</div>
       );
