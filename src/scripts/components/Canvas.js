@@ -697,11 +697,19 @@ export default class Canvas extends React.Component {
 
     const parentIsBranching = (parent !== undefined && Canvas.isBranching(this.state.content[parent]));
 
+    // BQs should not be able to be dropped on its children
+    const placingIsBranching = this.state.placing !== null &&
+      this.state.placing > -1 &&
+      Canvas.isBranching(this.state.content[this.state.placing]);
+    const childrenOfBQ = placingIsBranching ? this.getChildrenIds(this.state.placing, true) : undefined;
+
     let firstX, lastX, bigY = y + (this.state.nodeSpecs.spacing.y * 7.5); // The highest we'll ever be
     branch.forEach((id, num) => {
       let drawAboveLine = false;
       const content = this.state.content[id];
       const hasBeenDrawn = (renderedNodes.indexOf(id) !== -1);
+      const placingIsBranchingParent = childrenOfBQ && childrenOfBQ.indexOf(id) !== -1;
+
       renderedNodes.push(id);
 
       // Add vertical spacing for each level
@@ -865,8 +873,8 @@ export default class Canvas extends React.Component {
           </div>
         );
 
-        // Add dropzone under empty BQ alternative
-        if (this.state.placing !== null && !content) {
+        // Add dropzone under empty BQ alternative if not of BQ being moved
+        if (this.state.placing !== null && this.state.placing !== parent && !content && (!childrenOfBQ || childrenOfBQ.indexOf(parent) === -1)) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
@@ -880,7 +888,7 @@ export default class Canvas extends React.Component {
         const dzDistance = ((aboveLineHeight - this.state.dzSpecs.height) / 2);
 
         // Add dropzone above
-        if (this.state.placing !== parent) {
+        if (this.state.placing !== parent && !placingIsBranchingParent) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - dzDistance // for fixed tree
@@ -889,7 +897,7 @@ export default class Canvas extends React.Component {
         }
 
         // Add dropzone below if there's no subtree
-        if (content && (!subtree || !subtree.nodes.length)) {
+        if (content && (!subtree || !subtree.nodes.length) && !placingIsBranchingParent) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (this.state.dzSpecs.height / 2) : 0)
