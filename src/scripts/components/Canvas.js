@@ -379,7 +379,8 @@ export default class Canvas extends React.Component {
     }
 
     nextIds
-      .filter(id => id !== undefined && id > start) // id > start prevents loops
+      .filter(id => id !== undefined && id > -1)
+      .filter(id => this.renderedNodes.indexOf(id) > this.renderedNodes.indexOf(start)) // prevent loops
       .forEach(id => {
         childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true));
       });
