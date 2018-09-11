@@ -92,6 +92,44 @@ export default class Content extends React.Component {
     this.props.onMove();
   }
 
+  handleMenuButtonClick = () => {
+    if (!this.state.contentMenuActive) {
+      this.setState({
+        contentMenuActive: true
+      });
+      document.addEventListener('click', this.handleDocumentClick);
+    }
+  }
+
+  handleDocumentClick = (event) => {
+    if (event.button !== 0 || event.defaultPrevented) {
+      return; // Only handle left click
+    }
+
+    // Close
+    this.setState({
+      contentMenuActive: false
+    });
+
+    document.removeEventListener('click', this.handleDocumentClick);
+  }
+
+  handlePreview = () => {
+    // Postponed
+  }
+
+  handleEdit = () => {
+    this.props.onEditContent(this.props.id);
+  }
+
+  handleCopy = () => {
+    this.props.onCopyContent(this.props.id);
+  }
+
+  handleDelete = () => {
+    this.props.onDeleteContent(this.props.id);
+  }
+
   render() {
 
     // Determine element class depending on state
@@ -141,13 +179,7 @@ export default class Content extends React.Component {
           { dropped &&
             <div
               className={ contentMenuButtonClass }
-              onClick={ () => {
-                this.setState(prevState => {
-                  return {
-                    contentMenuActive: !prevState.contentMenuActive
-                  };
-                });
-              }}
+              onClick={ this.handleMenuButtonClick }
             />
           }
         </div>
@@ -158,21 +190,10 @@ export default class Content extends React.Component {
         }
         { this.state.contentMenuActive &&
           <SubMenu
-            onPreview={ () => {
-              this.setState({contentMenuActive: false});
-            }}
-            onEdit={ () => {
-              this.setState({contentMenuActive: false});
-              this.props.onEditContent(this.props.id);
-            }}
-            onCopy={ () => {
-              this.setState({contentMenuActive: false});
-              this.props.onCopyContent(this.props.id);
-            }}
-            onDelete={ () => {
-              this.setState({contentMenuActive: false});
-              this.props.onDeleteContent(this.props.id);
-            }}
+            onPreview={ this.handlePreview }
+            onEdit={ this.handleEdit }
+            onCopy={ this.handleCopy }
+            onDelete={ this.handleDelete }
           />
         }
       </Draggable>
