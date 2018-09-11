@@ -273,6 +273,17 @@ export default class Canvas extends React.Component {
       return;
     }
 
+    // BranchingQuestions shall not be able to replace its own children
+    if (dropzone instanceof Content && draggable.getContentClass() === 'BranchingQuestion') {
+      const childrenOfBQ = this.getChildrenIds(id);
+      if (childrenOfBQ.some(child => child === dropzone.props.id)) {
+        this.setState({
+          placing: null
+        });
+        return;
+      }
+    }
+
     if (dropzone instanceof Content && !this.state.editing) {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
