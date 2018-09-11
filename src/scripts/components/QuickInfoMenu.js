@@ -26,17 +26,17 @@ export default class QuickInfoMenu extends React.Component {
    * Render quick info menu
    */
   render () {
-    const elementClass = `legend ${(this.state.expanded === true) ? 'expanded' : ''}`;
+    const expanded = (this.state.expanded === true) ? ' expanded' : '';
 
     return (
-      <div id="legend" className={ elementClass }>
+      <div id="legend" className={ 'legend' + expanded }>
         <span>{ this.props.l10n.quickInfo }
           <a href="#" className="close" onClick={ this.handleToggle }>
             { this.state.expanded ? this.props.l10n.hide : this.props.l10n.show }
           </a>
         </span>
-        { this.state.expanded &&
-          <ul className="legend-content">
+        <div className={ 'legend-content' + expanded }>
+          <ul>
             <li><strong>{ this.props.l10n.dropzoneTerm }</strong> { this.props.l10n.dropzoneText }</li>
             <li><strong>{ this.props.l10n.contentTerm }</strong> { this.props.l10n.contentText }</li>
             <li><strong>{ this.props.l10n.branchingQuestionTerm }</strong> { this.props.l10n.branchingQuestionText }</li>
@@ -46,7 +46,7 @@ export default class QuickInfoMenu extends React.Component {
             <li>{ this.props.l10n.existingQuestion }</li>
             <li>{ this.props.l10n.stepByStep } <a href='#' onClick={ this.props.handleOpenTutorial }>{ this.props.l10n.tutorial }</a></li>
           </ul>
-        }
+        </div>
       </div>
     );
   }

@@ -79,7 +79,8 @@ export default class Editor extends React.Component {
 
   handleMouseDown = (event) => {
     this.setState({
-      inserting: event
+      inserting: event,
+      highlight: null
     });
   }
 
@@ -92,6 +93,24 @@ export default class Editor extends React.Component {
   handleOpenTutorial = () => {
     this.setState({
       activeIndex: 3
+    });
+  }
+
+  /**
+   * Handle click on window.
+   *
+   * @param  {Event} event Click event.
+   */
+  handleClick = (event) => {
+    if (event.target.className === 'highlight-end-scenarios-button') {
+      return;
+    }
+
+    this.setState({
+      highlight: null,
+      onlyThisBall: null
+    }, () => {
+      window.removeEventListener('click', this.handleClick);
     });
   }
 
@@ -108,11 +127,19 @@ export default class Editor extends React.Component {
     });
   }
 
+  /**
+   * Handle highlighting default end scenarios.
+   *
+   * @param {number} id Id of scenario to be highlighted.
+   * @param {} onlyThisBall
+   */
   handleHighlight = (id, onlyThisBall) => {
     this.setState({
       highlight: id,
       onlyThisBall: onlyThisBall === undefined ? null : onlyThisBall
-    });
+    }, () => {
+      window.addEventListener('click', this.handleClick);}
+    );
   }
 
   handleContentChanged = (content, numDefaultEndScenarios) => {

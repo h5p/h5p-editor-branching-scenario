@@ -4,6 +4,7 @@ import './Canvas.scss';
 import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
+import Content from './Content.js';
 import ConfirmationDialog from './ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
@@ -62,7 +63,7 @@ export default class Canvas extends React.Component {
       deleting: null,
       inserting: null,
       editing: null,
-      editorOverlayVisible: false,
+      freshContent: false,
       editorContents: {
         top: {
           icon: '',
@@ -73,7 +74,7 @@ export default class Canvas extends React.Component {
         content: {
         }
       },
-      nodeSpecs: { // TODO: Get from DOM ?
+      nodeSpecs: {
         width: 121,
         height: 32,
         spacing: {
@@ -88,10 +89,6 @@ export default class Canvas extends React.Component {
       content: this.props.content,
       dialog: this.l10n.dialogDelete,
       panning: {
-        x: 0,
-        y: 0
-      },
-      offset: {
         x: 0,
         y: 0
       },
@@ -168,6 +165,7 @@ export default class Canvas extends React.Component {
         deleting: id,
         dialog: this.buildDialog(id, this.l10n.dialogReplace)
       });
+      this.props.onDropped();
     }
     else {
       // Start placing
@@ -181,7 +179,7 @@ export default class Canvas extends React.Component {
   /**
    * Get intersections between dropzones and a draggable.
    *
-   * @param {Draggable} draggable Draggable object.
+   * @param {Content} draggable
    * @return {object[]} intersecting objects ordered by intersecting area in decreasing order
    */
   getIntersections(draggable) {
@@ -218,10 +216,10 @@ export default class Canvas extends React.Component {
       }
 
       if (dropzone === intersections[0]) {
-        dropzone.highlight();
+        //dropzone.highlight(); TODO: Use state
       }
       else {
-        dropzone.dehighlight();
+        //dropzone.dehighlight(); TODO: Use state
       }
     });
   }
@@ -243,22 +241,28 @@ export default class Canvas extends React.Component {
     const dropzone = intersections[0];
 
     // BranchingQuestion shall not be replacable by anything
-    if (dropzone instanceof Draggable && dropzone.getContentClass() === 'BranchingQuestion') {
+    if (dropzone instanceof Content && dropzone.getContentClass() === 'BranchingQuestion') {
       this.setState({
         placing: null
       });
       return;
     }
 
-    if (dropzone instanceof Draggable && !this.state.editorOverlayVisible) {
+    if (dropzone instanceof Content && !this.state.editing) {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
     }
     else if (!this.state.editing) {
       // Put new node or put existing node at new place
-      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, draggable.props.inserting.defaults);
+      const defaults = (draggable.props.inserting) ? draggable.props.inserting.defaults : undefined;
+
+      // TODO: If an existing node is removed, we'd have to determine the "correct" parent to update its
+      //       next node to -1. The "correct" parent should probably be the one with the shortest path
+      //       from the top node to the current node?
+      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, defaults);
     }
     else {
+      // TODO: Check if this is still needed
       // Add next element in editor
       const parentId = this.state.editing;
       // Here we retrieve the content from EditorOverlay, because CKEditor changes are not caught
@@ -457,6 +461,7 @@ export default class Canvas extends React.Component {
 
       // Handle inserting of new node
       if (id === -1) {
+        newState.freshContent = true;
         const defaultParams = this.getNewContentParams();
         defaultParams.type.params = defaults.params || defaultParams.type.params;
         defaultParams.contentTitle = defaults.specific.contentTitle || defaultParams.contentTitle;
@@ -470,6 +475,9 @@ export default class Canvas extends React.Component {
           // This is the first node added, nothing more needs to be done.
           return newState;
         }
+      }
+      else {
+        newState.freshContent = false;
       }
 
       // When placing after a leaf node keep track of it so we can update it
@@ -554,6 +562,7 @@ export default class Canvas extends React.Component {
         this.attachChild(newState.content[id], nextContentId);
       }
 
+      this.props.onDropped();
       return newState;
     });
   }
@@ -563,7 +572,9 @@ export default class Canvas extends React.Component {
     if (num === undefined) {
       num = 0;
     }
-    return ( !this.state.editorOverlayVisible &&
+
+    const defaults = (this.props.inserting) ? this.props.inserting.defaults : {};
+    return ( !this.state.editing &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
         ref={ element => this.dropzones.push(element) }
@@ -578,7 +589,7 @@ export default class Canvas extends React.Component {
             top: position.y + 'px'
           }
         }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num, this.props.inserting.defaults) }
+        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num, defaults) }
       />
     );
   }
@@ -699,10 +710,10 @@ export default class Canvas extends React.Component {
 
         // Draw node
         nodes.push(
-          <Draggable
+          <Content
             key={ id }
             id={ id }
-            highlight={ highlightCurrentNode }
+            fade={ this.props.highlight !== null && !highlightCurrentNode }
             ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
             position={ position }
             width={ this.state.nodeSpecs.width }
@@ -715,9 +726,10 @@ export default class Canvas extends React.Component {
             onDeleteContent={ this.handleDeleteContent }
             disabled={ contentIsBranching }
             tooltip={ Canvas.getTooltip(content) }
+            scale={ this.state.scale }
           >
             { libraryTitle }
-          </Draggable>
+          </Content>
         );
         drawAboveLine = true;
       }
@@ -730,11 +742,12 @@ export default class Canvas extends React.Component {
 
       // Add vertical line above (except for top node)
       if (content && id !== 0 && drawAboveLine) {
+        const compensation = (parentIsBranching ? 3 : 0);
         nodes.push(
-          <div key={ id + '-vabove' } className="vertical-line" style={ {
+          <div key={ id + '-vabove' } className={ 'vertical-line 1' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
-            top: (position.y - aboveLineHeight) + 'px',
-            height: aboveLineHeight + 'px'
+            top: (position.y - aboveLineHeight + compensation) + 'px',
+            height: (aboveLineHeight - compensation) + 'px'
           } }/>
         );
       }
@@ -747,7 +760,7 @@ export default class Canvas extends React.Component {
         content.type.params.branchingQuestion.alternatives.length > 1) {
         // Add vertical line below
         nodes.push(
-          <div key={ id + '-vbelow' } className="vertical-line" style={ {
+          <div key={ id + '-vbelow' } className={ 'vertical-line 2' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
             top: (position.y + this.state.nodeSpecs.height) + 'px',
             height: (this.state.nodeSpecs.spacing.y / 2) + 'px'
@@ -756,21 +769,20 @@ export default class Canvas extends React.Component {
 
         // Add horizontal line below
         nodes.push(
-          <div key={ id + '-hbelow' } className="horizontal-line" style={ {
+          <div key={ id + '-hbelow' } className={ 'horizontal-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: (x + (children[0] < 0 ? this.state.dzSpecs.width / 2 : this.state.nodeSpecs.width / 2)) + 'px',
             top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
-            width: subtree.dX + 'px'
+            width: (subtree.dX + 2) + 'px'
           } }/>
         );
       }
 
       if (parentIsBranching) {
-        const lengthMultiplier = (branch.length > 1 ? 2 : 2.5);
         nodes.push(
-          <div key={ parent + '-vabovebs-' + num } className="vertical-line" style={ {
+          <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line 3' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
-            top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * lengthMultiplier)) + 'px',
-            height: (this.state.nodeSpecs.spacing.y * lengthMultiplier) + 'px'
+            top: ((position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 2 : 0)) + 'px',
+            height: (this.state.nodeSpecs.spacing.y * (branch.length > 1 ? 0.375 : 1)) + 'px'
           } }/>
         );
 
@@ -791,9 +803,9 @@ export default class Canvas extends React.Component {
             alternativeBallClasses += ' endscreenCustom';
           }
         }
-        if (this.props.highlight !== null && this.props.highlight === id && !highlightCurrentNode) {
-          if (this.props.onlyThisBall === null || this.props.onlyThisBall === key) {
-            alternativeBallClasses += ' on-top-of-things';
+        if (this.props.highlight !== null && (this.props.highlight !== id || highlightCurrentNode)) {
+          if (this.props.onlyThisBall === null || this.props.onlyThisBall !== key) {
+            alternativeBallClasses += ' fade';
           }
         }
 
@@ -984,8 +996,9 @@ export default class Canvas extends React.Component {
         const nextContentId = prevState.content[prevState.deleting].nextContentId;
         newState.content[prevState.deleting] = this.getNewContentParams();
         newState.content[prevState.deleting].nextContentId = nextContentId;
+        newState.editing = prevState.deleting;
       }
-      else if (prevState.editing !== null && prevState.placing === null || prevState.deleting !== null) {
+      else if (prevState.editing !== null && prevState.freshContent === true || prevState.deleting !== null) {
         // Delete node
         removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
@@ -1143,72 +1156,7 @@ export default class Canvas extends React.Component {
     }).join('');
   }
 
-  handleMouseDown = (event) => {
-    if (event.button !== 0) {
-      return; // Only handle left click
-    }
-
-    this.setState(this.prepareMouseMove({
-      startX: event.pageX,
-      startY: event.pageY
-    }));
-  }
-
-  prepareMouseMove = (element) => {
-    window.addEventListener('mouseup', this.handleMouseUp);
-    window.addEventListener('mousemove', this.handleMouseMove);
-    return {
-      moving: element
-    };
-  }
-
-  handleMouseUp = () => {
-    if (this.state.moving.started) {
-      this.setState({
-        moving: null
-      });
-    }
-    window.removeEventListener('mouseup', this.handleMouseUp);
-    window.removeEventListener('mousemove', this.handleMouseMove);
-  }
-
-  handleMouseMove = (event) => {
-    let newState;
-
-    if (!this.state.moving.started) {
-      // Element has not started moving yet (might be clicking)
-
-      const threshold = 5; // Only start moving after passing threshold value
-      if (event.pageX > this.state.moving.startX + threshold ||
-          event.pageX < this.state.moving.startX - threshold ||
-          event.pageY > this.state.moving.startY + threshold ||
-          event.pageY < this.state.moving.startY - threshold) {
-        newState = {
-          moving: {
-            ...this.state.moving,
-            started: true
-          },
-          offset: this.state.panning
-        };
-        // TODO: Disable text select!
-      }
-      else {
-        return; // Not passed threshold value yet
-      }
-    }
-
-    // Determine if new state has been set already
-    newState = newState || {};
-
-    // Use newest offset if possible
-    let offset = (newState.offset ? newState.offset : this.state.offset);
-
-    // Update element position
-    newState.panning = {
-      x: (event.pageX - this.state.moving.startX) + offset.x,
-      y: (event.pageY - this.state.moving.startY) + offset.y
-    };
-
+  panningLimits = (position) => {
     // Limits, you have to have them
     const treewrapRect = this.refs.treewrap.getBoundingClientRect();
     const treeRect = this.refs.tree.getBoundingClientRect();
@@ -1220,42 +1168,39 @@ export default class Canvas extends React.Component {
 
     // Limit X movement
     if (wideLoad) {
-      if (newState.panning.x > padding) {
-        newState.panning.x = padding; // Max X
+      if (position.x > padding) {
+        position.x = padding; // Max X
       }
-      else if ((treewrapRect.width - newState.panning.x - padding) > treeRect.width) {
-        newState.panning.x = (treewrapRect.width - treeRect.width - padding); // Min X
+      else if ((treewrapRect.width - position.x - padding) > treeRect.width) {
+        position.x = (treewrapRect.width - treeRect.width - padding); // Min X
       }
     }
     else {
-      if (newState.panning.x < 0) {
-        newState.panning.x = 0; // Min X
+      if (position.x < 0) {
+        position.x = 0; // Min X
       }
-      else if ((newState.panning.x + treeRect.width) > treewrapRect.width) {
-        newState.panning.x = (treewrapRect.width - treeRect.width); // Max X
+      else if ((position.x + treeRect.width) > treewrapRect.width) {
+        position.x = (treewrapRect.width - treeRect.width); // Max X
       }
     }
 
     // Limit Y movement
     if (highLoad) {
-      if (newState.panning.y > padding) {
-        newState.panning.y = padding; // Max Y
+      if (position.y > padding) {
+        position.y = padding; // Max Y
       }
-      else if ((treewrapRect.height - newState.panning.y - padding) > treeRect.height) {
-        newState.panning.y = (treewrapRect.height - treeRect.height - padding); // Min Y
+      else if ((treewrapRect.height - position.y - padding) > treeRect.height) {
+        position.y = (treewrapRect.height - treeRect.height - padding); // Min Y
       }
     }
     else {
-      if (newState.panning.y < 0) {
-        newState.panning.y = 0; // Min Y
+      if (position.y < 0) {
+        position.y = 0; // Min Y
       }
-      else if ((newState.panning.y + treeRect.height) > treewrapRect.height) {
-        newState.panning.y = (treewrapRect.height - treeRect.height); // Max Y
+      else if ((position.y + treeRect.height) > treewrapRect.height) {
+        position.y = (treewrapRect.height - treeRect.height); // Max Y
       }
     }
-
-
-    this.setState(newState);
   }
 
   // For debugging
@@ -1286,11 +1231,11 @@ export default class Canvas extends React.Component {
 
     return (
       <div className="wrapper">
-        { (this.state.deleting || this.state.editing) &&
+        { (this.state.deleting !== null || this.state.editing !== null) &&
           <BlockInteractionOverlay />
         }
         { !! this.props.inserting && this.state.placing &&
-          <Draggable
+          <Content
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
             width={ this.state.nodeSpecs.width }
@@ -1299,18 +1244,19 @@ export default class Canvas extends React.Component {
             contentClass={ this.props.inserting.library.title.replace(/ +/g, '') }
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
+            scale={ this.state.scale }
           >
             { this.props.inserting.library.title }
-          </Draggable>
+          </Content>
         }
         <div className="canvas">
-          <div
-            className="treewrap"
-            onMouseDown={ this.handleMouseDown }
+          <Draggable
             ref={ 'treewrap' }
-            style={ {
-              transform: ''
-            } }
+            className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
+            position={ this.state.panning }
+            limits={ this.panningLimits }
+            onMoved={ position => { this.setState({panning: position}); } }
+            onStopped={ moved => { if (moved) { this.props.onHighlight(null); } this.props.onDropped(); } }
           >
             <div
               className="nodetree"
@@ -1322,9 +1268,8 @@ export default class Canvas extends React.Component {
               } }
             >
               { tree.nodes }
-              <div className={ 'dark-overlay' + (this.props.highlight !== null ? ' visible' : '') }/>
             </div>
-          </div>
+          </Draggable>
           { !tree.nodes.length &&
             <StartScreen
               handleClicked={ this.props.handleOpenTutorial }

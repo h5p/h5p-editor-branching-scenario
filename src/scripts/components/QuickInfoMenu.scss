@@ -15,6 +15,7 @@
   transition: all 0.1s ease;
   user-select: none;
   z-index:10;
+  overflow: hidden;
 
   &:hover {
     -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 3px 10px;
@@ -25,6 +26,26 @@
   span {
     font-size: 0.875rem;
   }
+
+  .close {
+    text-decoration: none;
+    text-align: right;
+    padding: $xsmall;
+    font-size: $medium;
+    text-align: right;
+  }
+
+  &.expanded {
+    width: 20rem;
+    left: calc(100% - 21rem);
+  }
+}
+
+.legend-content {
+  min-width: 19rem;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
 
   ul {
     list-style: none;
@@ -108,21 +129,8 @@
     }
   }
 
-  .close {
-    text-decoration: none;
-    text-align: right;
-    padding: $xsmall;
-    font-size: $medium;
-    text-align: right;
+  &.expanded {
+    display: inherit;
+    opacity: 1;
   }
-
-}
-
-.expanded {
-  width: 20rem;
-  left: calc(100% - 21rem);
-}
-
-.legend-content {
-
 }
