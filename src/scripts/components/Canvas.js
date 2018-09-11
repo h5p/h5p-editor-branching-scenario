@@ -283,18 +283,15 @@ export default class Canvas extends React.Component {
 
       // When moving nodes that leave empty alternatives, update those.
       if (id > -1) {
-        const parent = this.getParent(id);
         const children = this.getChildrenIds(id);
-        if (Canvas.isBranching(parent) && children.length === 0) {
+        const parent = this.getParent(id);
+        if (parent && Canvas.isBranching(parent) && children.length === 0) {
           parent.type.params.branchingQuestion.alternatives
             .filter(alt => alt.nextContentId === id)
             .forEach(alt => alt.nextContentId = -1);
         }
       }
 
-      // TODO: If an existing node is removed, we'd have to determine the "correct" parent to update its
-      //       next node to -1. The "correct" parent should probably be the one with the shortest path
-      //       from the top node to the current node?
       this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, defaults);
     }
     else {
