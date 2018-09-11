@@ -6,8 +6,11 @@ export default class Toolbar extends React.Component {
   constructor(props) {
     super(props);
 
+    this.zoomLevels = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5];
+
     this.state = {
-      showInfoPopup: false
+      showInfoPopup: false,
+      scale: 1.5
     };
   }
 
@@ -24,6 +27,28 @@ export default class Toolbar extends React.Component {
     this.handleClosePopup();
   }
 
+  /**
+   * Change zoom.
+   *
+   * @param {bolean} zoomin Zoom direction. true = zoom in, false = zoom out.
+   */
+  handleZoom = (zoomin = true) => {
+    this.setState(prevState => {
+      const newState = prevState;
+
+      const pos = this.zoomLevels.indexOf(prevState.scale);
+
+      if (zoomin) {
+        newState.scale = (pos + 1 >= this.zoomLevels.length) ? prevState.scale : this.zoomLevels[pos + 1];
+      }
+      else {
+        newState.scale = (pos <= 0) ? prevState.scale : this.zoomLevels[pos - 1];
+      }
+
+      return newState;
+    }, () => this.props.onZoom(this.state.scale));
+  }
+
   render() {
     // TODO: l10n
 
@@ -34,6 +59,19 @@ export default class Toolbar extends React.Component {
 
     return (
       <div className="toolbar">
+        <div className="zoom-wrapper">
+          <span
+            className="zoom-in"
+            onClick={ () => this.handleZoom(true) }
+          />
+          <span className="zoom-status">
+            { `${Math.round(this.state.scale * 100)} %`}
+          </span>
+          <span
+            className="zoom-out"
+            onClick={ () => this.handleZoom(false) }
+          />
+        </div>
         <div
           className="missing-end-scenarios"
           role="button"

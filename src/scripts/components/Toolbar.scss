@@ -1,3 +1,5 @@
+@import '../../styles/main.scss';
+
 .toolbar {
   position: absolute;
   bottom: 0;
@@ -6,6 +8,7 @@
   height: 2em;
   background-color: #191e22;
   color: #e9ebee;
+  display: flex;
 }
 .missing-end-scenarios {
   border: #1773DA solid 2px;
@@ -60,4 +63,38 @@
 .close-info-popup-button:after {
   font-family: "BSFont";
   content: "\e90a";
+}
+.zoom-wrapper {
+  padding: 0.5em;
+  vertical-align: middle;
+  align-content: center;
+  text-align: center;
+  line-height: 1.45em;
+  font-size: 0.875em;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center;
+
+}
+.zoom-in {
+  font-size: 1.5em;
+  cursor: pointer;
+
+  &:before {
+    font-family: BSFont;
+    content: $icon-zoom-in;
+  }
+}
+.zoom-status {
+  padding: 0 1em 0 1em;
+}
+.zoom-out {
+  font-size: 1.5em;
+  cursor: pointer;
+
+  &:before {
+    font-family: BSFont;
+    content: $icon-zoom-out;
+  }
 }

@@ -22,7 +22,8 @@ export default class Editor extends React.Component {
       libraries: null, // Needs to be loaded via AJAX
       numDefaultEndScenarios: 0,
       highlight: null,
-      onlyThisBall: null
+      onlyThisBall: null,
+      scale: 1.5
     };
   }
 
@@ -122,6 +123,12 @@ export default class Editor extends React.Component {
     });
   }
 
+  handleZoom = (scale) => {
+    this.setState({
+      scale: scale
+    });
+  }
+
   handleContentChanged = (content, numDefaultEndScenarios) => {
     if (content) {
       this.props.onContentChanged(content);
@@ -171,10 +178,12 @@ export default class Editor extends React.Component {
             highlight={ this.state.highlight }
             onlyThisBall={ this.state.onlyThisBall }
             onDropped={ this.handleInsertingDone }
+            scale={ this.state.scale }
           />
           <Toolbar
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
             onHighlight={ this.handleHighlight }
+            onZoom={ this.handleZoom }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
