@@ -87,6 +87,7 @@ export default class Toolbar extends React.Component {
           />
           <span
             className="fit-to-canvas-text"
+            onClick={ this.props.onFitToCanvas }
           >
             Zoom to fit
           </span>
