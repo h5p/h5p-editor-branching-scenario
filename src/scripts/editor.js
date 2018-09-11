@@ -114,24 +114,6 @@ export default class Editor extends React.Component {
     });
   }
 
-  /**
-   * Handle click on window.
-   *
-   * @param  {Event} event Click event.
-   */
-  handleClick = (event) => {
-    if (event.target.className === 'highlight-end-scenarios-button') {
-      return;
-    }
-
-    this.setState({
-      highlight: null,
-      onlyThisBall: null
-    }, () => {
-      window.removeEventListener('click', this.handleClick);
-    });
-  }
-
   // Those can probably be merged into one abstract function
   setActiveIndex = (key) => {
     this.setState({
@@ -155,9 +137,7 @@ export default class Editor extends React.Component {
     this.setState({
       highlight: id,
       onlyThisBall: onlyThisBall === undefined ? null : onlyThisBall
-    }, () => {
-      window.addEventListener('click', this.handleClick);}
-    );
+    });
   }
 
   handleContentChanged = (content, numDefaultEndScenarios) => {
