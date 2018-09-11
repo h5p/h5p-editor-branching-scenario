@@ -116,9 +116,10 @@ export default class Content extends React.Component {
         style={ {
           left: this.state.position.x + 'px',
           top: this.state.position.y + 'px',
-          width: this.props.width + 'px'
+          width: this.props.width + 'px',
+          transform: (this.props.inserting ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
         } }
-        scale={ this.props.scale }
+        scale={ this.props.scale ? 1 : this.props.scale }
         started={ this.props.inserting ? this.props.inserting : null }
         position={ this.state.position }
         onStarted={ this.props.onPlacing }
