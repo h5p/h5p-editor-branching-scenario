@@ -84,6 +84,14 @@ export default class Content extends React.Component {
     return intersectionX * intersectionY;
   }
 
+  handleMoved = (position) => {
+    this.setState({
+      position: position
+    });
+
+    this.props.onMove();
+  }
+
   render() {
 
     // Determine element class depending on state
@@ -119,11 +127,11 @@ export default class Content extends React.Component {
           width: this.props.width + 'px',
           transform: (this.props.inserting ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
         } }
-        scale={ this.props.scale ? 1 : this.props.scale }
+        scale={ this.props.inserting ? 1 : this.props.scale }
         started={ this.props.inserting ? this.props.inserting : null }
         position={ this.state.position }
         onStarted={ this.props.onPlacing }
-        onMoved={ position => { this.setState({position: position}); this.props.onMove(); } }
+        onMoved={ this.handleMoved }
         onStopped={ this.props.onDropped }
       >
         <div className='draggable-wrapper'>
