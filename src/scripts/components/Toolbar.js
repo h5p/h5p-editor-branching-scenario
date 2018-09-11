@@ -9,8 +9,7 @@ export default class Toolbar extends React.Component {
     this.zoomLevels = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5];
 
     this.state = {
-      showInfoPopup: false,
-      scale: 1.5
+      showInfoPopup: false
     };
   }
 
@@ -33,20 +32,31 @@ export default class Toolbar extends React.Component {
    * @param {bolean} zoomin Zoom direction. true = zoom in, false = zoom out.
    */
   handleZoom = (zoomin = true) => {
-    this.setState(prevState => {
-      const newState = prevState;
+    let newScale;
 
-      const pos = this.zoomLevels.indexOf(prevState.scale);
-
-      if (zoomin) {
-        newState.scale = (pos + 1 >= this.zoomLevels.length) ? prevState.scale : this.zoomLevels[pos + 1];
+    // Get closest zoom level
+    let pos = this.zoomLevels.indexOf(this.props.scale);
+    if (pos === -1) {
+      if (this.props.scale < this.zoomLevels[0]) {
+        pos = 0;
+      }
+      else if (this.props.scale > this.zoomLevels[this.zoomLevels.length-1]) {
+        pos = this.zoomLevels.length - 1;
       }
       else {
-        newState.scale = (pos <= 0) ? prevState.scale : this.zoomLevels[pos - 1];
+        pos = this.zoomLevels.indexOf(this.zoomLevels.find(level => level > this.props.scale));
       }
+    }
 
-      return newState;
-    }, () => this.props.onZoom(this.state.scale));
+    // Zoom
+    if (zoomin) {
+      newScale = (pos + 1 >= this.zoomLevels.length) ? this.props.scale : this.zoomLevels[pos + 1];
+    }
+    else {
+      newScale = (pos <= 0) ? this.props.scale : this.zoomLevels[pos - 1];
+    }
+
+    this.props.onZoom(newScale);
   }
 
   render() {
@@ -65,12 +75,21 @@ export default class Toolbar extends React.Component {
             onClick={ () => this.handleZoom(true) }
           />
           <span className="zoom-status">
-            { `${Math.round(this.state.scale * 100)} %`}
+            { `${Math.round(this.props.scale * 100)} %`}
           </span>
           <span
             className="zoom-out"
             onClick={ () => this.handleZoom(false) }
           />
+          <span
+            className="fit-to-canvas-icon"
+            onClick={ this.props.onFitToCanvas }
+          />
+          <span
+            className="fit-to-canvas-text"
+          >
+            Zoom to fit
+          </span>
         </div>
         <div
           className="missing-end-scenarios"

@@ -98,3 +98,17 @@
     content: $icon-zoom-out;
   }
 }
+.fit-to-canvas-icon {
+  margin-left: 2em;
+  margin-top: 0.2em;
+
+  &:before {
+    font-size: 1.5em;
+    cursor: pointer;
+    font-family: BSFont;
+    content: $icon-fit-to-canvas;
+  }
+}
+.fit-to-canvas-text {
+  margin-left: 0.1em;
+}

@@ -16,6 +16,8 @@ export default class Editor extends React.Component {
   constructor(props) {
     super(props);
 
+    this.zoomFitPadding = 0.9; // Percentage
+
     this.state = {
       activeIndex: 0,
       settings: props.settings,
@@ -23,7 +25,8 @@ export default class Editor extends React.Component {
       numDefaultEndScenarios: 0,
       highlight: null,
       onlyThisBall: null,
-      scale: 1.5
+      scale: 1.5,
+      center: true
     };
   }
 
@@ -123,9 +126,37 @@ export default class Editor extends React.Component {
     });
   }
 
+  /**
+   * Handle zoom.
+   *
+   * @param {number} scale Scale to set canvas to.
+   */
   handleZoom = (scale) => {
     this.setState({
       scale: scale
+    });
+  }
+
+  /**
+   * Handle fit to canvas request.
+   */
+  handleFitToCanvas = () => {
+    // TODO: Check if it's "reacty" to use refs directly this way
+    const treewrap = this.refs.canvas.refs.treewrap.refs.element.getBoundingClientRect();
+    const nodetree = this.refs.canvas.refs.tree.getBoundingClientRect();
+
+    const ratioWrap = treewrap.width / treewrap.height;
+    const ratioNode = nodetree.width / nodetree.height;
+
+    const factor = (ratioNode < ratioWrap) ?
+      treewrap.height * this.zoomFitPadding / nodetree.height :
+      treewrap.width * this.zoomFitPadding / nodetree.width;
+
+    this.setState(prevState => {
+      const newState = prevState;
+      newState.scale = prevState.scale * factor;
+      newState.center = true;
+      return newState;
     });
   }
 
@@ -139,6 +170,14 @@ export default class Editor extends React.Component {
     });
   }
 
+  /**
+   * Handle centering of Canvas done.
+   */
+  handleCanvasCentered = () => {
+    this.setState({
+      center: false
+    });
+  }
 
   /**
    * Handle inserting in Canvas
@@ -165,6 +204,7 @@ export default class Editor extends React.Component {
             onMouseDown={ this.handleMouseDown }
           />
           <Canvas
+            ref={ 'canvas' }
             inserting={ this.state.inserting }
             libraries={ this.state.libraries }
             saveData={this.props.saveData}
@@ -179,11 +219,15 @@ export default class Editor extends React.Component {
             onlyThisBall={ this.state.onlyThisBall }
             onDropped={ this.handleInsertingDone }
             scale={ this.state.scale }
+            center={ this.state.center }
+            onCanvasCentered={ this.handleCanvasCentered }
           />
           <Toolbar
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
             onHighlight={ this.handleHighlight }
+            scale={ this.state.scale }
             onZoom={ this.handleZoom }
+            onFitToCanvas={ this.handleFitToCanvas }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

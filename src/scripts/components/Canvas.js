@@ -91,8 +91,7 @@ export default class Canvas extends React.Component {
       panning: {
         x: 0,
         y: 0
-      },
-      center: true
+      }
     };
   }
 
@@ -1077,15 +1076,14 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.state.center && this.refs.tree && this['draggable-1']) {
+    if (this.props.center && this.refs.tree && this['draggable-1']) {
       const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.props.scale) / 2);
       this.setState({
-        center: false,
         panning: {
           x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
           y: 0
         }
-      });
+      }, this.props.onCanvasCentered);
     }
   }
 
