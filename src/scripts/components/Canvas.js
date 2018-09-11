@@ -205,6 +205,31 @@ export default class Canvas extends React.Component {
       .map(dropzone => dropzone.dropzone);
   }
 
+  /**
+   * Get "the" parent node.
+   *
+   * Assumes that this.renderedNodes holds all nodes in order of appearance
+   * and chooses the closest one before the child as "the" parent although
+   * more nodes may be parents.
+   *
+   * @param {number} id ID of child.
+   * @return {object} Parent node.
+   */
+  getParent = (id) => {
+    return this.renderedNodes
+      .slice(0, this.renderedNodes.indexOf(id)) // get all node IDs that were rendered on top
+      .filter(candidate => candidate > -1) // except end scenarios
+      .map(candidate => this.state.content[candidate]) // get nodes to IDs
+      .filter(candidate => { // get all parents of the child
+        if (Canvas.isBranching(candidate)) {
+          return candidate.type.params.branchingQuestion.alternatives
+            .some(alt => alt.nextContentId === id);
+        }
+        return candidate.nextContentId === id;
+      })
+      .slice(-1).pop(); // return the closest parent
+  }
+
   handleMove = (id) => {
     const draggable = this['draggable-' + id];
     const intersections = this.getIntersections(draggable);
@@ -255,6 +280,17 @@ export default class Canvas extends React.Component {
     else if (!this.state.editing) {
       // Put new node or put existing node at new place
       const defaults = (draggable.props.inserting) ? draggable.props.inserting.defaults : undefined;
+
+      // When moving nodes that leave empty alternatives, update those.
+      if (id > -1) {
+        const parent = this.getParent(id);
+        const children = this.getChildrenIds(id);
+        if (Canvas.isBranching(parent) && children.length === 0) {
+          parent.type.params.branchingQuestion.alternatives
+            .filter(alt => alt.nextContentId === id)
+            .forEach(alt => alt.nextContentId = -1);
+        }
+      }
 
       // TODO: If an existing node is removed, we'd have to determine the "correct" parent to update its
       //       next node to -1. The "correct" parent should probably be the one with the shortest path
@@ -311,7 +347,7 @@ export default class Canvas extends React.Component {
    * @return {string[]} Titles.
    */
   getChildrenTitles = (start) => {
-    return this.getChildrenIds(start)
+    return this.getChildrenIds(start, false)
       .sort((a, b) => a - b)
       .map(id => this.state.content[id].contentTitle || this.state.content[id].type.library);
   }
@@ -320,15 +356,23 @@ export default class Canvas extends React.Component {
    * Get IDs of all children nodes.
    *
    * @param {number} start ID of start node.
+   * @param {boolean} [includeBranching=true] If false, ids of BQs will not be returned.
+   * @param {boolean} [sub=false] If true, sub call.
    * @return {number[]} IDs.
    */
-  getChildrenIds = (start) => {
+  getChildrenIds = (start, includeBranching = true, sub = false) => {
     const node = this.state.content[start];
     let childrenIds = [];
     let nextIds = [];
+    const nodeIsBranching = Canvas.isBranching(node);
 
-    if (!Canvas.isBranching(node)) {
+    // Check for BQ inclusion and ignore very first start node
+    if (sub && (!nodeIsBranching || nodeIsBranching && includeBranching)) {
       childrenIds.push(start);
+    }
+
+    // Get next nodes
+    if (!nodeIsBranching) {
       nextIds = [node.nextContentId];
     }
     else {
@@ -338,7 +382,7 @@ export default class Canvas extends React.Component {
     nextIds
       .filter(id => id !== undefined && id > start) // id > start prevents loops
       .forEach(id => {
-        childrenIds = childrenIds.concat(this.getChildrenIds(id));
+        childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true));
       });
 
     return childrenIds;
@@ -874,6 +918,8 @@ export default class Canvas extends React.Component {
       }
       lastX = position.x + nodeWidth;
     });
+
+    this.renderedNodes = renderedNodes;
 
     return {
       nodes: nodes,
