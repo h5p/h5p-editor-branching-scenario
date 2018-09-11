@@ -98,15 +98,8 @@ export default class Canvas extends React.Component {
   }
 
   componentDidMount() {
-    // Handle document clicks (for exiting placing mode/state)
-    document.addEventListener('click', this.handleDocumentClick);
-
     // Trigger the initial default end scenarios count
     this.props.onContentChanged(null, this.countDefaultEndScenarios());
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.handleDocumentClick);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -161,7 +154,6 @@ export default class Canvas extends React.Component {
   handlePlacing = (id) => {
     if (this.state.placing !== null && this.state.placing !== id) {
       this.setState({
-        clickHandeled: true,
         deleting: id,
         dialog: this.buildDialog(id, this.l10n.dialogReplace)
       });
@@ -170,7 +162,6 @@ export default class Canvas extends React.Component {
     else {
       // Start placing
       this.setState({
-        clickHandeled: true,
         placing: id
       });
     }
@@ -241,10 +232,10 @@ export default class Canvas extends React.Component {
       }
 
       if (dropzone === intersections[0]) {
-        //dropzone.highlight(); TODO: Use state
+        dropzone.highlight();
       }
       else {
-        //dropzone.dehighlight(); TODO: Use state
+        dropzone.dehighlight();
       }
     });
   }
@@ -1265,6 +1256,28 @@ export default class Canvas extends React.Component {
     }
   }
 
+  handleMoved = (position) => {
+    this.setState({
+      panning: position
+    });
+  }
+
+  handleStopped = (moved) => {
+    if (!moved) {
+      // Stop highlighting
+      this.props.onHighlight(null);
+
+      // Stop click-to-place placing
+      if (this.state.placing !== null && this.state.deleting === null) {
+        this.setState({
+          placing: null
+        });
+      }
+    }
+
+    this.props.onDropped();
+  }
+
   // For debugging
   logNodes = caller => {
     console.log('NODES', caller);
@@ -1317,8 +1330,8 @@ export default class Canvas extends React.Component {
             className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
             position={ this.state.panning }
             limits={ this.panningLimits }
-            onMoved={ position => { this.setState({panning: position}); } }
-            onStopped={ moved => { if (moved) { this.props.onHighlight(null); } this.props.onDropped(); } }
+            onMoved={ this.handleMoved }
+            onStopped={ this.handleStopped }
           >
             <div
               className="nodetree"

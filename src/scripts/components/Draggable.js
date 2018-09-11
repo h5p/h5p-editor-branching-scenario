@@ -13,12 +13,9 @@ export default class Draggable extends React.Component {
   }
 
   handleMouseDown = (event) => {
-    if (event.button !== 0 || this.props.disabled || event.defaultPrevented) {
+    if (event.button !== 0 || this.props.disabled || Draggable.inUse) {
       return; // Only handle left click
     }
-
-    // Prevent the default behavior
-    event.preventDefault();
 
     this.setState(this.prepareMouseMove({
       startX: event.pageX,
@@ -31,8 +28,12 @@ export default class Draggable extends React.Component {
   }
 
   prepareMouseMove = (element) => {
+    // Prevent the multiple draggables on top of each other
+    Draggable.inUse = true;
+
     window.addEventListener('mouseup', this.handleMouseUp);
     window.addEventListener('mousemove', this.handleMouseMove);
+
     return {
       moving: element
     };
@@ -99,6 +100,8 @@ export default class Draggable extends React.Component {
     }
     window.removeEventListener('mouseup', this.handleMouseUp);
     window.removeEventListener('mousemove', this.handleMouseMove);
+
+    Draggable.inUse = false;
 
     // Trigger stopped event when we're done moving
     if (this.props.onStopped) {

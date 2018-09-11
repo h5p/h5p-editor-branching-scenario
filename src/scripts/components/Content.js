@@ -51,6 +51,14 @@ export default class Content extends React.Component {
       points[0].x > local[1].x );
   }
 
+  highlight() {
+    this.refs.element.refs.element.classList.add('highlight');
+  }
+
+  dehighlight() {
+    this.refs.element.refs.element.classList.remove('highlight');
+  }
+
   /**
    * Get content class name.
    *
@@ -84,27 +92,87 @@ export default class Content extends React.Component {
     return intersectionX * intersectionY;
   }
 
+  handleStarted = () => {
+    this.setState({
+      selected: true
+    });
+
+    this.props.onPlacing();
+  }
+
   handleMoved = (position) => {
     this.setState({
-      position: position
+      position: position,
+      moving: true
     });
 
     this.props.onMove();
+  }
+
+  handleStopped = (moved) => {
+    this.setState({
+      selected: false,
+      moving: false
+    });
+
+    if (moved) {
+      this.props.onDropped();
+    }
+  }
+
+  handleMenuButtonClick = () => {
+    if (!this.state.contentMenuActive) {
+      this.setState({
+        contentMenuActive: true
+      });
+      document.addEventListener('click', this.handleDocumentClick);
+    }
+  }
+
+  handleDocumentClick = (event) => {
+    if (event.button !== 0 || event.defaultPrevented) {
+      return; // Only handle left click
+    }
+
+    // Close
+    this.setState({
+      contentMenuActive: false
+    });
+
+    document.removeEventListener('click', this.handleDocumentClick);
+  }
+
+  handlePreview = () => {
+    // Postponed
+  }
+
+  handleEdit = () => {
+    this.props.onEditContent(this.props.id);
+  }
+
+  handleCopy = () => {
+    this.props.onCopyContent(this.props.id);
+  }
+
+  handleDelete = () => {
+    this.props.onDeleteContent(this.props.id);
   }
 
   render() {
 
     // Determine element class depending on state
     let elementClass = this.props.contentClass + ' draggable';
-    let dropped = true;
-    if (this.state.moving) {
+    if (this.state.selected) {
       elementClass += ' selected';
 
-      if (this.state.moving.started) {
+      if (this.state.moving) {
         elementClass += ' dragging';
         elementClass += ' active';
-        dropped = false;
       }
+    }
+    if (!this.state.moving && !this.props.inserting) {
+      // Prevent showing menu button
+      elementClass += ' ready';
     }
 
     let contentMenuButtonClass = 'content-menu-button';
@@ -125,31 +193,23 @@ export default class Content extends React.Component {
           left: this.state.position.x + 'px',
           top: this.state.position.y + 'px',
           width: this.props.width + 'px',
-          transform: (this.props.inserting ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
+          transform: (this.props.inserting && this.state.moving ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
         } }
-        scale={ this.props.inserting ? 1 : this.props.scale }
+        scale={ this.props.inserting && this.state.moving ? 1 : this.props.scale }
         started={ this.props.inserting ? this.props.inserting : null }
         position={ this.state.position }
-        onStarted={ this.props.onPlacing }
+        onStarted={ this.handleStarted }
         onMoved={ this.handleMoved }
-        onStopped={ this.props.onDropped }
+        onStopped={ this.handleStopped }
       >
         <div className='draggable-wrapper'>
           <div className={ 'draggable-label ' + this.props.contentClass }>
             { this.props.children }
           </div>
-          { dropped &&
-            <div
-              className={ contentMenuButtonClass }
-              onClick={ () => {
-                this.setState(prevState => {
-                  return {
-                    contentMenuActive: !prevState.contentMenuActive
-                  };
-                });
-              }}
-            />
-          }
+          <div
+            className={ contentMenuButtonClass }
+            onClick={ this.handleMenuButtonClick }
+          />
         </div>
         { this.props.tooltip &&
           <div className="dark-tooltip">
@@ -158,21 +218,10 @@ export default class Content extends React.Component {
         }
         { this.state.contentMenuActive &&
           <SubMenu
-            onPreview={ () => {
-              this.setState({contentMenuActive: false});
-            }}
-            onEdit={ () => {
-              this.setState({contentMenuActive: false});
-              this.props.onEditContent(this.props.id);
-            }}
-            onCopy={ () => {
-              this.setState({contentMenuActive: false});
-              this.props.onCopyContent(this.props.id);
-            }}
-            onDelete={ () => {
-              this.setState({contentMenuActive: false});
-              this.props.onDeleteContent(this.props.id);
-            }}
+            onPreview={ this.handlePreview }
+            onEdit={ this.handleEdit }
+            onCopy={ this.handleCopy }
+            onDelete={ this.handleDelete }
           />
         }
       </Draggable>
