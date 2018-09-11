@@ -111,7 +111,7 @@
   transition: visibility 0s linear 0.1s, opacity 0.1s linear, bottom 0.1s linear;
 }
 .alternative-ball:hover > .dark-tooltip,
-.draggable:hover > .dark-tooltip {
+.draggable.ready:hover > .dark-tooltip {
   visibility: visible;
   opacity: 1;
   transition-delay: 0s;
@@ -135,7 +135,8 @@
   text-overflow: ellipsis;
 }
 
-.dark .draggable {
+.dark .draggable,
+.draggable.highlight {
   box-shadow: 0 0 4px 1px #1773DA;
   pointer-events: none;
 }
