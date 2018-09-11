@@ -111,7 +111,7 @@
   transition: visibility 0s linear 0.1s, opacity 0.1s linear, bottom 0.1s linear;
 }
 .alternative-ball:hover > .dark-tooltip,
-.draggable:hover > .dark-tooltip {
+.draggable.ready:hover > .dark-tooltip {
   visibility: visible;
   opacity: 1;
   transition-delay: 0s;

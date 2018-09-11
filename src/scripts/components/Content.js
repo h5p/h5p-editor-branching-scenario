@@ -84,15 +84,29 @@ export default class Content extends React.Component {
     return intersectionX * intersectionY;
   }
 
+  handleStarted = () => {
+    this.setState({
+      selected: true
+    });
+
+    this.props.onPlacing();
+  }
+
   handleMoved = (position) => {
     this.setState({
-      position: position
+      position: position,
+      moving: true
     });
 
     this.props.onMove();
   }
 
   handleStopped = (moved) => {
+    this.setState({
+      selected: false,
+      moving: false
+    });
+
     if (moved) {
       this.props.onDropped();
     }
@@ -140,15 +154,17 @@ export default class Content extends React.Component {
 
     // Determine element class depending on state
     let elementClass = this.props.contentClass + ' draggable';
-    let dropped = true;
-    if (this.state.moving) {
+    if (this.state.selected) {
       elementClass += ' selected';
 
-      if (this.state.moving.started) {
+      if (this.state.moving) {
         elementClass += ' dragging';
         elementClass += ' active';
-        dropped = false;
       }
+    }
+    if (!this.state.moving && !this.props.inserting) {
+      // Prevent showing menu button
+      elementClass += ' ready';
     }
 
     let contentMenuButtonClass = 'content-menu-button';
@@ -169,12 +185,12 @@ export default class Content extends React.Component {
           left: this.state.position.x + 'px',
           top: this.state.position.y + 'px',
           width: this.props.width + 'px',
-          transform: (this.props.inserting ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
+          transform: (this.props.inserting && this.state.moving ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
         } }
-        scale={ this.props.inserting ? 1 : this.props.scale }
+        scale={ this.props.inserting && this.state.moving ? 1 : this.props.scale }
         started={ this.props.inserting ? this.props.inserting : null }
         position={ this.state.position }
-        onStarted={ this.props.onPlacing }
+        onStarted={ this.handleStarted }
         onMoved={ this.handleMoved }
         onStopped={ this.handleStopped }
       >
@@ -182,12 +198,10 @@ export default class Content extends React.Component {
           <div className={ 'draggable-label ' + this.props.contentClass }>
             { this.props.children }
           </div>
-          { dropped &&
-            <div
-              className={ contentMenuButtonClass }
-              onClick={ this.handleMenuButtonClick }
-            />
-          }
+          <div
+            className={ contentMenuButtonClass }
+            onClick={ this.handleMenuButtonClick }
+          />
         </div>
         { this.props.tooltip &&
           <div className="dark-tooltip">

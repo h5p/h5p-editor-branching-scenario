@@ -104,7 +104,7 @@
   }
 }
 .content-menu-button.active,
-.draggable:hover .content-menu-button {
+.draggable.ready:hover .content-menu-button {
   opacity: 1;
   visibility: visible;
   transition-delay: 0s;
