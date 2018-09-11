@@ -285,9 +285,13 @@ export default class Canvas extends React.Component {
 
       // When moving nodes that leave empty alternatives, update those.
       if (id > -1) {
-        const children = this.getChildrenIds(id);
         const parent = this.getParent(id);
-        if (parent && Canvas.isBranching(parent) && children.length === 0) {
+
+        const noNodeToAttach = Canvas.isBranching(this.state.content[id]) ||
+          !this.state.content[id].nextContentId ||
+          this.state.content[id].nextContentId < 0;
+
+        if (parent && Canvas.isBranching(parent) && noNodeToAttach) {
           parent.type.params.branchingQuestion.alternatives
             .filter(alt => alt.nextContentId === id)
             .forEach(alt => alt.nextContentId = -1);
