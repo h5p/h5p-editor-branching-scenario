@@ -84,10 +84,10 @@ export default class Draggable extends React.Component {
       this.props.limits(newState.position);
     }
 
-    this.setState(newState);
     if (this.props.onMoved) {
       this.props.onMoved(newState.position);
     }
+    this.setState(newState);
   }
 
   handleMouseUp = () => {

@@ -221,7 +221,7 @@ export default class Canvas extends React.Component {
       .slice(-1).pop(); // return the closest parent
   }
 
-  handleMove = (id) => {
+  handleMove = (id, position) => {
     const draggable = this['draggable-' + id];
     const intersections = this.getIntersections(draggable);
 
@@ -238,6 +238,25 @@ export default class Canvas extends React.Component {
         dropzone.dehighlight();
       }
     });
+
+    // TODO: Try panning if element outsite treewrap
+    const panning = this.refs.tree.style.transform.match(/translate\((-?[0-9]+\.*[0-9]*)px, (-?[0-9]+\.*[0-9]*)px\)/);
+    if (panning) {
+      const x = Number(panning[1]);
+      const y = Number(panning[2]);
+
+      const comp = 64 * this.state.scale;
+      const posX = (position.x + 64) * this.state.scale;
+
+      console.log(posX, Math.abs(x - comp));
+      if (posX > -1 && posX < Math.abs(x - comp)) {
+        //this.refs.tree.style.transform = 'translate(' + (x + 100) + 'px, ' + y + 'px) scale(1.5, 1.5)';
+        this.refs.tree.style.transform = 'translate(' + (comp - posX) + 'px, ' + y + 'px) scale(1.5, 1.5)';
+        //position.x = (position.x - ((x - (comp - posX)) * this.state.scale));
+        //console.log(this['draggable-' + id].refs.element.refs.element.style.left, (position.x + (x - (comp - posX))) + 'px');
+        //this['draggable-' + id].refs.element.refs.element.style.left = (position.x + (x - (comp - posX))) + 'px';
+      }
+    }
   }
 
   handleDropped = (id) => {
@@ -750,7 +769,7 @@ export default class Canvas extends React.Component {
             position={ position }
             width={ this.state.nodeSpecs.width }
             onPlacing={ () => this.handlePlacing(id) }
-            onMove={ () => this.handleMove(id) }
+            onMove={ (position) => this.handleMove(id, position) }
             onDropped={ () => this.handleDropped(id) }
             contentClass={ libraryTitle }
             onEditContent={ this.handleEditContent }
@@ -1295,7 +1314,7 @@ export default class Canvas extends React.Component {
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
             width={ this.state.nodeSpecs.width }
-            onMove={ () => this.handleMove(-1) }
+            onMove={ (position) => this.handleMove(-1, position) }
             onDropped={ () => this.handleDropped(-1) }
             contentClass={ this.props.inserting.library.title.replace(/ +/g, '') }
             position={ this.props.inserting.position }

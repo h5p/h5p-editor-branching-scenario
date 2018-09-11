@@ -101,12 +101,11 @@ export default class Content extends React.Component {
   }
 
   handleMoved = (position) => {
+    this.props.onMove(position);
     this.setState({
       position: position,
       moving: true
     });
-
-    this.props.onMove();
   }
 
   handleStopped = (moved) => {
