@@ -17,9 +17,9 @@ export default class TooltipButton extends React.Component {
    */
   handleClick = () => {
     this.setState(prevState => {
-      const newState = prevState;
-      newState.showTooltip = !prevState.showTooltip;
-      return newState;
+      return {
+        showTooltip: !prevState.showTooltip
+      };
     });
   }
 
