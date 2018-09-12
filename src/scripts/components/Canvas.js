@@ -832,6 +832,15 @@ export default class Canvas extends React.Component {
 
         const key = parent + '-abox-' + num;
 
+        const bqParams = this.state.content[parent].type.params;
+        const alternative = bqParams.branchingQuestion
+          && bqParams.branchingQuestion.alternatives
+          && bqParams.branchingQuestion.alternatives[num];
+        const hasFeedback = alternative
+          && alternative.addFeedback
+          && alternative.feedback
+          && alternative.feedback.title;
+
         let alternativeBallClasses = 'alternative-ball';
         if (!drawAboveLine) {
           if (id > -1) {
@@ -839,15 +848,20 @@ export default class Canvas extends React.Component {
             alternativeBallClasses += ' loop';
           }
           else if (id === -1) {
-            // Default end scenario
-            alternativeBallClasses += ' endscreen';
-          }
-          else if (id < -1) {
-            // Alternative end scenarios
-            alternativeBallClasses += ' endscreenCustom';
+            // Default or custom end scenario
+            alternativeBallClasses += hasFeedback
+              ? ' endscreenCustom'
+              : ' endscreen';
           }
         }
-        if (this.props.highlight !== null && (this.props.highlight !== id || highlightCurrentNode)) {
+
+        // Do not highlight custom end scenarios
+        const skipHighlighting = hasFeedback ||
+          (
+            this.props.highlight !== null
+            && (this.props.highlight !== id || highlightCurrentNode)
+          );
+        if (skipHighlighting) {
           if (this.props.onlyThisBall === null || this.props.onlyThisBall !== key) {
             alternativeBallClasses += ' fade';
           }
@@ -1125,7 +1139,10 @@ export default class Canvas extends React.Component {
     this.state.content.forEach(content => {
       if (Canvas.isBranching(content)) {
         content.type.params.branchingQuestion.alternatives.forEach(alternative => {
-          if (alternative.nextContentId === -1) {
+          const hasFeedback = alternative.addFeedback
+            && alternative.feedback
+            && alternative.feedback.title;
+          if (alternative.nextContentId === -1 && !hasFeedback) {
             numMissingEndScenarios++;
           }
         });
