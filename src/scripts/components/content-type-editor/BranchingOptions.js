@@ -16,13 +16,13 @@ export default class BranchingOptions extends React.Component {
     const library = content.type.library.split(' ')[0]
       .split('.')[1]
       .replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5');
-    const contentTitle = content.contentTitle;
+    const contentTitle = content.contentTitle; // TODO: Can we use Canvas.getTooltip() instead for consistency?
     return `${library}: ${contentTitle}`;
   }
 
   handleExistingContentChange(e) {
     const newValue = e.target.value;
-    this.setState({
+    this.setState({ // TODO: Parent is keeping track of this, use props instead
       existingContentId: newValue,
     });
     this.updateContentSelected(newValue);

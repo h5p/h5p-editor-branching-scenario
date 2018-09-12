@@ -41,7 +41,7 @@ export default class Editor extends React.Component {
         loadedLibraries.push({
           title: libraries[i].title.replace(/ +/g, ''),
           name: libraries[i].uberName,
-          className: '' // TODO: Add className
+          className: '' // TODO: Add className, use kabab-case
         });
       }
     }
@@ -63,10 +63,12 @@ export default class Editor extends React.Component {
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
 
+    // TODO: It seems the next state depends on the current, this should be handled inside the setState() updater using prevState.
     const settings = this.state.settings;
     settings[[name]] = value;
     this.setState({settings: settings});
 
+    // TODO: maintained in parent as well? We don't really need to have a local state then
     this.props.updateParams(settings);
   }
 
@@ -216,7 +218,6 @@ export default class Editor extends React.Component {
             handleOpenTutorial={ this.handleOpenTutorial }
             onOpenEditor={ this.handleOpenEditor }
             onContentChanged={ this.handleContentChanged }
-            getSemantics={ this.props.getSemantics }
             onHighlight={ this.handleHighlight }
             highlight={ this.state.highlight }
             onlyThisBall={ this.state.onlyThisBall }

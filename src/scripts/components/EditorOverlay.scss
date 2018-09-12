@@ -19,6 +19,22 @@
   flex-direction: column;
 }
 
+.editor-overlay .editor-overlay-library {
+  .field.library > .h5peditor-copypaste-wrap,
+  .field.library > select,
+  .field.library > .h5p-editor-flex-wrapper {
+    display: none;
+  }
+
+  .field.library  > .libwrap {
+    margin-top: 0;
+  }
+
+  > :not(.library) {
+    display: none;
+  }
+}
+
 .editor-overlay .editor-overlay-header {
   margin: 0;
   padding: 0;

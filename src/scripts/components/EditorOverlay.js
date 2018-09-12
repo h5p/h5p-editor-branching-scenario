@@ -17,12 +17,20 @@ export default class EditorOverlay extends React.Component {
     const library = content.type.library.split(' ')[0];
     this.isBranchingQuestion = library === 'H5P.BranchingQuestion';
 
-    content.$form = H5P.jQuery('<div/>');
+    content.$form = H5P.jQuery('<div/>', {
+      'class': 'editor-overlay-library'
+    });
 
     // Attach the DOM to $form
+    const contentFields = H5PEditor.findSemanticsField(
+      'content',
+      this.props.main.field
+    );
+    const libraryFields = contentFields.field.fields;
+
     H5PEditor.processSemanticsChunk(
-      this.props.elementFields,
-      content.type.params,
+      libraryFields,
+      content,
       content.$form,
       this.props.main,
       content.type.library
@@ -49,7 +57,10 @@ export default class EditorOverlay extends React.Component {
    */
   addBranchingOptionsToEditor() {
     if (this.isBranchingQuestion) {
-      const branchingQuestionEditor = this.props.main.children[0];
+      const branchingQuestionEditor = H5PEditor.findField(
+        'type/branchingQuestion',
+        this.props.main
+      );
 
       if (branchingQuestionEditor && branchingQuestionEditor.setAlternatives) {
 
@@ -112,6 +123,7 @@ export default class EditorOverlay extends React.Component {
   handleUpdateTitle = (event) => {
     const value = event.target.value;
 
+    // TODO: Content state is maintained in both this component and Canvas. Please only use parent (Canvas).
     this.setState(prevState => {
       const newState = {
         content: prevState.content
@@ -125,6 +137,7 @@ export default class EditorOverlay extends React.Component {
   };
 
   updateNextContentId = (value) => {
+    // TODO: Content state is maintained in both this component and Canvas. Please only use parent (Canvas).
     this.setState(prevState => {
       const newState = {
         content: prevState.content

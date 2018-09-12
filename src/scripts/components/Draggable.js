@@ -42,6 +42,7 @@ export default class Draggable extends React.Component {
   handleMouseMove = (event) => {
     let newState;
 
+    // TODO: Using state to determine new state, please use prevState inside setState() updater.
     if (!this.state.moving.started) {
       // Element has not started moving yet (might be clicking)
 
@@ -84,13 +85,14 @@ export default class Draggable extends React.Component {
       this.props.limits(newState.position);
     }
 
-    this.setState(newState);
+    this.setState(newState); // TODO: We shouldn't really store the position in the newState since parent is keeping track of it for us.
     if (this.props.onMoved) {
       this.props.onMoved(newState.position);
     }
   }
 
   handleMouseUp = () => {
+    // TODO: Using state to determine new state, please use prevState inside setState() updater.
     const moved = this.state.moving.started;
     if (moved) {
       this.setState({
