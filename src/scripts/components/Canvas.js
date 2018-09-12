@@ -1393,7 +1393,6 @@ export default class Canvas extends React.Component {
             <EditorOverlay
               id={ this.state.editing }
               content={ this.state.content }
-              elementFields={ interaction !== 'undefined' ? this.props.getSemantics(interaction.type.library) : undefined }
               icon={ interaction !== 'undefined' ? `editor-overlay-icon-${this.camelToKebab(interaction.type.library.split('.')[1].split(' ')[0])}` : ''}
               onRef={ this.handleRef }
               onNextPathDrop={ this.handlePushElement }

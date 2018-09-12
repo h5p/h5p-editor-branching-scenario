@@ -25,7 +25,7 @@ export default class Editor extends React.Component {
       numDefaultEndScenarios: 0,
       highlight: null,
       onlyThisBall: null,
-      scale: 1.5,
+      scale: 1.2,
       center: true
     };
   }
@@ -213,7 +213,6 @@ export default class Editor extends React.Component {
             handleOpenTutorial={ this.handleOpenTutorial }
             onOpenEditor={ this.handleOpenEditor }
             onContentChanged={ this.handleContentChanged }
-            getSemantics={ this.props.getSemantics }
             onHighlight={ this.handleHighlight }
             highlight={ this.state.highlight }
             onlyThisBall={ this.state.onlyThisBall }

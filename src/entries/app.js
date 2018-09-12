@@ -20,8 +20,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
     this.setValue = setValue;
 
-    this.elementFields = this.findField('content', this.field.fields);
-    this.libraries = this.findField('type', this.elementFields.field.fields).options;
+    const contentFields = H5PEditor.findSemanticsField('content', this.field);
+    const libraryFields = contentFields.field.fields;
+    this.libraries = H5PEditor.findSemanticsField('type', contentFields).options;
 
     this.params = params || {};
 
@@ -437,153 +438,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       }
     });
 
-    /**
-     * Flatten semantics.
-     * Unsanitized. Will keep track of the old path, so it can be "reverted" later.
-     *
-     * @param {object} field - Semantics field to start with flattening.
-     * @param {object[]} [path] - Start path to be added.
-     * @return {object[]} Flattened semantics.
-     */
-    const flattenSemantics = function (field, path = []) {
-      if (!Array.isArray(field)) {
-        field = [field];
-      }
-
-      let results = [];
-      const currentPath = path.slice();
-
-      field
-        .filter(field => field !== undefined)
-        .forEach(field => {
-          const nextPathItem = field.name ? [field.name] : [];
-          field.path = currentPath;
-          results.push(field);
-          if (field.type === 'group') {
-            results = results.concat(flattenSemantics(field.fields, currentPath.concat(nextPathItem)));
-          }
-          if (field.type === 'list') {
-            results = results.concat(flattenSemantics(field.field.fields, currentPath.concat(nextPathItem).concat([field.field.name])));
-          }
-        });
-
-      return results;
-    };
-
-    /**
-     * Check if field properties match a filter in a given way.
-     * TODO: Better solution, step 1: Do the filtering via a function such as semanticsFilter(semantics, filterFunction)
-     * TODO: Better solution, step 2: Build a semantics class with a function such as filter(filterFunction)
-     *
-     * @param {object} field - Semantics field.
-     * @param {object} filter - Filter.
-     * @param {string} filter.property - Field property to compare with.
-     * @param {number|string|boolean} filter.value - Property value to compare with.
-     * @param {string} filter.mode - Comparator between properties, e.g. "===" or "!==".
-     * @return {boolean} True, if property matches value given the mode.
-     */
-    const fieldMatchesFilter = function(field, filter) {
-      if (!field || !filter || typeof filter.value === 'undefined') {
-        return false;
-      }
-
-      if (!filter.mode) {
-        filter.mode = '===';
-      }
-
-      // More comparators could be added
-      switch (filter.mode) {
-        case '===':
-          return (field[filter.property] === filter.value);
-        case '!==':
-          return (field[filter.property] !== filter.value);
-      }
-
-      return false;
-    };
-
-    /**
-     * Check if particular comnbination of property filters is given.
-     *
-     * @param {object} field - Semantics field.
-     * @param {object[]} filters - List of filters.
-     * @param {string} filters[].property - Field property to compare with.
-     * @param {number|string|boolean} filters[].value - Property value to compare with.
-     * @param {string} filters[].[mode] - Comparator between properties, e.g. "===" (default) or "!==".
-     * @param {string} [mode] - Comparator between filters, e.g. "||" (default) or "&&".
-     * @return {boolean} True, if property combination matches mode.
-     */
-    const andOrOr = function (field, filters = {}, mode = '||') {
-      if (!field) {
-        return false;
-      }
-
-      switch (mode) {
-        case '||':
-          return filters.some(filter => fieldMatchesFilter(field, filter));
-        case '&&':
-          return filters.every(filter => fieldMatchesFilter(field, filter));
-      }
-
-      return false;
-    };
-
-    /**
-     * Filter semantics for particular property combinations.
-     *
-     * @param {object} field - Semantics field.
-     * @param {object[]} filters - List of filters.
-     * @param {string} filters[].property - Field property to compare with.
-     * @param {number|string|boolean} filters[].value - Property value to compare with.
-     * @param {string} filters[].[mode] - Comparator between properties, e.g. "===" (default) or "!==".
-     * @param {string} [mode] - Comparator between filters, e.g. "||" (default) or "&&".
-     */
-    const filterSemantics = function (field, filters = [], mode = '||') {
-      if (!Array.isArray(filters)) {
-        filters = [filters];
-      }
-
-      const flatSemantics = flattenSemantics(field);
-      return flatSemantics.filter(semantic => andOrOr(semantic, filters, mode));
-    };
-
-    /*
-     * This is terribly slow! Maybe it's better to pull the common semantics fields from somewhere else?
-     * Also: IE 11 doesn't support promises (and async/await) and'd need a Polyfill or an oldfashioned
-     * solution.
-     *
-     * This complete approach is crap.
-     */
-    const promise = new Promise(resolve => {
-      // Add all libraries that are not used but options in semantics
-      let librariesUsed = this.libraries.filter((library, index, array) => array.indexOf(library) === index);
-
-      const allSemantics = [];
-      librariesUsed.forEach(libraryName => {
-        H5PEditor.loadLibrary(libraryName, result => {
-          allSemantics.push({library: libraryName, semantics: {
-            type: 'group',
-            fields: result
-          }});
-          if (allSemantics.length === librariesUsed.length) {
-            resolve(allSemantics);
-          }
-        });
-      });
-    });
-    promise.then((results) => {
-      this.allSemantics = results.filter(result => result.semantics.fields !== null);
-      this.allSemantics.forEach(result => {
-        // Can contain "common" group fields with further "common" text fields nested inside
-        const firstFilter = filterSemantics(result.semantics, {property: 'common', value: true});
-        let fields = filterSemantics(firstFilter, {property: 'type', value: 'text'});
-        fields.forEach(field => {
-          field.library = result.library;
-        });
-      });
-      this.buildContentEditorForms();
-    });
-
     // TODO: Match semantics with design
     // TODO: Sanitized access more elegantly
     this.params.startScreen = this.params.startScreen || {};
@@ -613,26 +467,25 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
     const field2 = this.field.fields[2].field.fields[2];
     this.endImageChooser = new H5PEditor.widgets.image(this, field2, this.settings.endImage, () => {});
+
+    this.buildContentEditorForms(libraryFields);
   }
 
   /**
    * Build editors for existing content, so common fields are available
    * on load
    */
-  BranchingScenarioEditor.prototype.buildContentEditorForms = function () {
+  BranchingScenarioEditor.prototype.buildContentEditorForms = function (libraryFields) {
     // Render all forms up front, so common fields are available
     this.params.content.forEach((contentParams) => {
-      var elementFields = this.getSemantics(contentParams.type.library);
-      var $form = H5P.jQuery('<div/>');
+      const $form = H5P.jQuery('<div/>');
       H5PEditor.processSemanticsChunk(
-        elementFields,
-        contentParams.type.params,
+        libraryFields,
+        contentParams,
         $form,
         this,
         contentParams.type.library
       );
-
-      contentParams.$form = $form;
     });
   };
 
@@ -648,21 +501,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params.startScreen.startScreenSubtitle = data.startSubtitle;
     this.params.startScreen.startScreenImage = data.startImage;
     this.params.endScreens[0].endScreenImage = data.endImage;
-  };
-
-  /**
-   * Get semantics fields for a library.
-   *
-   * @param {string} libraryName - Library name.
-   * @return {object} Semantics for library.
-   */
-  BranchingScenarioEditor.prototype.getSemantics = function (libraryName) {
-    let elementFields = {};
-    if (this.allSemantics) {
-      const testLibrary = this.allSemantics.filter(item => item.library.indexOf(libraryName) !== -1)[0];
-      elementFields = testLibrary.semantics.fields;
-    }
-    return elementFields;
   };
 
   /**
@@ -686,14 +524,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     }
     else {
       this.readies.push(ready);
-    }
-  };
-
-  BranchingScenarioEditor.prototype.findField = function (name, fields) {
-    for (var i = 0; i < fields.length; i++) {
-      if (fields[i].name === name) {
-        return fields[i];
-      }
     }
   };
 
@@ -727,7 +557,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         endImageChooser={ this.endImageChooser }
         updateParams={ this.updateParams.bind(this) }
         onContentChanged={ this.handleContentChanged.bind(this) }
-        getSemantics={ this.getSemantics.bind(this) }
       />), $wrapper.get(0)
     );
   };
