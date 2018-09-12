@@ -113,7 +113,9 @@ export default class EditorOverlay extends React.Component {
     const value = event.target.value;
 
     this.setState(prevState => {
-      const newState = prevState;
+      const newState = {
+        content: prevState.content
+      };
       newState.content.contentTitle = value;
 
       return newState;
@@ -124,7 +126,9 @@ export default class EditorOverlay extends React.Component {
 
   updateNextContentId = (value) => {
     this.setState(prevState => {
-      const newState = prevState;
+      const newState = {
+        content: prevState.content
+      };
       newState.content.nextContentId = value;
 
       return newState;
