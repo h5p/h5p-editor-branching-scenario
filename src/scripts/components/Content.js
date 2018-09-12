@@ -23,7 +23,7 @@ export default class Content extends React.Component {
     if (nextProps.position && (
       nextProps.position.x !== this.state.position.x ||
         nextProps.position.y !== this.state.position.y)) {
-      this.setState({
+      this.setState({ // TODO: Parent is keeping track of this, use props instead
         position: {
           x: nextProps.position.x,
           y: nextProps.position.y
@@ -64,8 +64,8 @@ export default class Content extends React.Component {
    *
    * @return {string} Content class name.
    */
-  getContentClass = () => {
-    return this.props.contentClass;
+  isBranchingQuestion = () => {
+    return this.props.contentClass === 'BranchingQuestion';
   }
 
   /**
@@ -147,15 +147,18 @@ export default class Content extends React.Component {
   }
 
   handleEdit = () => {
-    this.props.onEditContent(this.props.id);
+    // TODO: We should not have to return our own ID. The parent already knows
+    this.props.onEdit(this.props.id);
   }
 
   handleCopy = () => {
-    this.props.onCopyContent(this.props.id);
+    // TODO: We should not have to return our own ID. The parent already knows
+    this.props.onCopy(this.props.id);
   }
 
   handleDelete = () => {
-    this.props.onDeleteContent(this.props.id);
+    // TODO: We should not have to return our own ID. The parent already knows
+    this.props.onDelete(this.props.id);
   }
 
   render() {

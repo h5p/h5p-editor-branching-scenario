@@ -14,11 +14,15 @@ export default class Toolbar extends React.Component {
   }
 
   handleShowPopup = () => {
-    this.setState({ showInfoPopup: true });
+    this.setState({
+      showInfoPopup: true
+    });
   }
 
   handleClosePopup = () => {
-    this.setState({ showInfoPopup: false });
+    this.setState({
+      showInfoPopup: false
+    });
   }
 
   handleHighlight = () => {

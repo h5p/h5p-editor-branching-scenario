@@ -112,6 +112,7 @@ export default class EditorOverlay extends React.Component {
   handleUpdateTitle = (event) => {
     const value = event.target.value;
 
+    // TODO: Content state is maintained in both this component and Canvas. Please only use parent (Canvas).
     this.setState(prevState => {
       const newState = {
         content: prevState.content
@@ -125,6 +126,7 @@ export default class EditorOverlay extends React.Component {
   };
 
   updateNextContentId = (value) => {
+    // TODO: Content state is maintained in both this component and Canvas. Please only use parent (Canvas).
     this.setState(prevState => {
       const newState = {
         content: prevState.content

@@ -58,7 +58,6 @@ export default class Canvas extends React.Component {
     };
 
     this.state = {
-      clickHandeled: false,
       placing: null,
       deleting: null,
       inserting: null,
@@ -100,7 +99,7 @@ export default class Canvas extends React.Component {
     this.props.onContentChanged(null, this.countDefaultEndScenarios());
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) { // TODO: Deprected ?
     if (nextProps.inserting) {
       this.setState({
         placing: -1,
@@ -133,19 +132,6 @@ export default class Canvas extends React.Component {
     return dialog;
   }
 
-  handleDocumentClick = () => {
-    if (this.state.clickHandeled) {
-      this.setState({
-        clickHandeled: false
-      });
-    }
-    else if (this.state.placing !== null && this.state.deleting === null) {
-      this.setState({
-        placing: null
-      });
-    }
-  }
-
   /**
    * @param {number} id - Dropzone ID.
    */
@@ -153,9 +139,10 @@ export default class Canvas extends React.Component {
     if (this.state.placing !== null && this.state.placing !== id) {
       this.setState({
         deleting: id,
-        dialog: this.buildDialog(id, this.l10n.dialogReplace)
+        dialog: this.buildDialog(id, this.l10n.dialogReplace) // TODO: Refactor. Uses the wrong state to determine the next. Should be a much cleaner way to handle this.
       });
-      this.props.onDropped();
+      this.props.onDropped(); // TODO: Determine if should really run after set state. Note that this triggers a changing in the props which sets the state again through componentWillReceiveProps, which is deprected. Can we find a better way of doing this?
+      // I guess only the parent should keep track of this state? yes
     }
     else {
       // Start placing
@@ -247,29 +234,33 @@ export default class Canvas extends React.Component {
       this.setState({
         placing: null
       });
-      this.props.onDropped();
+      this.props.onDropped(); // TODO: See handlePlacing. Should be called after setstate or could it be done differently.
       return;
     }
 
     // Dropzone with largest intersection
     const dropzone = intersections[0];
 
-    // BranchingQuestion shall not be replacable by anything
-    if (dropzone instanceof Content && dropzone.getContentClass() === 'BranchingQuestion') {
-      this.setState({
-        placing: null
-      });
-      return;
-    }
+    if (dropzone instanceof Content) {
+      // TODO: Remove drop zones when dragging intead of handling this on drop.
 
-    // BranchingQuestions shall not be able to replace its own children
-    if (dropzone instanceof Content && draggable.getContentClass() === 'BranchingQuestion') {
-      const childrenOfBQ = this.getChildrenIds(id);
-      if (childrenOfBQ.some(child => child === dropzone.props.id)) {
+      // Branching Question must not be replaced by anything
+      if (dropzone.isBranchingQuestion()) {
         this.setState({
           placing: null
         });
         return;
+      }
+
+      // Branching Question must not replace own children
+      if (draggable.isBranchingQuestion()) {
+        const childrenOfBQ = this.getChildrenIds(id);
+        if (childrenOfBQ.some(child => child === dropzone.props.id)) {
+          this.setState({
+            placing: null
+          });
+          return;
+        }
       }
     }
 
@@ -317,28 +308,22 @@ export default class Canvas extends React.Component {
     this.placeInTree(this.state.placing, nextContentId, parent, alternative, defaults);
   }
 
-  handleEditContent = (id) => {
+  handleContentEdit = (id) => {
     this.setState({
       editing: id
     });
   }
 
-  /**
-   * Copy content to clipboard.
-   *
-   * @param {number} id Content id.
-   */
-  handleCopyContent = (id) => {
+  handleContentCopy = (id) => {
     const clipboardItem = new H5P.ClipboardItem(this.state.content[id], 'type', 'H5PEditor.BranchingScenario');
     H5P.clipboardify(clipboardItem);
   }
 
-  handleDeleteContent = (id) => {
+  handleContentDelete = (id) => {
     this.setState({
       deleting: id,
-      dialog: this.buildDialog(id, this.l10n.dialogDelete)
+      dialog: this.buildDialog(id, this.l10n.dialogDelete) // TODO: See comment in handlePlacing(). There must be a better way to handle this.
     });
-
   }
 
   /**
@@ -436,6 +421,8 @@ export default class Canvas extends React.Component {
   }
 
   /**
+   * TODO: Could be a static ?
+   *
    * @param {number} id ID of node that was added/moved
    * @param {number} nextContentId ID that needs to be updated
    */
@@ -458,6 +445,7 @@ export default class Canvas extends React.Component {
 
   /**
    * Attach child to existing node.
+   * TODO: Could be a static ?
    *
    * @param {object} content Content node.
    * @param {number} id Id of child node.
@@ -497,7 +485,7 @@ export default class Canvas extends React.Component {
    * @param {object} [defaults.specific] Specific form options.
    */
   placeInTree(id, nextContentId, parent, alternative, defaults = {}) {
-    this.setState(prevState => {
+    this.setState((prevState, props) => {
       let newState = {
         placing: null,
         editing: null,
@@ -610,7 +598,7 @@ export default class Canvas extends React.Component {
         this.attachChild(newState.content[id], nextContentId);
       }
 
-      this.props.onDropped();
+      props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
       return newState;
     });
   }
@@ -776,10 +764,10 @@ export default class Canvas extends React.Component {
             onPlacing={ () => this.handlePlacing(id) }
             onMove={ () => this.handleMove(id) }
             onDropped={ () => this.handleDropped(id) }
-            contentClass={ libraryTitle }
-            onEditContent={ this.handleEditContent }
-            onCopyContent={ this.handleCopyContent }
-            onDeleteContent={ this.handleDeleteContent }
+            contentClass={ libraryTitle }  // TODO: Use kebab-case, should be determined once on load instead of for each render.
+            onEdit={ this.handleContentEdit }
+            onCopy={ this.handleContentCopy }
+            onDelete={ this.handleContentDelete }
             disabled={ contentIsBranching }
             tooltip={ Canvas.getTooltip(content) }
             scale={ this.props.scale }
@@ -970,6 +958,9 @@ export default class Canvas extends React.Component {
         content: [...prevState.content]
       };
 
+      // TODO: Don't place large named functions inside other functions, find a cleaner and easier to understand way of doing this.
+      // If we can find a simple way to group/prefix content state mutating functions that would be great.
+
       /**
        * Delete node.
        *
@@ -1065,7 +1056,7 @@ export default class Canvas extends React.Component {
     }, this.contentChanged);
   }
 
-  handleCancel = () => {
+  handleCancel = () => { // TODO: What are we canceling? Can this be used for everything?
     this.setState({
       placing: null,
       deleting: null,
@@ -1077,10 +1068,12 @@ export default class Canvas extends React.Component {
   componentDidUpdate() {
     // Center the tree
     if (this.props.center && this.refs.tree && this['draggable-1']) {
+      // TODO: Much cleaner if we can get this into the state through a ref= callback
+      // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
       const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.props.scale) / 2);
       this.setState({
         panning: {
-          x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
+          x: (center - (this['draggable-0'].props.position.x * this.props.scale)), // TODO: use prevState and props
           y: 0
         }
       }, this.props.onCanvasCentered);
@@ -1097,24 +1090,13 @@ export default class Canvas extends React.Component {
   }
 
   /**
-   * Handle insertion of new data.
-   *
-   * @param {number} id - ID.
-   */
-  handleInserted = (id) => {
-    this.setState({
-      editing: id
-    });
-  }
-
-  /**
    * Set reference to Editor Overlay DOM.
    *
    * @param {object} ref - Reference.
    */
   handleRef = ref => {
     this.setState({
-      editorOverlay: ref
+      editorOverlay: ref // TODO: We should not put refs into the state.
     });
   }
 
@@ -1279,7 +1261,7 @@ export default class Canvas extends React.Component {
       }
     }
 
-    this.props.onDropped();
+    this.props.onDropped(); // TODO: See TODO in handlePlacing()
   }
 
   // For debugging
@@ -1320,7 +1302,7 @@ export default class Canvas extends React.Component {
             width={ this.state.nodeSpecs.width }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
-            contentClass={ this.props.inserting.library.title.replace(/ +/g, '') }
+            contentClass={ this.props.inserting.library.title.replace(/ +/g, '') } // TODO: Use kebab-case
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
             scale={ this.props.scale }
@@ -1368,8 +1350,8 @@ export default class Canvas extends React.Component {
               confirmationDetailsList={ this.state.dialog.confirmationDetailsList }
               textConfirm={ this.state.dialog.textConfirm }
               textCancel={ this.state.dialog.textCancel }
-              handleConfirm={ this.state.dialog.handleConfirm }
-              handleCancel={ this.state.dialog.handleCancel }
+              handleConfirm={ this.state.dialog.handleConfirm } // TODO: Rename to onConfirm ?
+              handleCancel={ this.state.dialog.handleCancel } // TODO: Rename to onCancel ?
             />
           }
           { this.state.editing !== null &&

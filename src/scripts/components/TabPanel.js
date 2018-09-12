@@ -12,6 +12,7 @@ export default class Tabs extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    // TODO: State is maintained in both this component and parent. Please only use parent.
     this.setState({
       activeIndex: nextProps.activeIndex
     });
