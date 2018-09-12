@@ -6,6 +6,8 @@ export default class Toolbar extends React.Component {
   constructor(props) {
     super(props);
 
+    this.zoomLevels = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5];
+
     this.state = {
       showInfoPopup: false
     };
@@ -24,6 +26,39 @@ export default class Toolbar extends React.Component {
     this.handleClosePopup();
   }
 
+  /**
+   * Change zoom.
+   *
+   * @param {bolean} zoomin Zoom direction. true = zoom in, false = zoom out.
+   */
+  handleZoom = (zoomin = true) => {
+    let newScale;
+
+    // Get closest zoom level
+    let pos = this.zoomLevels.indexOf(this.props.scale);
+    if (pos === -1) {
+      if (this.props.scale < this.zoomLevels[0]) {
+        pos = 0;
+      }
+      else if (this.props.scale > this.zoomLevels[this.zoomLevels.length-1]) {
+        pos = this.zoomLevels.length - 1;
+      }
+      else {
+        pos = this.zoomLevels.indexOf(this.zoomLevels.find(level => level > this.props.scale));
+      }
+    }
+
+    // Zoom
+    if (zoomin) {
+      newScale = (pos + 1 >= this.zoomLevels.length) ? this.props.scale : this.zoomLevels[pos + 1];
+    }
+    else {
+      newScale = (pos <= 0) ? this.props.scale : this.zoomLevels[pos - 1];
+    }
+
+    this.props.onZoom(newScale);
+  }
+
   render() {
     // TODO: l10n
 
@@ -34,6 +69,29 @@ export default class Toolbar extends React.Component {
 
     return (
       <div className="toolbar">
+        <div className="zoom-wrapper">
+          <span
+            className="zoom-in"
+            onClick={ () => this.handleZoom(true) }
+          />
+          <span className="zoom-status">
+            { `${Math.round(this.props.scale * 100)} %`}
+          </span>
+          <span
+            className="zoom-out"
+            onClick={ () => this.handleZoom(false) }
+          />
+          <span
+            className="fit-to-canvas-icon"
+            onClick={ this.props.onFitToCanvas }
+          />
+          <span
+            className="fit-to-canvas-text"
+            onClick={ this.props.onFitToCanvas }
+          >
+            Zoom to fit
+          </span>
+        </div>
         <div
           className="missing-end-scenarios"
           role="button"

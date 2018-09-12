@@ -91,9 +91,7 @@ export default class Canvas extends React.Component {
       panning: {
         x: 0,
         y: 0
-      },
-      center: true,
-      scale: 1.5
+      }
     };
   }
 
@@ -784,7 +782,7 @@ export default class Canvas extends React.Component {
             onDeleteContent={ this.handleDeleteContent }
             disabled={ contentIsBranching }
             tooltip={ Canvas.getTooltip(content) }
-            scale={ this.state.scale }
+            scale={ this.props.scale }
           >
             { libraryTitle }
           </Content>
@@ -1078,15 +1076,14 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.state.center && this.refs.tree && this['draggable-1']) {
-      const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.state.scale) / 2);
+    if (this.props.center && this.refs.tree && this['draggable-1']) {
+      const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.props.scale) / 2);
       this.setState({
-        center: false,
         panning: {
-          x: (center - (this['draggable-0'].props.position.x * this.state.scale)),
+          x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
           y: 0
         }
-      });
+      }, this.props.onCanvasCentered);
     }
   }
 
@@ -1224,7 +1221,7 @@ export default class Canvas extends React.Component {
     const wideLoad = (treeRect.width > treewrapRect.width);
     const highLoad = (treeRect.height > treewrapRect.height);
 
-    const padding = (this.state.scale * 64); // Allow exceeding by this much
+    const padding = (this.props.scale * 64); // Allow exceeding by this much
 
     // Limit X movement
     if (wideLoad) {
@@ -1326,7 +1323,7 @@ export default class Canvas extends React.Component {
             contentClass={ this.props.inserting.library.title.replace(/ +/g, '') }
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
-            scale={ this.state.scale }
+            scale={ this.props.scale }
           >
             { this.props.inserting.library.title }
           </Content>
@@ -1346,7 +1343,7 @@ export default class Canvas extends React.Component {
               style={ {
                 width: tree.x + 'px',
                 height: tree.y + 'px',
-                transform: 'translate(' + this.state.panning.x + 'px,' + this.state.panning.y + 'px) scale(' + this.state.scale + ',' + this.state.scale + ')'
+                transform: 'translate(' + this.state.panning.x + 'px,' + this.state.panning.y + 'px) scale(' + this.props.scale + ',' + this.props.scale + ')'
               } }
             >
               { tree.nodes }
