@@ -16,8 +16,6 @@ export default class Editor extends React.Component {
   constructor(props) {
     super(props);
 
-    this.zoomFitPadding = 0.9; // Percentage
-
     this.state = {
       activeIndex: 0,
       settings: props.settings,
@@ -25,8 +23,9 @@ export default class Editor extends React.Component {
       numDefaultEndScenarios: 0,
       highlight: null,
       onlyThisBall: null,
-      scale: 1.5,
-      center: true
+      scale: 1,
+      center: true,
+      translate: null
     };
   }
 
@@ -127,36 +126,23 @@ export default class Editor extends React.Component {
   }
 
   /**
-   * Handle zoom.
+   * Handle changed scale.
    *
    * @param {number} scale Scale to set canvas to.
+   * @param {object} [options] Extra options.
+   * @param {boolean} [options.center] If true, center canvas.
+   * @param {object} [params.translate] Offsets for translating canvas.
+   * @param {number} [params.translate.x] X offset.
+   * @param {number} [params.translate.y] Y offset.
    */
-  handleZoom = (scale) => {
-    this.setState({
-      scale: scale
-    });
-  }
-
-  /**
-   * Handle fit to canvas request.
-   */
-  handleFitToCanvas = () => {
-    // TODO: Check if it's "reacty" to use refs directly this way
-    const treewrap = this.refs.canvas.refs.treewrap.refs.element.getBoundingClientRect();
-    const nodetree = this.refs.canvas.refs.tree.getBoundingClientRect();
-
-    const ratioWrap = treewrap.width / treewrap.height;
-    const ratioNode = nodetree.width / nodetree.height;
-
-    const factor = (ratioNode < ratioWrap) ?
-      treewrap.height * this.zoomFitPadding / nodetree.height :
-      treewrap.width * this.zoomFitPadding / nodetree.width;
-
+  handleScaleChanged = (scale, options) => {
     this.setState(prevState => {
-      return {
-        scale: prevState.scale * factor,
-        center: true
+      const newState = {
+        scale: scale || prevState.scale,
+        center: options.center || prevState.center,
+        translate: options.translate || prevState.translate
       };
+      return newState;
     });
   }
 
@@ -180,6 +166,15 @@ export default class Editor extends React.Component {
   }
 
   /**
+   * Handle translation of Canvas done.
+   */
+  handleCanvasTranslated = () => {
+    this.setState({
+      translate: null
+    });
+  }
+
+  /**
    * Handle inserting in Canvas
    */
   handleInsertingDone = () => {
@@ -189,6 +184,14 @@ export default class Editor extends React.Component {
   }
 
   render() {
+    // This might be replaced by callbacks invoked by the refs
+    if (!this.treewrap && this.refs.canvas && this.refs.canvas.refs.treewrap && this.refs.canvas.refs.treewrap.refs.element) {
+      this.treewrap = this.refs.canvas.refs.treewrap.refs.element;
+    }
+    if (!this.tree && this.refs.canvas && this.refs.canvas.refs.tree) {
+      this.tree = this.refs.canvas && this.refs.canvas.refs.tree;
+    }
+
     return (
       <Tabs className="tab-view-wrapper"
         activeIndex={ this.state.activeIndex}
@@ -221,13 +224,16 @@ export default class Editor extends React.Component {
             scale={ this.state.scale }
             center={ this.state.center }
             onCanvasCentered={ this.handleCanvasCentered }
+            translate={ this.state.translate }
+            onCanvasTranslated={ this.handleCanvasTranslated }
           />
           <Toolbar
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
             onHighlight={ this.handleHighlight }
             scale={ this.state.scale }
-            onZoom={ this.handleZoom }
-            onFitToCanvas={ this.handleFitToCanvas }
+            onScaleChanged={ this.handleScaleChanged }
+            containerRect={ this.treewrap }
+            contentRect={ this.tree }
           />
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">

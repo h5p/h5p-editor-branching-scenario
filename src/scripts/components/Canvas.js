@@ -1085,6 +1085,18 @@ export default class Canvas extends React.Component {
         }
       }, this.props.onCanvasCentered);
     }
+
+    // Translate the tree
+    if (this.props.translate && !this.props.center) {
+      this.setState(prevState => {
+        return {
+          panning: {
+            x: prevState.panning.x + this.props.translate.x,
+            y: prevState.panning.y + this.props.translate.y
+          }
+        };
+      }, this.props.onCanvasTranslated);
+    }
   }
 
   /**
@@ -1401,5 +1413,10 @@ Canvas.propTypes = {
   width: PropTypes.number,
   inserting: PropTypes.object,
   highlight: PropTypes.number,
-  onlyThisBall: PropTypes.string
+  onlyThisBall: PropTypes.string,
+  scale: PropTypes.number,
+  center: PropTypes.bool,
+  onCanvasCentered: PropTypes.func,
+  translate: PropTypes.object,
+  onCanvasTranslated: PropTypes.func
 };
