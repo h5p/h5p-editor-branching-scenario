@@ -72,6 +72,8 @@ export default class Toolbar extends React.Component {
         <div className="zoom-wrapper">
           <span
             className="zoom-in"
+            tabIndex="0"
+            role="button"
             onClick={ () => this.handleZoom(true) }
           />
           <span className="zoom-status">
@@ -79,6 +81,8 @@ export default class Toolbar extends React.Component {
           </span>
           <span
             className="zoom-out"
+            tabIndex="0"
+            role="button"
             onClick={ () => this.handleZoom(false) }
           />
           <span
@@ -87,6 +91,8 @@ export default class Toolbar extends React.Component {
           />
           <span
             className="fit-to-canvas-text"
+            tabIndex="0"
+            role="button"
             onClick={ this.props.onFitToCanvas }
           >
             Zoom to fit

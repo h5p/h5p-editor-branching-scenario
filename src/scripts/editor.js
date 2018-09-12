@@ -153,10 +153,10 @@ export default class Editor extends React.Component {
       treewrap.width * this.zoomFitPadding / nodetree.width;
 
     this.setState(prevState => {
-      const newState = prevState;
-      newState.scale = prevState.scale * factor;
-      newState.center = true;
-      return newState;
+      return {
+        scale: prevState.scale * factor,
+        center: true
+      };
     });
   }
 
