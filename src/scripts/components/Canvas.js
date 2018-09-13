@@ -270,36 +270,34 @@ export default class Canvas extends React.Component {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
     }
-    else if (!this.state.editing) {
+    else {
       // Put new node or put existing node at new place
       const defaults = (draggable.props.inserting) ? draggable.props.inserting.defaults : undefined;
 
-      // When moving nodes that leave empty alternatives, update those.
+      // When info node is moved, check if parent is BQ and needs updating
       if (id > -1) {
-        const parent = this.getParent(id);
-
-        const noNodeToAttach = Content.isBranching(this.state.content[id]) ||
+        const noNodeToAttach =
+          Content.isBranching(this.state.content[id]) || // moved node is BQ, will keep children
           !this.state.content[id].nextContentId ||
           this.state.content[id].nextContentId < 0;
 
-        if (parent && Content.isBranching(parent) && noNodeToAttach) {
-          parent.type.params.branchingQuestion.alternatives
-            .filter(alt => alt.nextContentId === id)
-            .forEach(alt => alt.nextContentId = -1);
+        if (noNodeToAttach) {
+          // Info node has no children that would be attached to *old* parent, latter needs update
+          const parent = this.getParent(id);
+
+          if (parent && Canvas.isBranching(parent)) {
+            // Parent is BQ, update needed
+            parent.type.params.branchingQuestion.alternatives
+              .forEach(alt => {
+                if (alt.nextContentId === id) {
+                  alt.nextContentId = -1;
+                }
+              });
+          }
         }
       }
 
       this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, defaults);
-    }
-    else {
-      // TODO: Check if this is still needed
-      // Add next element in editor
-      const parentId = this.state.editing;
-      // Here we retrieve the content from EditorOverlay, because CKEditor changes are not caught
-      this.handleFormSaved(this.state.editing, this.editorOverlay.state.content); // TODO: Do not retrieve child state
-      if (parentId !== undefined) {
-        this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
-      }
     }
   }
 
@@ -349,6 +347,9 @@ export default class Canvas extends React.Component {
    * @return {number[]} IDs.
    */
   getChildrenIds = (start, includeBranching = true, sub = false) => {
+    if (start < 0) {
+      return [];
+    }
     const node = this.state.content[start];
     let childrenIds = [];
     let nextIds = [];
@@ -1061,6 +1062,18 @@ export default class Canvas extends React.Component {
         }
       }, this.props.onCanvasCentered);
     }
+
+    // Translate the tree
+    if (this.props.translate && !this.props.center) {
+      this.setState(prevState => {
+        return {
+          panning: {
+            x: prevState.panning.x + this.props.translate.x,
+            y: prevState.panning.y + this.props.translate.y
+          }
+        };
+      }, this.props.onCanvasTranslated);
+    }
   }
 
   /**
@@ -1324,5 +1337,10 @@ Canvas.propTypes = {
   width: PropTypes.number,
   inserting: PropTypes.object,
   highlight: PropTypes.number,
-  onlyThisBall: PropTypes.string
+  onlyThisBall: PropTypes.string,
+  scale: PropTypes.number,
+  center: PropTypes.bool,
+  onCanvasCentered: PropTypes.func,
+  translate: PropTypes.object,
+  onCanvasTranslated: PropTypes.func
 };

@@ -19,14 +19,15 @@ export default class ContentTypeMenu extends React.Component {
       canPaste: {
         canPaste: false,
         reason: 'pasteNoContent'
-      }
+      },
+      libraries: null
     };
   }
 
   componentDidMount() {
     H5P.externalDispatcher.on('datainclipboard', () => {
-      if (this.props.libraries) {
-        this.setCanPaste(this.props.libraries);
+      if (this.state.libraries) {
+        this.setCanPaste(this.state.libraries);
       }
     });
   }
@@ -35,9 +36,11 @@ export default class ContentTypeMenu extends React.Component {
     H5P.externalDispatcher.off('datainclipboard');
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.libraries) {
-      this.setCanPaste(nextProps.libraries);
+  componentDidUpdate() {
+    // Set the available libraries once they are loaded
+    if (!this.state.libraries && this.props.libraries) {
+      this.state.libraries = this.props.libraries;
+      this.setCanPaste(this.state.libraries);
     }
   }
 
@@ -48,7 +51,9 @@ export default class ContentTypeMenu extends React.Component {
 
     // Get library from clipboard
     let defaults;
-    if (library === 'reuse') {
+    let inUse = library;
+    if (library === 'reuse-question') {
+
       // Inform user if content cannot be pasted
       if (this.state.canPaste.canPaste === false) {
         if (this.state.canPaste.reason === 'pasteTooOld' || this.state.canPaste.reason === 'pasteTooNew') {
@@ -73,7 +78,9 @@ export default class ContentTypeMenu extends React.Component {
         return;
       }
 
-      library = this.props.libraries.find(library => library.name === clipboard.generic.library);
+      library = (this.state.libraries) ?
+        this.state.libraries.find(library => library.name === clipboard.generic.library) :
+        undefined;
       if (typeof library === 'undefined') {
         return;
       }
@@ -90,6 +97,11 @@ export default class ContentTypeMenu extends React.Component {
         specific: clipboard.specific
       };
     }
+
+    // Prevent
+    this.setState({
+      inUse: (inUse === 'reuse-question') ? inUse : library
+    });
 
     const raw = event.currentTarget.getBoundingClientRect();
     this.props.onMouseDown({
@@ -147,13 +159,13 @@ export default class ContentTypeMenu extends React.Component {
   };
 
   renderDnDButtons() {
-    if (!this.props.libraries) {
+    if (!this.state.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
     }
 
-    let listItems = this.props.libraries.map(library => {
+    let listItems = this.state.libraries.map(library => {
       if (library.title === 'BranchingQuestion') {
         return '';
       }
@@ -164,7 +176,7 @@ export default class ContentTypeMenu extends React.Component {
       }
 
       let className = library.title.replace(/\s/g, '');
-      if (this.props.inserting && this.props.inserting.library === library) {
+      if (this.props.inserting && this.props.inserting.library === library && this.state.inUse === library) {
         className += ' greyout';
       }
 
@@ -185,34 +197,46 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   renderSecondButtons() {
-    if (!this.props.libraries) {
+    if (!this.state.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
     }
-    const bs = this.props.libraries.find(library => library.title === 'BranchingQuestion');
+    const bs = this.state.libraries.find(library => library.title === 'BranchingQuestion');
+    let className = 'branching-question';
+    if (this.props.inserting && this.props.inserting.library === bs && this.state.inUse === bs) {
+      className += ' greyout';
+    }
 
     return (
       <ul className="content-type-buttons">
-        <li className="branching-question" title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
+        <li className={ className } title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
       </ul>
     );
   }
 
   renderReuseButton() {
-    if (!this.props.libraries) {
+    if (!this.state.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
+    }
+
+    let className = 'reuse-question';
+    if (this.props.inserting && this.state.inUse === className) {
+      className += ' greyout';
+    }
+    if (!this.state.canPaste.canPaste) {
+      className += ' disabled';
     }
 
     return (
       <ul className="content-type-buttons">
         <li
           ref={ 'reuse-button' }
-          className={ 'reuse-question' + ((!this.state.canPaste.canPaste) ? ' disabled' : '') }
+          className={ className }
           title="Add from clipboard"
-          onMouseDown={ event => this.handleMouseDown(event, 'reuse') }
+          onMouseDown={ event => this.handleMouseDown(event, 'reuse-question') }
         >
           From a clipboard
         </li>

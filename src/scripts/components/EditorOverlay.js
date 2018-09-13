@@ -40,7 +40,10 @@ export default class EditorOverlay extends React.Component {
 
     if (this.isBranchingQuestion) {
       // Create and render a sub React DOM inside one of the editor widgets
-      EditorOverlay.addBranchingOptionsToEditor(this.children[0], this.props.validAlternatives);
+      EditorOverlay.addBranchingOptionsToEditor(H5PEditor.findField(
+        'type/branchingQuestion',
+        this.children
+      ), this.props.validAlternatives);
     }
   }
 
@@ -151,7 +154,7 @@ export default class EditorOverlay extends React.Component {
               value={ title } onChange={ this.handleUpdateTitle }/>
           </div>
 
-          <div className='editor-overlay-semantics' ref={ this.form }/>
+          <div className='editor-overlay-semantics editor-overlay-library' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
