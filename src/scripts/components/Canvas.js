@@ -347,6 +347,9 @@ export default class Canvas extends React.Component {
    * @return {number[]} IDs.
    */
   getChildrenIds = (start, includeBranching = true, sub = false) => {
+    if (start < 0) {
+      return [];
+    }
     const node = this.state.content[start];
     let childrenIds = [];
     let nextIds = [];
