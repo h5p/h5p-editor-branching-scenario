@@ -2,11 +2,39 @@ import React from 'react';
 import TooltipButton from './TooltipButton';
 
 export default class TabViewSettings extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.refStartImageChooser = React.createRef();
     this.refEndImageChooser = React.createRef();
+    this.refScoringOption= React.createRef();
+
+    const scoringOptionField = H5PEditor.findSemanticsField(
+      'scoringOption',
+      this.props.main.field
+    );
+    const scoringOptionWrapper = document.createElement('div');
+    scoringOptionWrapper.classList.add('h5p-behavioural-settings');
+    const params = this.props.main.params;
+
+
+    H5PEditor.processSemanticsChunk(
+      [scoringOptionField],
+      params,
+      H5PEditor.$(scoringOptionWrapper),
+      this.props.main
+    );
+
+    // Grab the select and listen for any changes to it
+    H5PEditor.followField(this.props.main, 'scoringOption', () => {
+      // Update scoring option
+      this.setState({
+        scoring: params.scoringOption
+      });
+      this.props.updateScoringOption();
+    });
+
+    this.scoringOptionWrapper = scoringOptionWrapper;
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
@@ -14,9 +42,13 @@ export default class TabViewSettings extends React.Component {
       tooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
       tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
     };
+
+    this.state = {
+      scoring: params.scoringOption
+    };
   }
 
-  componentDidMount () {
+  componentDidMount() {
     /*
 		 * This is hacking the old widget to quickly suit the new prerequisites.
 		 * TODO: Create a new widget that can also be used in the fullscreen editor later
@@ -60,9 +92,11 @@ export default class TabViewSettings extends React.Component {
         }
       });
     }
+
+    this.refScoringOption.current.appendChild(this.scoringOptionWrapper);
   }
 
-  render () {
+  render() {
     return (
       <div id="settings" className="tab tab-view-full-page large-padding">
         <span className="tab-view-title">Settings</span>
@@ -109,14 +143,19 @@ export default class TabViewSettings extends React.Component {
                   text={ this.l10n.tooltipEndScenario }
                 />
               </legend>
-              <label htmlFor="endScore">Score for the default end scenario</label>
-              <input
-                id="endScore"
-                type="number"
-                name="endScore"
-                value={ this.props.value.endScore }
-                onChange={ this.props.onChange }
-              />
+              {
+                this.state.scoring === 'static-end-score' &&
+                <div className="h5p-end-score-wrapper">
+                  <label htmlFor="endScreenScore">Score for the default end scenario</label>
+                  <input
+                    id="endScreenScore"
+                    type="number"
+                    name="endScreenScore"
+                    value={ this.props.value.endScreenScore }
+                    onChange={ this.props.onChange }
+                  />
+                </div>
+              }
               <label className="tab-view-info manual-focus" htmlFor="endFeedback">
                 Textual feedback for the user
                 <TooltipButton
@@ -168,6 +207,10 @@ export default class TabViewSettings extends React.Component {
                 checked={ this.props.value.optionsDisplayScore }
                 onChange={ this.props.onChange }
               />Display score<br />
+              <div
+                ref={this.refScoringOption}
+                className='h5p-scoring-option-wrapper'
+              />
             </fieldset>
           </form>
         </div>

@@ -25,7 +25,8 @@ export default class Editor extends React.Component {
       onlyThisBall: null,
       scale: 1,
       center: true,
-      translate: null
+      translate: null,
+      scoringOption: null
     };
   }
 
@@ -159,6 +160,15 @@ export default class Editor extends React.Component {
   }
 
   /**
+   * Scoring option change listener
+   */
+  handleScoringOptionChange = () => {
+    this.setState({
+      scoringOption: this.props.main.params.scoringOption
+    });
+  };
+
+  /**
    * Handle centering of Canvas done.
    */
   handleCanvasCentered = () => {
@@ -227,6 +237,7 @@ export default class Editor extends React.Component {
             onCanvasCentered={ this.handleCanvasCentered }
             translate={ this.state.translate }
             onCanvasTranslated={ this.handleCanvasTranslated }
+            scoringOption={ this.state.scoringOption }
           />
           <Toolbar
             numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
@@ -239,10 +250,12 @@ export default class Editor extends React.Component {
         </Tab>
         <Tab title="settings" className="bs-editor-settings-tab">
           <TabViewSettings
+            main={this.props.main}
             value={this.state.settings}
             startImageChooser={this.props.startImageChooser}
             endImageChooser={this.props.endImageChooser}
             onChange={this.handleSettingsChange}
+            updateScoringOption={this.handleScoringOptionChange}
           />
         </Tab>
         <Tab title="translations" className="bs-editor-translations-tab">

@@ -36,11 +36,6 @@ export default class EditorOverlay extends React.Component {
       content.type.library
     );
 
-    // TODO: l10n object
-    this.state = {
-      content: content
-    };
-
     this.validAlternatives = this.props.content.map((content, index) => {
       return Object.assign({}, content, {contentId: index});
     }).filter((alt, index) => {
@@ -48,6 +43,11 @@ export default class EditorOverlay extends React.Component {
     });
 
     this.addBranchingOptionsToEditor();
+
+    // TODO: l10n object
+    this.state = {
+      content: content
+    };
   }
 
   /**
@@ -61,6 +61,13 @@ export default class EditorOverlay extends React.Component {
         'type/branchingQuestion',
         this.props.main
       );
+
+      if (!branchingQuestionEditor) {
+        // Re-run as callback
+        const libraryField = H5PEditor.findField('type', this.props.main);
+        libraryField.change(this.addBranchingOptionsToEditor.bind(this));
+        return;
+      }
 
       if (branchingQuestionEditor && branchingQuestionEditor.setAlternatives) {
 
@@ -81,9 +88,10 @@ export default class EditorOverlay extends React.Component {
             ), selectorWrapper);
 
             // Set default value to end scenario
-            if (nextContentId === '') {
-              branchingQuestionEditor.setNextContentId(listIndex, -1);
-            }
+            branchingQuestionEditor.setNextContentId(
+              listIndex,
+              nextContentId === '' ? -1 : nextContentId
+            );
           });
       }
     }
@@ -151,6 +159,8 @@ export default class EditorOverlay extends React.Component {
   };
 
   render() {
+    const scoreClass = this.props.scoringOption !== 'static-end-score'
+      ? ' hide-scores' : '';
     return (
       <div className='editor-overlay'>
         <div className='editor-overlay-header'>
@@ -171,7 +181,7 @@ export default class EditorOverlay extends React.Component {
           </span>
         </div>
 
-        <div className='editor-overlay-content'>
+        <div className={`editor-overlay-content${scoreClass}`}>
           <div>
             <label className="editor-overlay-label" htmlFor="title">Title<span
               className="editor-overlay-label-red">*</span></label>

@@ -1394,6 +1394,7 @@ export default class Canvas extends React.Component {
               onFormClosed={ this.handleDelete }
               main={ this.props.main }
               onContentChanged={ this.handleContentChanged }
+              scoringOption={ this.props.scoringOption }
             />
           }
           <QuickInfoMenu
