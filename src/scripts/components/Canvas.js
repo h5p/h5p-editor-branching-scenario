@@ -285,7 +285,7 @@ export default class Canvas extends React.Component {
           // Info node has no children that would be attached to *old* parent, latter needs update
           const parent = this.getParent(id);
 
-          if (parent && Canvas.isBranching(parent)) {
+          if (parent && Content.isBranching(parent)) {
             // Parent is BQ, update needed
             parent.type.params.branchingQuestion.alternatives
               .forEach(alt => {
