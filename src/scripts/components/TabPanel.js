@@ -5,22 +5,6 @@ export default class Tabs extends React.Component {
 
   constructor(props) {
     super(props);
-
-    this.state = {
-      activeIndex: this.props.activeIndex
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // TODO: State is maintained in both this component and parent. Please only use parent.
-    this.setState({
-      activeIndex: nextProps.activeIndex
-    });
-  }
-
-  handleOnClick(key, event) {
-    event.preventDefault();
-    this.props.setActiveIndex(key);
   }
 
   renderNavItem = (key) => {
@@ -29,8 +13,8 @@ export default class Tabs extends React.Component {
     return (
       <li
         key={ key }
-        className={[tab.props.className, this.state.activeIndex == key ? 'active' : ''].join(' ')}
-        onClick={ this.handleOnClick.bind(this, key) }>
+        className={[tab.props.className, this.props.activeIndex == key ? 'active' : ''].join(' ')}
+        onClick={ () => this.props.onChange(key) }>
       </li>
     );
   }
@@ -38,7 +22,7 @@ export default class Tabs extends React.Component {
   render() {
 
     let index = 0;
-    let active = this.state.activeIndex;
+    let active = this.props.activeIndex;
 
     let tabs = React.Children.map(this.props.children, function(child) {
       return React.cloneElement(child, {
