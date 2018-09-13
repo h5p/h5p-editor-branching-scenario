@@ -289,16 +289,6 @@ export default class Canvas extends React.Component {
 
       this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, defaults);
     }
-    else {
-      // TODO: Check if this is still needed
-      // Add next element in editor
-      const parentId = this.state.editing;
-      // Here we retrieve the content from EditorOverlay, because CKEditor changes are not caught
-      this.handleFormSaved(this.state.editing, this.state.editorOverlay.state.content);
-      if (parentId !== undefined) {
-        this.placeInTree(id, dropzone.props.nextContentId, parentId, dropzone.props.alternative);
-      }
-    }
   }
 
   handleDropzoneClick = (nextContentId, parent, alternative, defaults) => {
