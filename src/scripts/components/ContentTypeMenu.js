@@ -19,14 +19,15 @@ export default class ContentTypeMenu extends React.Component {
       canPaste: {
         canPaste: false,
         reason: 'pasteNoContent'
-      }
+      },
+      libraries: null
     };
   }
 
   componentDidMount() {
     H5P.externalDispatcher.on('datainclipboard', () => {
-      if (this.props.libraries) {
-        this.setCanPaste(this.props.libraries);
+      if (this.state.libraries) {
+        this.setCanPaste(this.state.libraries);
       }
     });
   }
@@ -35,9 +36,11 @@ export default class ContentTypeMenu extends React.Component {
     H5P.externalDispatcher.off('datainclipboard');
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.libraries) {
-      this.setCanPaste(nextProps.libraries);
+  componentDidUpdate() {
+    // Set the available libraries once they are loaded
+    if (!this.state.libraries && this.props.libraries) {
+      this.state.libraries = this.props.libraries;
+      this.setCanPaste(this.state.libraries);
     }
   }
 
@@ -73,7 +76,9 @@ export default class ContentTypeMenu extends React.Component {
         return;
       }
 
-      library = this.props.libraries.find(library => library.name === clipboard.generic.library);
+      library = (this.state.libraries) ?
+        this.state.libraries.find(library => library.name === clipboard.generic.library) :
+        undefined;
       if (typeof library === 'undefined') {
         return;
       }
@@ -147,13 +152,13 @@ export default class ContentTypeMenu extends React.Component {
   };
 
   renderDnDButtons() {
-    if (!this.props.libraries) {
+    if (!this.state.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
     }
 
-    let listItems = this.props.libraries.map(library => {
+    let listItems = this.state.libraries.map(library => {
       if (library.title === 'BranchingQuestion') {
         return '';
       }
@@ -185,12 +190,12 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   renderSecondButtons() {
-    if (!this.props.libraries) {
+    if (!this.state.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
     }
-    const bs = this.props.libraries.find(library => library.title === 'BranchingQuestion');
+    const bs = this.state.libraries.find(library => library.title === 'BranchingQuestion');
 
     return (
       <ul className="content-type-buttons">
@@ -200,7 +205,7 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   renderReuseButton() {
-    if (!this.props.libraries) {
+    if (!this.state.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
