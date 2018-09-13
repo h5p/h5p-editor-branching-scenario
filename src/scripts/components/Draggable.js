@@ -42,7 +42,6 @@ export default class Draggable extends React.Component {
   handleMouseMove = (event) => {
     let newState;
 
-    // TODO: Using state to determine new state, please use prevState inside setState() updater.
     if (!this.state.moving.started) {
       // Element has not started moving yet (might be clicking)
 
@@ -75,24 +74,23 @@ export default class Draggable extends React.Component {
     const scale = this.props.scale ? (1 / this.props.scale) : 1;
 
     // Update element position
-    newState.position = {
+    const position = {
       x: ((event.pageX - this.state.moving.startX) * scale) + offset.x,
       y: ((event.pageY - this.state.moving.startY) * scale) + offset.y
     };
 
     if (this.props.limits) {
       // Enforce limits for the dragging
-      this.props.limits(newState.position);
+      this.props.limits(position);
     }
 
-    this.setState(newState); // TODO: We shouldn't really store the position in the newState since parent is keeping track of it for us.
+    this.setState(newState);
     if (this.props.onMoved) {
-      this.props.onMoved(newState.position);
+      this.props.onMoved(position);
     }
   }
 
   handleMouseUp = () => {
-    // TODO: Using state to determine new state, please use prevState inside setState() updater.
     const moved = this.state.moving.started;
     if (moved) {
       this.setState({

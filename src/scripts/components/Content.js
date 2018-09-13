@@ -10,7 +10,6 @@ export default class Content extends React.Component {
     super(props);
 
     this.state = {
-      position: props.position,
       contentMenuActive: false
     };
 
@@ -56,19 +55,6 @@ export default class Content extends React.Component {
    */
   static isBranching(content) {
     return content.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
-  }
-
-  componentWillReceiveProps = (nextProps) => {
-    if (nextProps.position && (
-      nextProps.position.x !== this.state.position.x ||
-        nextProps.position.y !== this.state.position.y)) {
-      this.setState({ // TODO: Parent is keeping track of this, use props instead
-        position: {
-          x: nextProps.position.x,
-          y: nextProps.position.y
-        }
-      });
-    }
   }
 
   getPoints = () => {
@@ -131,32 +117,20 @@ export default class Content extends React.Component {
     return intersectionX * intersectionY;
   }
 
-  handleStarted = () => {
-    this.setState({
-      selected: true
-    });
-
-    this.props.onPlacing();
-  }
-
   handleMoved = (position) => {
     this.setState({
-      position: position,
-      moving: true
-    });
-
-    this.props.onMove();
+      temporaryPosition: position,
+    }, this.props.onMove);
   }
 
   handleStopped = (moved) => {
-    this.setState({
-      selected: false,
-      moving: false
-    });
-
     if (moved) {
       this.props.onDropped();
     }
+
+    this.setState({
+      temporaryPosition: null
+    });
   }
 
   handleMenuButtonClick = () => {
@@ -185,34 +159,23 @@ export default class Content extends React.Component {
     // Postponed
   }
 
-  handleEdit = () => {
-    // TODO: We should not have to return our own ID. The parent already knows
-    this.props.onEdit(this.props.id);
-  }
-
-  handleCopy = () => {
-    // TODO: We should not have to return our own ID. The parent already knows
-    this.props.onCopy(this.props.id);
-  }
-
-  handleDelete = () => {
-    // TODO: We should not have to return our own ID. The parent already knows
-    this.props.onDelete(this.props.id);
-  }
-
   render() {
+
+    // Use temporary position when dragging, props is the static place in the tree
+    const moving = (this.state.temporaryPosition ? true : false);
+    const position = (this.state.temporaryPosition ? this.state.temporaryPosition : this.props.position);
 
     // Determine element class depending on state
     let elementClass = this.props.contentClass + ' draggable';
-    if (this.state.selected) {
+    if (this.props.selected) {
       elementClass += ' selected';
 
-      if (this.state.moving) {
+      if (moving) {
         elementClass += ' dragging';
         elementClass += ' active';
       }
     }
-    if (!this.state.moving && !this.props.inserting) {
+    if (!moving && !this.props.inserting) {
       // Prevent showing menu button
       elementClass += ' ready';
     }
@@ -232,15 +195,15 @@ export default class Content extends React.Component {
         ref={ node => this.element = node }
         className={ elementClass }
         style={ {
-          left: this.state.position.x + 'px',
-          top: this.state.position.y + 'px',
+          left: position.x + 'px',
+          top: position.y + 'px',
           width: this.props.width + 'px',
-          transform: (this.props.inserting && this.state.moving ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
+          transform: (this.props.inserting && moving ? 'scale(' + this.props.scale + ',' + this.props.scale + ')' : '')
         } }
-        scale={ this.props.inserting && this.state.moving ? 1 : this.props.scale }
+        scale={ this.props.inserting && moving ? 1 : this.props.scale }
         started={ this.props.inserting ? this.props.inserting : null }
-        position={ this.state.position }
-        onStarted={ this.handleStarted }
+        position={ position }
+        onStarted={ this.props.onPlacing }
         onMoved={ this.handleMoved }
         onStopped={ this.handleStopped }
       >
@@ -261,9 +224,9 @@ export default class Content extends React.Component {
         { this.state.contentMenuActive &&
           <SubMenu
             onPreview={ this.handlePreview }
-            onEdit={ this.handleEdit }
-            onCopy={ this.handleCopy }
-            onDelete={ this.handleDelete }
+            onEdit={ this.props.onEdit }
+            onCopy={ this.props.onCopy }
+            onDelete={ this.props.onDelete }
           />
         }
       </Draggable>
