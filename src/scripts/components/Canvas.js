@@ -268,22 +268,31 @@ export default class Canvas extends React.Component {
       // Replace existing node
       this.handlePlacing(dropzone.props.id);
     }
-    else if (!this.state.editing) {
+    else {
       // Put new node or put existing node at new place
       const defaults = (draggable.props.inserting) ? draggable.props.inserting.defaults : undefined;
 
-      // When moving nodes that leave empty alternatives, update those.
+      // When info node is moved, check if parent is BQ and needs updating
       if (id > -1) {
-        const parent = this.getParent(id);
 
-        const noNodeToAttach = Canvas.isBranching(this.state.content[id]) ||
+        const noNodeToAttach =
+          Canvas.isBranching(this.state.content[id]) || // moved node is BQ, will keep children
           !this.state.content[id].nextContentId ||
           this.state.content[id].nextContentId < 0;
 
-        if (parent && Canvas.isBranching(parent) && noNodeToAttach) {
-          parent.type.params.branchingQuestion.alternatives
-            .filter(alt => alt.nextContentId === id)
-            .forEach(alt => alt.nextContentId = -1);
+        if (noNodeToAttach) {
+          // Info node has no children that would be attached to *old* parent, latter needs update
+          const parent = this.getParent(id);
+
+          if (parent && Canvas.isBranching(parent)) {
+            // Parent is BQ, update needed
+            parent.type.params.branchingQuestion.alternatives
+              .forEach(alt => {
+                if (alt.nextContentId === id) {
+                  alt.nextContentId = -1;
+                }
+              });
+          }
         }
       }
 
