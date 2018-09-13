@@ -1,45 +1,54 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+
 import './EditorOverlay.scss';
+import Canvas from './Canvas';
+import Content from './Content';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
 
-/*global H5PEditor, H5P*/
 export default class EditorOverlay extends React.Component {
+
   constructor(props) {
     super(props);
 
-    this.refForm = React.createRef();
+    // NOTE: This component will have to be remounted when props.content changed
+    // in order to update the generic H5PEditor part.
+    // Does not update parent state until close.
+
+    // Reference to the React form wrapper
+    this.form = React.createRef();
+
+    // Avoid modifying the content reference, sent back on Done or Save/Update
+    this.state = {...this.props.content};
+
+    // Useful multiple places later
+    this.isBranchingQuestion = Content.isBranching(this.state);
+
+    // Tell H5PEditor we do not handle the widget's ready callbacks
     this.passReadies = false;
+  }
 
-    const content = this.props.content[this.props.id] || {};
-    content.contentTitle = content.contentTitle || content.type.library.split('.')[1];
-
-    const library = content.type.library.split(' ')[0];
-    this.isBranchingQuestion = library === 'H5P.BranchingQuestion';
-
-    content.$form = H5P.jQuery('<div/>');
-
-    // Attach the DOM to $form
+  componentDidMount() {
+    // Create and append the H5PEditor widgets to the React DOM
     H5PEditor.processSemanticsChunk(
-      this.props.elementFields,
-      content.type.params,
-      content.$form,
-      this.props.main,
-      content.type.library
+      this.props.getSemantics(this.state.type.library),
+      this.state.type.params,
+      H5P.jQuery(this.form.current),
+      this
     );
 
-    // TODO: l10n object
-    this.state = {
-      content: content
-    };
+    if (this.isBranchingQuestion) {
+      // Create and render a sub React DOM inside one of the editor widgets
+      EditorOverlay.addBranchingOptionsToEditor(this.children[0], this.props.validAlternatives);
+    }
+  }
 
-    this.validAlternatives = this.props.content.map((content, index) => {
-      return Object.assign({}, content, {contentId: index});
-    }).filter((alt, index) => {
-      return this.props.id !== index;
-    });
-
-    this.addBranchingOptionsToEditor();
+  componentWillUnmount() {
+    // Run remove on H5PEditor widgets
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].remove();
+    }
   }
 
   /**
@@ -47,136 +56,108 @@ export default class EditorOverlay extends React.Component {
    * For Branching Question this means that the branching options
    * must be added to each alternative that can be chosen
    */
-  addBranchingOptionsToEditor() {
-    if (this.isBranchingQuestion) {
-      const branchingQuestionEditor = this.props.main.children[0];
+  static addBranchingOptionsToEditor(branchingQuestionEditor, validAlternatives) {
+    if (!branchingQuestionEditor || !branchingQuestionEditor.setAlternatives) {
+      return;
+    }
 
-      if (branchingQuestionEditor && branchingQuestionEditor.setAlternatives) {
+    // Add <BranchingOptions> to each alternative in Branching Question
+    branchingQuestionEditor.setAlternatives((nextContentId, selectorWrapper, listIndex) => {
+      const branchingUpdated = (value) => {
+        branchingQuestionEditor.setNextContentId(listIndex, value);
+        nextContentId = value;
+        render(); // Update with the new state
+      };
 
-        // Add <BranchingOptions> to each alternative in Branching Question
-        branchingQuestionEditor.setAlternatives(
-          (nextContentId, selectorWrapper, listIndex) => {
-            const branchingUpdated = (value) => {
-              branchingQuestionEditor.setNextContentId(listIndex, value);
-            };
+      const render = () => {
+        ReactDOM.render((
+          <BranchingOptions
+            nextContentId={ nextContentId === '' ? undefined : nextContentId }
+            validAlternatives={validAlternatives}
+            onChangeContent={branchingUpdated}
+            alternativeIndex={listIndex}
+          />
+        ), selectorWrapper);
+      };
+      render();
 
-            ReactDOM.render((
-              <BranchingOptions
-                nextContentId={nextContentId}
-                validAlternatives={this.validAlternatives}
-                onChangeContent={branchingUpdated}
-                alternativeIndex={listIndex}
-              />
-            ), selectorWrapper);
+      // Set default value to end scenario
+      if (nextContentId === '') {
+        branchingQuestionEditor.setNextContentId(listIndex, -1);
+      }
+    });
+  }
 
-            // Set default value to end scenario
-            if (nextContentId === '') {
-              branchingQuestionEditor.setNextContentId(listIndex, -1);
-            }
-          });
+  /**
+   * Run validate on H5PEditor widgets.
+   * @return {boolean}
+   */
+  validate = () => {
+    let valid = true;
+    for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i].validate() === false) {
+        valid = false;
       }
     }
-  }
-
-  /*
-   * This is used to pass a reference "child" to the parent. I am eager to
-   * learn a better way of updating the DOM from outside a component
-   * (I know, you shouldn't), because the H5P core gives me DOM elements, not
-   * something I can simply pass as a state.
-   */
-  componentDidMount() {
-    this.props.onRef(this);
-
-    // Try to listen to everything in the form
-    // TODO: Also catch the CKEditor, Drag'n'Drop, etc.
-    this.state.content.$form.on('keypress click change blur', () => {
-      this.props.onContentChanged(this.props.id, this.state.content);
-    });
-
-    /*
-     * React doesn't allow DOM or jQuery elements, so this is a workaround
-     * to update the form overlay component's contents.
-     */
-    this.state.content.$form.appendTo(this.refForm.current);
-  }
-
-  componentWillUnmount() {
-    this.props.onRef(undefined);
+    return valid;
   }
 
   /**
    * Update title in header as it is changed in the title field.
    *
-   * @param {object} event - Change event.
+   * @param {Event} e Change event
    */
-  handleUpdateTitle = (event) => {
-    const value = event.target.value;
-
-    // TODO: Content state is maintained in both this component and Canvas. Please only use parent (Canvas).
-    this.setState(prevState => {
-      const newState = {
-        content: prevState.content
-      };
-      newState.content.contentTitle = value;
-
-      return newState;
-    }, () => {
-      this.props.onContentChanged(this.props.id, this.state.content);
+  handleUpdateTitle = (e) => {
+    this.setState({
+      contentTitle: e.target.value
     });
   };
 
-  updateNextContentId = (value) => {
-    // TODO: Content state is maintained in both this component and Canvas. Please only use parent (Canvas).
-    this.setState(prevState => {
-      const newState = {
-        content: prevState.content
-      };
-      newState.content.nextContentId = value;
-
-      return newState;
-    }, () => {
-      this.props.onContentChanged(this.props.id, this.state.content);
+  handleNextContentIdChange = (value) => {
+    this.setState({
+      nextContentId: value
     });
   };
+
+  handleDone = () => {
+    this.validate();
+    this.props.onDone(this.state); // Must use the same params object as H5PEditor
+  }
 
   render() {
+    const title = this.state.contentTitle || this.state.type.library.split('.')[1];
+    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.state.type.library.split('.')[1].split(' ')[0])}`;
+
     return (
       <div className='editor-overlay'>
         <div className='editor-overlay-header'>
           <span
-            className={['editor-overlay-title', this.props.icon].join(' ')}
-          >{this.state.content.contentTitle}</span>
+            className={ iconClass }
+          >{ title }</span>
           <span className="buttons">
             <button
               className="buttonBlue"
-              onClick={() => {
-                this.props.onFormSaved(this.props.id, this.state.content);
-              }}
-            >Save changes</button>
-            <button
-              className="button"
-              onClick={this.props.onFormClosed}
-            >Close</button>
+              onClick={ this.handleDone }
+            >Done{/* TODO: l10n */}</button>
           </span>
         </div>
 
         <div className='editor-overlay-content'>
           <div>
-            <label className="editor-overlay-label" htmlFor="title">Title<span
+            <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}<span
               className="editor-overlay-label-red">*</span></label>
             <input
               name="title" className='editor-overlay-titlefield' type="text"
-              value={this.state.content.contentTitle} onChange={this.handleUpdateTitle}/>
+              value={ title } onChange={ this.handleUpdateTitle }/>
           </div>
 
-          <div className='editor-overlay-semantics' ref={this.refForm}/>
-
+          <div className='editor-overlay-semantics' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              nextContentId={this.state.content.nextContentId}
-              validAlternatives={this.validAlternatives}
-              onChangeContent={this.updateNextContentId.bind(this)}
+              nextContentId={ this.state.nextContentId }
+              validAlternatives={ this.props.validAlternatives }
+              onChangeContent={ this.handleNextContentIdChange }
             />
           }
         </div>
@@ -185,3 +166,10 @@ export default class EditorOverlay extends React.Component {
     );
   }
 }
+
+EditorOverlay.propTypes = {
+  getSemantics: PropTypes.func,
+  content: PropTypes.object,
+  validAlternatives: PropTypes.array,
+  onDone: PropTypes.func
+};

@@ -83,6 +83,12 @@ export default class Editor extends React.Component {
     return true;
   }
 
+  validate = () => {
+    if (this.refs.canvas.state.editing !== null) {
+      this.refs.canvas.editorOverlay.handleDone(); // Trigger saving and closing of form
+    }
+  }
+
   handleMouseDown = (event) => {
     this.setState({
       inserting: event,
@@ -210,7 +216,6 @@ export default class Editor extends React.Component {
             inserting={ this.state.inserting }
             libraries={ this.state.libraries }
             saveData={this.props.saveData}
-            main={this.props.main} // TODO: A lot of stuff being passed through – use props.children instead?
             content={ this.props.content }
             handleOpenTutorial={ this.handleOpenTutorial }
             onOpenEditor={ this.handleOpenEditor }

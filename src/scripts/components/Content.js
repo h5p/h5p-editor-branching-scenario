@@ -19,6 +19,45 @@ export default class Content extends React.Component {
     }
   }
 
+  /**
+   * Determines a useful tooltip for the content
+   * @param {Object} content
+   * @return {string}
+   */
+  static getTooltip(content) {
+    switch (content.type.library.split(' ')[0]) {
+      case 'H5P.AdvancedText':
+        return Content.stripHTML(content.type.params.text);
+      case 'H5P.BranchingQuestion':
+        return (content.type.params.branchingQuestion
+          && content.type.params.branchingQuestion.question)
+          ? Content.stripHTML(content.type.params.branchingQuestion.question)
+          : undefined;
+      default:
+        return content.type.metadata ? content.type.metadata.title : undefined;
+    }
+  }
+
+  /**
+   * Removes any HTML from the given string.
+   * @return {string}
+   */
+  static stripHTML(html) {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  }
+
+  /**
+   * Determine if content params is Branching Question
+   *
+   * @param {Object} content
+   * @return {boolean}
+   */
+  static isBranching(content) {
+    return content.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
+  }
+
   componentWillReceiveProps = (nextProps) => {
     if (nextProps.position && (
       nextProps.position.x !== this.state.position.x ||

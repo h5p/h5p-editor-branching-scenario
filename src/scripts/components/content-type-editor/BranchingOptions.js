@@ -1,69 +1,60 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import './BranchingOptions.scss';
+import Content from '../Content.js';
 
 export default class BranchingOptions extends React.Component {
 
   constructor(props) {
     super(props);
-    const nextContentId = parseInt(this.props.nextContentId);
-
-    this.state = {
-      existingContentId: nextContentId,
-    };
   }
 
+  /**
+   * Determine option label for select
+   *
+   * @param {Object} content
+   * @return {string}
+   */
   static getAlternativeName(content) {
     const library = content.type.library.split(' ')[0]
       .split('.')[1]
       .replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5');
-    const contentTitle = content.contentTitle; // TODO: Can we use Canvas.getTooltip() instead for consistency?
+    const contentTitle = Content.getTooltip(content);
     return `${library}: ${contentTitle}`;
   }
 
-  handleExistingContentChange(e) {
-    const newValue = e.target.value;
-    this.setState({ // TODO: Parent is keeping track of this, use props instead
-      existingContentId: newValue,
-    });
-    this.updateContentSelected(newValue);
+  handleExistingContentChange = (e) => {
+    this.updateContentSelected(e.target.value);
   }
 
-  updateContentSelected(value) {
+  updateContentSelected = (value) => {
     if (this.props.onChangeContent) {
       this.props.onChangeContent(value);
     }
   }
 
-  handleMainOptionChange(e) {
+  handleMainOptionChange = (e) => {
     const newValue = e.target.value;
     switch (newValue) {
       case 'new-content':
-        this.setState({
-          existingContentId: undefined,
-        });
         this.updateContentSelected(-1);
         break;
 
       case 'end-scenario':
-        this.setState({
-          existingContentId: -1,
-        });
         this.updateContentSelected(-1);
         break;
 
       case 'old-content':
-        this.setState({
-          existingContentId: this.props.validAlternatives[0].contentId,
-        });
         this.updateContentSelected(this.props.validAlternatives[0].contentId);
         break;
     }
   }
 
   render() {
-    const mainSelectorValue = this.state.existingContentId >= 0
+    const mainSelectorValue = this.props.nextContentId >= 0
       ? 'old-content'
-      : (this.state.existingContentId === -1
+      : (this.props.nextContentId === -1
         ? 'end-scenario'
         : 'new-content');
 
@@ -79,8 +70,8 @@ export default class BranchingOptions extends React.Component {
           <div className='h5peditor-field-description'>If you select a value it is recommended to provide a feedback after each alternatives that leads to a new content. This will ensure a better learning experience for the viewer.</div>
         </div>
         <select
-          value={mainSelectorValue}
-          onChange={this.handleMainOptionChange.bind(this)}
+          value={ mainSelectorValue }
+          onChange={ this.handleMainOptionChange }
         >
           <option
             key="default"
@@ -99,20 +90,20 @@ export default class BranchingOptions extends React.Component {
           }
         </select>
         {
-          this.state.existingContentId >= 0 &&
+          this.props.nextContentId >= 0 &&
           <div>
             <label htmlFor="nextPath">Select a path to send a user to</label>
             <select
               name="nextPath"
-              value={this.state.existingContentId}
-              onChange={this.handleExistingContentChange.bind(this)}
+              value={ this.props.nextContentId }
+              onChange={ this.handleExistingContentChange }
             >
               {
                 this.props.validAlternatives.map(content => (
                   <option
-                    key={'next-path-' + content.contentId}
-                    value={content.contentId}
-                  >{BranchingOptions.getAlternativeName(content)}</option>
+                    key={ 'next-path-' + content.id }
+                    value={ content.id }
+                  >{content.label}</option>
                 ))
               }
             </select>
@@ -122,3 +113,9 @@ export default class BranchingOptions extends React.Component {
     );
   }
 }
+
+BranchingOptions.propTypes = {
+  nextContentId: PropTypes.number,
+  validAlternatives: PropTypes.array,
+  onChangeContent: PropTypes.func
+};

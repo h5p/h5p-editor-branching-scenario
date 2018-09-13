@@ -671,7 +671,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
    * @returns {boolean} True if validatable.
    */
   BranchingScenarioEditor.prototype.validate = function () {
-    // TODO: Run validate on all subcontent types
+    // TODO: Run validate on all H5PEditor widgets (OK for children of EditorOverlay)
+    this.editor.validate();
     return true;
   };
 
