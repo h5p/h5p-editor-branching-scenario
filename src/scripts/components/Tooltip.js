@@ -25,7 +25,7 @@ export default class Tooltip extends React.Component {
    * @param {Event} event Click event.
    */
   handleDocumentClick = (event) => {
-    if (event.target !== this.refs.tooltip) {
+    if (event.target !== this.tooltip) {
       this.props.onClose();
     }
   }
@@ -36,7 +36,7 @@ export default class Tooltip extends React.Component {
 
     return (
       <div
-        ref={ 'tooltip' }
+        ref={ node => this.tooltip = node }
         className={ tooltipClass }
         dangerouslySetInnerHTML={ { __html: this.props.text } }
       />

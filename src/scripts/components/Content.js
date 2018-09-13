@@ -72,7 +72,7 @@ export default class Content extends React.Component {
   }
 
   getPoints = () => {
-    const raw = this.refs.element.getBoundingClientRect();
+    const raw = this.element.getBoundingClientRect();
     return [{
       x: raw.x,
       y: raw.y
@@ -91,11 +91,11 @@ export default class Content extends React.Component {
   }
 
   highlight() {
-    this.refs.element.refs.element.classList.add('highlight');
+    this.element.element.classList.add('highlight');
   }
 
   dehighlight() {
-    this.refs.element.refs.element.classList.remove('highlight');
+    this.element.element.classList.remove('highlight');
   }
 
   /**
@@ -229,7 +229,7 @@ export default class Content extends React.Component {
 
     return (
       <Draggable
-        ref='element'
+        ref={ node => this.element = node }
         className={ elementClass }
         style={ {
           left: this.state.position.x + 'px',

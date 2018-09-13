@@ -61,7 +61,7 @@ export default class ContentTypeMenu extends React.Component {
         }
         else {
           H5PEditor.attachToastTo(
-            this.refs['reuse-button'],
+            this.reuseButton,
             this.state.canPaste.description,
             {position: {
               horizontal: 'center',
@@ -233,7 +233,7 @@ export default class ContentTypeMenu extends React.Component {
     return (
       <ul className="content-type-buttons">
         <li
-          ref={ 'reuse-button' }
+          ref={ node => this.reuseButton = node }
           className={ className }
           title="Add from clipboard"
           onMouseDown={ event => this.handleMouseDown(event, 'reuse-question') }

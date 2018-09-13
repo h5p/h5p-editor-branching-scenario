@@ -1051,10 +1051,10 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.props.center && this.refs.tree && this['draggable-1']) {
+    if (this.props.center && this.tree && this['draggable-1']) {
       // TODO: Much cleaner if we can get this into the state through a ref= callback
       // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
-      const center = (this.refs.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.props.scale) / 2);
+      const center = (this.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.props.scale) / 2);
       this.setState({
         panning: {
           x: (center - (this['draggable-0'].props.position.x * this.props.scale)), // TODO: use prevState and props
@@ -1142,8 +1142,8 @@ export default class Canvas extends React.Component {
 
   panningLimits = (position) => {
     // Limits, you have to have them
-    const treewrapRect = this.refs.treewrap.getBoundingClientRect();
-    const treeRect = this.refs.tree.getBoundingClientRect();
+    const treewrapRect = this.treewrap.getBoundingClientRect();
+    const treeRect = this.tree.getBoundingClientRect();
 
     const wideLoad = (treeRect.width > treewrapRect.width);
     const highLoad = (treeRect.height > treewrapRect.height);
@@ -1271,7 +1271,7 @@ export default class Canvas extends React.Component {
         }
         <div className="canvas">
           <Draggable
-            ref={ 'treewrap' }
+            ref={ node => this.treewrap = node }
             className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
             position={ this.state.panning }
             limits={ this.panningLimits }
@@ -1280,7 +1280,7 @@ export default class Canvas extends React.Component {
           >
             <div
               className="nodetree"
-              ref={ 'tree' }
+              ref={ node => this.tree = node }
               style={ {
                 width: tree.x + 'px',
                 height: tree.y + 'px',

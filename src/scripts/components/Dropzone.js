@@ -7,7 +7,7 @@ export default class Dropzone extends React.Component {
   }
 
   getPoints() {
-    const raw = this.refs.element.getBoundingClientRect();
+    const raw = this.element.getBoundingClientRect();
     return [{
       x: raw.x,
       y: raw.y
@@ -50,11 +50,11 @@ export default class Dropzone extends React.Component {
   }
 
   highlight() {
-    this.refs.element.classList.add('highlight');
+    this.element.classList.add('highlight');
   }
 
   dehighlight() {
-    this.refs.element.classList.remove('highlight');
+    this.element.classList.remove('highlight');
   }
 
   /**
@@ -69,7 +69,7 @@ export default class Dropzone extends React.Component {
   render() {
     return (
       <div
-        ref={ 'element' }
+        ref={ node => this.element = node }
         className={ this.props.elementClass }
         style={ this.props.style }
         onClick={ this.props.onClick }

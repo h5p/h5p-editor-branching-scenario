@@ -112,12 +112,12 @@ export default class Draggable extends React.Component {
   }
 
   getBoundingClientRect = () => {
-    return this.refs.element.getBoundingClientRect();
+    return this.element.getBoundingClientRect();
   }
 
   render() {
     return (
-      <div ref='element' className={ this.props.className } onMouseDown={ this.handleMouseDown } style={ this.props.style }>
+      <div ref={ node => this.element = node } className={ this.props.className } onMouseDown={ this.handleMouseDown } style={ this.props.style }>
         { this.props.children }
       </div>
     );

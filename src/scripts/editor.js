@@ -83,8 +83,8 @@ export default class Editor extends React.Component {
   }
 
   validate = () => {
-    if (this.refs.canvas.state.editing !== null) {
-      this.refs.canvas.editorOverlay.handleDone(); // Trigger saving and closing of form
+    if (this.canvas.state.editing !== null) {
+      this.canvas.editorOverlay.handleDone(); // Trigger saving and closing of form
     }
   }
 
@@ -193,11 +193,11 @@ export default class Editor extends React.Component {
 
   render() {
     // This might be replaced by callbacks invoked by the refs
-    if (!this.treewrap && this.refs.canvas && this.refs.canvas.refs.treewrap && this.refs.canvas.refs.treewrap.refs.element) {
-      this.treewrap = this.refs.canvas.refs.treewrap.refs.element;
+    if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
+      this.treewrap = this.canvas.treewrap.element;
     }
-    if (!this.tree && this.refs.canvas && this.refs.canvas.refs.tree) {
-      this.tree = this.refs.canvas && this.refs.canvas.refs.tree;
+    if (!this.tree && this.canvas && this.canvas.tree) {
+      this.tree = this.canvas && this.canvas.tree;
     }
 
     return (
@@ -215,7 +215,7 @@ export default class Editor extends React.Component {
             onMouseDown={ this.handleMouseDown }
           />
           <Canvas
-            ref={ 'canvas' }
+            ref={ node => this.canvas = node }
             inserting={ this.state.inserting }
             libraries={ this.state.libraries }
             saveData={this.props.saveData}
