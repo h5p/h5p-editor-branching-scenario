@@ -202,8 +202,8 @@ export default class Editor extends React.Component {
 
     return (
       <Tabs className="tab-view-wrapper"
-        activeIndex={ this.state.activeIndex}
-        setActiveIndex={ key => this.setActiveIndex(key)}
+        activeIndex={ this.state.activeIndex }
+        onChange={ key => this.setActiveIndex(key) }
       >
         <Tab
           onMouseUp={ this.handleMouseUp }

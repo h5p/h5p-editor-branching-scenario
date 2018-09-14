@@ -706,13 +706,14 @@ export default class Canvas extends React.Component {
             } }
             position={ position }
             width={ this.state.nodeSpecs.width }
+            selected={ this.state.placing === id }
             onPlacing={ () => this.handlePlacing(id) }
             onMove={ () => this.handleMove(id) }
             onDropped={ () => this.handleDropped(id) }
             contentClass={ libraryTitle }  // TODO: Use kebab-case, should be determined once on load instead of for each render.
-            onEdit={ this.handleContentEdit }
-            onCopy={ this.handleContentCopy }
-            onDelete={ this.handleContentDelete }
+            onEdit={ () => this.handleContentEdit(id) }
+            onCopy={ () => this.handleContentCopy(id) }
+            onDelete={ () => this.handleContentDelete(id) }
             disabled={ contentIsBranching }
             tooltip={ Content.getTooltip(content) }
             scale={ this.props.scale }
@@ -1291,6 +1292,7 @@ export default class Canvas extends React.Component {
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
             width={ this.state.nodeSpecs.width }
+            selected={ this.state.placing === -1 }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
             contentClass={ this.props.inserting.library.title.replace(/ +/g, '') } // TODO: Use kebab-case
