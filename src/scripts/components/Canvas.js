@@ -879,7 +879,8 @@ export default class Canvas extends React.Component {
         if (content && (!subtree || !subtree.nodes.length) && !placingIsBranchingParent) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
-            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (this.state.dzSpecs.height / 2) : 0)
+            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance // for fixed tree
+            // y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (this.state.dzSpecs.height / 2) : 0) // for expandable tree
           }, id, parentIsBranching ? num + 1 : 1));
         }
       }
