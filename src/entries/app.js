@@ -75,7 +75,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       startTitle: this.params.startScreen.startScreenTitle,
       startSubtitle: this.params.startScreen.startScreenSubtitle,
       startImage: this.params.startScreen.startScreenImage,
-      endScore: 0, // TODO: Doesn't have a match in current semantics
+      endScreenScore: this.params.endScreens[0].endScreenScore, // TODO: Doesn't have a match in current semantics
       endFeedback: '', // TODO: Doesn't have a match in current semantics
       endImage: this.params.endScreens[0].endScreenImage,
       optionsSkipToAQuestion: false, // TODO: Doesn't have a match in current semantics
@@ -153,6 +153,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params.startScreen.startScreenSubtitle = data.startSubtitle;
     this.params.startScreen.startScreenImage = data.startImage;
     this.params.endScreens[0].endScreenImage = data.endImage;
+    this.params.endScreens[0].endScreenScore = data.endScreenScore;
   };
 
   /**

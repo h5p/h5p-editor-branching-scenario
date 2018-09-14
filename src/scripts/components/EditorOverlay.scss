@@ -184,3 +184,15 @@
 .field.wizard .h5peditor-tab-a.h5peditor-tab-summary:before {
   content: '\e912';
 }
+
+.editor-overlay .h5p-editor-branching-question {
+  .content.hide-score .field-name-endScreenScore {
+    display: none;
+  }
+}
+
+.editor-overlay .editor-overlay-content.hide-scores {
+  .h5p-editor-branching-question .field-name-endScreenScore {
+    display: none;
+  }
+}

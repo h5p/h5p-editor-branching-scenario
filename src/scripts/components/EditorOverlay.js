@@ -123,7 +123,8 @@ export default class EditorOverlay extends React.Component {
   render() {
     const title = this.state.contentTitle || this.state.type.library.split('.')[1];
     const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.state.type.library.split('.')[1].split(' ')[0])}`;
-
+    const scoreClass = this.props.scoringOption !== 'static-end-score'
+      ? ' hide-scores' : '';
     return (
       <div className='editor-overlay'>
         <div className='editor-overlay-header'>
@@ -138,7 +139,7 @@ export default class EditorOverlay extends React.Component {
           </span>
         </div>
 
-        <div className='editor-overlay-content'>
+        <div className={`editor-overlay-content${scoreClass}`}>
           <div>
             <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}<span
               className="editor-overlay-label-red">*</span></label>

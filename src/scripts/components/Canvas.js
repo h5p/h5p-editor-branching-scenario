@@ -1355,6 +1355,7 @@ export default class Canvas extends React.Component {
               content={ interaction }
               semantics={ this.props.semantics }
               validAlternatives={ validAlternatives }
+              scoringOption={ this.props.scoringOption }
               onDone={ this.handleEditorDone }
             />
           }
