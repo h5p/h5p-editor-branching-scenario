@@ -218,6 +218,10 @@ export default class Canvas extends React.Component {
         return; // Skip
       }
 
+      if (this.isDropzoneDisabled(dropzone.props.id)) {
+        return; // Skip
+      }
+
       if (dropzone === intersections[0]) {
         dropzone.highlight();
       }
@@ -242,29 +246,6 @@ export default class Canvas extends React.Component {
 
     // Dropzone with largest intersection
     const dropzone = intersections[0];
-
-    if (dropzone instanceof Content) {
-      // TODO: Remove drop zones when dragging intead of handling this on drop.
-
-      // Branching Question must not be replaced by anything
-      if (dropzone.isBranchingQuestion()) {
-        this.setState({
-          placing: null
-        });
-        return;
-      }
-
-      // Branching Question must not replace own children
-      if (draggable.isBranchingQuestion()) {
-        const childrenOfBQ = this.getChildrenIds(id);
-        if (childrenOfBQ.some(child => child === dropzone.props.id)) {
-          this.setState({
-            placing: null
-          });
-          return;
-        }
-      }
-    }
 
     if (dropzone instanceof Content && !this.state.editing) {
       // Replace existing node
@@ -662,18 +643,11 @@ export default class Canvas extends React.Component {
 
     const parentIsBranching = (parent !== undefined && Content.isBranching(this.state.content[parent]));
 
-    // BQs should not be able to be dropped on its children
-    const placingIsBranching = this.state.placing !== null &&
-      this.state.placing > -1 &&
-      Content.isBranching(this.state.content[this.state.placing]);
-    const childrenOfBQ = placingIsBranching ? this.getChildrenIds(this.state.placing, true) : undefined;
-
     let firstX, lastX, bigY = y + (this.state.nodeSpecs.spacing.y * 7.5); // The highest we'll ever be
     branch.forEach((id, num) => {
       let drawAboveLine = false;
       const content = this.state.content[id];
       const hasBeenDrawn = (renderedNodes.indexOf(id) !== -1);
-      const placingIsBranchingParent = childrenOfBQ && childrenOfBQ.indexOf(id) !== -1;
 
       renderedNodes.push(id);
 
@@ -728,7 +702,12 @@ export default class Canvas extends React.Component {
             key={ id }
             id={ id }
             fade={ this.props.highlight !== null && !highlightCurrentNode }
-            ref={ element => { this['draggable-' + id] = element; if (this.state.placing !== null && this.state.placing !== id) this.dropzones.push(element); } }
+            ref={ element => {
+              this['draggable-' + id] = element;
+              if (!this.isDropzoneDisabled(id)) {
+                this.dropzones.push(element);
+              }
+            } }
             position={ position }
             width={ this.state.nodeSpecs.width }
             onPlacing={ () => this.handlePlacing(id) }
@@ -853,7 +832,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative if not of BQ being moved
-        if (this.state.placing !== null && this.state.placing !== parent && !content && (!childrenOfBQ || childrenOfBQ.indexOf(parent) === -1)) {
+        if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !Content.isBranching(this.state.content[this.state.placing]))) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
@@ -867,7 +846,7 @@ export default class Canvas extends React.Component {
         const dzDistance = ((aboveLineHeight - this.state.dzSpecs.height) / 2);
 
         // Add dropzone above
-        if (this.state.placing !== parent && !placingIsBranchingParent) {
+        if (this.state.placing !== parent && (!this.isDropzoneDisabled(id) || this.isOuterNode(this.state.placing, id))) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - dzDistance // for fixed tree
@@ -876,7 +855,7 @@ export default class Canvas extends React.Component {
         }
 
         // Add dropzone below if there's no subtree
-        if (content && (!subtree || !subtree.nodes.length) && !placingIsBranchingParent) {
+        if (content && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id)) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance // for fixed tree
@@ -1225,8 +1204,64 @@ export default class Canvas extends React.Component {
     console.warn(this.state.content);
   }
 
+  /**
+   * Create list of dropzones that Draggable should not be droppable on.
+   *
+   * @param {number} id Id of draggable.
+   * @return {object[]} Ids of dropzones that are "disabled".
+   */
+  getDisabledDropzones = (id) => {
+    if (id < 0) {
+      return [];
+    }
+    // No BQ or info content shall be droppable on itself
+    let dropzonesDisabled = [id];
+
+    // No node shall not be able to replace BQs
+    this.state.content.forEach((node, index) => {
+      if (Content.isBranching(node)) {
+        dropzonesDisabled.push(index);
+      }
+    });
+
+    // BQs shall not be droppable on their children
+    if (Content.isBranching(this.state.content[id])) {
+      dropzonesDisabled = dropzonesDisabled.concat(this.getChildrenIds(id));
+    }
+
+    return dropzonesDisabled.filter((node, index, nodes) => nodes.indexOf(node) === index);
+  }
+
+  /**
+   * Detect whether a dropzone is "disabled" for a draggable.
+   *
+   * @param {number} id Id of draggable to check for being disabled.
+   * @return {boolean} True, if dropzone is "disabled", else false.
+   */
+  isDropzoneDisabled = (id) => {
+    if (!this.dropzonesDisabled || !id || id < 0) {
+      return false;
+    }
+
+    return this.dropzonesDisabled.indexOf(id) !== -1;
+  }
+
+  /**
+   * Test if node is not child of focus node and not focus node itself.
+   *
+   * @param {number} focusId Id of node to check against.
+   * @param {number} nodeId Id of node to test.
+   */
+  isOuterNode(focusId, nodeId) {
+    if (!focusId || !nodeId) {
+      return;
+    }
+    return this.getChildrenIds(focusId, true, true).indexOf(nodeId) === -1;
+  }
+
   render() {
     this.dropzones = [];
+    this.dropzonesDisabled = (this.state.placing) ? this.getDisabledDropzones(this.state.placing) : [];
 
     // Generate the tree
     const tree = this.renderTree(0);
