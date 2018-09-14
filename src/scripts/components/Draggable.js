@@ -17,6 +17,8 @@ export default class Draggable extends React.Component {
       return; // Only handle left click
     }
 
+    event.preventDefault();
+
     this.setState(this.prepareMouseMove({
       startX: event.pageX,
       startY: event.pageY
