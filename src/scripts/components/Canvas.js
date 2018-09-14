@@ -214,19 +214,15 @@ export default class Canvas extends React.Component {
 
     // Highlight dropzones with largest intersection with draggable
     this.dropzones.forEach(dropzone => {
-      if (!dropzone || dropzone === draggable || intersections.length === 0) {
+      if (!dropzone || dropzone === draggable || this.isDropzoneDisabled(dropzone.props.id)) {
         return; // Skip
       }
 
-      if (this.isDropzoneDisabled(dropzone.props.id)) {
-        return; // Skip
-      }
-
-      if (dropzone === intersections[0]) {
-        dropzone.highlight();
+      if (intersections.length === 0 || dropzone !== intersections[0]) {
+        dropzone.dehighlight();
       }
       else {
-        dropzone.dehighlight();
+        dropzone.highlight();
       }
     });
   }
