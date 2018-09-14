@@ -17,17 +17,16 @@ export default class ContentTypeMenu extends React.Component {
 
     this.state = {
       canPaste: {
-        canPaste: false,
+        canPaste: null, // null to implicitly track that setCanPaste has not run yet
         reason: 'pasteNoContent'
-      },
-      libraries: null
+      }
     };
   }
 
   componentDidMount() {
     H5P.externalDispatcher.on('datainclipboard', () => {
-      if (this.state.libraries) {
-        this.setCanPaste(this.state.libraries);
+      if (this.props.libraries) {
+        this.setCanPaste(this.props.libraries);
       }
     });
   }
@@ -37,10 +36,10 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   componentDidUpdate() {
-    // Set the available libraries once they are loaded
-    if (!this.state.libraries && this.props.libraries) {
-      this.state.libraries = this.props.libraries;
-      this.setCanPaste(this.state.libraries);
+    // Set canPaste only once as soon as the libraries have been loaded
+    if (this.state.canPaste.canPaste === null && this.props.libraries) {
+      this.state.canPaste.canPaste = false;
+      this.setCanPaste(this.props.libraries);
     }
   }
 
@@ -78,8 +77,8 @@ export default class ContentTypeMenu extends React.Component {
         return;
       }
 
-      library = (this.state.libraries) ?
-        this.state.libraries.find(library => library.name === clipboard.generic.library) :
+      library = (this.props.libraries) ?
+        this.props.libraries.find(library => library.name === clipboard.generic.library) :
         undefined;
       if (typeof library === 'undefined') {
         return;
@@ -159,13 +158,13 @@ export default class ContentTypeMenu extends React.Component {
   };
 
   renderDnDButtons() {
-    if (!this.state.libraries) {
+    if (!this.props.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
     }
 
-    let listItems = this.state.libraries.map(library => {
+    let listItems = this.props.libraries.map(library => {
       if (library.title === 'BranchingQuestion') {
         return '';
       }
@@ -197,12 +196,12 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   renderSecondButtons() {
-    if (!this.state.libraries) {
+    if (!this.props.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
     }
-    const bs = this.state.libraries.find(library => library.title === 'BranchingQuestion');
+    const bs = this.props.libraries.find(library => library.title === 'BranchingQuestion');
     let className = 'branching-question';
     if (this.props.inserting && this.props.inserting.library === bs && this.state.inUse === bs) {
       className += ' greyout';
@@ -216,7 +215,7 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   renderReuseButton() {
-    if (!this.state.libraries) {
+    if (!this.props.libraries) {
       return (
         <div className="loading">Loading…</div>
       );
