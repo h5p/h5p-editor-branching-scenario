@@ -1,156 +1,158 @@
-a {
-  color: #1773DA;
+.h5p-branchingscenario-editor .h5peditor-form {
+  a {
+    color: #1773DA;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  input[type=text], input[type=number], select, .editor-path-dropzone {
+    box-sizing: border-box;
+    display: inline-block;
+    border-radius: 4px;
+    vertical-align: middle;
+    border: 2px solid #e2e5ee;
+    width: 50%;
+    padding: 0.958em;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    font-size: 0.833em;
+    transition: all 0.1s ease; }
+
+  .editor-path-dropzone {
+    margin-top: 0.7rem;
+  }
+
+  input[type=text]:focus, input[type=number]:focus, select:focus {
+    border-color: #98cbe8;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6); }
+
+  input[type=checkbox] {
+    background-color: #363b42;
+    border: solid 2px #cccccc;
+    margin: 0.3rem; }
+
+  input[type="button"], input[type="submit"] {
+    font-size: 100%;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 2px;
+    cursor: pointer; }
+
+  form {
+    height: 100%;
+  }
+
+  .tab-panel {
+  	display: none;
+  }
+
+  .tab-panel.active {
+    display: flex;
+    width: 100%;
+  }
+
+  .tab-view-wrapper {
+  	height: 100%;
+  	overflow-y: hidden;
+  	overflow-x: hidden;
+  	margin: 0;
+  	padding: 0;
+  }
+
+  .tab-view-full-page {
+    width: 100%;
+    background-color: #F1F3F6;
+    box-sizing: border-box;
+    display: block;
+    width: calc(100% - 2rem);
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    height: 100%;
+  	margin-right: 6rem;
+  }
+
+  .tab-view-full-page fieldset {
+    border: solid 0.042rem #e2e5ee;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .tab-view-full-page fieldset legend {
+    color: #363b42;
+    background-color: white;
+    padding: 0.6rem;
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+
+  .large-padding {
+    padding: 1.5rem;
+  }
+
+  .tab-view-white-box {
+    border: solid 0.042rem #e2e5ee;
+    border-radius: 4px;
+    background-color: #fff;
+    padding: 1rem;
+    margin-top: 1rem;
+    max-height: calc(100% - 7.55rem);
+    overflow-y: auto;
+  }
+
+  .tab-view-title {
+  	font-size: 2rem;
+    display: block;
+    font-weight: 300;
+    color: #1773DA;
+  }
+
+  .tab-view-description {
+  	font-size: 0.75rem;
+    margin-top: 0.3rem;
+    display: block;
+    color: #626262;
+  }
+
+  .tab-view-info {
+    position: relative;
+    display: block; }
+
+  .tab-view-info-tip {
+    display: none;
+    position: absolute;
+    bottom: 130%;
+    min-width: 15rem;
+    background-color: #ffffff;
+    z-index: 2000;
+    padding: 0.6rem;
+    border-radius: 5px;
+    font-weight: normal;
+    padding-left: 3.5rem;
+    text-align: left;
+    -webkit-box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+    font-size: 0.75rem;
+    line-height: 0.9rem;
+    font-family: "Roboto";
+    color: #363b42; }
+
+  .tab-view-info-tip::before {
+    font-family: BSFont;
+    position: absolute;
+    content: "\1F6C8";
+    font-size: 1.3rem;
+    color: #1773DA;
+    left: 0.6rem;
+    top: 0.6rem;
+    border-right: solid 1px #e9ebee;
+    padding-right: 0.6rem;
+    height: calc(100% - 1rem);
+    font-weight: normal; }
 }
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-input[type=text], input[type=number], select, .editor-path-dropzone {
-  box-sizing: border-box;
-  display: inline-block;
-  border-radius: 4px;
-  vertical-align: middle;
-  border: 2px solid #e2e5ee;
-  width: 50%;
-  padding: 0.958em;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  font-size: 0.833em;
-  transition: all 0.1s ease; }
-
-.editor-path-dropzone {
-  margin-top: 0.7rem;
-}
-
-input[type=text]:focus, input[type=number]:focus, select:focus {
-  border-color: #98cbe8;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6); }
-
-input[type=checkbox] {
-  background-color: #363b42;
-  border: solid 2px #cccccc;
-  margin: 0.3rem; }
-
-input[type="button"], input[type="submit"] {
-  font-size: 100%;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  border-radius: 2px;
-  cursor: pointer; }
-
-form {
-  height: 100%;
-}
-
-.tab-panel {
-	display: none;
-}
-
-.tab-panel.active {
-  display: flex;
-  width: 100%;
-}
-
-.tab-view-wrapper {
-	height: 100%;
-	overflow-y: hidden;
-	overflow-x: hidden;
-	margin: 0;
-	padding: 0;
-}
-
-.tab-view-full-page {
-  width: 100%;
-  background-color: #F1F3F6;
-  box-sizing: border-box;
-  display: block;
-  width: calc(100% - 2rem);
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  height: 100%;
-	margin-right: 6rem;
-}
-
-.tab-view-full-page fieldset {
-  border: solid 0.042rem #e2e5ee;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-
-.tab-view-full-page fieldset legend {
-  color: #363b42;
-  background-color: white;
-  padding: 0.6rem;
-  font-weight: bold;
-  font-size: 0.85rem;
-}
-
-.large-padding {
-  padding: 1.5rem;
-}
-
-.tab-view-white-box {
-  border: solid 0.042rem #e2e5ee;
-  border-radius: 4px;
-  background-color: #fff;
-  padding: 1rem;
-  margin-top: 1rem;
-  max-height: calc(100% - 7.55rem);
-  overflow-y: auto;
-}
-
-.tab-view-title {
-	font-size: 2rem;
-  display: block;
-  font-weight: 300;
-  color: #1773DA;
-}
-
-.tab-view-description {
-	font-size: 0.75rem;
-  margin-top: 0.3rem;
-  display: block;
-  color: #626262;
-}
-
-.tab-view-info {
-  position: relative;
-  display: block; }
-
-.tab-view-info-tip {
-  display: none;
-  position: absolute;
-  bottom: 130%;
-  min-width: 15rem;
-  background-color: #ffffff;
-  z-index: 2000;
-  padding: 0.6rem;
-  border-radius: 5px;
-  font-weight: normal;
-  padding-left: 3.5rem;
-  text-align: left;
-  -webkit-box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
-  font-size: 0.75rem;
-  line-height: 0.9rem;
-  font-family: "Roboto";
-  color: #363b42; }
-
-.tab-view-info-tip::before {
-  font-family: BSFont;
-  position: absolute;
-  content: "\1F6C8";
-  font-size: 1.3rem;
-  color: #1773DA;
-  left: 0.6rem;
-  top: 0.6rem;
-  border-right: solid 1px #e9ebee;
-  padding-right: 0.6rem;
-  height: calc(100% - 1rem);
-  font-weight: normal; }
