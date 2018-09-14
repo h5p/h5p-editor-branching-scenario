@@ -19,39 +19,24 @@ export default class EditorOverlay extends React.Component {
     // Reference to the React form wrapper
     this.form = React.createRef();
 
-    // Avoid modifying the content reference, sent back on Done or Save/Update
-    this.state = {...this.props.content};
+    // Must be the same object used by the editor form
+    this.state = this.props.content.params;
 
     // Useful multiple places later
-    this.isBranchingQuestion = Content.isBranching(this.state);
-
-    // Tell H5PEditor we do not handle the widget's ready callbacks
-    this.passReadies = false;
+    this.isBranchingQuestion = Content.isBranching(this.props.content);
   }
 
   componentDidMount() {
-    // Create and append the H5PEditor widgets to the React DOM
-    H5PEditor.processSemanticsChunk(
-      this.props.getSemantics(this.state.type.library),
-      this.state.type.params,
-      H5P.jQuery(this.form.current),
-      this
-    );
-
     if (this.isBranchingQuestion) {
       // Create and render a sub React DOM inside one of the editor widgets
       EditorOverlay.addBranchingOptionsToEditor(H5PEditor.findField(
         'type/branchingQuestion',
-        this.children
+        this.props.content.formChildren
       ), this.props.validAlternatives);
     }
-  }
 
-  componentWillUnmount() {
-    // Run remove on H5PEditor widgets
-    for (let i = 0; i < this.children.length; i++) {
-      this.children[i].remove();
-    }
+    // Insert editor form
+    this.form.current.appendChild(this.props.content.formWrapper);
   }
 
   /**
@@ -97,8 +82,8 @@ export default class EditorOverlay extends React.Component {
    */
   validate = () => {
     let valid = true;
-    for (let i = 0; i < this.children.length; i++) {
-      if (this.children[i].validate() === false) {
+    for (let i = 0; i < this.props.content.formChildren.length; i++) {
+      if (this.props.content.formChildren[i].validate() === false) {
         valid = false;
       }
     }
@@ -123,7 +108,15 @@ export default class EditorOverlay extends React.Component {
   };
 
   handleDone = () => {
+    // Validate all form children to save their current value
     this.validate();
+
+    // Remove any open wysiwyg fields
+    if (H5PEditor.Html) {
+      H5PEditor.Html.removeWysiwyg();
+    }
+
+    // Update Canvas state
     this.props.onDone(this.state); // Must use the same params object as H5PEditor
   }
 
@@ -154,7 +147,7 @@ export default class EditorOverlay extends React.Component {
               value={ title } onChange={ this.handleUpdateTitle }/>
           </div>
 
-          <div className='editor-overlay-semantics editor-overlay-library' ref={ this.form }/>
+          <div className='editor-overlay-semantics' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
@@ -171,7 +164,6 @@ export default class EditorOverlay extends React.Component {
 }
 
 EditorOverlay.propTypes = {
-  getSemantics: PropTypes.func,
   content: PropTypes.object,
   validAlternatives: PropTypes.array,
   onDone: PropTypes.func

@@ -17,7 +17,7 @@ export default class BranchingOptions extends React.Component {
    * @return {string}
    */
   static getAlternativeName(content) {
-    const library = content.type.library.split(' ')[0]
+    const library = content.params.type.library.split(' ')[0]
       .split('.')[1]
       .replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5');
     const contentTitle = Content.getTooltip(content);
@@ -46,7 +46,7 @@ export default class BranchingOptions extends React.Component {
         break;
 
       case 'old-content':
-        this.updateContentSelected(this.props.validAlternatives[0].contentId);
+        this.updateContentSelected(this.props.validAlternatives[0].id);
         break;
     }
   }

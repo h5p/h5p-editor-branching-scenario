@@ -21,7 +21,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.setValue = setValue;
 
     const contentFields = H5PEditor.findSemanticsField('content', this.field);
-    const libraryFields = contentFields.field.fields;
+    this.libraryFields = contentFields.field.fields;
     this.libraries = H5PEditor.findSemanticsField('type', contentFields).options;
 
     this.params = params || {};
@@ -468,27 +468,53 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     const field2 = this.field.fields[2].field.fields[2];
     this.endImageChooser = new H5PEditor.widgets.image(this, field2, this.settings.endImage, () => {});
 
-    this.buildContentEditorForms(libraryFields);
+    this.buildContentEditorForms();
   }
 
   /**
    * Build editors for existing content, so common fields are available
    * on load
    */
-  BranchingScenarioEditor.prototype.buildContentEditorForms = function (libraryFields) {
+  BranchingScenarioEditor.prototype.buildContentEditorForms = function () {
+    // Note that this is just the initial array, it will be maintained as a state in <Canvas>
+    this.content = [];
     // Render all forms up front, so common fields are available
-    this.params.content.forEach((contentParams) => {
-      const $form = H5P.jQuery('<div/>');
-      H5PEditor.processSemanticsChunk(
-        libraryFields,
-        contentParams,
-        $form,
-        this,
-        contentParams.type.library
-      );
-    });
+    this.params.content.forEach(params => this.content.push(this.getNewContent(params)));
   };
 
+  /**
+   * Create Content object with editor form and params
+   *
+   * @param {Object} params
+   * @return {Object} Contnet object
+   */
+  BranchingScenarioEditor.prototype.getNewContent = function (params) {
+    // To be restored once done (processSemanticsChunk() replaces current children)
+    const children = this.children;
+
+    // Create content object that holds the editor form and params
+    const content = {
+      formWrapper: document.createElement('div'),
+      formChildren: null,
+      params: params
+    };
+    
+    content.formWrapper.classList.add('editor-overlay-library');
+
+    H5PEditor.processSemanticsChunk(
+      this.libraryFields,
+      params,
+      H5P.jQuery(content.formWrapper),
+      this,
+      params.type.library
+    );
+    content.formChildren = this.children;
+
+    // Restore children
+    this.children = children;
+
+    return content;
+  };
 
   /**
    * Update parameters with values delivered by React components.
@@ -549,9 +575,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
     this.editor = ReactDOM.render(
       (<Editor
-        main={this} // hacky
         parent={this.parent}
-        content={ this.params.content }
+        content={ this.content }
+        getNewContent={ this.getNewContent.bind(this) }
         libraries={ this.libraries }
         settings={ this.settings }
         startImageChooser={ this.startImageChooser }

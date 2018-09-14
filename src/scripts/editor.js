@@ -218,6 +218,7 @@ export default class Editor extends React.Component {
             ref={ node => this.canvas = node }
             inserting={ this.state.inserting }
             libraries={ this.state.libraries }
+            getNewContent={ this.props.getNewContent }
             saveData={this.props.saveData}
             content={ this.props.content }
             handleOpenTutorial={ this.handleOpenTutorial }

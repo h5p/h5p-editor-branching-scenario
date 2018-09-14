@@ -24,16 +24,16 @@ export default class Content extends React.Component {
    * @return {string}
    */
   static getTooltip(content) {
-    switch (content.type.library.split(' ')[0]) {
+    switch (content.params.type.library.split(' ')[0]) {
       case 'H5P.AdvancedText':
-        return Content.stripHTML(content.type.params.text);
+        return Content.stripHTML(content.params.type.params.text);
       case 'H5P.BranchingQuestion':
-        return (content.type.params.branchingQuestion
-          && content.type.params.branchingQuestion.question)
-          ? Content.stripHTML(content.type.params.branchingQuestion.question)
+        return (content.params.type.params.branchingQuestion
+          && content.params.type.params.branchingQuestion.question)
+          ? Content.stripHTML(content.params.type.params.branchingQuestion.question)
           : undefined;
       default:
-        return content.type.metadata ? content.type.metadata.title : undefined;
+        return content.type.metadata ? content.params.type.metadata.title : undefined;
     }
   }
 
@@ -54,7 +54,7 @@ export default class Content extends React.Component {
    * @return {boolean}
    */
   static isBranching(content) {
-    return content.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
+    return content.params.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
   }
 
   getPoints = () => {
