@@ -124,7 +124,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       formChildren: null,
       params: params
     };
-    
+
     content.formWrapper.classList.add('editor-overlay-library');
 
     H5PEditor.processSemanticsChunk(
@@ -211,6 +211,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         endImageChooser={ this.endImageChooser }
         updateParams={ this.updateParams.bind(this) }
         onContentChanged={ this.handleContentChanged.bind(this) }
+        main={ this } // TODO: Find a more React friendly solution
       />), $wrapper.get(0)
     );
   };
