@@ -38,7 +38,12 @@ export default class ContentTypeMenu extends React.Component {
   componentDidUpdate() {
     // Set canPaste only once as soon as the libraries have been loaded
     if (this.state.canPaste.canPaste === null && this.props.libraries) {
-      this.state.canPaste.canPaste = false;
+      this.setState(prevState => {
+        return {
+          canPaste: false,
+          reason: prevState.canPaste.reason
+        };
+      });
       this.setCanPaste(this.props.libraries);
     }
   }
