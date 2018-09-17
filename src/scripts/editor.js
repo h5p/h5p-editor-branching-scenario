@@ -61,8 +61,12 @@ export default class Editor extends React.Component {
    */
   handleSettingsChange = (event) => {
     const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
+    let value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
+
+    if (name === 'endScreenScore') {
+      value = parseInt(value);
+    }
 
     // TODO: It seems the next state depends on the current, this should be handled inside the setState() updater using prevState.
     const settings = this.state.settings;

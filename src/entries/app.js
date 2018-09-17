@@ -45,11 +45,15 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params.content.forEach(item => {
       if (item.type.library.indexOf('H5P.BranchingQuestion') === 0) {
         item.type.params.branchingQuestion.alternatives.forEach(alt =>
-          alt.nextContentId = alt.nextContentId || -1
+          alt.nextContentId = alt.nextContentId !== undefined
+            ? alt.nextContentId
+            : -1
         );
       }
       else {
-        item.nextContentId = item.nextContentId || -1;
+        item.nextContentId = item.nextContentId !== undefined
+          ? item.nextContentId
+          : -1;
       }
     });
 
@@ -102,6 +106,19 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
    * on load
    */
   BranchingScenarioEditor.prototype.buildContentEditorForms = function () {
+    // Render all common fields of branching scenario
+    const commonFieldsWrapper = document.createElement('div');
+    const commonFields = this.field.fields.filter(branchingField => {
+      return branchingField.common;
+    });
+    H5PEditor.processSemanticsChunk(
+      commonFields,
+      this.params,
+      H5P.jQuery(commonFieldsWrapper),
+      this,
+      this.parent.library
+    );
+
     // Note that this is just the initial array, it will be maintained as a state in <Canvas>
     this.content = [];
     // Render all forms up front, so common fields are available
@@ -112,7 +129,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
    * Create Content object with editor form and params
    *
    * @param {Object} params
-   * @return {Object} Contnet object
+   * @return {Object} Content object
    */
   BranchingScenarioEditor.prototype.getNewContent = function (params) {
     // To be restored once done (processSemanticsChunk() replaces current children)
