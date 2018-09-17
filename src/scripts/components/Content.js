@@ -140,6 +140,7 @@ export default class Content extends React.Component {
       });
       document.addEventListener('click', this.handleDocumentClick);
     }
+    this.props.onDropped(); // Prevent placing after clicking button
   }
 
   handleDocumentClick = (event) => {
