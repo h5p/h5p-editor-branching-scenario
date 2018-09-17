@@ -960,9 +960,10 @@ export default class Canvas extends React.Component {
               const deleteNode = newState.content[deleteId];
 
               // If node to be removed loops backwards or to itself, use default end scenario
-              const successorIds = newState.content.map(node => node.params.nextContentId);
+              const renderedNodes = this.renderedNodes.filter(node => node > -1);
+
               let successorId = -1;
-              if (deleteNode.params.nextContentId !== undefined && successorIds.indexOf(deleteNode.params.nextContentId) > successorIds.indexOf(deleteId)) {
+              if (deleteNode.params.nextContentId > -1 && renderedNodes.indexOf(deleteNode.params.nextContentId) > renderedNodes.indexOf(deleteId)) {
                 successorId = deleteNode.params.nextContentId;
               }
 
