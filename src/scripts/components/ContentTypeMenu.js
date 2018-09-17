@@ -168,11 +168,11 @@ export default class ContentTypeMenu extends React.Component {
     }
 
     let listItems = this.props.libraries.map(library => {
-      if (library.title === 'BranchingQuestion') {
+      if (library.className === 'branchingquestion') {
         return '';
       }
 
-      let className = library.title.replace(/\s/g, '');
+      let className = library.className;
       if (this.props.inserting && this.props.inserting.library === library && this.state.inUse === library) {
         className += ' greyout';
       }
@@ -199,8 +199,8 @@ export default class ContentTypeMenu extends React.Component {
         <div className="loading">Loading…</div>
       );
     }
-    const bs = this.props.libraries.find(library => library.title === 'BranchingQuestion');
-    let className = 'branching-question';
+    const bs = this.props.libraries.find(library => library.className === 'branchingquestion');
+    let className = bs.className;
     if (this.props.inserting && this.props.inserting.library === bs && this.state.inUse === bs) {
       className += ' greyout';
     }
