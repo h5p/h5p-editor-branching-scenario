@@ -1001,6 +1001,9 @@ export default class Canvas extends React.Component {
 
                 removeNode(childrenIds, true);
               }
+
+              // Remove form
+              deleteNode.formChildren.forEach(child => child.remove());
             });
         });
       };
@@ -1008,6 +1011,10 @@ export default class Canvas extends React.Component {
       if (prevState.placing === -1) {
         // Replace node
         const nextContentId = prevState.content[prevState.deleting].params.nextContentId;
+
+        // Remove form
+        newState.content[prevState.deleting].formChildren.forEach(child => child.remove());
+
         newState.content[prevState.deleting] = this.props.getNewContent(this.getNewContentParams());
         newState.content[prevState.deleting].params.nextContentId = nextContentId;
         newState.editing = prevState.deleting;
