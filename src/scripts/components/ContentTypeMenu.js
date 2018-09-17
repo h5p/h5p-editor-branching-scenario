@@ -166,11 +166,6 @@ export default class ContentTypeMenu extends React.Component {
         return '';
       }
 
-      // TODO: Temporarily excluded, because of crashing the editor for some reason
-      if (library.title === 'CoursePresentation') {
-        return '';
-      }
-
       let className = library.title.replace(/\s/g, '');
       if (this.props.inserting && this.props.inserting.library === library && this.state.inUse === library) {
         className += ' greyout';
