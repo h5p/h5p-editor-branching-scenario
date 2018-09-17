@@ -956,7 +956,7 @@ export default class Canvas extends React.Component {
             .filter(id => id !== undefined)
             .sort((a, b) => b - a) // Delete nodes with highest id first to account for node removal
             .forEach(deleteId => {
-              // node to be removed
+              // node to be removed, will always be an info node, no BQ
               const deleteNode = newState.content[deleteId];
 
               // If node to be removed loops backwards or to itself, use default end scenario
@@ -971,15 +971,15 @@ export default class Canvas extends React.Component {
               newState.content.forEach(node => {
                 const affectedNodes = (Content.isBranching(node)) ?
                   node.params.type.params.branchingQuestion.alternatives :
-                  [node];
+                  [node.params];
 
                 affectedNodes.forEach(affectedNode => {
-                  if (affectedNode.params.nextContentId === deleteId) {
-                    affectedNode.params.nextContentId = successorId;
+                  if (affectedNode.nextContentId === deleteId) {
+                    affectedNode.nextContentId = successorId;
                   }
                   // Account Id for upcoming node removal
-                  if (affectedNode.params.nextContentId !== undefined && affectedNode.params.nextContentId >= deleteId) {
-                    affectedNode.params.nextContentId -= 1;
+                  if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
+                    affectedNode.nextContentId -= 1;
                   }
                 });
               });
