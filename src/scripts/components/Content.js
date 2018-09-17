@@ -33,7 +33,7 @@ export default class Content extends React.Component {
           ? Content.stripHTML(content.params.type.params.branchingQuestion.question)
           : undefined;
       default:
-        return content.type.metadata ? content.params.type.metadata.title : undefined;
+        return content.params.type.metadata ? content.params.type.metadata.title : undefined;
     }
   }
 
