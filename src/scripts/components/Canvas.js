@@ -1281,7 +1281,6 @@ export default class Canvas extends React.Component {
 
     const interaction = this.state.content[this.state.editing];
 
-    // TODO: I believe this is determined elsewhere as well, when dragging. We should use the same function / Have the same options!
     let validAlternatives = [];
     if (interaction) {
       // Determine valid alternatives for the content being edited
