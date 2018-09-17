@@ -579,18 +579,20 @@ export default class Canvas extends React.Component {
     );
   }
 
-  getLibraryTitle(library) {
-    if (!this.props.libraries) {
-      return library;
-    }
-
+  getLibrary(library) {
     for (var i = 0; i < this.props.libraries.length; i++) {
       if (this.props.libraries[i].name === library) {
-        return this.props.libraries[i].title;
+        return this.props.libraries[i];
       }
     }
 
-    return library;
+    const name = library.split(' ')[0];
+    const title = name.replace('H5P.', '');
+    return {
+      title: title,
+      name: name,
+      className: title.toLocaleLowerCase()
+    };
   }
 
   getBranchingChildren(content) { // TODO: Could be a static on <Content> ?
@@ -689,7 +691,7 @@ export default class Canvas extends React.Component {
 
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
-        const libraryTitle = this.getLibraryTitle(content.params.type.library);
+        const library = this.getLibrary(content.params.type.library);
         if ((content.params.nextContentId !== undefined && content.params.nextContentId < 0 && content.params.nextContentId === this.props.highlight) || this.props.highlight === id) {
           highlightCurrentNode = true;
         }
@@ -712,7 +714,7 @@ export default class Canvas extends React.Component {
             onPlacing={ () => this.handlePlacing(id) }
             onMove={ () => this.handleMove(id) }
             onDropped={ () => this.handleDropped(id) }
-            contentClass={ libraryTitle }  // TODO: Use kebab-case, should be determined once on load instead of for each render.
+            contentClass={ library.className }
             onEdit={ () => this.handleContentEdit(id) }
             onCopy={ () => this.handleContentCopy(id) }
             onDelete={ () => this.handleContentDelete(id) }
@@ -720,7 +722,7 @@ export default class Canvas extends React.Component {
             tooltip={ Content.getTooltip(content) }
             scale={ this.props.scale }
           >
-            { libraryTitle }
+            { library.title }
           </Content>
         );
         drawAboveLine = true;
@@ -1299,7 +1301,7 @@ export default class Canvas extends React.Component {
             selected={ this.state.placing === -1 }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
-            contentClass={ this.props.inserting.library.title.replace(/ +/g, '') } // TODO: Use kebab-case
+            contentClass={ this.props.inserting.library.className }
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
             scale={ this.props.scale }

@@ -57,26 +57,32 @@
     margin-right: 0.6rem;
   }
 
-  &.Text:before {
+  &.advancedtext:before {
     content: $icon-text;
   }
 
-  &.Image:before {
+  &.coursepresentation:before {
+    content: '\e916';
+  }
+
+  &.image:before {
     content: $icon-image;
   }
 
-  &.ImageHotspots:before {
+  &.imagehotspots:before {
     content: $icon-image-hotspots;
   }
 
-  &.InteractiveVideo:before {
+  &.interactivevideo:before {
     content: $icon-interactive-video;
   }
-
-  &.Video:before {
+  &.video:before {
     content: $icon-video;
   }
 
+  &.branchingquestion:before {
+    content: '\E902';
+  }
 }
 
 .content-menu-button {

@@ -40,9 +40,9 @@ export default class Editor extends React.Component {
     for (var i = 0; i < libraries.length; i++) {
       if (libraries[i].restricted !== true) {
         loadedLibraries.push({
-          title: libraries[i].title.replace(/ +/g, ''),
+          title: libraries[i].title,
           name: libraries[i].uberName,
-          className: '' // TODO: Add className, use kabab-case
+          className: libraries[i].name.replace('H5P.', '').toLocaleLowerCase()
         });
       }
     }
