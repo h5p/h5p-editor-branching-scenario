@@ -193,11 +193,11 @@ export default class Canvas extends React.Component {
    * @param {number} id ID of child.
    * @return {object} Parent node.
    */
-  getParent = (id) => {
+  getParent = (id, contentNodes) => {
     return this.renderedNodes
       .slice(0, this.renderedNodes.indexOf(id)) // get all node IDs that were rendered on top
       .filter(candidate => candidate > -1) // except end scenarios
-      .map(candidate => this.state.content[candidate]) // get nodes to IDs
+      .map(candidate => contentNodes[candidate]) // get nodes to IDs
       .filter(candidate => { // get all parents of the child
         if (Content.isBranching(candidate)) {
           return candidate.params.type.params.branchingQuestion.alternatives
@@ -260,7 +260,7 @@ export default class Canvas extends React.Component {
 
         if (noNodeToAttach) {
           // Info node has no children that would be attached to *old* parent, latter needs update
-          const parent = this.getParent(id);
+          const parent = this.getParent(id, this.state.content);
 
           if (parent && Content.isBranching(parent)) {
             // Parent is BQ, update needed
@@ -418,6 +418,42 @@ export default class Canvas extends React.Component {
       else {
         alternatives[pos] = {nextContentId: nextContentId};
       }
+    }
+  }
+
+  /**
+   * Replace a child in a node. If oldChild is specified, newChild will only
+   * get set if currentChild is oldChild.
+   * TODO: Could be a static ?
+   *
+   * @param {object} content Content node.
+   * @param {number} newChildId Id of new child.
+   * @param {number} [oldChildId] Id of old child
+   */
+  replaceChild = (content, newChildId, oldChildId) => {
+    if (!content || !newChildId) {
+      return;
+    }
+
+    // Info node
+    if (!Content.isBranching(content)) {
+      if (!oldChildId || content.params.nextContentId === oldChildId) {
+        content.params.nextContentId = newChildId;
+      }
+      return;
+    }
+
+    // BQ
+    const alternatives = content.params.type.params.branchingQuestion.alternatives;
+    if (oldChildId) {
+      alternatives.forEach(alt => {
+        if (alt.nextContentId === oldChildId) {
+          alt.nextContentId = newChildId;
+        }
+      });
+    }
+    else {
+      this.attachChild(content, newChildId);
     }
   }
 
@@ -997,28 +1033,64 @@ export default class Canvas extends React.Component {
                   childrenIds = [deleteNode.params.nextContentId];
                 }
                 childrenIds = childrenIds
-                  .filter(id => id > deleteId - 1) // Ignore backlinks
+                  .filter(id => renderedNodes.indexOf(id) > renderedNodes.indexOf(deleteId - 1)) // Ignore backlinks
                   .sort((a, b) => b - a); // Delete nodes with highest id first to account for node removal
 
                 removeNode(childrenIds, true);
               }
 
+              // debugger // TODO: Is this necessary?
               // Remove form
               deleteNode.formChildren.forEach(child => child.remove());
             });
         });
       };
 
-      if (prevState.placing === -1) {
+      if (prevState.placing !== prevState.deleting) {
         // Replace node
         const nextContentId = prevState.content[prevState.deleting].params.nextContentId;
 
         // Remove form
         newState.content[prevState.deleting].formChildren.forEach(child => child.remove());
 
-        newState.content[prevState.deleting] = this.props.getNewContent(this.getNewContentParams());
-        newState.content[prevState.deleting].params.nextContentId = nextContentId;
-        newState.editing = prevState.deleting;
+        if (prevState.placing === -1) {
+          // Replace with fresh node
+
+          newState.content[prevState.deleting] = this.props.getNewContent(this.getNewContentParams());
+          newState.content[prevState.deleting].params.nextContentId = nextContentId;
+          newState.editing = prevState.deleting;
+        }
+        else {
+          // Replace with existing node
+
+          // BQs take their children with them and don't leave a node to attach
+          const nodeToAttach = Content.isBranching(newState.content[prevState.placing]) ?
+            -1 :
+            newState.content[prevState.placing].params.nextContentId;
+
+          // Point parent of "placing" to successor of "placing"
+          this.replaceChild(
+            this.getParent(prevState.placing, newState.content),
+            nodeToAttach,
+            prevState.placing
+          );
+
+          // Point parent of "deleting" to "placing"
+          this.replaceChild(
+            this.getParent(prevState.deleting, newState.content),
+            prevState.placing,
+            prevState.deleting
+          );
+
+          // Point "placing" to successor of "deleting"
+          this.replaceChild(
+            newState.content[prevState.placing],
+            newState.content[prevState.deleting].params.nextContentId,
+            newState.content[prevState.placing].params.nextContentId
+          );
+
+          removeNode(prevState.deleting);
+        }
       }
       else if (prevState.editing !== null && prevState.freshContent === true || prevState.deleting !== null) {
         // Delete node
