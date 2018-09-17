@@ -101,14 +101,11 @@ export default class ContentTypeMenu extends React.Component {
       startY: event.pageY,
       position: {
         x: raw.left - 1,
-        y: raw.top - 58 // TODO: Determine where offset comes from
+        y: raw.top - 58
       },
       library: library,
       defaults: defaults
     });
-
-    event.stopPropagation();
-    event.preventDefault();
   }
 
   /**
@@ -178,11 +175,6 @@ export default class ContentTypeMenu extends React.Component {
 
     let listItems = this.props.libraries.map(library => {
       if (library.title === 'BranchingQuestion') {
-        return '';
-      }
-
-      // TODO: Temporarily excluded, because of crashing the editor for some reason
-      if (library.title === 'CoursePresentation') {
         return '';
       }
 

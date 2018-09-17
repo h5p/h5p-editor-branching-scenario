@@ -1085,7 +1085,9 @@ export default class Canvas extends React.Component {
    * Trigger callbacks after the content state has changed
    */
   contentChanged = () => {
-    this.props.onContentChanged(this.state.content, this.countDefaultEndScenarios());
+    this.props.onContentChanged(this.state.content.map(content =>
+      content.params
+    ), this.countDefaultEndScenarios());
   }
 
   handleEditorDone = (params) => {
