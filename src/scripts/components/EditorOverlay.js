@@ -29,9 +29,10 @@ export default class EditorOverlay extends React.Component {
   componentDidMount() {
     if (this.isBranchingQuestion) {
       // Create and render a sub React DOM inside one of the editor widgets
-      EditorOverlay.addBranchingOptionsToEditor(H5PEditor.findField(
-        'type/branchingQuestion',
-        this.props.content.formChildren
+      this.addBranchingOptionsToEditor(H5PEditor.findField(
+        'type/branchingQuestion', {
+          children: this.props.content.formChildren,
+        }
       ), this.props.validAlternatives);
     }
 
@@ -44,8 +45,23 @@ export default class EditorOverlay extends React.Component {
    * For Branching Question this means that the branching options
    * must be added to each alternative that can be chosen
    */
-  static addBranchingOptionsToEditor(branchingQuestionEditor, validAlternatives) {
+  addBranchingOptionsToEditor(branchingQuestionEditor, validAlternatives) {
     if (!branchingQuestionEditor || !branchingQuestionEditor.setAlternatives) {
+
+      // Re-run when library has loaded
+      const library = H5PEditor.findField('type', {
+        children: this.props.content.formChildren,
+      });
+
+      library.change(() => {
+        this.addBranchingOptionsToEditor(
+          H5PEditor.findField('type/branchingQuestion', {
+            children: this.props.content.formChildren,
+          }),
+          this.props.validAlternatives,
+        );
+      });
+
       return;
     }
 
@@ -60,19 +76,21 @@ export default class EditorOverlay extends React.Component {
       const render = () => {
         ReactDOM.render((
           <BranchingOptions
-            nextContentId={ nextContentId === '' ? undefined : nextContentId }
+            nextContentId={nextContentId === '' ? undefined : parseInt(nextContentId)}
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
           />
         ), selectorWrapper);
       };
-      render();
 
       // Set default value to end scenario
-      if (nextContentId === '') {
-        branchingQuestionEditor.setNextContentId(listIndex, -1);
-      }
+      const normalizedNextContentId = nextContentId === '' ? -1 : nextContentId;
+      branchingQuestionEditor.setNextContentId(
+        listIndex,
+        normalizedNextContentId
+      );
+      render();
     });
   }
 

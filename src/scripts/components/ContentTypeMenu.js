@@ -38,7 +38,6 @@ export default class ContentTypeMenu extends React.Component {
   componentDidUpdate() {
     // Set canPaste only once as soon as the libraries have been loaded
     if (this.state.canPaste.canPaste === null && this.props.libraries) {
-      this.state.canPaste.canPaste = false;
       this.setCanPaste(this.props.libraries);
     }
   }
@@ -55,20 +54,7 @@ export default class ContentTypeMenu extends React.Component {
 
       // Inform user if content cannot be pasted
       if (this.state.canPaste.canPaste === false) {
-        if (this.state.canPaste.reason === 'pasteTooOld' || this.state.canPaste.reason === 'pasteTooNew') {
-          this.confirmPasteError(this.state.canPaste.description, document, () => {});
-        }
-        else {
-          H5PEditor.attachToastTo(
-            this.reuseButton,
-            this.state.canPaste.description,
-            {position: {
-              horizontal: 'center',
-              vertical: 'above',
-              noOverflowX: true
-            }}
-          );
-        }
+        this.displayNoPasteExplanation();
       }
 
       // Sanitization
@@ -114,6 +100,26 @@ export default class ContentTypeMenu extends React.Component {
       library: library,
       defaults: defaults
     });
+  }
+
+  /**
+   * Display info on why content cannot be pasted.
+   */
+  displayNoPasteExplanation = () => {
+    if (this.state.canPaste.reason === 'pasteTooOld' || this.state.canPaste.reason === 'pasteTooNew') {
+      this.confirmPasteError(this.state.canPaste.description, document, () => {});
+    }
+    else {
+      H5PEditor.attachToastTo(
+        this.reuseButton,
+        this.state.canPaste.description,
+        {position: {
+          horizontal: 'center',
+          vertical: 'above',
+          noOverflowX: true
+        }}
+      );
+    }
   }
 
   /**
