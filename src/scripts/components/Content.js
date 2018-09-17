@@ -124,13 +124,13 @@ export default class Content extends React.Component {
   }
 
   handleStopped = (moved) => {
-    if (moved) {
-      this.props.onDropped();
-    }
-
     this.setState({
       temporaryPosition: null
     });
+    
+    if (moved) {
+      this.props.onDropped();
+    }
   }
 
   handleMenuButtonClick = () => {

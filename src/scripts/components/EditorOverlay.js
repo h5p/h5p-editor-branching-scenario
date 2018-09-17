@@ -33,7 +33,7 @@ export default class EditorOverlay extends React.Component {
         'type/branchingQuestion', {
           children: this.props.content.formChildren,
         }
-      ), this.props.validAlternatives);
+      ), this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
     }
 
     // Insert editor form
@@ -45,7 +45,7 @@ export default class EditorOverlay extends React.Component {
    * For Branching Question this means that the branching options
    * must be added to each alternative that can be chosen
    */
-  addBranchingOptionsToEditor(branchingQuestionEditor, validAlternatives) {
+  addBranchingOptionsToEditor(branchingQuestionEditor, validAlternatives, alternatives) {
     if (!branchingQuestionEditor || !branchingQuestionEditor.setAlternatives) {
 
       // Re-run when library has loaded
@@ -66,7 +66,9 @@ export default class EditorOverlay extends React.Component {
     }
 
     // Add <BranchingOptions> to each alternative in Branching Question
-    branchingQuestionEditor.setAlternatives((nextContentId, selectorWrapper, listIndex) => {
+    branchingQuestionEditor.setAlternatives((listIndex, selectorWrapper) => {
+      let nextContentId = alternatives[listIndex].nextContentId;
+
       const branchingUpdated = (value) => {
         branchingQuestionEditor.setNextContentId(listIndex, value);
         nextContentId = value;

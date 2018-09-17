@@ -603,7 +603,7 @@ export default class Canvas extends React.Component {
         parent={ parent }
         alternative={ num }
         position={ position }
-        elementClass={ 'dropzone' }
+        elementClass={ 'dropzone' + (id === -9 ? ' disabled' : '') }
         style={
           {
             left: position.x + 'px',
@@ -1112,16 +1112,35 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.props.center && this.tree && this['draggable-1']) {
-      // TODO: Much cleaner if we can get this into the state through a ref= callback
-      // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
-      const center = (this.treewrap.getBoundingClientRect().width / 2) - ((this.state.nodeSpecs.width * this.props.scale) / 2);
-      this.setState({
-        panning: {
-          x: (center - (this['draggable-0'].props.position.x * this.props.scale)), // TODO: use prevState and props
-          y: 0
-        }
-      }, this.props.onCanvasCentered);
+    if (this.props.center && this.tree) {
+      let width, posX, y;
+
+      if (this['draggable-1']) {
+        // Center on 1st node
+        width = this.state.nodeSpecs.width;
+        posX = this['draggable-0'].props.position.x;
+        y = 0;
+      }
+      else if (this.dropzones[1]) {
+        // Center on top DZ (used for empty scenarios)
+        width = 41.59;
+        posX = this.dropzones[1].props.position.x;
+        y = 122; // Align with StartScreen's hardcoded value
+      }
+
+      if (width !== undefined && posX !== undefined && y !== undefined) {
+        // Do the centering
+
+        // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
+        // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
+        const center = (this.treewrap.getBoundingClientRect().width / 2) - ((width * this.props.scale) / 2);
+        this.setState({
+          panning: {
+            x: (center - (posX * this.props.scale)),
+            y: y
+          }
+        }, this.props.onCanvasCentered);
+      }
     }
 
     // Translate the tree
@@ -1354,7 +1373,6 @@ export default class Canvas extends React.Component {
 
     const interaction = this.state.content[this.state.editing];
 
-    // TODO: I believe this is determined elsewhere as well, when dragging. We should use the same function / Have the same options!
     let validAlternatives = [];
     if (interaction) {
       // Determine valid alternatives for the content being edited
@@ -1414,8 +1432,8 @@ export default class Canvas extends React.Component {
             <StartScreen
               handleClicked={ this.props.handleOpenTutorial }
             >
-              { this.renderDropzone(-1, {
-                x: 363.19, // TODO: Decide on spacing a better way?
+              { this.renderDropzone(-9, {
+                x: 361.635,
                 y: 130
               }) }
             </StartScreen>
