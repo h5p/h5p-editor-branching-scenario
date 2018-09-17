@@ -24,6 +24,10 @@
     color: #125bac;
     background-color: #96c2f4;
   }
+
+  &.disabled {
+    pointer-events: none;
+  }
 }
 
 .dropzone-editor-path {
