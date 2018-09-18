@@ -124,12 +124,15 @@ export default class Content extends React.Component {
   }
 
   handleStopped = (moved) => {
-    this.setState({
-      temporaryPosition: null
-    });
-    
     if (moved) {
       this.props.onDropped();
+    }
+
+    if (this.element) {
+      // Reset if component is still visible
+      this.setState({
+        temporaryPosition: null
+      });
     }
   }
 
