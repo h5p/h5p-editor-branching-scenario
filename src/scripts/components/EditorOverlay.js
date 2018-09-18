@@ -32,6 +32,19 @@ export default class EditorOverlay extends React.Component {
   }
 
   componentDidMount() {
+    // Insert editor form
+    this.form.current.appendChild(this.props.content.formWrapper);
+
+    // Listen for the ready event from the sub form
+    if (this.props.content.ready === true) {
+      this.ready();
+    }
+    else {
+      this.props.content.ready = this.ready;
+    }
+  }
+
+  ready = () => {
     if (this.isBranchingQuestion) {
       // Create and render a sub React DOM inside one of the editor widgets
       this.addBranchingOptionsToEditor(H5PEditor.findField(
@@ -40,9 +53,6 @@ export default class EditorOverlay extends React.Component {
         }
       ), this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
     }
-
-    // Insert editor form
-    this.form.current.appendChild(this.props.content.formWrapper);
 
     this.initSyncMetadataTitles();
   }

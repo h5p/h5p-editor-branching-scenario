@@ -88,14 +88,13 @@ export default class ContentTypeMenu extends React.Component {
       inUse: (inUse === 'reuse-question') ? inUse : library
     });
 
-    const raw = event.currentTarget.getBoundingClientRect();
     this.props.onMouseDown({
       target: event.target,
       startX: event.pageX,
       startY: event.pageY,
       position: {
-        x: raw.left - 1,
-        y: raw.top - 58
+        x: event.currentTarget.offsetLeft,
+        y: event.currentTarget.offsetTop
       },
       library: library,
       defaults: defaults

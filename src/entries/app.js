@@ -153,6 +153,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     );
     content.formChildren = this.children;
 
+    // For BS we need to know when the sub form is ready/loaded
+    content.formChildren[0].change(() => {
+      if (content.ready) {
+        content.ready();
+      }
+      content.ready = true;
+    });
+
     // Restore children
     this.children = children;
 
@@ -217,16 +225,18 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
   BranchingScenarioEditor.prototype.appendTo = function ($wrapper) {
     const self = this;
 
+    let fullscreen;
     if (H5PEditor.Fullscreen !== undefined) {
       const formWrapper = $wrapper.parent()[0];
-      const fullscreen = new H5PEditor.Fullscreen(formWrapper);
+      fullscreen = new H5PEditor.Fullscreen(formWrapper);
 
       fullscreen.on('entered', function () {
         formWrapper.classList.add('h5peditor-fullscreen');
 
         // Center tree after entering fullscreen
         self.editor.setState({
-          center: true
+          center: true,
+          fullscreen: true
         });
         // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
       });
@@ -236,15 +246,26 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
         // Center tree after exiting fullscreen
         self.editor.setState({
-          center: true
+          center: true,
+          fullscreen: false
         });
         // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
       });
     }
+    function toggleFullscreen(on) {
+      if (fullscreen) {
+        if (on) {
+          fullscreen.enter();
+        }
+        else {
+          fullscreen.exit();
+        }
+      }
+    }
 
     this.editor = ReactDOM.render(
       (<Editor
-        parent={this.parent}
+        parent={ this.parent }
         content={ this.content }
         getNewContent={ this.getNewContent.bind(this) }
         libraries={ this.libraries }
@@ -253,6 +274,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         endImageChooser={ this.endImageChooser }
         updateParams={ this.updateParams.bind(this) }
         onContentChanged={ this.handleContentChanged.bind(this) }
+        onToggleFullscreen={ toggleFullscreen }
+        onTitleChange={ title => this.parent.metadata = {title: title} }
         main={ this } // TODO: Find a more React friendly solution
       />), $wrapper.get(0)
     );

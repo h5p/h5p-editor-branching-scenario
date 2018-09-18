@@ -494,6 +494,7 @@ export default class Canvas extends React.Component {
             newState.content[0].params.nextContentId = -1; // Use default end scenario as default end scenario
           }
           // This is the first node added, nothing more needs to be done.
+          props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
           return newState;
         }
       }
@@ -595,15 +596,16 @@ export default class Canvas extends React.Component {
     }
 
     const defaults = (this.props.inserting) ? this.props.inserting.defaults : {};
+    const isInitial = (id === -9);
     return ( !this.state.editing &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
-        ref={ element => this.dropzones.push(element) }
+        ref={ element => isInitial ? this.initialDropzone = element : this.dropzones.push(element) }
         nextContentId={ nextContentId }
         parent={ parent }
         alternative={ num }
         position={ position }
-        elementClass={ 'dropzone' + (id === -9 ? ' disabled' : '') }
+        elementClass={ 'dropzone' + (isInitial ? ' disabled' : '') }
         style={
           {
             left: position.x + 'px',
@@ -1121,10 +1123,10 @@ export default class Canvas extends React.Component {
         posX = this['draggable-0'].props.position.x;
         y = 0;
       }
-      else if (this.dropzones[1]) {
+      else if (this.dropzones[0]) {
         // Center on top DZ (used for empty scenarios)
         width = 41.59;
-        posX = this.dropzones[1].props.position.x;
+        posX = this.dropzones[0].props.position.x;
         y = 122; // Align with StartScreen's hardcoded value
       }
 
@@ -1141,6 +1143,12 @@ export default class Canvas extends React.Component {
           }
         }, this.props.onCanvasCentered);
       }
+    }
+
+    // Center inital dropzone
+    if (this.initialDropzone) {
+      const center = (this.treewrap.getBoundingClientRect().width / 2) - (41.59 / 2);
+      this.initialDropzone.element.style.left = center + 'px';
     }
 
     // Translate the tree
