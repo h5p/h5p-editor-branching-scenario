@@ -1280,12 +1280,15 @@ export default class Canvas extends React.Component {
       // Stop highlighting
       this.props.onHighlight(null);
 
-      // Stop click-to-place placing
-      if (this.state.placing !== null && this.state.deleting === null) {
-        this.setState({
-          placing: null
-        });
-      }
+      // Defer until after dropzone click handler
+      setTimeout(() => {
+        // Stop click-to-place placing
+        if (this.state.placing !== null && this.state.deleting === null) {
+          this.setState({
+            placing: null
+          });
+        }
+      }, 0);
     }
 
     this.props.onDropped(); // TODO: See TODO in handlePlacing()
