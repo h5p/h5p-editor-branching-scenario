@@ -26,7 +26,8 @@ export default class Editor extends React.Component {
       scale: 1,
       center: true,
       translate: null,
-      scoringOption: null
+      scoringOption: null,
+      fullscreen: false
     };
   }
 
@@ -205,6 +206,15 @@ export default class Editor extends React.Component {
     });
   }
 
+  handleToggleFullscreen = () => {
+    this.setState(prevState => {
+      this.props.onToggleFullscreen(!prevState.fullscreen);
+      return {
+        fullscreen: !prevState.fullscreen
+      };
+    });
+  }
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -215,75 +225,84 @@ export default class Editor extends React.Component {
     }
 
     return (
-      <Tabs className="tab-view-wrapper"
-        activeIndex={ this.state.activeIndex }
-        onChange={ key => this.setActiveIndex(key) }
-      >
-        <Tab
-          onMouseUp={ this.handleMouseUp }
-          title="add content"
-          className="bs-editor-content-tab has-submenu">
-          <ContentTypeMenu
-            inserting={ this.state.inserting }
-            libraries={ this.state.libraries }
-            onMouseDown={ this.handleMouseDown }
-          />
-          <Canvas
-            ref={ node => this.canvas = node }
-            inserting={ this.state.inserting }
-            libraries={ this.state.libraries }
-            getNewContent={ this.props.getNewContent }
-            saveData={this.props.saveData}
-            content={ this.props.content }
-            handleOpenTutorial={ this.handleOpenTutorial }
-            onOpenEditor={ this.handleOpenEditor }
-            onContentChanged={ this.handleContentChanged }
-            onHighlight={ this.handleHighlight }
-            highlight={ this.state.highlight }
-            onlyThisBall={ this.state.onlyThisBall }
-            onDropped={ this.handleInsertingDone }
-            scale={ this.state.scale }
-            center={ this.state.center }
-            onCanvasCentered={ this.handleCanvasCentered }
-            translate={ this.state.translate }
-            onCanvasTranslated={ this.handleCanvasTranslated }
-            scoringOption={ this.state.scoringOption }
-          />
-          <Toolbar
-            numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
-            onHighlight={ this.handleHighlight }
-            scale={ this.state.scale }
-            onScaleChanged={ this.handleScaleChanged }
-            containerRect={ this.treewrap }
-            contentRect={ this.tree }
-          />
-        </Tab>
-        <Tab title="settings" className="bs-editor-settings-tab">
-          <TabViewSettings
-            main={this.props.main}
-            value={this.state.settings}
-            startImageChooser={this.props.startImageChooser}
-            endImageChooser={this.props.endImageChooser}
-            onChange={this.handleSettingsChange}
-            updateScoringOption={this.handleScoringOptionChange}
-          />
-        </Tab>
-        <Tab title="translations" className="bs-editor-translations-tab">
-          <TabViewTranslations
-            parent={this.props.parent}
-          />
-        </Tab>
-        <Tab title="tutorial" className="bs-editor-tutorial-tab">
-          <TabViewTutorial
-            handleOpenCanvas={ this.handleOpenCanvas }
-          />
-        </Tab>
-        <Tab title="metadata" className="bs-editor-metadata-tab">
-          <TabViewMetadata
-            value=""
-          />
-        </Tab>
-      </Tabs>
+      <div className="bswrapper">
+        <div className="topbar">
+          <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>
+          <input name="title" placeholder="Please give us a title" onChange={ e => this.props.onTitleChange(e.target.value) }></input>
+          { this.state.fullscreen &&
+            <div className="proceed-button" role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }>Proceed to Save{/* TODO: l10n */}</div>
+          }
+        </div>
+        <Tabs className="tab-view-wrapper"
+          activeIndex={ this.state.activeIndex }
+          onChange={ key => this.setActiveIndex(key) }
+        >
+          <Tab
+            onMouseUp={ this.handleMouseUp }
+            title="add content"
+            className="bs-editor-content-tab has-submenu">
+            <ContentTypeMenu
+              inserting={ this.state.inserting }
+              libraries={ this.state.libraries }
+              onMouseDown={ this.handleMouseDown }
+            />
+            <Canvas
+              ref={ node => this.canvas = node }
+              inserting={ this.state.inserting }
+              libraries={ this.state.libraries }
+              getNewContent={ this.props.getNewContent }
+              saveData={this.props.saveData}
+              content={ this.props.content }
+              handleOpenTutorial={ this.handleOpenTutorial }
+              onOpenEditor={ this.handleOpenEditor }
+              onContentChanged={ this.handleContentChanged }
+              onHighlight={ this.handleHighlight }
+              highlight={ this.state.highlight }
+              onlyThisBall={ this.state.onlyThisBall }
+              onDropped={ this.handleInsertingDone }
+              scale={ this.state.scale }
+              center={ this.state.center }
+              onCanvasCentered={ this.handleCanvasCentered }
+              translate={ this.state.translate }
+              onCanvasTranslated={ this.handleCanvasTranslated }
+              scoringOption={ this.state.scoringOption }
+            />
+            <Toolbar
+              numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
+              onHighlight={ this.handleHighlight }
+              scale={ this.state.scale }
+              onScaleChanged={ this.handleScaleChanged }
+              containerRect={ this.treewrap }
+              contentRect={ this.tree }
+            />
+          </Tab>
+          <Tab title="settings" className="bs-editor-settings-tab">
+            <TabViewSettings
+              main={this.props.main}
+              value={this.state.settings}
+              startImageChooser={this.props.startImageChooser}
+              endImageChooser={this.props.endImageChooser}
+              onChange={this.handleSettingsChange}
+              updateScoringOption={this.handleScoringOptionChange}
+            />
+          </Tab>
+          <Tab title="translations" className="bs-editor-translations-tab">
+            <TabViewTranslations
+              parent={this.props.parent}
+            />
+          </Tab>
+          <Tab title="tutorial" className="bs-editor-tutorial-tab">
+            <TabViewTutorial
+              handleOpenCanvas={ this.handleOpenCanvas }
+            />
+          </Tab>
+          <Tab title="metadata" className="bs-editor-metadata-tab">
+            <TabViewMetadata
+              value=""
+            />
+          </Tab>
+        </Tabs>
+      </div>
     );
   }
 }

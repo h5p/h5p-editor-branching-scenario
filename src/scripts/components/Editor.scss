@@ -1,3 +1,5 @@
+@import '../../styles/main.scss';
+
 .h5peditor.h5p-branchingscenario-editor > .h5peditor-form {
   padding: 0;
 }
@@ -5,5 +7,51 @@
   border: 0;
 }
 .h5peditor-form.h5peditor-fullscreen > .tree {
+  height: 100%;
+}
+.topbar {
+  background: $col6;
+  color: #d1d2d2;
+
+  & > input {
+    background: #000;
+    padding: 0.35em 0.5em;
+    color: #d1d2d2;
+    border: 0;
+    margin: 0.5em 10em 0.5em 3.507333333333333em;
+    width: 25em;
+    font-size: 0.9375em;
+  }
+}
+.fullscreen-button {
+  position: absolute;
+  cursor: pointer;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  font-size: 1.3125em;
+  padding: 0.5119047619047619em 0.380952380952381em;
+
+  &:before {
+    font-family: BSFont;
+    content: $icon-full-screen-open;
+  }
+  &.active:before {
+    content: $icon-full-screen-close;
+  }
+}
+.proceed-button {
+  cursor: pointer;
+  position: absolute;
+  right: 0.35em;
+  top: 0.35em;
+  background: $success-col;
+  color: white;
+  text-transform: uppercase;
+  font-size: 0.875em;
+  padding: 0.47em 0.75em;
+  border-radius: 0.25em;
+}
+.bswrapper {
   height: 100%;
 }
