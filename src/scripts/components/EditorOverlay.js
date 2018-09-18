@@ -19,6 +19,11 @@ export default class EditorOverlay extends React.Component {
     // Reference to the React form wrapper
     this.form = React.createRef();
 
+    // Reference to the React title field
+    this.title = React.createRef();
+
+    this.titleListenerName = 'input.metadata-subcontent-sync';
+
     // Must be the same object used by the editor form
     this.state = this.props.content.params;
 
@@ -38,6 +43,64 @@ export default class EditorOverlay extends React.Component {
 
     // Insert editor form
     this.form.current.appendChild(this.props.content.formWrapper);
+
+    this.initSyncMetadataTitles();
+  }
+
+  componentWillUnmount() {
+    if (this.$metadataFormTitle) {
+      this.$metadataFormTitle.off(this.titleListenerName);
+    }
+    if (this.$editorFormTitle) {
+      this.$editorFormTitle.off(this.titleListenerName);
+    }
+  }
+
+  /**
+   * Initalize sync of custom title field and metadata form title field.
+   */
+  initSyncMetadataTitles() {
+    const library = H5PEditor.findField('type', {
+      children: this.props.content.formChildren,
+    });
+
+    this.syncMetadataTitles();
+
+    // For when a library has not been loaded yet
+    library.change(() => {
+      this.syncMetadataTitles();
+    });
+  }
+
+  /**
+   * Sync custom title field with metadata form title field.
+   *
+   * Title from metadata overrules custom title.
+   */
+  syncMetadataTitles = () => {
+    this.$metadataFormTitle = H5PEditor.$(this.form.current)
+      .find('.h5p-metadata-form-wrapper .field-name-title input');
+    this.$editorFormTitle = H5PEditor.$(this.title.current);
+
+    H5PEditor.sync(
+      this.$metadataFormTitle,
+      this.$editorFormTitle,
+      {
+        listenerName: this.titleListenerName,
+        callback: this.handleTitlesSynced
+      }
+    );
+  }
+
+  /**
+   * Update state when title fields have been synced.
+   *
+   * @param {string} valueSet Value the field was set to by sync.
+   */
+  handleTitlesSynced = (valueSet) => {
+    this.setState({
+      contentTitle: valueSet
+    });
   }
 
   /**
@@ -141,7 +204,6 @@ export default class EditorOverlay extends React.Component {
   }
 
   render() {
-    const title = this.state.contentTitle || this.state.type.library.split('.')[1];
     const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.state.type.library.split('.')[1].split(' ')[0])}`;
     const scoreClass = this.props.scoringOption !== 'static-end-score'
       ? ' hide-scores' : '';
@@ -150,7 +212,7 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
-          >{ title }</span>
+          >{ this.state.contentTitle }</span>
           <span className="buttons">
             <button
               className="buttonBlue"
@@ -164,8 +226,8 @@ export default class EditorOverlay extends React.Component {
             <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}<span
               className="editor-overlay-label-red">*</span></label>
             <input
-              name="title" className='editor-overlay-titlefield' type="text"
-              value={ title } onChange={ this.handleUpdateTitle }/>
+              name="title" id="metadata-title-sub" className='editor-overlay-titlefield' type="text" ref={ this.title }
+              value={ this.state.contentTitle } onChange={ this.handleUpdateTitle }/>
           </div>
 
           <div className='editor-overlay-semantics' ref={ this.form }/>
