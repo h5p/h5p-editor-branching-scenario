@@ -494,6 +494,7 @@ export default class Canvas extends React.Component {
             newState.content[0].params.nextContentId = -1; // Use default end scenario as default end scenario
           }
           // This is the first node added, nothing more needs to be done.
+          props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
           return newState;
         }
       }
