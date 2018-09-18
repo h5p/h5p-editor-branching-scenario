@@ -24,16 +24,25 @@ export default class Content extends React.Component {
    * @return {string}
    */
   static getTooltip(content) {
-    switch (content.params.type.library.split(' ')[0]) {
+    const lib = content.params.type.library.split(' ')[0];
+    const fallbackTip = lib.replace('H5P.', '');
+    let html;
+    switch (lib) {
       case 'H5P.AdvancedText':
-        return Content.stripHTML(content.params.type.params.text);
+        if (content.params.type.params.text) {
+          html = Content.stripHTML(content.params.type.params.text);
+        }
+        if (html === undefined && content.params.type.metadata) {
+          html = content.params.type.metadata.title;
+        }
+        return (html !== undefined ? html : fallbackTip);
       case 'H5P.BranchingQuestion':
         return (content.params.type.params.branchingQuestion
           && content.params.type.params.branchingQuestion.question)
           ? Content.stripHTML(content.params.type.params.branchingQuestion.question)
-          : undefined;
+          : fallbackTip;
       default:
-        return content.params.type.metadata ? content.params.type.metadata.title : undefined;
+        return content.params.type.metadata ? content.params.type.metadata.title : fallbackTip;
     }
   }
 
