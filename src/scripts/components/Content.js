@@ -159,8 +159,9 @@ export default class Content extends React.Component {
     document.removeEventListener('click', this.handleDocumentClick);
   }
 
-  handlePreview = () => {
-    // Postponed
+  handleSubMenuAction = (action) => {
+    this.props[action]();
+    this.props.onDropped(); // Prevent placing after clicking button
   }
 
   render() {
@@ -227,10 +228,9 @@ export default class Content extends React.Component {
         }
         { this.state.contentMenuActive &&
           <SubMenu
-            onPreview={ this.handlePreview }
-            onEdit={ this.props.onEdit }
-            onCopy={ this.props.onCopy }
-            onDelete={ this.props.onDelete }
+            onEdit={ () => this.handleSubMenuAction('onEdit') }
+            onCopy={ () => this.handleSubMenuAction('onCopy') }
+            onDelete={ () => this.handleSubMenuAction('onDelete') }
           />
         }
       </Draggable>
