@@ -215,7 +215,32 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
    * @param {jQuery} $wrapper - Container in DOM.
    */
   BranchingScenarioEditor.prototype.appendTo = function ($wrapper) {
-    $wrapper.parent().css('padding', 0);
+    const self = this;
+
+    if (H5PEditor.Fullscreen !== undefined) {
+      const formWrapper = $wrapper.parent()[0];
+      const fullscreen = new H5PEditor.Fullscreen(formWrapper);
+
+      fullscreen.on('entered', function () {
+        formWrapper.classList.add('h5peditor-fullscreen');
+
+        // Center tree after entering fullscreen
+        self.editor.setState({
+          center: true
+        });
+        // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
+      });
+
+      fullscreen.on('exited', function () {
+        formWrapper.classList.remove('h5peditor-fullscreen');
+
+        // Center tree after exiting fullscreen
+        self.editor.setState({
+          center: true
+        });
+        // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
+      });
+    }
 
     this.editor = ReactDOM.render(
       (<Editor

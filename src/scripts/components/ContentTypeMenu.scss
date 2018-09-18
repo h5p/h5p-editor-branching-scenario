@@ -3,7 +3,6 @@
 .content-type-menu {
   display: inline-block;
   background-color: #363b42;
-  height: 19em;
   height: 55em;
   width: 10em;
 
@@ -11,6 +10,10 @@
     padding: 1rem;
     color: white;
   }
+}
+
+.h5peditor-form.h5peditor-fullscreen .content-type-menu {
+  height: 100%;
 }
 
 .label-info {
