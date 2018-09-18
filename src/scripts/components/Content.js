@@ -230,7 +230,7 @@ export default class Content extends React.Component {
           <SubMenu
             onEdit={ () => this.handleSubMenuAction('onEdit') }
             onCopy={ () => this.handleSubMenuAction('onCopy') }
-            onDelete={ () => this.handleSubMenuAction('onDelete') }
+            onDelete={ this.props.onDelete }
           />
         }
       </Draggable>
