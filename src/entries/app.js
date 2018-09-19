@@ -157,12 +157,17 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     const type = H5PEditor.findField('type', {
       children: content.formChildren
     });
-    type.change(() => {
-      if (content.ready) {
-        content.ready();
-      }
+    if (type.children) {
       content.ready = true;
-    });
+    }
+    else {
+      type.change(() => {
+        if (content.ready) {
+          content.ready();
+        }
+        content.ready = true;
+      });
+    }
 
     // Restore children
     this.children = children;
