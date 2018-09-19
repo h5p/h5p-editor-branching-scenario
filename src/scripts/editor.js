@@ -78,16 +78,6 @@ export default class Editor extends React.Component {
     this.props.updateParams(settings);
   }
 
-  /**
-   * Signal readiness to processSemanticsChunk.
-   * TODO: Should probably be completed as intended.
-   *
-   * @return {boolean} true.
-   */
-  ready() {
-    return true;
-  }
-
   validate = () => {
     if (this.canvas.state.editing !== null) {
       this.canvas.editorOverlay.handleDone(); // Trigger saving and closing of form
@@ -298,6 +288,7 @@ export default class Editor extends React.Component {
           </Tab>
           <Tab title="metadata" className="bs-editor-metadata-tab">
             <TabViewMetadata
+              main={this.props.main}
               value=""
             />
           </Tab>
