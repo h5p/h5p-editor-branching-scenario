@@ -766,7 +766,8 @@ export default class Canvas extends React.Component {
         drawAboveLine = true;
       }
 
-      const nodeWidth = (content ? (this.state.nodeSpecs.width / 2) : 21); // Half width actually...
+      const isLoop = (parentIsBranching && !drawAboveLine && id > -1);
+      const nodeWidth = (content && !isLoop? (this.state.nodeSpecs.width / 2) : 21); // Half width actually...
       const nodeCenter = position.x + nodeWidth;
 
       distanceYFactor -= parentIsBranching ? 4.5 : 2; // 2 = height factor of Draggable
@@ -786,10 +787,10 @@ export default class Canvas extends React.Component {
 
       // Extra lines for BQ
       if (!hasBeenDrawn &&
-        contentIsBranching &&
-        content.params.type.params.branchingQuestion &&
-        content.params.type.params.branchingQuestion.alternatives &&
-        content.params.type.params.branchingQuestion.alternatives.length > 1) {
+          contentIsBranching &&
+          content.params.type.params.branchingQuestion &&
+          content.params.type.params.branchingQuestion.alternatives &&
+          content.params.type.params.branchingQuestion.alternatives.length > 1) {
         // Add vertical line below
         nodes.push(
           <div key={ id + '-vbelow' } className={ 'vertical-line 2' + (this.props.highlight !== null ? ' fade' : '') } style={ {
