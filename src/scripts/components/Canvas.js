@@ -551,7 +551,7 @@ export default class Canvas extends React.Component {
           }
         }
         else {
-          this.updateNextContentId(content, id, nextId, nextContentId, bumpIdsUntil);
+          this.updateNextContentId(content.params, id, nextId, nextContentId, bumpIdsUntil);
         }
       });
 
