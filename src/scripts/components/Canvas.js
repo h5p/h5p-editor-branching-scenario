@@ -363,7 +363,7 @@ export default class Canvas extends React.Component {
         params: {},
         subContentId: H5P.createUUID()
       },
-      contentTitle: this.state.library.name.split('.')[1], // TODO: There's probably a better default
+      contentTitle: H5PEditor.LibraryListCache.getDefaultTitle(this.state.library.name),
       showContentTitle: false
     };
   }
