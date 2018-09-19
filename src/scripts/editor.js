@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import './editor.scss';
 
 import './components/Editor.scss';
 import Tabs from './components/TabPanel';
@@ -11,10 +12,14 @@ import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
 import TabViewMetadata from './components/TabViewMetadata';
+import FullScreenDialog from "./components/dialogs/FullScreenDialog";
+import BlockInteractionOverlay from "./components/BlockInteractionOverlay";
 
 export default class Editor extends React.Component {
   constructor(props) {
     super(props);
+
+    const isFullScreenCapable = H5PEditor.Fullscreen !== undefined;
 
     this.state = {
       activeIndex: 0,
@@ -27,7 +32,8 @@ export default class Editor extends React.Component {
       center: true,
       translate: null,
       scoringOption: null,
-      fullscreen: false
+      fullscreen: false,
+      showFullScreenDialog: isFullScreenCapable,
     };
   }
 
@@ -208,6 +214,16 @@ export default class Editor extends React.Component {
     });
   }
 
+  onFullScreenDialogAction = (enableFullScreen) => {
+    if (enableFullScreen) {
+      this.props.onToggleFullscreen(true);
+    }
+
+    this.setState({
+      showFullScreenDialog: false,
+    });
+  };
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -219,6 +235,15 @@ export default class Editor extends React.Component {
 
     return (
       <div className="bswrapper">
+        {
+          this.state.showFullScreenDialog &&
+          <BlockInteractionOverlay>
+            <FullScreenDialog
+              handleConfirm={this.onFullScreenDialogAction.bind(this, true)}
+              handleCancel={this.onFullScreenDialogAction.bind(this, false)}
+            />
+          </BlockInteractionOverlay>
+        }
         <div className="topbar" ref={ element => this.topbar = element }>
           { H5PEditor.Fullscreen !== undefined &&
             <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>

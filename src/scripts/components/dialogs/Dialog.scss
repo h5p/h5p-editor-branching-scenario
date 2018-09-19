@@ -1,9 +1,7 @@
-@import '../../styles/components/icons.scss';
-
 .confirmation-dialog {
-	position: absolute;
+  position: absolute;
   width: 90%;
-	max-width: 80rem;
+  max-width: 80rem;
   max-height: 80%;
   top: 50%;
   left: 50%;
@@ -11,11 +9,11 @@
   border-radius: 5px;
   display: flex;
   flex-direction: column;
-	transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   transition: all 5s ease-in-out;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   font-size: 1.2rem;
-  z-index:30;
+  z-index: 61;
 }
 
 .confirmation-dialog-header {
@@ -24,16 +22,6 @@
   flex: 0 1 auto;
   align-items: center;
   display: flex;
-
-  .icon-delete:before {
-    font-family: BSFont;
-    content: $icon-delete;
-    font-size: 1.3rem;
-    margin-right: 0.5em;
-  }
-
-  .header-text {
-  }
 }
 
 .confirmation-dialog-body {
@@ -43,38 +31,38 @@
   justify-content: space-between;
   flex: 1 1 auto;
 
-	.confirmation-question {
-		margin-top: 0;
-	}
+  .confirmation-question {
+    margin-top: 0;
+  }
 
-	.confirmation-details {
-	  background-color: #d9eaf4;
-	  border-color: #c3e3ee;
-	  color: #335cb4;
-	  margin: 0.7rem 0;
-	  padding: 1.7rem;
+  .confirmation-details {
+    background-color: #d9eaf4;
+    border-color: #c3e3ee;
+    color: #335cb4;
+    margin: 0.7rem 0;
+    padding: 1.7rem;
 
-		p {
-			margin: 0;
-		}
+    p {
+      margin: 0;
+    }
 
-		ul {
-			margin: 0;
-			list-style-type: none;
-			padding-left: 0;
-		}
-		ul > li:before {
-			content: "- ";
-			text-indent: -5px;
-		}
-		ul > li {
-		}
-	}
+    ul {
+      margin: 0;
+      list-style-type: none;
+      padding-left: 0;
+    }
+    ul > li:before {
+      content: "- ";
+      text-indent: -5px;
+    }
+    ul > li {
+    }
+  }
 
-	.dialog-buttons {
-		display: flex;
-		margin-top: 1rem;
-	}
+  .dialog-buttons {
+    display: flex;
+    margin-top: 1rem;
+  }
 
   .dialog-confirm {
     margin-right: 0.2em;
@@ -89,7 +77,6 @@
     &:hover {
       background-color: #1567c3;
     }
-
   }
 
   .dialog-cancel {
