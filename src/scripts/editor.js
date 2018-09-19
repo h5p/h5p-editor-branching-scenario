@@ -330,7 +330,7 @@ export default class Editor extends React.Component {
 Editor.propTypes = {
   libraries: PropTypes.array,
   settings: PropTypes.object,
-  updateParams: PropTypes.func
+  updateParams: PropTypes.func,
+  startImageChooser: PropTypes.instanceOf(ns.widgets.image),
+  endImageChooser: PropTypes.instanceOf(ns.widgets.image),
 };
-
-// TODO Proptypes for endImageChooser and startImageChooser

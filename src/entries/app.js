@@ -68,8 +68,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       }
     });
 
-    // TODO: Match semantics with design
-    // TODO: Sanitized access more elegantly
     this.params.startScreen = this.params.startScreen || {};
     this.params.startScreen.startScreenTitle = this.params.startScreen.startScreenTitle || '';
     this.params.startScreen.startScreenSubtitle = this.params.startScreen.startScreenSubtitle || '';
@@ -79,24 +77,34 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       startTitle: this.params.startScreen.startScreenTitle,
       startSubtitle: this.params.startScreen.startScreenSubtitle,
       startImage: this.params.startScreen.startScreenImage,
-      endScreenScore: this.params.endScreens[0].endScreenScore, // TODO: Doesn't have a match in current semantics
-      endFeedback: '', // TODO: Doesn't have a match in current semantics
+      endScreenScore: this.params.endScreens[0].endScreenScore,
       endImage: this.params.endScreens[0].endScreenImage,
-      optionsSkipToAQuestion: false, // TODO: Doesn't have a match in current semantics
-      optionsConfirmOnAlternative: false, // TODO: Doesn't have a match in current semantics
-      optionsTryAnotherChoice: false, // TODO: Doesn't have a match in current semantics
-      optionsDisplayScore: false // TODO: Doesn't have a match in current semantics
     };
 
     this.passReadies = true;
     parent.ready(() => this.passReadies = false);
 
-    // TODO: Make a general function for retrieving particular fields from semantics
-    const field1 = this.field.fields[1].fields[2];
-    this.startImageChooser = new H5PEditor.widgets.image(this, field1, this.settings.startImage, () => {});
+    const startScreenImageField = H5PEditor.findSemanticsField(
+      'startScreenImage',
+      this.field
+    );
+    this.startImageChooser = new H5PEditor.widgets.image(
+      this,
+      startScreenImageField,
+      this.settings.startImage,
+      () => {}
+    );
 
-    const field2 = this.field.fields[2].field.fields[2];
-    this.endImageChooser = new H5PEditor.widgets.image(this, field2, this.settings.endImage, () => {});
+    const endScreenImageField = H5PEditor.findSemanticsField(
+      'endScreenImage',
+      this.field
+    );
+    this.endImageChooser = new H5PEditor.widgets.image(
+      this,
+      endScreenImageField,
+      this.settings.endImage,
+      () => {}
+    );
 
     this.buildContentEditorForms();
   }
@@ -181,7 +189,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
    * @param {Object} data - Data from React components.
    */
   BranchingScenarioEditor.prototype.updateParams = function (data) {
-    // TODO: Switch here if we accept data from more than one component
     this.params.startScreen.startScreenTitle = data.startTitle;
     this.params.startScreen.startScreenSubtitle = data.startSubtitle;
     this.params.startScreen.startScreenImage = data.startImage;

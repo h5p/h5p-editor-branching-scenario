@@ -179,34 +179,6 @@ export default class TabViewSettings extends React.Component {
             </fieldset>
             <fieldset>
               <legend className="tab-view-info">Behavioural settings</legend>
-              <input
-                id="optionsSkipToAQuestion"
-                type="checkbox"
-                name="optionsSkipToAQuestion"
-                checked={ this.props.value.optionsSkipToAQuestion }
-                onChange={ this.props.onChange }
-              />Show "Skip to a question" button<br />
-              <input
-                id="optionsConfirmOnAlternative"
-                type="checkbox"
-                name="optionsConfirmOnAlternative"
-                checked={ this.props.value.optionsConfirmOnAlternative }
-                onChange={ this.props.onChange }
-              />Show "Confirm" after you select an alternative<br />
-              <input
-                id="optionsTryAnotherChoice"
-                type="checkbox"
-                name="optionsTryAnotherChoice"
-                checked={ this.props.value.optionsTryAnotherChoice }
-                onChange={ this.props.onChange }
-              />Show "Try another choice" after an answer <br />
-              <input
-                id="optionsDisplayScore"
-                type="checkbox"
-                name="optionsDisplayScore"
-                checked={ this.props.value.optionsDisplayScore }
-                onChange={ this.props.onChange }
-              />Display score<br />
               <div
                 ref={this.refScoringOption}
                 className='h5p-scoring-option-wrapper'
