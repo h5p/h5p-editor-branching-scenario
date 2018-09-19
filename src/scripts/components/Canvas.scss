@@ -132,6 +132,7 @@
   max-width: 30em;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dark .draggable,

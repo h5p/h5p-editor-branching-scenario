@@ -855,17 +855,18 @@ export default class Canvas extends React.Component {
           }
         }
 
+        const alternativeText = this.state.content[parent].params.type.params.branchingQuestion.alternatives[num].text;
         nodes.push(
           <div key={ key }
             className={ alternativeBallClasses }
-            aria-label={ 'Alternative ' + (num + 1) }
+            aria-label={ /* TODO: l10n */ 'Alternative ' + (num + 1) }
             onClick={ () => this.handleBallTouch(hasBeenDrawn ? id : -1, key) }
             style={ {
               left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) - 1) + 'px',
               top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
             } }>A{ num + 1 }
             <div className="dark-tooltip">
-              <div className="dark-text-wrap">{ this.state.content[parent].params.type.params.branchingQuestion.alternatives[num].text }</div>
+              <div className="dark-text-wrap">{ !alternativeText ? /* TODO: l10n */ 'Alternative ' + (num + 1) : alternativeText }</div>
             </div>
           </div>
         );
