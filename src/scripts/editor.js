@@ -36,7 +36,7 @@ export default class Editor extends React.Component {
     window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesLoaded);
 
     // Add title field
-    this.props.main.parent.mainTitleField.$item.insertAfter(this.fsbutton);
+    this.props.main.parent.mainTitleField.$item.appendTo(this.topbar);
   }
 
   handleLibrariesLoaded = (libraries) => {
@@ -219,8 +219,10 @@ export default class Editor extends React.Component {
 
     return (
       <div className="bswrapper">
-        <div className="topbar">
-          <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen } ref={ element => this.fsbutton = element }/>
+        <div className="topbar" ref={ element => this.topbar = element }>
+          { H5PEditor.Fullscreen !== undefined &&
+            <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>
+          }
           { this.state.fullscreen &&
             <div className="proceed-button" role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }>Proceed to Save{/* TODO: l10n */}</div>
           }
