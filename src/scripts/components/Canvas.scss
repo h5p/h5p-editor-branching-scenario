@@ -23,7 +23,6 @@
   height: 100%;
   &.dark {
     background-color: rgba(0,0,0,0.85);
-    transition: background-color 500ms;
   }
 }
 .nodetree {
@@ -143,7 +142,6 @@
 .dark .fade {
   opacity: 0.15;
   box-shadow: none;
-  transition: opacity 500ms;
 }
 
 .click-overlay {
