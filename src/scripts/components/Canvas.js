@@ -802,7 +802,7 @@ export default class Canvas extends React.Component {
         // Add horizontal line below
         nodes.push(
           <div key={ id + '-hbelow' } className={ 'horizontal-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: (x + (children[0] < 0 ? this.state.dzSpecs.width / 2 : this.state.nodeSpecs.width / 2)) + 'px',
+            left: (x + (children[0] === undefined || children[0] < 0 ? this.state.dzSpecs.width / 2 : this.state.nodeSpecs.width / 2)) + 'px',
             top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
             width: (subtree.dX + 2) + 'px'
           } }/>
@@ -1041,7 +1041,6 @@ export default class Canvas extends React.Component {
                 removeNode(childrenIds, true);
               }
 
-              // debugger // TODO: Is this necessary?
               // Remove form
               deleteNode.formChildren.forEach(child => child.remove());
             });

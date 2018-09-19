@@ -40,6 +40,7 @@ export default class EditorOverlay extends React.Component {
   }
 
   ready = () => {
+    // This will run once the sub content form is loaded
     if (this.isBranchingQuestion) {
       // Create and render a sub React DOM inside one of the editor widgets
       this.addBranchingOptionsToEditor(H5PEditor.findField(
@@ -56,23 +57,8 @@ export default class EditorOverlay extends React.Component {
    * must be added to each alternative that can be chosen
    */
   addBranchingOptionsToEditor(branchingQuestionEditor, validAlternatives, alternatives) {
-    if (!branchingQuestionEditor || !branchingQuestionEditor.setAlternatives) {
-
-      // Re-run when library has loaded
-      const library = H5PEditor.findField('type', {
-        children: this.props.content.formChildren,
-      });
-
-      library.change(() => {
-        this.addBranchingOptionsToEditor(
-          H5PEditor.findField('type/branchingQuestion', {
-            children: this.props.content.formChildren,
-          }),
-          this.props.validAlternatives,
-        );
-      });
-
-      return;
+    if (!branchingQuestionEditor) {
+      throw Error('Unable to locate Branching Question Editor. Did someone change Core?');
     }
 
     // Add <BranchingOptions> to each alternative in Branching Question
@@ -96,12 +82,6 @@ export default class EditorOverlay extends React.Component {
         ), selectorWrapper);
       };
 
-      // Set default value to end scenario
-      const normalizedNextContentId = nextContentId === '' ? -1 : nextContentId;
-      branchingQuestionEditor.setNextContentId(
-        listIndex,
-        normalizedNextContentId
-      );
       render();
     });
   }
@@ -144,6 +124,16 @@ export default class EditorOverlay extends React.Component {
     // Remove any open wysiwyg fields
     if (H5PEditor.Html) {
       H5PEditor.Html.removeWysiwyg();
+    }
+
+    if (this.isBranchingQuestion) {
+      // Change non-selected "Next Content" to default end scenario.
+      const alternatives = this.props.content.params.type.params.branchingQuestion.alternatives;
+      alternatives.forEach((alternative, index) => {
+        if (alternative.nextContentId === undefined) {
+          alternatives[index].nextContentId = -1;
+        }
+      });
     }
 
     // Update Canvas state

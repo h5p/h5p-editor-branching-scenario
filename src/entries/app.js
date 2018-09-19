@@ -154,7 +154,10 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     content.formChildren = this.children;
 
     // For BS we need to know when the sub form is ready/loaded
-    content.formChildren[0].change(() => {
+    const type = H5PEditor.findField('type', {
+      children: content.formChildren
+    });
+    type.change(() => {
       if (content.ready) {
         content.ready();
       }
