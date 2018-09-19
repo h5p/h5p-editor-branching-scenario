@@ -13,14 +13,25 @@
   background: $col6;
   color: #d1d2d2;
 
-  & > input {
-    background: #000;
-    padding: 0.35em 0.5em;
-    color: #d1d2d2;
-    border: 0;
-    margin: 0.5em 10em 0.5em 3.507333333333333em;
-    width: 25em;
-    font-size: 0.9375em;
+  & > .field.text {
+    margin: 0;
+    
+    .h5p-editor-flex-wrapper,
+    .h5peditor-field-description,
+    .h5p-errors {
+      display: none;
+    }
+
+    input.h5peditor-text {
+      background: #000;
+      padding: 0.35em 0.5em;
+      color: #d1d2d2;
+      border: 0;
+      margin: 0.5em 10em 0.5em 3.507333333333333em;
+      width: 25em;
+      font-size: 0.9375em;
+      min-height: auto;
+    }
   }
 }
 .fullscreen-button {

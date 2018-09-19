@@ -6,7 +6,7 @@ import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
 import Content from './Content.js';
-import ConfirmationDialog from './ConfirmationDialog.js';
+import ConfirmationDialog from './dialogs/ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
 import BlockInteractionOverlay from './BlockInteractionOverlay';
@@ -551,7 +551,7 @@ export default class Canvas extends React.Component {
           }
         }
         else {
-          this.updateNextContentId(content, id, nextId, nextContentId, bumpIdsUntil);
+          this.updateNextContentId(content.params, id, nextId, nextContentId, bumpIdsUntil);
         }
       });
 
@@ -1453,8 +1453,8 @@ export default class Canvas extends React.Component {
           { this.state.deleting !== null &&
             <ConfirmationDialog
               icon={ this.state.dialog.icon } // TODO: Just send the whole dialog object? Should probably be improved when the l10n is being fixed.
-              confirmationHeader={ this.state.dialog.confirmationHeader }
-              confirmationQuestion={ this.state.dialog.confirmationQuestion }
+              headerText={ this.state.dialog.confirmationHeader }
+              body={ this.state.dialog.confirmationQuestion }
               confirmationDetails={ this.state.dialog.confirmationDetails }
               confirmationDetailsList={ this.state.dialog.confirmationDetailsList }
               textConfirm={ this.state.dialog.textConfirm }

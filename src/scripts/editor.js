@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import './editor.scss';
 
 import './components/Editor.scss';
 import Tabs from './components/TabPanel';
@@ -11,10 +12,14 @@ import TabViewSettings from './components/TabViewSettings';
 import TabViewTranslations from './components/TabViewTranslations';
 import TabViewTutorial from './components/TabViewTutorial';
 import TabViewMetadata from './components/TabViewMetadata';
+import FullScreenDialog from "./components/dialogs/FullScreenDialog";
+import BlockInteractionOverlay from "./components/BlockInteractionOverlay";
 
 export default class Editor extends React.Component {
   constructor(props) {
     super(props);
+
+    const isFullScreenCapable = H5PEditor.Fullscreen !== undefined;
 
     this.state = {
       activeIndex: 0,
@@ -27,13 +32,17 @@ export default class Editor extends React.Component {
       center: true,
       translate: null,
       scoringOption: null,
-      fullscreen: false
+      fullscreen: false,
+      showFullScreenDialog: isFullScreenCapable,
     };
   }
 
   componentDidMount() {
     // We need to load libraries details before rendering the canvas or menu
     window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesLoaded);
+
+    // Add title field
+    this.props.main.parent.mainTitleField.$item.appendTo(this.topbar);
   }
 
   handleLibrariesLoaded = (libraries) => {
@@ -205,6 +214,16 @@ export default class Editor extends React.Component {
     });
   }
 
+  onFullScreenDialogAction = (enableFullScreen) => {
+    if (enableFullScreen) {
+      this.props.onToggleFullscreen(true);
+    }
+
+    this.setState({
+      showFullScreenDialog: false,
+    });
+  };
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -216,9 +235,19 @@ export default class Editor extends React.Component {
 
     return (
       <div className="bswrapper">
-        <div className="topbar">
-          <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>
-          <input name="title" placeholder="Please give us a title" onChange={ e => this.props.onTitleChange(e.target.value) }></input>
+        {
+          this.state.showFullScreenDialog &&
+          <BlockInteractionOverlay>
+            <FullScreenDialog
+              handleConfirm={this.onFullScreenDialogAction.bind(this, true)}
+              handleCancel={this.onFullScreenDialogAction.bind(this, false)}
+            />
+          </BlockInteractionOverlay>
+        }
+        <div className="topbar" ref={ element => this.topbar = element }>
+          { H5PEditor.Fullscreen !== undefined &&
+            <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>
+          }
           { this.state.fullscreen &&
             <div className="proceed-button" role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }>Proceed to Save{/* TODO: l10n */}</div>
           }
@@ -301,7 +330,7 @@ export default class Editor extends React.Component {
 Editor.propTypes = {
   libraries: PropTypes.array,
   settings: PropTypes.object,
-  updateParams: PropTypes.func
+  updateParams: PropTypes.func,
+  startImageChooser: PropTypes.instanceOf(ns.widgets.image),
+  endImageChooser: PropTypes.instanceOf(ns.widgets.image),
 };
-
-// TODO Proptypes for endImageChooser and startImageChooser

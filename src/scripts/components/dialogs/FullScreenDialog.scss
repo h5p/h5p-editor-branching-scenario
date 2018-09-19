@@ -1,0 +1,17 @@
+@import '../../../styles/base/colours';
+
+.h5p-branchingscenario-editor {
+  .confirmation-dialog.full-screen-dialog {
+    top: 3em;
+    max-width: 34em;
+    transform: translateX(-50%);
+
+    .header-text {
+      font-weight: bold;
+    }
+
+    .dialog-cancel {
+      color: $info-col;
+    }
+  }
+}
