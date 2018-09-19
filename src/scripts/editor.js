@@ -34,6 +34,9 @@ export default class Editor extends React.Component {
   componentDidMount() {
     // We need to load libraries details before rendering the canvas or menu
     window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesLoaded);
+
+    // Add title field
+    this.props.main.parent.mainTitleField.$item.insertAfter(this.fsbutton);
   }
 
   handleLibrariesLoaded = (libraries) => {
@@ -217,8 +220,7 @@ export default class Editor extends React.Component {
     return (
       <div className="bswrapper">
         <div className="topbar">
-          <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>
-          <input name="title" placeholder="Please give us a title" onChange={ e => this.props.onTitleChange(e.target.value) }></input>
+          <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen } ref={ element => this.fsbutton = element }/>
           { this.state.fullscreen &&
             <div className="proceed-button" role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }>Proceed to Save{/* TODO: l10n */}</div>
           }

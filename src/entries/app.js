@@ -278,7 +278,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         updateParams={ this.updateParams.bind(this) }
         onContentChanged={ this.handleContentChanged.bind(this) }
         onToggleFullscreen={ toggleFullscreen }
-        onTitleChange={ title => this.parent.metadata = {title: title} }
         main={ this }
       />), $wrapper.get(0)
     );
