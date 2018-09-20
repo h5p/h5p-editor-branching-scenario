@@ -1,27 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import './BranchingOptions.scss';
-import Content from '../Content.js';
 
 export default class BranchingOptions extends React.Component {
 
   constructor(props) {
     super(props);
-  }
-
-  /**
-   * Determine option label for select
-   *
-   * @param {Object} content
-   * @return {string}
-   */
-  static getAlternativeName(content) {
-    const library = content.params.type.library.split(' ')[0]
-      .split('.')[1]
-      .replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5');
-    const contentTitle = Content.getTooltip(content);
-    return `${library}: ${contentTitle}`;
   }
 
   handleExistingContentChange = (e) => {

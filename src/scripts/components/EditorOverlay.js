@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 
 import './EditorOverlay.scss';
 import Canvas from './Canvas';
-import Content from './Content';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
+import { isBranching } from '../helpers/Library';
 
 export default class EditorOverlay extends React.Component {
 
@@ -28,7 +28,7 @@ export default class EditorOverlay extends React.Component {
     this.state = this.props.content.params;
 
     // Useful multiple places later
-    this.isBranchingQuestion = Content.isBranching(this.props.content);
+    this.isBranchingQuestion = isBranching(this.props.content);
   }
 
   componentDidMount() {
