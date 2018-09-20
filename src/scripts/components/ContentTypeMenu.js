@@ -241,7 +241,6 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   render() {
-    // TODO: Keep width constant during loading. Fix only one loading message for the entire menu?
     return (
       <div className="content-type-menu">
         <label className="label-info">
