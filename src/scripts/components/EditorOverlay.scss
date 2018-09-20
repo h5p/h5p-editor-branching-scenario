@@ -50,6 +50,24 @@
   width: 100%;
 }
 
+.editor-overlay .editor-overlay-content {
+  .editor-overlay-metadata-title-label-wrapper {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .editor-overlay-label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #454347;
+  }
+
+  .editor-overlay-label-red {
+    margin-left: 0.25em;
+    color: #da0001;
+  }
+}
+
 .editor-overlay .editor-overlay-header .editor-overlay-icon {
   width: 2.5rem;
 }
@@ -140,6 +158,7 @@
   width: 100%;
   font-weight: bold;
   border-radius: 4px;
+  font-size: 16px;
 }
 
 .editor-overlay .editor-overlay-content {
@@ -166,14 +185,6 @@
   width: 100%;
 }
 
-.editor-overlay .editor-overlay-label {
-  font-size: 0.6rem;
-}
-
-.editor-overlay .editor-overlay-label-red {
-  margin-left: 0.25em;
-  color: #da0001;
-}
 /* Add icons for IV overlay */
 .field.wizard .h5peditor-tab-a.h5peditor-tab-video:before {
   content: '\e911';

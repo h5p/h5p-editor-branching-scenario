@@ -24,6 +24,9 @@ export default class EditorOverlay extends React.Component {
 
     this.titleListenerName = 'input.metadata-subcontent-sync';
 
+    // Reference to the React label wrapper
+    this.labelWrapper = React.createRef();
+
     // Must be the same object used by the editor form
     this.state = this.props.content.params;
 
@@ -34,6 +37,12 @@ export default class EditorOverlay extends React.Component {
   componentDidMount() {
     // Insert editor form
     this.form.current.appendChild(this.props.content.formWrapper);
+
+    // Get metadata button from form and use it for custom title
+    H5PEditor.$(this.props.content.formWrapper)
+      .find('.h5p-metadata-button-wrapper')
+      .clone(true, true)
+      .appendTo(H5PEditor.$(this.labelWrapper.current));
 
     // Listen for the ready event from the sub form
     if (this.props.content.ready === true) {
@@ -223,8 +232,11 @@ export default class EditorOverlay extends React.Component {
 
         <div className={`editor-overlay-content${scoreClass}`}>
           <div>
-            <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}<span
-              className="editor-overlay-label-red">*</span></label>
+            <div className="editor-overlay-metadata-title-label-wrapper" ref={ this.labelWrapper }>
+              <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}
+                <span className="editor-overlay-label-red">*</span>
+              </label>
+            </div>
             <input
               name="title" id="metadata-title-sub" className='editor-overlay-titlefield' type="text" ref={ this.title }
               value={ this.state.contentTitle } onChange={ this.handleUpdateTitle }/>
