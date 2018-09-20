@@ -170,7 +170,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     }
     else {
       type.change(() => {
-        if (content.ready) {
+        if (typeof content.ready === 'function') {
           content.ready();
         }
         content.ready = true;
