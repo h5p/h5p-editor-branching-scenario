@@ -234,7 +234,7 @@ export default class EditorOverlay extends React.Component {
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              nextContentId={ this.state.nextContentId }
+              nextContentId={ this.state.nextContentId === '' ? undefined : parseInt(this.state.nextContentId) }
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
             />
