@@ -317,8 +317,8 @@ export default class Editor extends React.Component {
           </Tab>
           <Tab title="metadata" className="bs-editor-metadata-tab">
             <TabViewMetadata
-              main={this.props.main}
-              value=""
+              $metadataForm={ this.props.main.parent.$metadataForm }
+              $mainTitleField={ this.props.main.parent.mainTitleField.$item }
             />
           </Tab>
         </Tabs>
@@ -331,6 +331,6 @@ Editor.propTypes = {
   libraries: PropTypes.array,
   settings: PropTypes.object,
   updateParams: PropTypes.func,
-  startImageChooser: PropTypes.instanceOf(ns.widgets.image),
-  endImageChooser: PropTypes.instanceOf(ns.widgets.image),
+  startImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
+  endImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
 };

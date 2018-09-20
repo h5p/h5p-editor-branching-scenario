@@ -10,14 +10,13 @@ export default class TabViewMetadata extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.main.parent.$metadataForm !== undefined) {
+    if (this.props.$metadataForm !== undefined) {
 
-      this.$metadataTitleField = this.props.main.parent.$metadataForm
-        .find('.field-name-title input')
+      this.$topbarTitleField = this.props.$mainTitleField
+        .find('input')
         .first();
 
-      // TODO: Get this via ref + props
-      this.$topbarTitleField = H5PEditor.$(document)
+      H5PEditor.$(document)
         .find('.topbar input')
         .first();
 
@@ -29,7 +28,7 @@ export default class TabViewMetadata extends React.Component {
           listenerName: this.titleListenerName
         }
       );
-      this.props.main.parent.$metadataForm.appendTo(this.form);
+      this.props.$metadataForm.appendTo(this.form);
     }
   }
 
