@@ -317,8 +317,8 @@ export default class Editor extends React.Component {
           </Tab>
           <Tab title="metadata" className="bs-editor-metadata-tab">
             <TabViewMetadata
-              main={this.props.main}
-              value=""
+              $metadataForm={ this.props.main.parent.$metadataForm }
+              $mainTitleField={ this.props.main.parent.mainTitleField.$item }
             />
           </Tab>
         </Tabs>
