@@ -331,6 +331,6 @@ Editor.propTypes = {
   libraries: PropTypes.array,
   settings: PropTypes.object,
   updateParams: PropTypes.func,
-  startImageChooser: PropTypes.instanceOf(ns.widgets.image),
-  endImageChooser: PropTypes.instanceOf(ns.widgets.image),
+  startImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
+  endImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
 };
