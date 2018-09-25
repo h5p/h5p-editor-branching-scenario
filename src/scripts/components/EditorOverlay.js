@@ -64,7 +64,12 @@ export default class EditorOverlay extends React.Component {
       ), this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
     }
 
-    this.initSyncMetadataTitles();
+    const library = H5PEditor.findField('type', {
+      children: this.props.content.formChildren,
+    });
+    const titleField = H5PEditor.findField('title', library.metadataForm);
+    titleField.$input.on('change', () => this.setState({contentTitle: titleField.$input.val()}));
+    this.setState({contentTitle: titleField.$input.val()});
   }
 
   componentWillUnmount() {
@@ -74,53 +79,6 @@ export default class EditorOverlay extends React.Component {
     if (this.$editorFormTitle) {
       this.$editorFormTitle.off(this.titleListenerName);
     }
-  }
-
-  /**
-   * Initalize sync of custom title field and metadata form title field.
-   */
-  initSyncMetadataTitles() {
-    const library = H5PEditor.findField('type', {
-      children: this.props.content.formChildren,
-    });
-
-    this.syncMetadataTitles();
-
-    // For when a library has not been loaded yet
-    library.change(() => {
-      this.syncMetadataTitles();
-    });
-  }
-
-  /**
-   * Sync custom title field with metadata form title field.
-   *
-   * Title from metadata overrules custom title.
-   */
-  syncMetadataTitles = () => {
-    this.$metadataFormTitle = H5PEditor.$(this.form.current)
-      .find('.h5p-metadata-form-wrapper .field-name-title input');
-    this.$editorFormTitle = H5PEditor.$(this.title.current);
-
-    H5PEditor.sync(
-      this.$metadataFormTitle,
-      this.$editorFormTitle,
-      {
-        listenerName: this.titleListenerName,
-        callback: this.handleTitlesSynced
-      }
-    );
-  }
-
-  /**
-   * Update state when title fields have been synced.
-   *
-   * @param {string} valueSet Value the field was set to by sync.
-   */
-  handleTitlesSynced = (valueSet) => {
-    this.setState({
-      contentTitle: valueSet
-    });
   }
 
   /**
@@ -178,17 +136,6 @@ export default class EditorOverlay extends React.Component {
     }
     return valid;
   }
-
-  /**
-   * Update title in header as it is changed in the title field.
-   *
-   * @param {Event} e Change event
-   */
-  handleUpdateTitle = (e) => {
-    this.setState({
-      contentTitle: e.target.value
-    });
-  };
 
   handleNextContentIdChange = (value) => {
     this.setState({
