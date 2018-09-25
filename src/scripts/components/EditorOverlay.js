@@ -78,7 +78,7 @@ export default class EditorOverlay extends React.Component {
   }
 
   componentDidUpdate() {
-    H5P.$window.trigger('resize');
+    setTimeout(() => H5P.$window.trigger('resize'), 1);
   }
 
   /**
@@ -141,6 +141,7 @@ export default class EditorOverlay extends React.Component {
 
   handleNextContentIdChange = (value) => {
     this.props.content.params.nextContentId = parseInt(value);
+    this.forceUpdate();
   };
 
   handleDone = () => {
