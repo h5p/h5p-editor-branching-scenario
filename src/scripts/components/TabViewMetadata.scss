@@ -1,108 +1,28 @@
 // Overrides of style from Core for metadata form
 .h5p-branchingscenario-editor .tabs #metadata .h5p-metadata-wrapper {
-    visibility: visible;
-    opacity: 1;
-    height: auto;
-    padding: 1em;
-    margin: 0;
-    position: relative;
-    width: auto;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
+  visibility: visible;
+  opacity: 1;
+  height: auto;
+  padding: 1em;
+  margin: 0;
+  position: relative;
+  width: auto;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
 
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 
-    .h5p-metadata-header {
-      display: none;
-    }
+  .h5p-metadata-header {
+    display: none;
+  }
 
-    select {
-      width: 100%;
-    }
+  .h5p-metadata-fields-wrapper {
+    margin: 0;  
+  }
 
-    input[type=text], input[type=number], select, .editor-path-dropzone {
-      box-sizing: border-box;
-      display: inline-block;
-      border-radius: 4px;
-      vertical-align: middle;
-      border: 2px solid #e2e5ee;
-      width: 100%;
-      padding: 0.958em;
-      -webkit-box-shadow: none;
-      box-shadow: none;
-      font-size: 0.833em;
-      transition: all 0.1s ease; }
-
-    .editor-path-dropzone {
-      margin-top: 0.7rem;
-    }
-
-    input[type=text]:focus, input[type=number]:focus, select:focus {
-      border-color: #98cbe8;
-      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6);
-      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6); }
-
-    input[type=checkbox] {
-      background-color: #363b42;
-      border: solid 2px #cccccc;
-      margin: 0.3rem; }
-
-    input[type="button"], input[type="submit"] {
-      font-size: 100%;
-      padding: 0.5rem 1rem;
-      text-decoration: none;
-      border-radius: 2px;
-      cursor: pointer; }
-
-    label {
-      margin: 0;
-    }
-
-    .h5peditor-label {
-      font-weight: normal;
-      color: #212121;
-    }
-
-    .h5p-metadata-author-widget {
-      width: auto;
-    }
-
-    .field-name-license {
-      width: 49%;
-      float: left;
-      margin-right: 1%;
-    }
-
-    .field-name-licenseVersion { // TODO: Fix this class name; in core, too
-      width: 49%;
-      float: right;
-      margin-left: 1%;
-    }
-
-    .field-name-yearFrom { // TODO: Fix this class name; in core, too
-      width: 24%;
-      margin-right: 1%;
-      white-space: nowrap;
-      float: left;
-    }
-
-    .field-name-yearTo { // TODO: Fix this class name; in core, too
-      width: 24%;
-      margin-right: 1%;
-      white-space: nowrap;
-      float: left;
-    }
-
-    .field-name-source {
-      width: 49%;
-      float: right;
-      margin-left: 1%;
-    }
-
-    .field-name-role {
-      display: flex;
-      flex-direction: column;
-    }
+  &:after {
+    display: none;
+  }
 }

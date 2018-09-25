@@ -1,4 +1,14 @@
+@import '../../fonts/roboto.scss';
 @import '../../styles/main.scss';
+
+.bswrapper {
+  font-family: 'H5PRoboto';
+}
+.editor-overlay-content,
+#translate-interface > .tab-view-white-box,
+#metadata .h5p-metadata-wrapper {
+  font-family: "Open Sans",sans-serif;
+}
 
 .h5peditor.h5p-branchingscenario-editor > .h5peditor-form {
   padding: 0;
@@ -15,7 +25,7 @@
 
   & > .field.text {
     margin: 0;
-    
+
     .h5p-editor-flex-wrapper,
     .h5peditor-field-description,
     .h5p-errors {
