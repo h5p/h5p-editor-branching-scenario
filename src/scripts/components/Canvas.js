@@ -1208,16 +1208,11 @@ export default class Canvas extends React.Component {
     ), this.countDefaultEndScenarios());
   }
 
-  handleEditorDone = (params) => {
-    // Update content state for Canvas
-    this.setState(prevState => {
-      let newState = {
-        content: [...prevState.content],
-        editing: null,
-        inserting: null
-      };
-      newState.content[this.state.editing].params = params;
-      return newState;
+  handleEditorDone = () => {
+    // Update content state for Canvas (params are updated by reference)
+    this.setState({
+      editing: null,
+      inserting: null
     }, this.contentChanged);
   };
 

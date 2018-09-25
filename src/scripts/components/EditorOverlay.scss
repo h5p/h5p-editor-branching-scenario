@@ -28,10 +28,6 @@
   .field.library  > .libwrap {
     margin-top: 0;
   }
-
-  > :not(.library):not(.field-name-feedback) {
-    display: none;
-  }
 }
 
 .editor-overlay .editor-overlay-header {
@@ -88,7 +84,9 @@
     float: inherit;
     font-family: "BSFont";
     font-size: 1rem;
+    font-weight: normal;
     margin-right: 0.3rem;
+    padding-right: 0.5em;
   }
 
   &.editor-overlay-icon-course-presentation:before {
@@ -125,7 +123,7 @@
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  padding: 0.7em 1.5rem;
+  padding: 0.7em;
   white-space: nowrap;
 }
 
@@ -226,4 +224,7 @@
 
 .editor-overlay.h5p-branching-question .editor-overlay-feedback-semantics {
   display: none;
+}
+.editor-overlay-semantics {
+  margin-bottom: 20px;
 }

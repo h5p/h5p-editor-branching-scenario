@@ -37,7 +37,9 @@ const getAlternativeName = (content) => {
     .replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5');
 
   const contentTitle = Content.getTooltip(content);
-  return `${library}: ${contentTitle}`;
+  const name = `${library}: ${contentTitle}`;
+
+  return name.length > 80 ? name.substr(0, 77) + '...' : name;
 };
 
 export {

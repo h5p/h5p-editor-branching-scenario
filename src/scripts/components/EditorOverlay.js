@@ -30,9 +30,6 @@ export default class EditorOverlay extends React.Component {
     // Reference to the React label wrapper
     this.labelWrapper = React.createRef();
 
-    // Must be the same object used by the editor form
-    this.state = this.props.content.params;
-
     // Useful multiple places later
     this.isBranchingQuestion = isBranching(this.props.content);
   }
@@ -70,7 +67,11 @@ export default class EditorOverlay extends React.Component {
       ), this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
     }
 
-    this.initSyncMetadataTitles();
+    const library = H5PEditor.findField('type', {
+      children: this.props.content.formChildren,
+    });
+    const titleField = H5PEditor.findField('title', library.metadataForm);
+    titleField.$input.on('change', () => this.forceUpdate());
   }
 
   componentWillUnmount() {
@@ -82,51 +83,8 @@ export default class EditorOverlay extends React.Component {
     }
   }
 
-  /**
-   * Initalize sync of custom title field and metadata form title field.
-   */
-  initSyncMetadataTitles() {
-    const library = H5PEditor.findField('type', {
-      children: this.props.content.formChildren,
-    });
-
-    this.syncMetadataTitles();
-
-    // For when a library has not been loaded yet
-    library.change(() => {
-      this.syncMetadataTitles();
-    });
-  }
-
-  /**
-   * Sync custom title field with metadata form title field.
-   *
-   * Title from metadata overrules custom title.
-   */
-  syncMetadataTitles = () => {
-    this.$metadataFormTitle = H5PEditor.$(this.form.current)
-      .find('.h5p-metadata-form-wrapper .field-name-title input');
-    this.$editorFormTitle = H5PEditor.$(this.title.current);
-
-    H5PEditor.sync(
-      this.$metadataFormTitle,
-      this.$editorFormTitle,
-      {
-        listenerName: this.titleListenerName,
-        callback: this.handleTitlesSynced
-      }
-    );
-  }
-
-  /**
-   * Update state when title fields have been synced.
-   *
-   * @param {string} valueSet Value the field was set to by sync.
-   */
-  handleTitlesSynced = (valueSet) => {
-    this.setState({
-      contentTitle: valueSet
-    });
+  componentDidUpdate() {
+    H5P.$window.trigger('resize');
   }
 
   /**
@@ -187,21 +145,8 @@ export default class EditorOverlay extends React.Component {
     return valid;
   }
 
-  /**
-   * Update title in header as it is changed in the title field.
-   *
-   * @param {Event} e Change event
-   */
-  handleUpdateTitle = (e) => {
-    this.setState({
-      contentTitle: e.target.value
-    });
-  };
-
   handleNextContentIdChange = (value) => {
-    this.setState({
-      nextContentId: parseInt(value)
-    });
+    this.props.content.params.nextContentId = parseInt(value);
   };
 
   handleDone = () => {
@@ -224,12 +169,13 @@ export default class EditorOverlay extends React.Component {
     }
 
     // Update Canvas state
-    this.props.onDone(this.state); // Must use the same params object as H5PEditor
+    this.props.onDone();
   }
 
   render() {
-    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.state.type.library.split('.')[1].split(' ')[0])}`;
-    const scoreClass = this.props.scoringOption !== 'static-end-score' ? ' hide-scores' : '';
+    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.props.content.params.type.library.split('.')[1].split(' ')[0])}`;
+    const scoreClass = this.props.scoringOption !== 'static-end-score'
+      ? ' hide-scores' : '';
     const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
     const feedbackGroupClass = this.state.nextContentId !== -1 ? ' hide-score' : '';
 
@@ -238,7 +184,7 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
-          >{ this.state.contentTitle }</span>
+          >{ this.props.content.params.type.metadata.title }</span>
           <span className="buttons">
             <button
               className="button-blue"
@@ -252,7 +198,7 @@ export default class EditorOverlay extends React.Component {
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              nextContentId={ this.state.nextContentId }
+              nextContentId={ this.props.content.params.nextContentId }
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
             />
