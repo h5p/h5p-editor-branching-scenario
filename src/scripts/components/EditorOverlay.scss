@@ -4,12 +4,13 @@
   background: #fff;
   border-radius: 5px;
   width: 90%;
-  max-width: 80rem;
+  max-width: 53rem;
   max-height: 90%;
   height: 90%;
   position: absolute;
-  left: 5%;
-  top: 5%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   font-size: 0.7rem;
   z-index:61;
