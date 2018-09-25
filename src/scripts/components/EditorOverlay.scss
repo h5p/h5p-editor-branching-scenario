@@ -29,7 +29,7 @@
     margin-top: 0;
   }
 
-  > :not(.library) {
+  > :not(.library):not(.field-name-feedback) {
     display: none;
   }
 }
@@ -210,4 +210,20 @@
   .h5p-editor-branching-question .field-name-endScreenScore {
     display: none;
   }
+}
+
+.editor-overlay {
+  .editor-overlay-feedback-semantics {
+    margin-top: 2em;
+  }
+
+  .editor-overlay-feedback-semantics.hide-score {
+    .field-name-endScreenScore {
+      display: none;
+    }
+  }
+}
+
+.editor-overlay.h5p-branching-question .editor-overlay-feedback-semantics {
+  display: none;
 }

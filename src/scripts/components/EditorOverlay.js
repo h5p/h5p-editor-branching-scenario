@@ -19,6 +19,9 @@ export default class EditorOverlay extends React.Component {
     // Reference to the React form wrapper
     this.form = React.createRef();
 
+    // Reference to the feedback form wrapper
+    this.feedbackForm = React.createRef();
+
     // Reference to the React title field
     this.title = React.createRef();
 
@@ -35,6 +38,9 @@ export default class EditorOverlay extends React.Component {
   }
 
   componentDidMount() {
+    // Move feedback group to feedback form
+    this.feedbackForm.current.appendChild(this.props.content.feedbackFormWrapper);
+
     // Insert editor form
     this.form.current.appendChild(this.props.content.formWrapper);
 
@@ -223,10 +229,12 @@ export default class EditorOverlay extends React.Component {
 
   render() {
     const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.state.type.library.split('.')[1].split(' ')[0])}`;
-    const scoreClass = this.props.scoringOption !== 'static-end-score'
-      ? ' hide-scores' : '';
+    const scoreClass = this.props.scoringOption !== 'static-end-score' ? ' hide-scores' : '';
+    const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
+    const feedbackGroupClass = this.state.nextContentId !== -1 ? ' hide-score' : '';
+
     return (
-      <div className='editor-overlay'>
+      <div className={`editor-overlay${overlayClass}`}>
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
@@ -249,6 +257,10 @@ export default class EditorOverlay extends React.Component {
               onChangeContent={ this.handleNextContentIdChange }
             />
           }
+          <div
+            className={`editor-overlay-feedback-semantics${feedbackGroupClass}`}
+            ref={ this.feedbackForm }
+          />
         </div>
 
       </div>

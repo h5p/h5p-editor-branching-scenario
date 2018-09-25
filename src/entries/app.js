@@ -147,6 +147,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     // Create content object that holds the editor form and params
     const content = {
       formWrapper: document.createElement('div'),
+      feedbackFormWrapper: document.createElement('div'),
       formChildren: null,
       params: params
     };
@@ -160,6 +161,12 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       this,
       params.type.library
     );
+
+    // Move feedback group to its own wrapper
+    const feedbackGroup = content.formWrapper
+      .querySelector(':not(.library) .field-name-feedback');
+    content.feedbackFormWrapper.appendChild(feedbackGroup);
+
     content.formChildren = this.children;
 
     // For BS we need to know when the sub form is ready/loaded
