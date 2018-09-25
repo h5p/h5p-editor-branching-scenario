@@ -81,6 +81,10 @@ export default class EditorOverlay extends React.Component {
     }
   }
 
+  componentDidUpdate() {
+    H5P.$window.trigger('resize');
+  }
+
   /**
    * Adds branching options to content
    * For Branching Question this means that the branching options

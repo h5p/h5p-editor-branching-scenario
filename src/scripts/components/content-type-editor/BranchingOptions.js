@@ -46,13 +46,11 @@ export default class BranchingOptions extends React.Component {
     return (
       <div className='editor-overlay-branching-options'>
         <div className='field text importance-low'>
-          <div className='h5p-editor-flex-wrapper'>
-            <label className='h5peditor-label-wrapper'>
-              <span className='h5peditor-label'>
-                { this.props.nextContentLabel || 'Next content' }
-              </span>
-            </label>
-          </div>
+          <label className='h5peditor-label-wrapper'>
+            <span className='h5peditor-label'>
+              { this.props.nextContentLabel || 'Next content' }
+            </span>
+          </label>
           <div className='h5peditor-field-description'>
             { this.props.nextContentDescription || 'You can choose to: 1. End scenario 2. Send a user to an existing content/question or 3. Send a user to a new content/question. If you want to send a user to a new content/question, close this popup and create a new content/question below this content.' }
           </div>
@@ -79,8 +77,10 @@ export default class BranchingOptions extends React.Component {
         </select>
         {
           this.props.nextContentId >= 0 &&
-          <div>
-            <label htmlFor="nextPath">Select a path to send a user to</label>
+          <div className="field text importance-low">
+            <label className="h5peditor-label-wrapper" htmlFor="nextPath">
+              <span className="h5peditor-label h5peditor-required">Select a path to send a user to{/* TODO: Use title from semantics */}</span>
+            </label>
             <select
               name="nextPath"
               value={ this.props.nextContentId }
