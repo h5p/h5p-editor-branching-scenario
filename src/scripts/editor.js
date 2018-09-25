@@ -43,6 +43,7 @@ export default class Editor extends React.Component {
 
     // Add title field
     const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
+    titleField.$item.find('input')[0].placeholder = 'Enter title here';
     titleField.$item.appendTo(this.topbar);
   }
 
