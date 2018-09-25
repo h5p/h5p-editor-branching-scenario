@@ -138,6 +138,7 @@ export default class EditorOverlay extends React.Component {
       let nextContentId = alternatives[listIndex].nextContentId;
 
       const branchingUpdated = (value) => {
+        value = parseInt(value);
         branchingQuestionEditor.setNextContentId(listIndex, value);
         nextContentId = value;
         render(); // Update with the new state
@@ -146,7 +147,7 @@ export default class EditorOverlay extends React.Component {
       const render = () => {
         ReactDOM.render((
           <BranchingOptions
-            nextContentId={nextContentId === '' ? undefined : parseInt(nextContentId)}
+            nextContentId={ nextContentId }
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
@@ -191,7 +192,7 @@ export default class EditorOverlay extends React.Component {
 
   handleNextContentIdChange = (value) => {
     this.setState({
-      nextContentId: value
+      nextContentId: parseInt(value)
     });
   };
 
@@ -237,22 +238,11 @@ export default class EditorOverlay extends React.Component {
         </div>
 
         <div className={`editor-overlay-content${scoreClass}`}>
-          <div>
-            <div className="editor-overlay-metadata-title-label-wrapper" ref={ this.labelWrapper }>
-              <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}
-                <span className="editor-overlay-label-red">*</span>
-              </label>
-            </div>
-            <input
-              name="title" id="metadata-title-sub" className='editor-overlay-titlefield' type="text" ref={ this.title }
-              value={ this.state.contentTitle } onChange={ this.handleUpdateTitle }/>
-          </div>
-
           <div className='editor-overlay-semantics' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              nextContentId={ this.state.nextContentId === '' ? undefined : parseInt(this.state.nextContentId) }
+              nextContentId={ this.state.nextContentId }
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
             />

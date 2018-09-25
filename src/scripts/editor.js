@@ -42,7 +42,8 @@ export default class Editor extends React.Component {
     window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesLoaded);
 
     // Add title field
-    this.props.main.parent.mainTitleField.$item.appendTo(this.topbar);
+    const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
+    titleField.$item.appendTo(this.topbar);
   }
 
   handleLibrariesLoaded = (libraries) => {
@@ -317,8 +318,7 @@ export default class Editor extends React.Component {
           </Tab>
           <Tab title="metadata" className="bs-editor-metadata-tab">
             <TabViewMetadata
-              $metadataForm={ this.props.main.parent.$metadataForm }
-              $mainTitleField={ this.props.main.parent.mainTitleField.$item }
+              metadataForm={ this.props.main.parent.metadataForm }
             />
           </Tab>
         </Tabs>
