@@ -138,10 +138,17 @@ export default class Canvas extends React.Component {
       this.props.onDropped(); // TODO: Determine if should really run after set state. Note that this triggers a changing in the props which sets the state again through componentWillReceiveProps, which is deprected. Can we find a better way of doing this?
       // I guess only the parent should keep track of this state? yes
     }
-    else {
+    else if (this.state.placing !== id || id === -1) {
       // Start placing
       this.setState({
         placing: id
+      });
+    }
+    else {
+      // Start editing
+      this.setState({
+        placing: null,
+        editing: id
       });
     }
   }
@@ -278,6 +285,9 @@ export default class Canvas extends React.Component {
   }
 
   handleContentEdit = (id) => {
+    // Workaround for Chrome keeping hover state on the draggable
+    H5PEditor.$(this[`draggable-${id}`].element.element).click();
+
     this.setState({
       editing: id
     });
@@ -819,10 +829,12 @@ export default class Canvas extends React.Component {
         const alternative = bqParams.branchingQuestion
           && bqParams.branchingQuestion.alternatives
           && bqParams.branchingQuestion.alternatives[num];
-        const hasFeedback = alternative
-          && alternative.addFeedback
+        const hasFeedback = !!(alternative
           && alternative.feedback
-          && alternative.feedback.title;
+          && (alternative.feedback.title
+            || alternative.feedback.subtitle
+            || alternative.feedback.image
+          ));
 
         let alternativeBallClasses = 'alternative-ball';
         if (!drawAboveLine) {
@@ -1170,9 +1182,11 @@ export default class Canvas extends React.Component {
     this.state.content.forEach(content => {
       if (isBranching(content)) {
         content.params.type.params.branchingQuestion.alternatives.forEach(alternative => {
-          const hasFeedback = alternative.addFeedback
-            && alternative.feedback
-            && alternative.feedback.title;
+          const hasFeedback = !!(alternative.feedback
+            && (alternative.feedback.title
+              || alternative.feedback.subtitle
+              || alternative.feedback.image
+            ));
           if (alternative.nextContentId === -1 && !hasFeedback) {
             numMissingEndScenarios++;
           }

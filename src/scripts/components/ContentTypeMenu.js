@@ -234,7 +234,7 @@ export default class ContentTypeMenu extends React.Component {
           title="Add from clipboard"
           onMouseDown={ event => this.handleMouseDown(event, 'reuse-question') }
         >
-          From a clipboard
+          Paste
         </li>
       </ul>
     );

@@ -125,7 +125,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       this.params,
       H5P.jQuery(commonFieldsWrapper),
       this,
-      this.parent.library
+      this.parent.currentLibrary
     );
 
     // Note that this is just the initial array, it will be maintained as a state in <Canvas>
@@ -193,6 +193,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params.startScreen.startScreenTitle = data.startTitle;
     this.params.startScreen.startScreenSubtitle = data.startSubtitle;
     this.params.startScreen.startScreenImage = data.startImage;
+    this.params.endScreens[0].endScreenTitle = data.endFeedback;
     this.params.endScreens[0].endScreenImage = data.endImage;
     this.params.endScreens[0].endScreenScore = data.endScreenScore;
   };
