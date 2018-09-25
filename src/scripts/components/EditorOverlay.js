@@ -84,7 +84,7 @@ export default class EditorOverlay extends React.Component {
   }
 
   componentDidUpdate() {
-    setTimeout(() => H5P.$window.trigger('resize'), 100);
+    setTimeout(() => H5P.$window.trigger('resize'), 1000);
   }
 
   /**
@@ -185,7 +185,7 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
-          >{ this.props.content.params.type.metadata.title }</span>
+          >{ this.props.content.params.type.metadata ? this.props.content.params.type.metadata.title : 'New' }</span>
           <span className="buttons">
             <button
               className="button-blue"
