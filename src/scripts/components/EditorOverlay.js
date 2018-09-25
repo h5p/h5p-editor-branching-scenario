@@ -232,17 +232,6 @@ export default class EditorOverlay extends React.Component {
         </div>
 
         <div className={`editor-overlay-content${scoreClass}`}>
-          <div>
-            <div className="editor-overlay-metadata-title-label-wrapper" ref={ this.labelWrapper }>
-              <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}
-                <span className="editor-overlay-label-red">*</span>
-              </label>
-            </div>
-            <input
-              name="title" id="metadata-title-sub" className='editor-overlay-titlefield' type="text" ref={ this.title }
-              value={ this.state.contentTitle } onChange={ this.handleUpdateTitle }/>
-          </div>
-
           <div className='editor-overlay-semantics' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
