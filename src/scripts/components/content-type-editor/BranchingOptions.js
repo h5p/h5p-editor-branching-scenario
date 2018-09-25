@@ -48,10 +48,14 @@ export default class BranchingOptions extends React.Component {
         <div className='field text importance-low'>
           <div className='h5p-editor-flex-wrapper'>
             <label className='h5peditor-label-wrapper'>
-              <span className='h5peditor-label'>Next content</span>
+              <span className='h5peditor-label'>
+                { this.props.nextContentLabel || 'Next content' }
+              </span>
             </label>
           </div>
-          <div className='h5peditor-field-description'>If you select a value it is recommended to provide a feedback after each alternatives that leads to a new content. This will ensure a better learning experience for the viewer.</div>
+          <div className='h5peditor-field-description'>
+            { this.props.nextContentDescription || 'You can choose to: 1. End scenario 2. Send a user to an existing content/question or 3. Send a user to a new content/question. If you want to send a user to a new content/question, close this popup and create a new content/question below this content.' }
+          </div>
         </div>
         <select
           value={ mainSelectorValue }
