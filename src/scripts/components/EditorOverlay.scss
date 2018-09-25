@@ -3,15 +3,13 @@
 .editor-overlay {
   background: #fff;
   border-radius: 5px;
-  width: 80%;
+  width: 90%;
   max-width: 80rem;
-  max-height: 80%;
-  height: 80%;
+  max-height: 90%;
+  height: 90%;
   position: absolute;
-  transition: all 5s ease-in-out;
-  transform: translate(-50%, -50%);
-  left: 50%;
-  top: 50%;
+  left: 5%;
+  top: 5%;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   font-size: 0.7rem;
   z-index:61;
@@ -81,14 +79,19 @@
   text-overflow: ellipsis;
   overflow: hidden;
   color: #363b42;
-  font-size: 0.7rem;
-  padding-top: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  padding-top: 0.8em;
 
   &:before {
     float: inherit;
     font-family: "BSFont";
     font-size: 1rem;
     margin-right: 0.3rem;
+  }
+
+  &.editor-overlay-icon-course-presentation:before {
+    content: $icon-presentation;
   }
 
   &.editor-overlay-icon-advanced-text:before {
@@ -109,6 +112,10 @@
 
   &.editor-overlay-icon-video:before {
     content: $icon-video;
+  }
+
+  &.editor-overlay-icon-branching-question:before {
+    content: $icon-branching-question;
   }
 }
 
@@ -138,8 +145,10 @@
   background-color: #dbdee3;
 }
 
-.editor-overlay .editor-overlay-header .buttons .buttonBlue {
-  font-size: 100%;
+.editor-overlay .editor-overlay-header .buttons .button-blue {
+  font-size: 0.85em;
+  font-weight: bold;
+  font-family: H5PRoboto;
   padding: 0.4rem 1rem;
   text-decoration: none;
   border-radius: 2px;
@@ -150,7 +159,7 @@
   border: solid 2px #1773DA;
 }
 
-.editor-overlay .editor-overlay-header .buttons .buttonBlue:hover {
+.editor-overlay .editor-overlay-header .buttons .button-blue:hover {
   background-color: #1567c3;
 }
 
@@ -165,12 +174,6 @@
   padding: 0.7rem 1.5rem;
   box-sizing: border-box;
   overflow-y: auto;
-}
-
-.editor-overlay .editor-overlay-semantics {
-  padding: 0.8rem;
-  border: solid 2px rgba(18, 14, 14, 0.1);
-  margin: 0.7rem 0.2rem;
 }
 
 .editor-overlay .editor-overlay-footer {

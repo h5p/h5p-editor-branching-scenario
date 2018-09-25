@@ -19,22 +19,25 @@
   margin-top: 0;
   margin-bottom: 0;
   padding: 0;
-  font-size: 0.6em;
   background: grey;
   list-style-type: none;
   background-color: #191e22;
 }
 
 .tabs-nav li {
-  padding: 1rem 0.5rem 1rem 0.3rem;
+  padding: 0.75em 0;
+  width: 3em;
+  box-sizing: border-box;
+  text-align: center;
   color: #d1d2d2;
   cursor: pointer;
   transition: all 0.1s ease-in-out;
   border-left: solid 3px #191e22;
+  border-right: solid 3px transparent;
 
   &:hover {
     background-color: #363b42;
-    border-color: #363b42;
+    border-left-color: #363b42;
     color: #fff;
   }
 
@@ -43,7 +46,7 @@
     display: inline-block;
     width: 100%;
     text-align: center;
-    font-size: 1.3rem;
+    font-size: 1.3em;
   }
 
   &.bs-editor-content-tab::before {
@@ -69,8 +72,7 @@
 
 .tabs-nav li.active {
   background-color: #F1F3F6;
-  border-color: #F1F3F6;
-  border-left: solid 3px #F1F3F6;
+  border-left-color: #F1F3F6;
 
   &:before {
     color: #363b42;
@@ -78,25 +80,25 @@
 
   &:hover {
     background-color: #F1F3F6;
-    border-color: #F1F3F6;
+    border-left-color: #F1F3F6;
   }
 }
 
 .tabs-nav li.has-submenu {
-  border-color: #191e22;
+  border-left-color: #191e22;
 
   &:before {
     color: #d1d2d2;
   }
 
   &:hover {
-    border-color: #363b42;
+    border-left-color: #363b42;
   }
 }
 
 .tabs-nav li.has-submenu.active {
   background-color: #363b42;
-  border-color: #1773DA;
+  border-left-color: #1773DA;
 
   &:before {
     color: #fff;
