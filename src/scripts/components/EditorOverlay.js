@@ -154,6 +154,12 @@ export default class EditorOverlay extends React.Component {
         ), selectorWrapper);
       };
 
+      // Set default value to end scenario
+      const normalizedNextContentId = nextContentId === '' ? -1 : nextContentId;
+      branchingQuestionEditor.setNextContentId(
+        listIndex,
+        normalizedNextContentId
+      );
       render();
     });
   }
