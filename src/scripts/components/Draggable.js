@@ -13,10 +13,9 @@ export default class Draggable extends React.Component {
   }
 
   handleMouseDown = (event) => {
-    if (event.button !== 0 || this.props.disabled || Draggable.inUse) {
+    if (event.button !== 0 || this.props.disabled || Draggable.inUse || event.target.className.indexOf('content-menu-button') !== -1) {
       return; // Only handle left click
     }
-
     this.setState(this.prepareMouseMove({
       startX: event.pageX,
       startY: event.pageY
