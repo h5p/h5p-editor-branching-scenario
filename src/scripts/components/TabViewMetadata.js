@@ -17,18 +17,16 @@ export default class TabViewMetadata extends React.Component {
         <span className="tab-view-title">Metadata</span>
         <span className="tab-view-description">Add metadata for main content</span>
         <div className="tab-view-white-box" >
-          <form>
-            <fieldset>
-              <legend className="tab-view-info">
-                Metadata
-                <TooltipButton
-                  text="Metadata help users to reuse your content."
-                  tooltipClass={ 'tooltip below' }
-                />
-              </legend>
-              <div ref={ element => this.form = element } />
-            </fieldset>
-          </form>
+          <fieldset>
+            <legend className="tab-view-info">
+              Metadata
+              <TooltipButton
+                text="Metadata help users to reuse your content."
+                tooltipClass={ 'tooltip below' }
+              />
+            </legend>
+            <div ref={ element => this.form = element } />
+          </fieldset>
         </div>
       </div>
     );
