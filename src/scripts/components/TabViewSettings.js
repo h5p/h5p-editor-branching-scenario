@@ -110,30 +110,44 @@ export default class TabViewSettings extends React.Component {
                 tooltipClass={ 'tooltip below' }
               />
             </legend>
-            <label htmlFor="startTitle">Course title</label>
-            <input
-              id="startTitle"
-              type="text"
-              name="startTitle"
-              value={ this.props.value.startTitle }
-              placeholder="Title for your course"
-              onChange={ this.props.onChange }
-            />
-            <label htmlFor="startSubtitle">Course details</label>
-            <input
-              id="startSubtitle"
-              type="text"
-              name="startSubtitle"
-              value={ this.props.value.startSubtitle }
-              placeholder="Details about the course"
-              onChange={ this.props.onChange }
-            />
-            <label htmlFor="startImage">Upload the image</label>
-            <div
-              id="startImage"
-              name="startImage"
-              ref={ this.refStartImageChooser }
-            />
+            <div className="field text importance-low">
+              <label className="h5peditor-label-wrapper" htmlFor="startTitle">
+                <span className="h5peditor-label h5peditor-required">Course Title{/* TODO: Use title from semantics */}</span>
+              </label>
+              <input
+                className="h5peditor-text"
+                id="startTitle"
+                type="text"
+                name="startTitle"
+                value={ this.props.value.startTitle }
+                placeholder="Title for your course"
+                onChange={ this.props.onChange }
+              />
+            </div>
+            <div className="field text importance-low">
+              <label className="h5peditor-label-wrapper" htmlFor="startSubtitle">
+                <span className="h5peditor-label h5peditor-required">Course Details{/* TODO: Use title from semantics */}</span>
+              </label>
+              <input
+                className="h5peditor-text"
+                id="startSubtitle"
+                type="text"
+                name="startSubtitle"
+                value={ this.props.value.startSubtitle }
+                placeholder="Details about the course"
+                onChange={ this.props.onChange }
+              />
+            </div>
+            <div className="field importance-low">
+              <label className="h5peditor-label-wrapper" htmlFor="startImage">
+                <span className="h5peditor-label">Course Image{/* TODO: Use title from semantics */}</span>
+              </label>
+              <div
+                id="startImage"
+                name="startImage"
+                ref={ this.refStartImageChooser }
+              />
+            </div>
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">
@@ -144,9 +158,12 @@ export default class TabViewSettings extends React.Component {
             </legend>
             {
               this.state.scoring === 'static-end-score' &&
-              <div className="h5p-end-score-wrapper">
-                <label htmlFor="endScreenScore">Score for the default end scenario</label>
+              <div className="h5p-end-score-wrapper field text importance-low">
+                <label className="h5peditor-label-wrapper" htmlFor="endScreenScore">
+                  <span className="h5peditor-label h5peditor-required">Score for the default end scenario{/* TODO: Use title from semantics */}</span>
+                </label>
                 <input
+                  className="h5peditor-text"
                   id="endScreenScore"
                   type="number"
                   name="endScreenScore"
@@ -155,26 +172,33 @@ export default class TabViewSettings extends React.Component {
                 />
               </div>
             }
-            <label className="tab-view-info manual-focus" htmlFor="endFeedback">
-              Textual feedback for the user
-              <TooltipButton
-                text={ this.l10n.tooltipEndFeedback }
+            <div className="field text importance-low">
+              <label className="h5peditor-label-wrapper tab-view-info manual-focus" htmlFor="endFeedback">
+                <span className="h5peditor-label h5peditor-required">Textual feedback for the user{/* TODO: Use title from semantics */}
+                  <TooltipButton
+                    text={ this.l10n.tooltipEndFeedback }
+                  /></span>
+              </label>
+              <input
+                className="h5peditor-text"
+                id="endFeedback"
+                type="text"
+                name="endFeedback"
+                placeholder="Some feedback for the user"
+                value={ this.props.value.endFeedback }
+                onChange={ this.props.onChange }
               />
-            </label>
-            <input
-              id="endFeedback"
-              type="text"
-              name="endFeedback"
-              placeholder="Some feedback for the user"
-              value={ this.props.value.endFeedback }
-              onChange={ this.props.onChange }
-            />
-            <label htmlFor="endImage">Upload the image</label>
-            <div
-              id="endImage"
-              name="endImage"
-              ref={ this.refEndImageChooser }
-            />
+            </div>
+            <div className="field text importance-low">
+              <label className="h5peditor-label-wrapper" htmlFor="endImage">
+                <span className="h5peditor-label">Default End Scenario Image{/* TODO: Use title from semantics */}</span>
+              </label>
+              <div
+                id="endImage"
+                name="endImage"
+                ref={ this.refEndImageChooser }
+              />
+            </div>
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">Behavioural settings</legend>
