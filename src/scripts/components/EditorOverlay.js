@@ -177,7 +177,7 @@ export default class EditorOverlay extends React.Component {
     const scoreClass = this.props.scoringOption !== 'static-end-score'
       ? ' hide-scores' : '';
     const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
-    const feedbackGroupClass = this.state.nextContentId !== -1 ? ' hide-score' : '';
+    const feedbackGroupClass = this.props.content.params.nextContentId !== -1 ? ' hide-score' : '';
 
     return (
       <div className={`editor-overlay${overlayClass}`}>
