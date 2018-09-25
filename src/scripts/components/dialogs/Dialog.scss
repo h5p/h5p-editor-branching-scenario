@@ -12,7 +12,7 @@
   transform: translate(-50%, -50%);
   transition: all 5s ease-in-out;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
-  font-size: 1.2rem;
+  font-size: 1em;
   z-index: 61;
 }
 
@@ -40,7 +40,8 @@
     border-color: #c3e3ee;
     color: #335cb4;
     margin: 0.7rem 0;
-    padding: 1.7rem;
+    padding: 0.85rem;
+    font-size: 0.85rem;
 
     p {
       margin: 0;

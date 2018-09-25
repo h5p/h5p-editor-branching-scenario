@@ -12,8 +12,8 @@ export default class SubMenu extends React.Component {
 
     return (
       <ul className={ elementClass }>
-        <li>Content Options</li>
-        <li className='edit-content' onClick={ this.props.onEdit }>Edit content</li>
+        <li>{ this.props.isContent ? 'Content Options' : 'Branching Question Options' }</li>
+        <li className='edit-content' onClick={ this.props.onEdit }>{ this.props.isContent ? 'Edit content' : 'Edit question or alternatives' }</li>
         <li className='copy-content' onClick={ this.props.onCopy }>Copy to a clipboard</li>
         <li className='delete-content' onClick={ this.props.onDelete }>Delete</li>
       </ul>

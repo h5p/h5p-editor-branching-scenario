@@ -206,7 +206,7 @@ export default class ContentTypeMenu extends React.Component {
 
     return (
       <ul className="content-type-buttons">
-        <li className={ className } title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
+        <li ref={ element => element ? this.props.onNodeSize(element.getBoundingClientRect()) : undefined } className={ className } title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
       </ul>
     );
   }
@@ -234,7 +234,7 @@ export default class ContentTypeMenu extends React.Component {
           title="Add from clipboard"
           onMouseDown={ event => this.handleMouseDown(event, 'reuse-question') }
         >
-          From a clipboard
+          Paste
         </li>
       </ul>
     );

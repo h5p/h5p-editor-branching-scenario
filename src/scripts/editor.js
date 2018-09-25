@@ -34,6 +34,14 @@ export default class Editor extends React.Component {
       scoringOption: null,
       fullscreen: false,
       showFullScreenDialog: isFullScreenCapable,
+      nodeSize: {
+        width: 176,
+        height: 32,
+        spacing: {
+          x: 29,
+          y: 16
+        }
+      }
     };
   }
 
@@ -43,6 +51,7 @@ export default class Editor extends React.Component {
 
     // Add title field
     const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
+    titleField.$item.find('input')[0].placeholder = 'Enter title here';
     titleField.$item.appendTo(this.topbar);
   }
 
@@ -225,6 +234,21 @@ export default class Editor extends React.Component {
     });
   };
 
+  handleNodeSize = (rect) => {
+    if ((rect.width && this.state.nodeSize.width !== rect.width) || (rect.height && this.state.nodeSize.height !== rect.height)) {
+      this.setState({
+        nodeSize: {
+          width: rect.width,
+          height: rect.height,
+          spacing: {
+            x: 29,
+            y: 16
+          }
+        },
+      });
+    }
+  }
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -265,6 +289,7 @@ export default class Editor extends React.Component {
               inserting={ this.state.inserting }
               libraries={ this.state.libraries }
               onMouseDown={ this.handleMouseDown }
+              onNodeSize={ this.handleNodeSize }
             />
             <Canvas
               ref={ node => this.canvas = node }
@@ -286,6 +311,7 @@ export default class Editor extends React.Component {
               translate={ this.state.translate }
               onCanvasTranslated={ this.handleCanvasTranslated }
               scoringOption={ this.state.scoringOption }
+              nodeSize={ this.state.nodeSize }
             />
             <Toolbar
               numDefaultEndScenarios={ this.state.numDefaultEndScenarios }

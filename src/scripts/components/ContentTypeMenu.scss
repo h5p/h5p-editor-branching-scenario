@@ -4,11 +4,11 @@
   display: inline-block;
   background-color: #363b42;
   height: 55em;
-  width: 10em;
-  min-width: 10em;
+  width: 15em;
+  min-width: 15em;
 
   .loading {
-    padding: 1rem;
+    padding: 1em;
     color: white;
   }
 }
@@ -20,11 +20,15 @@
 .label-info {
   position: relative;
   color: white;
-  font-size: 0.75rem;
-  line-height: 0.8rem;
-  padding-top: 1rem;
-  padding-left: 1rem;
+  font-size: 0.75em;
+  line-height: 1.25em;
+  padding-top: 1.333333333333333em;
+  padding-left: 1.333333333333333em;
   padding-bottom: 0;
+  font-weight: 300;
+  display: block;
+  margin-bottom: 0.6666666666666667em;
+  margin-top: 0.6666666666666667em;
 }
 
 .content-type-buttons {
@@ -43,13 +47,13 @@
   user-select: none;
 
   li {
-    width: 100%;
+    width: 11rem;
     height: 2rem;
     background: #2B2F36;
     padding: 0.5rem;
     display: block;
     box-sizing: border-box;
-    font-size: 0.7rem;
+    font-size: 0.7em;
     margin-bottom: 0.5rem;
     cursor: pointer;
     line-height: 0.875rem;
@@ -60,7 +64,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    transition: all 0.5s ease;
   }
 
   li:hover {

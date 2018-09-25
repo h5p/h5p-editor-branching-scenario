@@ -233,7 +233,7 @@ export default class EditorOverlay extends React.Component {
           >{ this.state.contentTitle }</span>
           <span className="buttons">
             <button
-              className="buttonBlue"
+              className="button-blue"
               onClick={ this.handleDone }
             >Done{/* TODO: l10n */}</button>
           </span>

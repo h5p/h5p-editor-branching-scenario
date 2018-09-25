@@ -15,15 +15,22 @@
   list-style-type: none;
   cursor: pointer;
   line-height: 0.875rem;
-  color: #e9ebee;
+  color: #fff;
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
   z-index: 10;
 
-  &.BranchingQuestion {
+  &.branchingquestion {
     background: #396ad1;
     color: #fff;
+  }
+
+  &:hover {
+    -webkit-box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
+    -moz-box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
+    box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
+    transition: box-shadow 0.2s ease;
   }
 }
 
@@ -55,6 +62,7 @@
     padding-bottom: 0.2rem;
     font-size: 0.875rem;
     margin-right: 0.6rem;
+    color: #d7d8d9;
   }
 
   &.advancedtext:before {
