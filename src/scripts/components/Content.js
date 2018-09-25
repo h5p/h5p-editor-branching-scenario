@@ -56,16 +56,6 @@ export default class Content extends React.Component {
     return div.textContent || div.innerText || '';
   }
 
-  /**
-   * Determine if content params is Branching Question
-   *
-   * @param {Object} content
-   * @return {boolean}
-   */
-  static isBranching(content) {
-    return content.params.type.library.split(' ')[0] === 'H5P.BranchingQuestion';
-  }
-
   getPoints = () => {
     const raw = this.element.getBoundingClientRect();
     return [{
@@ -91,15 +81,6 @@ export default class Content extends React.Component {
 
   dehighlight() {
     this.element.element.classList.remove('highlight');
-  }
-
-  /**
-   * Get content class name.
-   *
-   * @return {string} Content class name.
-   */
-  isBranchingQuestion = () => {
-    return this.props.contentClass === 'BranchingQuestion';
   }
 
   /**

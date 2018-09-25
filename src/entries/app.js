@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Editor from '../scripts/editor';
+import { isBranching } from '../scripts/helpers/Library';
 
 /*global H5PEditor*/
 H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function () {
@@ -43,7 +44,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
     // Sanitize missing nextContentId; can never be undefined
     this.params.content.forEach(item => {
-      if (item.type.library.indexOf('H5P.BranchingQuestion') === 0) {
+      if (isBranching(item.type.library)) {
         item.type.params.branchingQuestion.alternatives.forEach(alt =>
           alt.nextContentId = alt.nextContentId !== undefined
             ? alt.nextContentId

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './ContentTypeMenu.scss';
 import TooltipButton from './TooltipButton';
+import { isBranching, getMachineName } from '../helpers/Library';
 
 export default class ContentTypeMenu extends React.Component {
 
@@ -71,7 +72,7 @@ export default class ContentTypeMenu extends React.Component {
       }
 
       // Pasted Branching Questions should not have next nodes
-      if (library.name.indexOf ('H5P.BranchingQuestion ') === 0) {
+      if (isBranching(library.name)) {
         clipboard.generic.params.branchingQuestion.alternatives.forEach(alt => {
           alt.nextContentId = -1;
         });
@@ -129,10 +130,9 @@ export default class ContentTypeMenu extends React.Component {
   setCanPaste = (libraries) => {
     // Transform libraries to expected format
     libraries = libraries.map(lib => {
-      const name = lib.name.split(' ')[0];
-      lib = H5P.libraryFromString(lib.name);
-      lib.name = name;
-      return lib;
+      const library = H5P.libraryFromString(lib.name);
+      library.name = getMachineName(lib.name);
+      return library;
     });
 
     this.setState({
@@ -241,7 +241,6 @@ export default class ContentTypeMenu extends React.Component {
   }
 
   render() {
-    // TODO: Keep width constant during loading. Fix only one loading message for the entire menu?
     return (
       <div className="content-type-menu">
         <label className="label-info">

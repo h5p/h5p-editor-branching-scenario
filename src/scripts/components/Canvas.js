@@ -10,7 +10,7 @@ import ConfirmationDialog from './dialogs/ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
 import BlockInteractionOverlay from './BlockInteractionOverlay';
-import BranchingOptions from "./content-type-editor/BranchingOptions";
+import { getMachineName, getAlternativeName, isBranching } from '../helpers/Library';
 
 /*global H5P*/
 export default class Canvas extends React.Component {
@@ -119,7 +119,7 @@ export default class Canvas extends React.Component {
    */
   buildDialog = (id, params) => {
     const dialog = params;
-    if (Content.isBranching(this.state.content[id])) {
+    if (isBranching(this.state.content[id])) {
       const nodeTitles = this.getChildrenTitles(id)
         .map((title, index) => <li key={index}>{title}</li>);
 
@@ -199,7 +199,7 @@ export default class Canvas extends React.Component {
       .filter(candidate => candidate > -1) // except end scenarios
       .map(candidate => contentNodes[candidate]) // get nodes to IDs
       .filter(candidate => { // get all parents of the child
-        if (Content.isBranching(candidate)) {
+        if (isBranching(candidate)) {
           return candidate.params.type.params.branchingQuestion.alternatives
             .some(alt => alt.nextContentId === id);
         }
@@ -254,7 +254,7 @@ export default class Canvas extends React.Component {
       // When info node is moved, check if parent is BQ and needs updating
       if (id > -1) {
         const noNodeToAttach =
-          Content.isBranching(this.state.content[id]) || // moved node is BQ, will keep children
+          isBranching(this.state.content[id]) || // moved node is BQ, will keep children
           !this.state.content[id].params.nextContentId ||
           this.state.content[id].params.nextContentId < 0;
 
@@ -262,7 +262,7 @@ export default class Canvas extends React.Component {
           // Info node has no children that would be attached to *old* parent, latter needs update
           const parent = this.getParent(id, this.state.content);
 
-          if (parent && Content.isBranching(parent)) {
+          if (parent && isBranching(parent)) {
             // Parent is BQ, update needed
             parent.params.type.params.branchingQuestion.alternatives
               .forEach(alt => {
@@ -312,8 +312,10 @@ export default class Canvas extends React.Component {
   getChildrenTitles = (start) => {
     return this.getChildrenIds(start, false)
       .sort((a, b) => a - b)
-      .map(id => this.state.content[id].params.contentTitle || this.state.content[id].params.type.library);
-    // TODO: Create a function for determining default title - the same is done multiple places but not exactaly the same.
+      .map(id => {
+        return this.state.content[id].params.contentTitle ||
+          getMachineName(this.state.content[id]);
+      });
   }
 
   /**
@@ -331,7 +333,7 @@ export default class Canvas extends React.Component {
     const node = this.state.content[start];
     let childrenIds = [];
     let nextIds = [];
-    const nodeIsBranching = Content.isBranching(node);
+    const nodeIsBranching = isBranching(node);
 
     // Check for BQ inclusion and ignore very first start node
     if (sub && (!nodeIsBranching || nodeIsBranching && includeBranching)) {
@@ -403,7 +405,7 @@ export default class Canvas extends React.Component {
       nextContentId = -1;
     }
 
-    if (!Content.isBranching(content)) {
+    if (!isBranching(content)) {
       content.params.nextContentId = nextContentId;
       return;
     }
@@ -436,7 +438,7 @@ export default class Canvas extends React.Component {
     }
 
     // Info node
-    if (!Content.isBranching(content)) {
+    if (!isBranching(content)) {
       if (!oldChildId || content.params.nextContentId === oldChildId) {
         content.params.nextContentId = newChildId;
       }
@@ -490,7 +492,7 @@ export default class Canvas extends React.Component {
         id = newState.content.length - 1;
         newState.editing = id;
         if (id === 0) {
-          if (!Content.isBranching(newState.content[0])) {
+          if (!isBranching(newState.content[0])) {
             newState.content[0].params.nextContentId = -1; // Use default end scenario as default end scenario
           }
           // This is the first node added, nothing more needs to be done.
@@ -508,7 +510,7 @@ export default class Canvas extends React.Component {
         parent = newState.content[parent];
       }
 
-      const parentIsBranching = (parent && Content.isBranching(parent));
+      const parentIsBranching = (parent && isBranching(parent));
 
       const nextId = newState.content[id].params.nextContentId;
 
@@ -541,7 +543,7 @@ export default class Canvas extends React.Component {
           return; // Duplicate in array, must not be processed twice.
         }
 
-        if (Content.isBranching(content)) {
+        if (isBranching(content)) {
           var hasAlternatives = content.params.type.params
             && content.params.type.params.branchingQuestion
             && content.params.type.params.branchingQuestion.alternatives;
@@ -624,7 +626,7 @@ export default class Canvas extends React.Component {
       }
     }
 
-    const name = library.split(' ')[0];
+    const name = getMachineName(library);
     const title = name.replace('H5P.', '');
     return {
       title: title,
@@ -679,7 +681,7 @@ export default class Canvas extends React.Component {
       y = 0; // Y level start
     }
 
-    const parentIsBranching = (parent !== undefined && Content.isBranching(this.state.content[parent]));
+    const parentIsBranching = (parent !== undefined && isBranching(this.state.content[parent]));
 
     let firstX, lastX, bigY = y + (this.state.nodeSpecs.spacing.y * 7.5); // The highest we'll ever be
     branch.forEach((id, num) => {
@@ -703,7 +705,7 @@ export default class Canvas extends React.Component {
       const branchY = y + distanceYFactor * this.state.nodeSpecs.spacing.y;
 
       // Determine if we are or parent is a branching question
-      const contentIsBranching = (content && Content.isBranching(content));
+      const contentIsBranching = (content && isBranching(content));
 
       // Determine if we have any children
       const children = (hasBeenDrawn ? null : (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.params.nextContentId] : null)));
@@ -873,7 +875,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative if not of BQ being moved
-        if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !Content.isBranching(this.state.content[this.state.placing]))) {
+        if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
           nodes.push(this.renderDropzone(-1, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
@@ -979,11 +981,11 @@ export default class Canvas extends React.Component {
 
         ids.forEach(id => {
           const node = newState.content[id];
-          removeChildren = removeChildren || Content.isBranching(node);
+          removeChildren = removeChildren || isBranching(node);
 
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
-          if (Content.isBranching(node)) {
+          if (isBranching(node)) {
             deleteIds = node.params.type.params.branchingQuestion.alternatives
               .filter(alt => alt.nextContentId >= 0) // Filter end scenarios
               .map(alt => alt.nextContentId).concat(id);
@@ -1009,7 +1011,7 @@ export default class Canvas extends React.Component {
 
               // Exchange all links pointing to node to be deleted to its successor instead.
               newState.content.forEach(node => {
-                const affectedNodes = (Content.isBranching(node)) ?
+                const affectedNodes = (isBranching(node)) ?
                   node.params.type.params.branchingQuestion.alternatives :
                   [node.params];
 
@@ -1030,7 +1032,7 @@ export default class Canvas extends React.Component {
               // Purge children
               if (removeChildren === true) {
                 let childrenIds;
-                if (Content.isBranching(deleteNode)) {
+                if (isBranching(deleteNode)) {
                   childrenIds = deleteNode.params.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId);
                 }
                 else {
@@ -1067,7 +1069,7 @@ export default class Canvas extends React.Component {
           // Replace with existing node
 
           // BQs take their children with them and don't leave a node to attach
-          const nodeToAttach = Content.isBranching(newState.content[prevState.placing]) ?
+          const nodeToAttach = isBranching(newState.content[prevState.placing]) ?
             -1 :
             newState.content[prevState.placing].params.nextContentId;
 
@@ -1174,7 +1176,7 @@ export default class Canvas extends React.Component {
   countDefaultEndScenarios = () => {
     let numMissingEndScenarios = 0;
     this.state.content.forEach(content => {
-      if (Content.isBranching(content)) {
+      if (isBranching(content)) {
         content.params.type.params.branchingQuestion.alternatives.forEach(alternative => {
           const hasFeedback = alternative.addFeedback
             && alternative.feedback
@@ -1307,7 +1309,7 @@ export default class Canvas extends React.Component {
   logNodes = caller => {
     console.log('NODES', caller);
     this.state.content.forEach((node, index) => {
-      const target = (Content.isBranching(node)) ?
+      const target = (isBranching(node)) ?
         (node.params.type.params.branchingQuestion && node.params.type.params.branchingQuestion.alternatives ?
           node.params.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId).join(' | ') :
           -1) : node.params.nextContentId;
@@ -1333,13 +1335,13 @@ export default class Canvas extends React.Component {
 
     // No node shall not be able to replace BQs
     this.state.content.forEach((node, index) => {
-      if (Content.isBranching(node)) {
+      if (isBranching(node)) {
         dropzonesDisabled.push(index);
       }
     });
 
     // BQs shall not be droppable on their children
-    if (Content.isBranching(this.state.content[id])) {
+    if (isBranching(this.state.content[id])) {
       dropzonesDisabled = dropzonesDisabled.concat(this.getChildrenIds(id));
     }
 
@@ -1392,7 +1394,7 @@ export default class Canvas extends React.Component {
         if (index !== this.state.editing) {
           validAlternatives.push({
             id: index,
-            label: BranchingOptions.getAlternativeName(content)
+            label: getAlternativeName(content),
           });
         }
       });
