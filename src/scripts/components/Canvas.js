@@ -827,10 +827,12 @@ export default class Canvas extends React.Component {
         const alternative = bqParams.branchingQuestion
           && bqParams.branchingQuestion.alternatives
           && bqParams.branchingQuestion.alternatives[num];
-        const hasFeedback = alternative
-          && alternative.addFeedback
+        const hasFeedback = !!(alternative
           && alternative.feedback
-          && alternative.feedback.title;
+          && (alternative.feedback.title
+            || alternative.feedback.subtitle
+            || alternative.feedback.image
+          ));
 
         let alternativeBallClasses = 'alternative-ball';
         if (!drawAboveLine) {
@@ -1178,9 +1180,11 @@ export default class Canvas extends React.Component {
     this.state.content.forEach(content => {
       if (isBranching(content)) {
         content.params.type.params.branchingQuestion.alternatives.forEach(alternative => {
-          const hasFeedback = alternative.addFeedback
-            && alternative.feedback
-            && alternative.feedback.title;
+          const hasFeedback = !!(alternative.feedback
+            && (alternative.feedback.title
+              || alternative.feedback.subtitle
+              || alternative.feedback.image
+            ));
           if (alternative.nextContentId === -1 && !hasFeedback) {
             numMissingEndScenarios++;
           }
