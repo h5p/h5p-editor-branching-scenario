@@ -102,89 +102,87 @@ export default class TabViewSettings extends React.Component {
         <span className="tab-view-title">Settings</span>
         <span className="tab-view-description">Below are the settings for your <strong>Branching Questions</strong></span>
         <div className="tab-view-white-box">
-          <form>
-            <fieldset>
-              <legend className="tab-view-info">
-                Configure starting screen
-                <TooltipButton
-                  text={ this.l10n.tooltipStartingScreen }
-                  tooltipClass={ 'tooltip below' }
+          <fieldset>
+            <legend className="tab-view-info">
+              Configure starting screen
+              <TooltipButton
+                text={ this.l10n.tooltipStartingScreen }
+                tooltipClass={ 'tooltip below' }
+              />
+            </legend>
+            <label htmlFor="startTitle">Course title</label>
+            <input
+              id="startTitle"
+              type="text"
+              name="startTitle"
+              value={ this.props.value.startTitle }
+              placeholder="Title for your course"
+              onChange={ this.props.onChange }
+            />
+            <label htmlFor="startSubtitle">Course details</label>
+            <input
+              id="startSubtitle"
+              type="text"
+              name="startSubtitle"
+              value={ this.props.value.startSubtitle }
+              placeholder="Details about the course"
+              onChange={ this.props.onChange }
+            />
+            <label htmlFor="startImage">Upload the image</label>
+            <div
+              id="startImage"
+              name="startImage"
+              ref={ this.refStartImageChooser }
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="tab-view-info">
+              Configure the default "End Scenario" screen
+              <TooltipButton
+                text={ this.l10n.tooltipEndScenario }
+              />
+            </legend>
+            {
+              this.state.scoring === 'static-end-score' &&
+              <div className="h5p-end-score-wrapper">
+                <label htmlFor="endScreenScore">Score for the default end scenario</label>
+                <input
+                  id="endScreenScore"
+                  type="number"
+                  name="endScreenScore"
+                  value={ this.props.value.endScreenScore }
+                  onChange={ this.props.onChange }
                 />
-              </legend>
-              <label htmlFor="startTitle">Course title</label>
-              <input
-                id="startTitle"
-                type="text"
-                name="startTitle"
-                value={ this.props.value.startTitle }
-                placeholder="Title for your course"
-                onChange={ this.props.onChange }
+              </div>
+            }
+            <label className="tab-view-info manual-focus" htmlFor="endFeedback">
+              Textual feedback for the user
+              <TooltipButton
+                text={ this.l10n.tooltipEndFeedback }
               />
-              <label htmlFor="startSubtitle">Course details</label>
-              <input
-                id="startSubtitle"
-                type="text"
-                name="startSubtitle"
-                value={ this.props.value.startSubtitle }
-                placeholder="Details about the course"
-                onChange={ this.props.onChange }
-              />
-              <label htmlFor="startImage">Upload the image</label>
-              <div
-                id="startImage"
-                name="startImage"
-                ref={ this.refStartImageChooser }
-              />
-            </fieldset>
-            <fieldset>
-              <legend className="tab-view-info">
-                Configure the default "End Scenario" screen
-                <TooltipButton
-                  text={ this.l10n.tooltipEndScenario }
-                />
-              </legend>
-              {
-                this.state.scoring === 'static-end-score' &&
-                <div className="h5p-end-score-wrapper">
-                  <label htmlFor="endScreenScore">Score for the default end scenario</label>
-                  <input
-                    id="endScreenScore"
-                    type="number"
-                    name="endScreenScore"
-                    value={ this.props.value.endScreenScore }
-                    onChange={ this.props.onChange }
-                  />
-                </div>
-              }
-              <label className="tab-view-info manual-focus" htmlFor="endFeedback">
-                Textual feedback for the user
-                <TooltipButton
-                  text={ this.l10n.tooltipEndFeedback }
-                />
-              </label>
-              <input
-                id="endFeedback"
-                type="text"
-                name="endFeedback"
-                placeholder="Some feedback for the user"
-                value={ this.props.value.endFeedback }
-                onChange={ this.props.onChange }
-              />
-              <label htmlFor="endImage">Upload the image</label>
-              <div
-                id="endImage"
-                name="endImage"
-                ref={ this.refEndImageChooser }
-              />
-            </fieldset>
-            <fieldset>
-              <legend className="tab-view-info">Behavioural settings</legend>
-              <div
-                ref={this.refScoringOption}
-                className='h5p-scoring-option-wrapper'
-              />
-            </fieldset>
-          </form>
+            </label>
+            <input
+              id="endFeedback"
+              type="text"
+              name="endFeedback"
+              placeholder="Some feedback for the user"
+              value={ this.props.value.endFeedback }
+              onChange={ this.props.onChange }
+            />
+            <label htmlFor="endImage">Upload the image</label>
+            <div
+              id="endImage"
+              name="endImage"
+              ref={ this.refEndImageChooser }
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="tab-view-info">Behavioural settings</legend>
+            <div
+              ref={this.refScoringOption}
+              className='h5p-scoring-option-wrapper'
+            />
+          </fieldset>
         </div>
       </div>
     );
