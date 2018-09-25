@@ -84,7 +84,7 @@ export default class EditorOverlay extends React.Component {
   }
 
   componentDidUpdate() {
-    setTimeout(() => H5P.$window.trigger('resize'), 1);
+    setTimeout(() => H5P.$window.trigger('resize'), 100);
   }
 
   /**
