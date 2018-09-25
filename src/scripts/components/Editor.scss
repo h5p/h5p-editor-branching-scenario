@@ -55,12 +55,12 @@
   cursor: pointer;
   text-align: center;
   width: 3em;
-  padding: 0.75em 0;
+  padding: 0.8125em 0;
   line-height: 1;
 
   &:before {
     font-family: BSFont;
-    font-size: 1.5em;
+    font-size: 1.3em;
     content: $icon-full-screen-close;
   }
   &.active:before {
