@@ -138,6 +138,7 @@ export default class EditorOverlay extends React.Component {
       let nextContentId = alternatives[listIndex].nextContentId;
 
       const branchingUpdated = (value) => {
+        value = parseInt(value);
         branchingQuestionEditor.setNextContentId(listIndex, value);
         nextContentId = value;
         render(); // Update with the new state
@@ -146,7 +147,7 @@ export default class EditorOverlay extends React.Component {
       const render = () => {
         ReactDOM.render((
           <BranchingOptions
-            nextContentId={nextContentId === '' ? undefined : parseInt(nextContentId)}
+            nextContentId={ nextContentId }
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
@@ -185,7 +186,7 @@ export default class EditorOverlay extends React.Component {
 
   handleNextContentIdChange = (value) => {
     this.setState({
-      nextContentId: value
+      nextContentId: parseInt(value)
     });
   };
 
@@ -246,7 +247,7 @@ export default class EditorOverlay extends React.Component {
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              nextContentId={ this.state.nextContentId === '' ? undefined : parseInt(this.state.nextContentId) }
+              nextContentId={ this.state.nextContentId }
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
             />
