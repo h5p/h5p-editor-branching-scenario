@@ -286,6 +286,9 @@ export default class Canvas extends React.Component {
   }
 
   handleContentEdit = (id) => {
+    // Workaround for Chrome keeping hover state on the draggable
+    H5PEditor.$(this[`draggable-${id}`].element.element).click();
+
     this.setState({
       editing: id
     });
