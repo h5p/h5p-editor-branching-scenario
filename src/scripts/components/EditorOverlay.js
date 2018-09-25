@@ -27,9 +27,6 @@ export default class EditorOverlay extends React.Component {
     // Reference to the React label wrapper
     this.labelWrapper = React.createRef();
 
-    // Must be the same object used by the editor form
-    this.state = this.props.content.params;
-
     // Useful multiple places later
     this.isBranchingQuestion = isBranching(this.props.content);
   }
@@ -68,8 +65,7 @@ export default class EditorOverlay extends React.Component {
       children: this.props.content.formChildren,
     });
     const titleField = H5PEditor.findField('title', library.metadataForm);
-    titleField.$input.on('change', () => this.setState({contentTitle: titleField.$input.val()}));
-    this.setState({contentTitle: titleField.$input.val()});
+    titleField.$input.on('change', () => this.forceUpdate());
   }
 
   componentWillUnmount() {
@@ -144,9 +140,7 @@ export default class EditorOverlay extends React.Component {
   }
 
   handleNextContentIdChange = (value) => {
-    this.setState({
-      nextContentId: parseInt(value)
-    });
+    this.props.content.params.nextContentId = parseInt(value);
   };
 
   handleDone = () => {
@@ -169,11 +163,11 @@ export default class EditorOverlay extends React.Component {
     }
 
     // Update Canvas state
-    this.props.onDone(this.state); // Must use the same params object as H5PEditor
+    this.props.onDone();
   }
 
   render() {
-    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.state.type.library.split('.')[1].split(' ')[0])}`;
+    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.props.content.params.type.library.split('.')[1].split(' ')[0])}`;
     const scoreClass = this.props.scoringOption !== 'static-end-score'
       ? ' hide-scores' : '';
     return (
@@ -181,7 +175,7 @@ export default class EditorOverlay extends React.Component {
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
-          >{ this.state.contentTitle }</span>
+          >{ this.props.content.params.type.metadata.title }</span>
           <span className="buttons">
             <button
               className="button-blue"
@@ -195,7 +189,7 @@ export default class EditorOverlay extends React.Component {
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              nextContentId={ this.state.nextContentId }
+              nextContentId={ this.props.content.params.nextContentId }
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
             />
