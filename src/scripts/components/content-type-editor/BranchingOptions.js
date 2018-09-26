@@ -51,9 +51,6 @@ export default class BranchingOptions extends React.Component {
               { this.props.nextContentLabel || 'Special action if selected' }
             </span>
           </label>
-          <div className='h5peditor-field-description'>
-            { this.props.nextContentDescription || 'You can choose to: 1. End scenario 2. Send a user to an existing content/question or 3. Send a user to a new content/question. If you want to send a user to a new content/question, close this popup and create a new content/question below this content.' }
-          </div>
         </div>
         <select
           value={ mainSelectorValue }

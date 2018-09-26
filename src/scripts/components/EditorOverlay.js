@@ -116,7 +116,6 @@ export default class EditorOverlay extends React.Component {
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
             nextContentLabel={'Special action if selected'}
-            nextContentDescription={'You can choose to: 1. End scenario 2. Send a user to an existing content/question or 3. Send a user to a new content/question. If you want to send a user to a new content/question, close this popup and create new content/question below this alternative.'}
           />
         ), selectorWrapper);
       };
