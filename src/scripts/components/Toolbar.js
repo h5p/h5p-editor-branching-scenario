@@ -173,7 +173,7 @@ export default class Toolbar extends React.Component {
           onClick={ this.handleShowPopup }
         >{ this.props.numDefaultEndScenarios }</div>
         <div className={ infoPopupClass }>
-          { this.props.numDefaultEndScenarios } alternatives will lead to the default <em>End Scenario</em>.
+          { this.props.numDefaultEndScenarios } alternatives alternatives are missing the custom end scenario. Click here to highlight these.
           { !!this.props.numDefaultEndScenarios &&
             <span> Click <span className="highlight-end-scenarios-button" role="button" tabIndex="0" onClick={ this.handleHighlight }>here</span> to highlight these.</span>
           }

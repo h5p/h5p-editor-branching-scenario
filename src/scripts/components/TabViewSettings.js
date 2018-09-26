@@ -112,7 +112,7 @@ export default class TabViewSettings extends React.Component {
             </legend>
             <div className="field text importance-low">
               <label className="h5peditor-label-wrapper" htmlFor="startTitle">
-                <span className="h5peditor-label h5peditor-required">Course Title{/* TODO: Use title from semantics */}</span>
+                <span className="h5peditor-label h5peditor-required">Course title{/* TODO: Use title from semantics */}</span>
               </label>
               <input
                 className="h5peditor-text"
@@ -126,7 +126,7 @@ export default class TabViewSettings extends React.Component {
             </div>
             <div className="field text importance-low">
               <label className="h5peditor-label-wrapper" htmlFor="startSubtitle">
-                <span className="h5peditor-label h5peditor-required">Course Details{/* TODO: Use title from semantics */}</span>
+                <span className="h5peditor-label h5peditor-required">Course details{/* TODO: Use title from semantics */}</span>
               </label>
               <input
                 className="h5peditor-text"
@@ -140,7 +140,7 @@ export default class TabViewSettings extends React.Component {
             </div>
             <div className="field importance-low">
               <label className="h5peditor-label-wrapper" htmlFor="startImage">
-                <span className="h5peditor-label">Course Image{/* TODO: Use title from semantics */}</span>
+                <span className="h5peditor-label">Course image{/* TODO: Use title from semantics */}</span>
               </label>
               <div
                 id="startImage"
@@ -151,7 +151,7 @@ export default class TabViewSettings extends React.Component {
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">
-              Configure the default "End Scenario" screen
+              Configure the default "End scenario" screen
               <TooltipButton
                 text={ this.l10n.tooltipEndScenario }
               />
@@ -191,7 +191,7 @@ export default class TabViewSettings extends React.Component {
             </div>
             <div className="field text importance-low">
               <label className="h5peditor-label-wrapper" htmlFor="endImage">
-                <span className="h5peditor-label">Default End Scenario Image{/* TODO: Use title from semantics */}</span>
+                <span className="h5peditor-label">Default end scenario image{/* TODO: Use title from semantics */}</span>
               </label>
               <div
                 id="endImage"
