@@ -693,6 +693,8 @@ export default class Canvas extends React.Component {
     branch.forEach((id, num) => {
       let drawAboveLine = false;
       const content = this.state.content[id];
+      const contentIsBranching = (content && isBranching(content));
+
       const hasBeenDrawn = (renderedNodes.indexOf(id) !== -1);
 
       renderedNodes.push(id);
@@ -709,9 +711,6 @@ export default class Canvas extends React.Component {
       // }
 
       const branchY = y + distanceYFactor * this.props.nodeSize.spacing.y;
-
-      // Determine if we are or parent is a branching question
-      const contentIsBranching = (content && isBranching(content));
 
       // Determine if we have any children
       const children = (hasBeenDrawn ? null : (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.params.nextContentId] : null)));
@@ -827,12 +826,24 @@ export default class Canvas extends React.Component {
       }
 
       if (parentIsBranching) {
+        const alternatives = this.state.content[parent].params.type.params.branchingQuestion.alternatives;
+
+        // Offset for centering alternatives below BQ node if their total width < node width
+        const alternativesEmpty = alternatives.filter(alt => alt.nextContentId < 0).length;
+        const width = alternativesEmpty * this.state.dzSpecs.width +
+          (alternatives.length - alternativesEmpty) * this.props.nodeSize.width +
+          (alternatives.length - 1) * this.props.nodeSize.spacing.x;
+        const alternativesOffsetX = (this.props.nodeSize.width > width) ? ((this.props.nodeSize.width - width) / 2) : 0;
+
+        // Remember position of first alternative for rendering parent node
         if (num === 0) {
-          firstAlternativeX = nodeCenter;
+          firstAlternativeX = alternativesOffsetX + nodeCenter;
         }
+
+        // Add vertical line above alternative ball
         nodes.push(
           <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line 3' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: nodeCenter + 'px',
+            left: alternativesOffsetX + nodeCenter + 'px',
             top: ((position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 2 : 0)) + 'px',
             height: (this.props.nodeSize.spacing.y * (branch.length > 1 ? 0.375 : 1)) + 'px'
           } }/>
@@ -840,10 +851,7 @@ export default class Canvas extends React.Component {
 
         const key = parent + '-abox-' + num;
 
-        const bqParams = this.state.content[parent].params.type.params;
-        const alternative = bqParams.branchingQuestion
-          && bqParams.branchingQuestion.alternatives
-          && bqParams.branchingQuestion.alternatives[num];
+        const alternative = alternatives[num];
         const hasFeedback = !!(alternative
           && alternative.feedback
           && (alternative.feedback.title
@@ -878,14 +886,15 @@ export default class Canvas extends React.Component {
           }
         }
 
-        const alternativeText = this.state.content[parent].params.type.params.branchingQuestion.alternatives[num].text;
+        // Add alternatives ball
+        const alternativeText = alternatives[num].text;
         nodes.push(
           <div key={ key }
             className={ alternativeBallClasses }
             aria-label={ /* TODO: l10n */ 'Alternative ' + (num + 1) }
             onClick={ () => this.handleBallTouch(hasBeenDrawn ? id : -1, key) }
             style={ {
-              left: (nodeCenter - (this.props.nodeSize.spacing.y * 0.75) - 1) + 'px',
+              left: (alternativesOffsetX + nodeCenter - (this.props.nodeSize.spacing.y * 0.75) - 1) + 'px',
               top: (position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * 1.5)) + 'px'
             } }>A{ num + 1 }
             <div className="dark-tooltip">
@@ -897,7 +906,7 @@ export default class Canvas extends React.Component {
         // Add dropzone under empty BQ alternative if not of BQ being moved
         if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
           nodes.push(this.renderDropzone(-1, {
-            x: nodeCenter - (this.state.dzSpecs.width / 2),
+            x: alternativesOffsetX + nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
             // y: position.y - 42 + 2 * this.props.nodeSize.spacing.y // for expandable tree
           }, parent, num));
