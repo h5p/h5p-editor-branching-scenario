@@ -9,6 +9,9 @@ export default class TabViewTranslations extends React.Component {
   }
 
   componentDidMount() {
+    // Remove header, should not be included in custom editor
+    this.props.parent.$common.find('p.desc').remove();
+
     H5PEditor.setCommonFieldsWrapper(this.props.parent, this.commonFields.current);
   }
 
