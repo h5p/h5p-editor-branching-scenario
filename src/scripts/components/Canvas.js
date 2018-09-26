@@ -686,6 +686,10 @@ export default class Canvas extends React.Component {
     const parentIsBranching = (parent !== undefined && isBranching(this.state.content[parent]));
 
     let firstX, lastX, bigY = y + (this.props.nodeSize.spacing.y * 7.5); // The highest we'll ever be
+
+    // x position of first alternative (of a subtree)
+    let firstAlternativeX;
+
     branch.forEach((id, num) => {
       let drawAboveLine = false;
       const content = this.state.content[id];
@@ -807,7 +811,7 @@ export default class Canvas extends React.Component {
         // Add horizontal line below
         nodes.push(
           <div key={ id + '-hbelow' } className={ 'horizontal-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: (x + (children[0] === undefined || children[0] < 0 ? this.state.dzSpecs.width / 2 : this.props.nodeSize.width / 2)) + 'px',
+            left: subtree.firstAlternativeX + 'px',
             top: (position.y + this.props.nodeSize.height + (this.props.nodeSize.spacing.y / 2)) + 'px',
             width: (subtree.dX + 2) + 'px'
           } }/>
@@ -815,6 +819,9 @@ export default class Canvas extends React.Component {
       }
 
       if (parentIsBranching) {
+        if (num === 0) {
+          firstAlternativeX = nodeCenter;
+        }
         nodes.push(
           <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line 3' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
@@ -936,7 +943,8 @@ export default class Canvas extends React.Component {
       nodes: nodes,
       x: x,
       y: bigY,
-      dX: (firstX !== undefined ? lastX - firstX : 0) // Width of this subtree level only (used for pretty trees)
+      dX: (firstX !== undefined ? lastX - firstX : 0), // Width of this subtree level only (used for pretty trees)
+      firstAlternativeX: firstAlternativeX
     };
   }
 
