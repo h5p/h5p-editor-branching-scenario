@@ -738,7 +738,15 @@ export default class Canvas extends React.Component {
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const library = this.getLibrary(content.params.type.library);
-        if ((content.params.nextContentId !== undefined && content.params.nextContentId < 0 && content.params.nextContentId === this.props.highlight) || this.props.highlight === id) {
+        const hasCustomEndScreen = content.params.feedback.title
+          || content.params.feedback.subtitle
+          || content.params.feedback.image
+          || content.params.feedback.endScreenScore !== undefined;
+        const hasDefaultEndScreen = !hasCustomEndScreen
+          && content.params.nextContentId !== undefined
+          && content.params.nextContentId < 0
+          && content.params.nextContentId === this.props.highlight;
+        if (hasDefaultEndScreen || this.props.highlight === id) {
           highlightCurrentNode = true;
         }
 
@@ -841,6 +849,7 @@ export default class Canvas extends React.Component {
           && (alternative.feedback.title
             || alternative.feedback.subtitle
             || alternative.feedback.image
+            || alternative.feedback.endScreenScore !== undefined
           ));
 
         let alternativeBallClasses = 'alternative-ball';
@@ -1194,6 +1203,7 @@ export default class Canvas extends React.Component {
             && (alternative.feedback.title
               || alternative.feedback.subtitle
               || alternative.feedback.image
+              || alternative.feedback.endScreenScore !== undefined
             ));
           if (alternative.nextContentId === -1 && !hasFeedback) {
             numMissingEndScenarios++;

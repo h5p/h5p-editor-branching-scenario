@@ -167,6 +167,15 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       .querySelector(':not(.library) .field-name-feedback');
     content.feedbackFormWrapper.appendChild(feedbackGroup);
 
+    // Add description to feedback group
+    const description = document.createElement('div');
+    description.classList.add('h5p-feedback-description');
+    description.classList.add('h5peditor-field-description');
+    description.textContent = 'It is recommended to provide a feedback after each alternative. This will ensure a better learning experience for the viewer.';
+
+    const groupWrapper = feedbackGroup.querySelector('.content');
+    groupWrapper.prepend(description);
+
     content.formChildren = this.children;
 
     // For BS we need to know when the sub form is ready/loaded
