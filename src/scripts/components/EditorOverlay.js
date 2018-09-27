@@ -168,6 +168,19 @@ export default class EditorOverlay extends React.Component {
       });
     }
 
+    // Collapse branching question list alternatives
+    if (this.isBranchingQuestion) {
+      const branchingQuestionEditor = H5PEditor.findField(
+        'type/branchingQuestion', {
+          children: this.props.content.formChildren,
+        }
+      );
+
+      if (branchingQuestionEditor) {
+        branchingQuestionEditor.collapseListAlternatives();
+      }
+    }
+
     // Update Canvas state
     this.props.onDone();
   }
