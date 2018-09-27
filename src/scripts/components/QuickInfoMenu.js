@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+
+import { isDecendantOf } from '../helpers/DOM';
 import './QuickInfoMenu.scss';
 
 export default class QuickInfoMenu extends React.Component {
@@ -7,8 +9,27 @@ export default class QuickInfoMenu extends React.Component {
     super(props);
 
     this.state = {
-      expanded: this.props.expanded
+      expanded: false
     };
+  }
+
+  componentDidMount() {
+    document.addEventListener('click', this.handleDocumentClick);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleDocumentClick);
+  }
+
+  /**
+   * Reset visibility on any document action
+   */
+  handleDocumentClick = (event) => {
+    if (this.state.expanded && !isDecendantOf(this.legend, event.target)) {
+      this.setState({
+        expanded: false
+      });
+    }
   }
 
   /**
@@ -26,14 +47,15 @@ export default class QuickInfoMenu extends React.Component {
    * Render quick info menu
    */
   render () {
-    const expanded = (this.state.expanded === true) ? ' expanded' : '';
+    const expanded = (this.state.expanded ? ' expanded' : '');
+    const fade = (this.props.fade ? ' fade' : '');
 
     return (
-      <div id="legend" className={ 'legend' + expanded }>
+      <div className={ 'legend' + expanded + fade } onClick={ this.handleToggle } ref={ element => this.legend = element }>
         <span>{ this.props.l10n.quickInfo }
-          <a href="#" className="close" onClick={ this.handleToggle }>
+          <span className="close link-look">
             { this.state.expanded ? this.props.l10n.hide : this.props.l10n.show }
-          </a>
+          </span>
         </span>
         <div className={ 'legend-content' + expanded }>
           <ul>
@@ -44,7 +66,7 @@ export default class QuickInfoMenu extends React.Component {
             <li>{ this.props.l10n.defaultEndScenario }</li>
             <li>{ this.props.l10n.customEndScenario }</li>
             <li>{ this.props.l10n.existingQuestion }</li>
-            <li>{ this.props.l10n.stepByStep } <a href='#' onClick={ this.props.handleOpenTutorial }>{ this.props.l10n.tutorial }</a></li>
+            <li>{ this.props.l10n.stepByStep } <span className="link-look" onClick={ this.props.handleOpenTutorial }>{ this.props.l10n.tutorial }</span></li>
           </ul>
         </div>
       </div>
@@ -53,7 +75,7 @@ export default class QuickInfoMenu extends React.Component {
 }
 
 QuickInfoMenu.propTypes = {
-  expanded: PropTypes.bool,
+  fade: PropTypes.bool,
   l10n: PropTypes.object,
   onOpenTutorial: PropTypes.func
 };

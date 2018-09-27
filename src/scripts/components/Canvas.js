@@ -1476,11 +1476,13 @@ export default class Canvas extends React.Component {
               handleCancel={ this.state.dialog.handleCancel } // TODO: Rename to onCancel ?
             />
           }
-          <QuickInfoMenu
-            expanded={ false }
-            l10n={ this.l10n.quickInfoMenu }
-            handleOpenTutorial={ this.props.handleOpenTutorial }
-          />
+          { tree.nodes.length &&
+            <QuickInfoMenu
+              fade={ this.props.highlight !== null }
+              l10n={ this.l10n.quickInfoMenu }
+              handleOpenTutorial={ this.props.handleOpenTutorial }
+            />
+          }
         </div>
         { this.state.editing !== null &&
           <EditorOverlay

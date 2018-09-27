@@ -2,7 +2,7 @@
 @import '../../styles/main.scss';
 
 .legend {
-  cursor: default;
+  cursor: pointer;
   width: 8rem;
   background-color: white;
   position: absolute;
@@ -14,7 +14,7 @@
   font-weight: bold;
   transition: all 0.1s ease;
   user-select: none;
-  z-index:10;
+  z-index: 10;
   overflow: hidden;
 
   &:hover {
@@ -23,8 +23,13 @@
     box-shadow: rgba(0, 0, 0, 0.2) 0 3px 10px;
   }
 
-  span {
+  & > span {
     font-size: 0.875rem;
+  }
+
+  &.fade {
+    pointer-events: none;
+    opacity: 0.15;
   }
 
   .close {
@@ -50,8 +55,8 @@
 
   ul {
     list-style: none;
-    margin-top: 0.6rem;
-    padding: $large;
+    margin: 0.6em 0 0 0;
+    padding: $large $large 0;
     border-top: solid 1px $col2;
 
     li {
@@ -60,13 +65,14 @@
       font-weight: normal;
       list-style-position: inside;
       text-align: left;
+      padding-left: 2rem;
 
       &:before {
-        margin-right: 0.8rem;
         font-size: $large;
         width: $large;
         height: $large;
-        display: inline-block;
+        position: absolute;
+        left: 1.5rem;
         border: solid 1px;
         border-radius: 3px;
       }
@@ -76,7 +82,7 @@
         background-color: lighten($accent-col, 40);
         font-family: "BSFont";
         content: $icon-plus-2;
-        border: dashed #1773DA;
+        border: 2px dotted #1773DA;
       }
 
       &:nth-child(2):before {
