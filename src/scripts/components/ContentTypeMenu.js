@@ -11,9 +11,9 @@ export default class ContentTypeMenu extends React.Component {
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      tooltipInfo: 'Add Informational content to the <strong>Branching Question Set.</strong>',
-      tooltipBranching: 'Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>',
-      tooltipReuse: 'Add content from the clipboard to the <strong>Branching Question Set.</strong>'
+      tooltipInfo: 'Create new content by dragging content below to dropzones on the right',
+      tooltipBranching: 'Create branching question to add a custom path in the <strong>Branching Scenario</strong>',
+      tooltipReuse: 'Paste" to a dropzone to insert content from a clipboard'
     };
 
     this.state = {

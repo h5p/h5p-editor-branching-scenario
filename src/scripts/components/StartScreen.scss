@@ -31,9 +31,15 @@
 
 .startscreen-footer {
   text-align: center;
+  margin-top: 0.3rem;
   margin-bottom: 2em;
+  font-size: 0.75rem;
+  display: block;
+  color: #626262;
 
   a {
     cursor: pointer;
+    color: #1773DA;
+    text-decoration: underline;
   }
 }

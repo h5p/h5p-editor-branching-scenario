@@ -48,12 +48,9 @@ export default class BranchingOptions extends React.Component {
         <div className='field text importance-low'>
           <label className='h5peditor-label-wrapper'>
             <span className='h5peditor-label'>
-              { this.props.nextContentLabel || 'Next content' }
+              { this.props.nextContentLabel || 'Special action if selected' }
             </span>
           </label>
-          <div className='h5peditor-field-description'>
-            { this.props.nextContentDescription || 'You can choose to: 1. End scenario 2. Send a user to an existing content/question or 3. Send a user to a new content/question. If you want to send a user to a new content/question, close this popup and create a new content/question below this content.' }
-          </div>
         </div>
         <select
           value={ mainSelectorValue }
@@ -66,20 +63,20 @@ export default class BranchingOptions extends React.Component {
           <option
             key="end-scenario"
             value="end-scenario"
-          >End scenario here</option>
+          >Custom end scenario</option>
           {
             this.props.validAlternatives.length > 0 &&
             <option
               key="old-content"
               value="old-content"
-            >Send a viewer to an existing content/question</option>
+            >Jump to another branch</option>
           }
         </select>
         {
           this.props.nextContentId >= 0 &&
           <div className="field text importance-low">
             <label className="h5peditor-label-wrapper" htmlFor="nextPath">
-              <span className="h5peditor-label h5peditor-required">Select a path to send a user to{/* TODO: Use title from semantics */}</span>
+              <span className="h5peditor-label h5peditor-required">Select a branch to jump to{/* TODO: Use title from semantics */}</span>
             </label>
             <select
               name="nextPath"
