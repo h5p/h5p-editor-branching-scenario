@@ -271,10 +271,22 @@ export default class Editor extends React.Component {
         }
         <div className="topbar" ref={ element => this.topbar = element }>
           { H5PEditor.Fullscreen !== undefined &&
-            <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>
+            <div
+              className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') }
+              title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
+              role="button"
+              tabIndex="0"
+              onClick={ this.handleToggleFullscreen }
+            />
           }
           { this.state.fullscreen &&
-            <div className="proceed-button" role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }>Proceed to Save{/* TODO: l10n */}</div>
+            <div
+              className="proceed-button"
+              title="Proceed to save your Branching Scenario"
+              role="button"
+              tabIndex="0"
+              onClick={ this.handleToggleFullscreen }
+            >Proceed to Save{/* TODO: l10n */}</div>
           }
         </div>
         <Tabs className="tab-view-wrapper"
@@ -283,7 +295,7 @@ export default class Editor extends React.Component {
         >
           <Tab
             onMouseUp={ this.handleMouseUp }
-            title="add content"
+            title="Create content"
             className="bs-editor-content-tab has-submenu">
             <ContentTypeMenu
               inserting={ this.state.inserting }
@@ -322,7 +334,7 @@ export default class Editor extends React.Component {
               contentRect={ this.tree }
             />
           </Tab>
-          <Tab title="settings" className="bs-editor-settings-tab">
+          <Tab title="Settings" className="bs-editor-settings-tab">
             <TabViewSettings
               main={this.props.main}
               value={this.state.settings}
@@ -332,17 +344,17 @@ export default class Editor extends React.Component {
               updateScoringOption={this.handleScoringOptionChange}
             />
           </Tab>
-          <Tab title="translations" className="bs-editor-translations-tab">
+          <Tab title="Interface translations" className="bs-editor-translations-tab">
             <TabViewTranslations
               parent={this.props.parent}
             />
           </Tab>
-          <Tab title="tutorial" className="bs-editor-tutorial-tab">
+          <Tab title="Get help" className="bs-editor-tutorial-tab">
             <TabViewTutorial
               handleOpenCanvas={ this.handleOpenCanvas }
             />
           </Tab>
-          <Tab title="metadata" className="bs-editor-metadata-tab">
+          <Tab title="Metadata" className="bs-editor-metadata-tab">
             <TabViewMetadata
               metadataForm={ this.props.main.parent.metadataForm }
             />
