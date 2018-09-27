@@ -72,6 +72,9 @@ export default class EditorOverlay extends React.Component {
     });
     const titleField = H5PEditor.findField('title', library.metadataForm);
     titleField.$input.on('change', () => this.forceUpdate());
+
+    // Force visuals to resize after initial render
+    H5P.$window.trigger('resize');
   }
 
   componentWillUnmount() {
@@ -81,10 +84,6 @@ export default class EditorOverlay extends React.Component {
     if (this.$editorFormTitle) {
       this.$editorFormTitle.off(this.titleListenerName);
     }
-  }
-
-  componentDidUpdate() {
-    setTimeout(() => H5P.$window.trigger('resize'), 1000);
   }
 
   /**
