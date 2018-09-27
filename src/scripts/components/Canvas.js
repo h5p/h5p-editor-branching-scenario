@@ -604,12 +604,12 @@ export default class Canvas extends React.Component {
     return ( !this.state.editing &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
-        ref={ element => isInitial ? this.initialDropzone = element : this.dropzones.push(element) }
+        ref={ element => { if (isInitial) { this.initialDropzone = element; } this.dropzones.push(element); } }
         nextContentId={ nextContentId }
         parent={ parent }
         alternative={ num }
         position={ position }
-        elementClass={ 'dropzone' + (isInitial ? ' disabled' : '') }
+        elementClass={ 'dropzone' + (isInitial && !this.props.inserting ? ' disabled' : '') }
         style={
           {
             left: position.x + 'px',
@@ -918,7 +918,7 @@ export default class Canvas extends React.Component {
         const dzDistance = ((aboveLineHeight - this.state.dzSpecs.height) / 2);
 
         // Add dropzone above
-        if (this.state.placing !== parent && (!this.isDropzoneDisabled(id) || this.isOuterNode(this.state.placing, id))) {
+        if (content && this.state.placing !== parent && (!this.isDropzoneDisabled(id) || this.isOuterNode(this.state.placing, id))) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - dzDistance // for fixed tree
@@ -1147,35 +1147,17 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.props.center && this.tree) {
-      let width, posX, y;
-
-      if (this['draggable-1']) {
-        // Center on 1st node
-        width = this.props.nodeSize.width;
-        posX = this['draggable-0'].props.position.x;
-        y = 0;
-      }
-      else if (this.dropzones[0]) {
-        // Center on top DZ (used for empty scenarios)
-        width = 41.59;
-        posX = this.dropzones[0].props.position.x;
-        y = 122; // Align with StartScreen's hardcoded value
-      }
-
-      if (width !== undefined && posX !== undefined && y !== undefined) {
-        // Do the centering
-
-        // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
-        // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
-        const center = (this.treewrap.getBoundingClientRect().width / 2) - ((width * this.props.scale) / 2);
-        this.setState({
-          panning: {
-            x: (center - (posX * this.props.scale)),
-            y: y
-          }
-        }, this.props.onCanvasCentered);
-      }
+    if (this.props.center && this.tree && this['draggable-0']) {
+      // Center on 1st node
+      // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
+      // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
+      const center = (this.treewrap.getBoundingClientRect().width / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
+      this.setState({
+        panning: {
+          x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
+          y: 0
+        }
+      }, this.props.onCanvasCentered);
     }
 
     // Center inital dropzone
@@ -1472,7 +1454,8 @@ export default class Canvas extends React.Component {
           </Draggable>
           { !tree.nodes.length &&
             <StartScreen
-              handleClicked={ this.props.handleOpenTutorial }
+              handleClick={ this.props.onDropped }
+              handleTutorialClick={ this.props.handleOpenTutorial }
             >
               { this.renderDropzone(-9, {
                 x: 361.635,

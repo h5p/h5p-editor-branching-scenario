@@ -9,14 +9,14 @@ export default class StartScreen extends React.Component {
 
   render() {
     return (
-      <div className="startscreen-wrapper">
+      <div className="startscreen-wrapper" onClick={this.props.handleClick}>
         <div className="startscreen-header">
           <h1>Your Branching Questions Set is empty</h1>
           <p>To create content drag the icons from the left menu to the dropzone below</p>
           { this.props.children }
         </div>
         <div className="startscreen-footer">
-          <p>Step by step <a onClick={this.props.handleClicked}>tutorial</a> on how to use Branching Question</p>
+          <p>Step by step <a onClick={this.props.handleTutorialClick}>tutorial</a> on how to use Branching Question</p>
         </div>
       </div>
     );
@@ -24,5 +24,6 @@ export default class StartScreen extends React.Component {
 }
 
 StartScreen.propTypes = {
-  handleClicked: PropTypes.func
+  handleClick: PropTypes.func,
+  handleTutorialClick: PropTypes.func
 };
