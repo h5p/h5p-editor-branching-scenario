@@ -1152,19 +1152,25 @@ export default class Canvas extends React.Component {
       // Center on 1st node
       // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
       // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
-      const center = (this.treewrap.getBoundingClientRect().width / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
-      this.setState({
-        panning: {
-          x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
-          y: 0
-        }
-      }, this.props.onCanvasCentered);
+      const treeWrapWidth = this.treewrap.getBoundingClientRect().width;
+      if (treeWrapWidth !== 0) {
+        const center = (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
+        this.setState({
+          panning: {
+            x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
+            y: 0
+          }
+        }, this.props.onCanvasCentered);
+      }
     }
 
     // Center inital dropzone
     if (this.initialDropzone) {
-      const center = (this.treewrap.getBoundingClientRect().width / 2) - (41.59 / 2);
-      this.initialDropzone.element.style.left = center + 'px';
+      const treeWrapWidth = this.treewrap.getBoundingClientRect().width;
+      if (treeWrapWidth !== 0) {
+        const center = (treeWrapWidth / 2) - (41.59 / 2);
+        this.initialDropzone.element.style.left = center + 'px';
+      }
     }
 
     // Translate the tree
