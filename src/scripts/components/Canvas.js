@@ -1265,26 +1265,27 @@ export default class Canvas extends React.Component {
     const treewrapRect = this.treewrap.getBoundingClientRect();
     const treeRect = this.tree.getBoundingClientRect();
 
-    const wideLoad = (treeRect.width > treewrapRect.width);
-    const highLoad = (treeRect.height > treewrapRect.height);
-
     const padding = (this.props.scale * 64); // Allow exceeding by this much
+
+    const wideLoad = (treeRect.width + (padding * 4) > treewrapRect.width);
+    const highLoad = (treeRect.height + padding > treewrapRect.height);
+
 
     // Limit X movement
     if (wideLoad) {
       if (position.x > padding) {
         position.x = padding; // Max X
       }
-      else if ((treewrapRect.width - position.x - padding) > treeRect.width) {
-        position.x = (treewrapRect.width - treeRect.width - padding); // Min X
+      else if ((treewrapRect.width - position.x - (padding * 4)) > treeRect.width) {
+        position.x = (treewrapRect.width - treeRect.width - (padding * 4)); // Min X
       }
     }
     else {
-      if (position.x < 0) {
-        position.x = 0; // Min X
+      if (position.x < (padding / 2)) {
+        position.x = (padding / 2); // Min X
       }
-      else if ((position.x + treeRect.width) > treewrapRect.width) {
-        position.x = (treewrapRect.width - treeRect.width); // Max X
+      else if ((position.x + treeRect.width + padding) > treewrapRect.width) {
+        position.x = (treewrapRect.width - treeRect.width - padding); // Max X
       }
     }
 
@@ -1301,8 +1302,8 @@ export default class Canvas extends React.Component {
       if (position.y < 0) {
         position.y = 0; // Min Y
       }
-      else if ((position.y + treeRect.height) > treewrapRect.height) {
-        position.y = (treewrapRect.height - treeRect.height); // Max Y
+      else if ((position.y + treeRect.height + padding) > treewrapRect.height) {
+        position.y = (treewrapRect.height - treeRect.height - padding); // Max Y
       }
     }
   }
