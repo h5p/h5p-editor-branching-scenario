@@ -23,7 +23,6 @@ export default class Editor extends React.Component {
 
     this.state = {
       activeIndex: 0,
-      settings: props.settings,
       libraries: null, // Needs to be loaded via AJAX
       numDefaultEndScenarios: 0,
       highlight: null,
@@ -70,31 +69,6 @@ export default class Editor extends React.Component {
     this.setState({
       libraries: loadedLibraries
     });
-  }
-
-  /**
-   * Update settings
-   * TODO: For a more general solution such as the fullscreen editor, this
-   *       should be more abstract
-   *
-   * @param {Event} event - Change event.
-   */
-  handleSettingsChange = (event) => {
-    const target = event.target;
-    let value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-
-    if (name === 'endScreenScore') {
-      value = parseInt(value);
-    }
-
-    // TODO: It seems the next state depends on the current, this should be handled inside the setState() updater using prevState.
-    const settings = this.state.settings;
-    settings[[name]] = value;
-    this.setState({settings: settings});
-
-    // TODO: maintained in parent as well? We don't really need to have a local state then
-    this.props.updateParams(settings);
   }
 
   validate = () => {
@@ -325,10 +299,6 @@ export default class Editor extends React.Component {
           <Tab title="settings" className="bs-editor-settings-tab">
             <TabViewSettings
               main={this.props.main}
-              value={this.state.settings}
-              startImageChooser={this.props.startImageChooser}
-              endImageChooser={this.props.endImageChooser}
-              onChange={this.handleSettingsChange}
               updateScoringOption={this.handleScoringOptionChange}
             />
           </Tab>
@@ -354,9 +324,5 @@ export default class Editor extends React.Component {
 }
 
 Editor.propTypes = {
-  libraries: PropTypes.array,
-  settings: PropTypes.object,
-  updateParams: PropTypes.func,
-  startImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
-  endImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
+  libraries: PropTypes.array
 };
