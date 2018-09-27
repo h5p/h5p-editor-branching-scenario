@@ -162,9 +162,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       params.type.library
     );
 
-    // Move feedback group to its own wrapper
-    const feedbackGroup = content.formWrapper
-      .querySelector(':not(.library) .field-name-feedback');
+    // Move last feedback group to its own wrapper
+    let feedbackGroups = content.formWrapper
+      .querySelectorAll('.field-name-feedback');
+    const feedbackGroup = feedbackGroups[feedbackGroups.length - 1];
+
     content.feedbackFormWrapper.appendChild(feedbackGroup);
 
     // Add description to feedback group
