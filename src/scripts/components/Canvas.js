@@ -1202,7 +1202,17 @@ export default class Canvas extends React.Component {
         });
       }
       else if (content.params.nextContentId === -1) {
-        numMissingEndScenarios++;
+        const hasCustomEnding = content.params.feedback
+          && (
+            content.params.feedback.title
+            || content.params.feedback.subtitle
+            || content.params.feedback.image
+            || content.params.feedback.endScreenScore !== undefined
+          );
+
+        if (!hasCustomEnding) {
+          numMissingEndScenarios++;
+        }
       }
     });
     return numMissingEndScenarios;
