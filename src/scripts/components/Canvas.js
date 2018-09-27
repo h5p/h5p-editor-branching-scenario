@@ -750,6 +750,7 @@ export default class Canvas extends React.Component {
         }
 
         // Draw node
+        const label = Content.getTooltip(content);
         nodes.push(
           <Content
             key={ id }
@@ -772,10 +773,10 @@ export default class Canvas extends React.Component {
             onCopy={ () => this.handleContentCopy(id) }
             onDelete={ () => this.handleContentDelete(id) }
             disabled={ contentIsBranching }
-            tooltip={ Content.getTooltip(content) }
+            tooltip={ label }
             scale={ this.props.scale }
           >
-            { library.title }
+            { label }
           </Content>
         );
         drawAboveLine = true;
