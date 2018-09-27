@@ -114,7 +114,7 @@ export default class EditorOverlay extends React.Component {
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
-            nextContentLabel={'Special action if selected'}
+            nextContentLabel={'Special action after this content'}
           />
         ), selectorWrapper);
       };
