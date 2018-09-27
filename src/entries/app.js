@@ -274,6 +274,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
 
         document.documentElement.style.fontSize = '18px';
+
+        // Remove any open wysiwyg fields (they do not automatically resize)
+        if (H5PEditor.Html) {
+          H5PEditor.Html.removeWysiwyg();
+        }
       });
 
       fullscreen.on('exited', function () {
@@ -287,6 +292,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
 
         document.documentElement.style.fontSize = '';
+
+        // Remove any open wysiwyg fields (they do not automatically resize)
+        if (H5PEditor.Html) {
+          H5PEditor.Html.removeWysiwyg();
+        }
       });
     }
     function toggleFullscreen(on) {
