@@ -13,7 +13,7 @@ export default class ContentTypeMenu extends React.Component {
     this.l10n = {
       tooltipInfo: 'Create new content by dragging content below to dropzones on the right',
       tooltipBranching: 'Create branching question to add a custom path in the <strong>Branching Scenario</strong>',
-      tooltipReuse: 'Paste" to a dropzone to insert content from a clipboard'
+      tooltipReuse: 'Drag "Paste" to a dropzone to insert content from a clipboard'
     };
 
     this.state = {

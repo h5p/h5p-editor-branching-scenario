@@ -48,30 +48,30 @@ export default class BranchingOptions extends React.Component {
         <div className='field text importance-low'>
           <label className='h5peditor-label-wrapper'>
             <span className='h5peditor-label'>
-              { this.props.nextContentLabel || 'Special action if selected' }
+              { this.props.nextContentLabel || 'Special action after this content' }
             </span>
           </label>
-        </div>
-        <select
-          value={ mainSelectorValue }
-          onChange={ this.handleMainOptionChange }
-        >
-          <option
-            key="default"
-            value="new-content"
-          > - </option>
-          <option
-            key="end-scenario"
-            value="end-scenario"
-          >Custom end scenario</option>
-          {
-            this.props.validAlternatives.length > 0 &&
+          <select
+            value={ mainSelectorValue }
+            onChange={ this.handleMainOptionChange }
+          >
             <option
-              key="old-content"
-              value="old-content"
-            >Jump to another branch</option>
-          }
-        </select>
+              key="default"
+              value="new-content"
+            > - </option>
+            <option
+              key="end-scenario"
+              value="end-scenario"
+            >Custom end scenario</option>
+            {
+              this.props.validAlternatives.length > 0 &&
+              <option
+                key="old-content"
+                value="old-content"
+              >Jump to another branch</option>
+            }
+          </select>
+        </div>
         {
           this.props.nextContentId >= 0 &&
           <div className="field text importance-low">
