@@ -150,7 +150,10 @@ export default class EditorOverlay extends React.Component {
 
   handleDone = () => {
     // Validate all form children to save their current value
-    this.validate();
+    const valid = this.validate();
+    if (!valid) {
+      return; // Don't close form yet
+    }
 
     // Remove any open wysiwyg fields
     if (H5PEditor.Html) {
