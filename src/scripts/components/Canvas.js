@@ -91,6 +91,12 @@ export default class Canvas extends React.Component {
   componentDidMount() {
     // Trigger the initial default end scenarios count
     this.props.onContentChanged(null, this.countDefaultEndScenarios());
+
+    document.addEventListener('keydown', this.handleDocumentKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleDocumentKeyDown);
   }
 
   componentWillReceiveProps(nextProps) { // TODO: Deprected ?
@@ -99,6 +105,15 @@ export default class Canvas extends React.Component {
         placing: -1,
         library: nextProps.inserting.library
       });
+    }
+  }
+
+  handleDocumentKeyDown = (event) => {
+    switch (event.which) {
+      case 46: // Delete
+        if (this.state.placing !== null) {
+          this.handleContentDelete(this.state.placing);
+        }
     }
   }
 
