@@ -1258,6 +1258,18 @@ export default class Canvas extends React.Component {
     }, this.contentChanged);
   };
 
+  handleEditorRemove = () => {
+    this.setState(prevState => {
+      return {
+        editing: null,
+        inserting: null,
+        placing: prevState.editing,
+        deleting: prevState.editing,
+        dialog: this.buildDialog(prevState.editing, this.l10n.dialogDelete) // TODO: See comment in handlePlacing(). There must be a better way to handle this.
+      };
+    }, this.contentChanged);
+  }
+
   /**
    * Convert camel case to kebab case.
    *
@@ -1525,6 +1537,7 @@ export default class Canvas extends React.Component {
             semantics={ this.props.semantics }
             validAlternatives={ validAlternatives }
             scoringOption={ this.props.scoringOption }
+            onRemove={ this.handleEditorRemove }
             onDone={ this.handleEditorDone }
           />
         }

@@ -205,6 +205,12 @@ export default class EditorOverlay extends React.Component {
           >{ this.props.content.params.type.metadata ? this.props.content.params.type.metadata.title : 'New' }</span>
           <span className="buttons">
             <button
+              className="button-remove"
+              onClick={ this.props.onRemove }
+            >
+              Remove { /* TODO: l10 */ }
+            </button>
+            <button
               className="button-blue"
               onClick={ this.handleDone }
             >Done{/* TODO: l10n */}</button>
