@@ -14,13 +14,13 @@ export default class TabViewSettings extends React.Component {
     const params = this.props.main.params;
 
     // Prepare fields for separate fieldsets
-    const startScreenFields = H5PEditor.findSemanticsField(
+    const startScreenField = H5PEditor.findSemanticsField(
       'startScreen',
       this.props.main.field
     );
     this.startScreenWrapper = document.createElement('div');
 
-    const endScreenFields = H5PEditor.findSemanticsField(
+    const endScreenField = H5PEditor.findSemanticsField(
       'endScreens',
       this.props.main.field
     );
@@ -32,19 +32,22 @@ export default class TabViewSettings extends React.Component {
     );
     this.scoringOptionWrapper = document.createElement('div');
 
+
     // Fill fields
     H5PEditor.processSemanticsChunk(
-      startScreenFields.fields,
-      params.startScreen,
+      [startScreenField],
+      params,
       H5PEditor.$(this.startScreenWrapper),
       this.props.main
     );
     // Backup children
     let children = [].concat(this.props.main.children);
 
+    const fakeParams = {};
+    fakeParams[endScreenField.field.name] = params.endScreens[0];
     H5PEditor.processSemanticsChunk(
-      endScreenFields.field.fields,
-      params.endScreens[0],
+      [endScreenField.field],
+      fakeParams,
       H5PEditor.$(this.endScreenWrapper),
       this.props.main
     );
@@ -63,7 +66,7 @@ export default class TabViewSettings extends React.Component {
 
     // Grab the select and listen for any changes to it
     this.$scoringField = H5PEditor.$(this.endScreenWrapper).find('.field-name-endScreenScore');
-    H5PEditor.followField(this.props.main, 'scoringOption', () => {
+    H5PEditor.followField(this.props.main, scoringOptionField.name + '/' + scoringOptionField.name, () => {
       // Can't use showWhen, because we don't have access to scoringOption in endScreen chunk
       this.$scoringField.toggleClass('no-display', params.scoringOption !== 'static-end-score');
 
