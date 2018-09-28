@@ -12,6 +12,7 @@ const ConfirmationDialog = (props) => {
       handleCancel={props.handleCancel}
       textConfirm={props.textConfirm}
       textCancel={props.textCancel}
+      styleConfirm={props.styleConfirm}
     >
       {
         props.confirmationDetails &&

@@ -17,7 +17,7 @@
 }
 
 .confirmation-dialog-header {
-  padding: 1.5rem;
+  padding: 1rem 1rem 1rem 1.5rem;
   border-bottom: 0.042rem solid #EEC;
   flex: 0 1 auto;
   align-items: center;
@@ -36,9 +36,10 @@
   }
 
   .confirmation-details {
-    background-color: #d9eaf4;
-    border-color: #c3e3ee;
-    color: #335cb4;
+    background-color: #fffcdb;
+    border: solid 1px #f7f4d0;
+    color: #8a6d3b;
+
     margin: 0.7rem 0;
     padding: 0.85rem;
     font-size: 0.85rem;
@@ -77,6 +78,27 @@
 
     &:hover {
       background-color: #1567c3;
+    }
+  }
+
+  .dialog-confirm-red {
+    margin-right: 0.2em;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 2px;
+    cursor: pointer;
+    color: #fff;
+    background-color: #E40C29;
+    border: solid 2px #E40C29;
+
+    &:hover {
+      background-color: #c71129;
+      border-color: #c71129;
+    }
+
+    &:active {
+      background-color: #b90b22;
+      border-color: #b90b22;
     }
   }
 

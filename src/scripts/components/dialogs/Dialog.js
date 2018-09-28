@@ -13,7 +13,7 @@ const Dialog = (props) => {
         {props.children}
         <div className='dialog-buttons'>
           <a
-            className='dialog-confirm'
+            className={props.styleConfirm || 'dialog-confirm'}
             onClick={props.handleConfirm}
           >{props.textConfirm}</a>
           <a

@@ -1520,6 +1520,7 @@ export default class Canvas extends React.Component {
               textCancel={ this.state.dialog.textCancel }
               handleConfirm={ this.state.dialog.handleConfirm } // TODO: Rename to onConfirm ?
               handleCancel={ this.state.dialog.handleCancel } // TODO: Rename to onCancel ?
+              styleConfirm={ 'dialog-confirm-red' }
             />
           }
           { tree.nodes.length &&
