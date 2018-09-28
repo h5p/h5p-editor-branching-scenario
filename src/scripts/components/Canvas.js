@@ -1098,7 +1098,7 @@ export default class Canvas extends React.Component {
         });
       };
 
-      if (prevState.placing !== prevState.deleting) {
+      if (prevState.placing !== null && prevState.placing !== prevState.deleting) {
         // Replace node
         const nextContentId = prevState.content[prevState.deleting].params.nextContentId;
 
