@@ -22,6 +22,10 @@
   flex: 0 1 auto;
   align-items: center;
   display: flex;
+
+  .header-text {
+    font-weight: bold;
+  }
 }
 
 .confirmation-dialog-body {
