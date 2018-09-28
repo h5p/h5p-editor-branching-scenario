@@ -21,16 +21,19 @@
   white-space: nowrap;
   z-index: 10;
 
+  &:hover {
+    box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
+    transition: box-shadow 0.2s ease;
+  }
+
   &.branchingquestion {
     background: #396ad1;
     color: #fff;
-  }
+    cursor: default;
 
-  &:hover {
-    -webkit-box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
-    -moz-box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
-    box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
-    transition: box-shadow 0.2s ease;
+    &:hover {
+      box-shadow: none;
+    }
   }
 }
 
