@@ -6,6 +6,10 @@ export default class BranchingOptions extends React.Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      expanded: false
+    };
   }
 
   handleExistingContentChange = (e) => {
@@ -45,55 +49,67 @@ export default class BranchingOptions extends React.Component {
     // TODO: translations
     return (
       <div className='editor-overlay-branching-options'>
-        <div className='field text importance-low'>
-          <label className='h5peditor-label-wrapper'>
-            <span className='h5peditor-label'>
-              { this.props.nextContentLabel || 'Special action if selected' }
-            </span>
-          </label>
-          <select
-            value={ mainSelectorValue }
-            onChange={ this.handleMainOptionChange }
-          >
-            <option
-              key="default"
-              value="new-content"
-            > - </option>
-            <option
-              key="end-scenario"
-              value="end-scenario"
-            >Custom end scenario</option>
-            {
-              this.props.validAlternatives.length > 0 &&
-              <option
-                key="old-content"
-                value="old-content"
-              >Jump to another branch</option>
-            }
-          </select>
-        </div>
-        {
-          this.props.nextContentId >= 0 &&
-          <div className="field text importance-low">
-            <label className="h5peditor-label-wrapper" htmlFor="nextPath">
-              <span className="h5peditor-label h5peditor-required">Select a branch to jump to{/* TODO: Use title from semantics */}</span>
-            </label>
-            <select
-              name="nextPath"
-              value={ this.props.nextContentId }
-              onChange={ this.handleExistingContentChange }
-            >
-              {
-                this.props.validAlternatives.map(content => (
-                  <option
-                    key={ 'next-path-' + content.id }
-                    value={ content.id }
-                  >{content.label}</option>
-                ))
-              }
-            </select>
+        <fieldset className={ 'field group' + (this.state.expanded ? ' expanded' : '' ) }>
+          <div
+            className="title"
+            title="Expand/Collapse"
+            role="button"
+            onClick={ () => this.setState(prevState => ({expanded: !prevState.expanded})) }
+            onKeyPress={ e => { if (e.which === 32) this.setState(prevState => ({expanded: !prevState.expanded}));} }
+            tabIndex="0">Branching Options{ /* TODO: l10n */ }
           </div>
-        }
+          <div className="content">
+            <div className='field text importance-low'>
+              <label className='h5peditor-label-wrapper'>
+                <span className='h5peditor-label'>
+                  { this.props.nextContentLabel || 'Special action if selected' }
+                </span>
+              </label>
+              <select
+                value={ mainSelectorValue }
+                onChange={ this.handleMainOptionChange }
+              >
+                <option
+                  key="default"
+                  value="new-content"
+                > - </option>
+                <option
+                  key="end-scenario"
+                  value="end-scenario"
+                >Custom end scenario</option>
+                {
+                  this.props.validAlternatives.length > 0 &&
+                  <option
+                    key="old-content"
+                    value="old-content"
+                  >Jump to another branch</option>
+                }
+              </select>
+            </div>
+            {
+              this.props.nextContentId >= 0 &&
+              <div className="field text importance-low">
+                <label className="h5peditor-label-wrapper" htmlFor="nextPath">
+                  <span className="h5peditor-label h5peditor-required">Select a branch to jump to{/* TODO: Use title from semantics */}</span>
+                </label>
+                <select
+                  name="nextPath"
+                  value={ this.props.nextContentId }
+                  onChange={ this.handleExistingContentChange }
+                >
+                  {
+                    this.props.validAlternatives.map(content => (
+                      <option
+                        key={ 'next-path-' + content.id }
+                        value={ content.id }
+                      >{content.label}</option>
+                    ))
+                  }
+                </select>
+              </div>
+            }
+          </div>
+        </fieldset>
       </div>
     );
   }
