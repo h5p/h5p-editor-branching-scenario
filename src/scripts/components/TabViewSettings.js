@@ -1,40 +1,74 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import TooltipButton from './TooltipButton';
+import './TabViewSettings.scss';
 
 export default class TabViewSettings extends React.Component {
   constructor(props) {
     super(props);
 
-    this.refStartImageChooser = React.createRef();
-    this.refEndImageChooser = React.createRef();
+    this.refStartScreen = React.createRef();
+    this.refEndScreen = React.createRef();
     this.refScoringOption= React.createRef();
+
+    const params = this.props.main.params;
+
+    // Prepare fields for separate fieldsets
+    const startScreenFields = H5PEditor.findSemanticsField(
+      'startScreen',
+      this.props.main.field
+    );
+    this.startScreenWrapper = document.createElement('div');
+
+    const endScreenFields = H5PEditor.findSemanticsField(
+      'endScreens',
+      this.props.main.field
+    );
+    this.endScreenWrapper = document.createElement('div');
 
     const scoringOptionField = H5PEditor.findSemanticsField(
       'scoringOption',
       this.props.main.field
     );
-    const scoringOptionWrapper = document.createElement('div');
-    scoringOptionWrapper.classList.add('h5p-behavioural-settings');
-    const params = this.props.main.params;
+    this.scoringOptionWrapper = document.createElement('div');
 
+    // Fill fields
+    H5PEditor.processSemanticsChunk(
+      startScreenFields.fields,
+      params.startScreen,
+      H5PEditor.$(this.startScreenWrapper),
+      this.props.main
+    );
+    // Backup children
+    let children = [].concat(this.props.main.children);
+
+    H5PEditor.processSemanticsChunk(
+      endScreenFields.field.fields,
+      params.endScreens[0],
+      H5PEditor.$(this.endScreenWrapper),
+      this.props.main
+    );
+    children = children.concat(this.props.main.children);
 
     H5PEditor.processSemanticsChunk(
       [scoringOptionField],
       params,
-      H5PEditor.$(scoringOptionWrapper),
+      H5PEditor.$(this.scoringOptionWrapper),
       this.props.main
     );
+    children = children.concat(this.props.main.children);
+
+    // Restore children
+    this.props.main.children = children;
 
     // Grab the select and listen for any changes to it
+    this.$scoringField = H5PEditor.$(this.endScreenWrapper).find('.field-name-endScreenScore');
     H5PEditor.followField(this.props.main, 'scoringOption', () => {
-      // Update scoring option
-      this.setState({
-        scoring: params.scoringOption
-      });
+      // Can't use showWhen, because we don't have access to scoringOption in endScreen chunk
+      this.$scoringField.toggleClass('no-display', params.scoringOption !== 'static-end-score');
+
       this.props.updateScoringOption();
     });
-
-    this.scoringOptionWrapper = scoringOptionWrapper;
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
@@ -42,57 +76,11 @@ export default class TabViewSettings extends React.Component {
       tooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
       tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
     };
-
-    this.state = {
-      scoring: params.scoringOption
-    };
   }
 
   componentDidMount() {
-    /*
-		 * This is hacking the old widget to quickly suit the new prerequisites.
-		 * TODO: Create a new widget that can also be used in the fullscreen editor later
-		 */
-    this.props.startImageChooser.appendTo(this.refStartImageChooser.current);
-    const startImage = document.getElementById('startImage').firstChild;
-    startImage.removeChild(startImage.childNodes[0]);
-
-    this.props.startImageChooser.on('changedImage', event => {
-      // Pretend to be a React event
-      event.target = {
-        type: 'h5p-image',
-        name: 'startImage',
-        value: event.data
-      };
-      this.props.onChange(event);
-    });
-
-    // Same as above for default endscreen image
-    this.props.endImageChooser.appendTo(this.refEndImageChooser.current);
-    const endImage = document.getElementById('endImage').firstChild;
-    endImage.removeChild(endImage.childNodes[0]);
-
-    this.props.endImageChooser.on('changedImage', event => {
-      // Pretend to be a React event
-      event.target = {
-        type: 'h5p-image',
-        name: 'endImage',
-        value: event.data
-      };
-      this.props.onChange(event);
-    });
-
-    // Allow buttons inside labels being clickable
-    const manualFocus = document.getElementsByClassName('manual-focus');
-    for (let i = 0; i < manualFocus.length; i++) {
-      manualFocus[i].addEventListener('click', event => {
-        event.preventDefault();
-        if (manualFocus[i].htmlFor) {
-          document.getElementById(manualFocus[i].htmlFor).focus();
-        }
-      });
-    }
-
+    this.refStartScreen.current.appendChild(this.startScreenWrapper);
+    this.refEndScreen.current.appendChild(this.endScreenWrapper);
     this.refScoringOption.current.appendChild(this.scoringOptionWrapper);
   }
 
@@ -110,95 +98,22 @@ export default class TabViewSettings extends React.Component {
                 tooltipClass={ 'tooltip below' }
               />
             </legend>
-            <div className="field text importance-low">
-              <label className="h5peditor-label-wrapper" htmlFor="startTitle">
-                <span className="h5peditor-label h5peditor-required">Course title{/* TODO: Use title from semantics */}</span>
-              </label>
-              <input
-                className="h5peditor-text"
-                id="startTitle"
-                type="text"
-                name="startTitle"
-                value={ this.props.value.startTitle }
-                placeholder="Title for your course"
-                onChange={ this.props.onChange }
-              />
-            </div>
-            <div className="field text importance-low">
-              <label className="h5peditor-label-wrapper" htmlFor="startSubtitle">
-                <span className="h5peditor-label h5peditor-required">Course details{/* TODO: Use title from semantics */}</span>
-              </label>
-              <input
-                className="h5peditor-text"
-                id="startSubtitle"
-                type="text"
-                name="startSubtitle"
-                value={ this.props.value.startSubtitle }
-                placeholder="Details about the course"
-                onChange={ this.props.onChange }
-              />
-            </div>
-            <div className="field importance-low">
-              <label className="h5peditor-label-wrapper" htmlFor="startImage">
-                <span className="h5peditor-label">Course image{/* TODO: Use title from semantics */}</span>
-              </label>
-              <div
-                id="startImage"
-                name="startImage"
-                ref={ this.refStartImageChooser }
-              />
-            </div>
+            <div
+              ref={ this.refStartScreen }
+              className='h5p-scoring-option-wrapper'
+            />
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">
-              Configure the default "End scenario" screen
+            Configure the default "End scenario" screen
               <TooltipButton
                 text={ this.l10n.tooltipEndScenario }
               />
             </legend>
-            {
-              this.state.scoring === 'static-end-score' &&
-              <div className="h5p-end-score-wrapper field text importance-low">
-                <label className="h5peditor-label-wrapper" htmlFor="endScreenScore">
-                  <span className="h5peditor-label h5peditor-required">Score for the default end scenario{/* TODO: Use title from semantics */}</span>
-                </label>
-                <input
-                  className="h5peditor-text"
-                  id="endScreenScore"
-                  type="number"
-                  name="endScreenScore"
-                  value={ this.props.value.endScreenScore }
-                  onChange={ this.props.onChange }
-                />
-              </div>
-            }
-            <div className="field text importance-low">
-              <label className="h5peditor-label-wrapper tab-view-info manual-focus" htmlFor="endFeedback">
-                <span className="h5peditor-label h5peditor-required">Textual feedback for the user{/* TODO: Use title from semantics */}
-                  <TooltipButton
-                    text={ this.l10n.tooltipEndFeedback }
-                  /></span>
-              </label>
-              <input
-                className="h5peditor-text"
-                id="endFeedback"
-                type="text"
-                name="endFeedback"
-                placeholder="Some feedback for the user"
-                value={ this.props.value.endFeedback }
-                onChange={ this.props.onChange }
-              />
-            </div>
-            <div className="field text importance-low">
-              <label className="h5peditor-label-wrapper" htmlFor="endImage">
-                <span className="h5peditor-label">Default end scenario image{/* TODO: Use title from semantics */}</span>
-              </label>
-              <div
-                id="endImage"
-                name="endImage"
-                ref={ this.refEndImageChooser }
-              />
-            </div>
+            <div
+              ref={ this.refEndScreen }
+              className='h5p-scoring-option-wrapper'
+            />
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">Behavioural settings</legend>
@@ -212,3 +127,8 @@ export default class TabViewSettings extends React.Component {
     );
   }
 }
+
+TabViewSettings.propTypes = {
+  main: PropTypes.object,
+  updateScoringOption: PropTypes.func
+};

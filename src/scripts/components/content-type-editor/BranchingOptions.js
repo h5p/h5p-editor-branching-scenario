@@ -48,7 +48,7 @@ export default class BranchingOptions extends React.Component {
         <div className='field text importance-low'>
           <label className='h5peditor-label-wrapper'>
             <span className='h5peditor-label'>
-              { this.props.nextContentLabel || 'Special action if selected' }
+              { this.props.nextContentLabel || 'Special action after this content' }
             </span>
           </label>
           <select

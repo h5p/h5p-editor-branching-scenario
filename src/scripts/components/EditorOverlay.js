@@ -114,7 +114,7 @@ export default class EditorOverlay extends React.Component {
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
-            nextContentLabel={'Special action if selected'}
+            nextContentLabel={'Special action after this content'}
           />
         ), selectorWrapper);
       };
@@ -186,8 +186,11 @@ export default class EditorOverlay extends React.Component {
 
   render() {
     const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.props.content.params.type.library.split('.')[1].split(' ')[0])}`;
-    const scoreClass = this.props.scoringOption !== 'static-end-score'
+    let scoreClass = this.props.scoringOption === 'no-score'
       ? ' hide-scores' : '';
+    if (this.props.scoringOption === 'dynamic-score') {
+      scoreClass = ' dynamic-score';
+    }
     const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
     const feedbackGroupClass = this.props.content.params.nextContentId !== -1 ? ' hide-score' : '';
 

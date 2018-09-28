@@ -74,38 +74,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params.startScreen.startScreenSubtitle = this.params.startScreen.startScreenSubtitle || '';
     this.params.endScreens = this.params.endScreens || [{}];
 
-    this.settings = {
-      startTitle: this.params.startScreen.startScreenTitle,
-      startSubtitle: this.params.startScreen.startScreenSubtitle,
-      startImage: this.params.startScreen.startScreenImage,
-      endScreenScore: this.params.endScreens[0].endScreenScore,
-      endImage: this.params.endScreens[0].endScreenImage,
-    };
-
     this.passReadies = true;
     parent.ready(() => this.passReadies = false);
-
-    const startScreenImageField = H5PEditor.findSemanticsField(
-      'startScreenImage',
-      this.field
-    );
-    this.startImageChooser = new H5PEditor.widgets.image(
-      this,
-      startScreenImageField,
-      this.settings.startImage,
-      () => {}
-    );
-
-    const endScreenImageField = H5PEditor.findSemanticsField(
-      'endScreenImage',
-      this.field
-    );
-    this.endImageChooser = new H5PEditor.widgets.image(
-      this,
-      endScreenImageField,
-      this.settings.endImage,
-      () => {}
-    );
 
     this.buildContentEditorForms();
   }
@@ -200,20 +170,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.children = children;
 
     return content;
-  };
-
-  /**
-   * Update parameters with values delivered by React components.
-   *
-   * @param {Object} data - Data from React components.
-   */
-  BranchingScenarioEditor.prototype.updateParams = function (data) {
-    this.params.startScreen.startScreenTitle = data.startTitle;
-    this.params.startScreen.startScreenSubtitle = data.startSubtitle;
-    this.params.startScreen.startScreenImage = data.startImage;
-    this.params.endScreens[0].endScreenTitle = data.endFeedback;
-    this.params.endScreens[0].endScreenImage = data.endImage;
-    this.params.endScreens[0].endScreenScore = data.endScreenScore;
   };
 
   /**
@@ -318,10 +274,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         content={ this.content }
         getNewContent={ this.getNewContent.bind(this) }
         libraries={ this.libraries }
-        settings={ this.settings }
-        startImageChooser={ this.startImageChooser }
-        endImageChooser={ this.endImageChooser }
-        updateParams={ this.updateParams.bind(this) }
         onContentChanged={ this.handleContentChanged.bind(this) }
         onToggleFullscreen={ toggleFullscreen }
         main={ this }
