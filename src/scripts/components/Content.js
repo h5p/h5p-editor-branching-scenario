@@ -204,6 +204,7 @@ export default class Content extends React.Component {
         onStarted={ this.props.onPlacing }
         onMoved={ this.handleMoved }
         onStopped={ this.handleStopped }
+        disabled={ this.props.disabled }
       >
         <div className='draggable-wrapper'>
           <div className={ 'draggable-label ' + this.props.contentClass }>
