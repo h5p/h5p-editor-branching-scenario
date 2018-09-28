@@ -198,8 +198,8 @@
   content: '\e912';
 }
 
-.editor-overlay .h5p-editor-branching-question {
-  .content.hide-score .field-name-endScreenScore {
+.editor-overlay .editor-overlay-content:not(.dynamic-score) {
+  .h5p-editor-branching-question .content.hide-score .field-name-endScreenScore {
     display: none;
   }
 }
@@ -215,8 +215,8 @@
     margin-top: 2em;
   }
 
-  .editor-overlay-feedback-semantics.hide-score {
-    .field-name-endScreenScore {
+  .editor-overlay-content:not(.dynamic-score) {
+    .editor-overlay-feedback-semantics.hide-score .field-name-endScreenScore {
       display: none;
     }
   }

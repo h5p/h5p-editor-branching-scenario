@@ -66,6 +66,7 @@
       list-style-position: inside;
       text-align: left;
       padding-left: 2rem;
+      padding-bottom: 0.85em;
 
       &:before {
         font-size: $large;
@@ -132,6 +133,8 @@
         padding-top: $large;
         font-size: 0.75rem;
         text-align: center;
+        padding-left: 0;
+        padding-bottom: 0;
       }
     }
   }
