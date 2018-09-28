@@ -178,9 +178,68 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
    * @returns {boolean} True if validatable.
    */
   BranchingScenarioEditor.prototype.validate = function () {
-    // TODO: Run validate on all H5PEditor widgets (OK for children of EditorOverlay)
-    this.editor.validate();
-    return true;
+    let valid = true;
+
+    // settings
+    valid = this.validateChunk(this.children);
+
+    // metadata
+    if (valid) {
+      valid = this.validateChunk(this.parent.metadataForm.children);
+    }
+
+    // translations
+    if (valid) {
+      valid = this.validateChunk(this.findTranslationFields(this.parent.commonFields));
+    }
+
+    // content
+    if (valid) {
+      valid = this.validateChunk(this.content.reduce((a, b) => a.concat(b), []));
+    }
+
+    return valid;
+  };
+
+  /**
+   * Find translation fields.
+   *
+   * @param {object} chunk Chunk to check for fields.
+   * @return {object[]} Fields.
+   */
+  BranchingScenarioEditor.prototype.findTranslationFields = function (chunk) {
+    let fields = [];
+
+    if (typeof chunk !== 'object') {
+      return fields;
+    }
+
+    for (let item in chunk) {
+      const candidate = chunk[item];
+      if (typeof candidate === 'object' && typeof candidate.instance !== 'undefined') {
+        fields.push(candidate.instance);
+      }
+      else {
+        fields = fields.concat(this.findTranslationFields(candidate));
+      }
+    }
+
+    return fields;
+  };
+
+  /**
+   * Validate a chunk of children.
+   *
+   * @param {object[]} chunk Chunk of children.
+   * @return {boolean} True, if all children can be validated.
+   */
+  BranchingScenarioEditor.prototype.validateChunk = function (chunk) {
+    return chunk.every(child => {
+      if (typeof child.validate === 'function') {
+        return child.validate() !== false;
+      }
+      return true;
+    });
   };
 
   /**

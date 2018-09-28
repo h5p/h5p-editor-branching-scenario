@@ -150,7 +150,10 @@ export default class EditorOverlay extends React.Component {
 
   handleDone = () => {
     // Validate all form children to save their current value
-    this.validate();
+    const valid = this.validate();
+    if (!valid) {
+      return; // Don't close form yet
+    }
 
     // Remove any open wysiwyg fields
     if (H5PEditor.Html) {
@@ -201,6 +204,12 @@ export default class EditorOverlay extends React.Component {
             className={ iconClass }
           >{ this.props.content.params.type.metadata ? this.props.content.params.type.metadata.title : 'New' }</span>
           <span className="buttons">
+            <button
+              className="button-remove"
+              onClick={ this.props.onRemove }
+            >
+              Remove { /* TODO: l10 */ }
+            </button>
             <button
               className="button-blue"
               onClick={ this.handleDone }

@@ -156,10 +156,31 @@
   color: #fff;
   background-color: #1773DA;
   border: solid 2px #1773DA;
+
+  &:not(:first-child) {
+    margin-left: 1em;
+  }
 }
 
 .editor-overlay .editor-overlay-header .buttons .button-blue:hover {
   background-color: #1567c3;
+}
+
+.editor-overlay .editor-overlay-header .buttons .button-remove {
+  font-size: 0.85rem;
+  font-family: H5PRoboto;
+  padding: 0.4rem 1rem;
+  text-decoration: none;
+  border-radius: 2px;
+  cursor: pointer;
+
+  color: #a00;
+  background: none;
+  border: none;
+
+  &:not(:first-child) {
+    margin-left: 1em;
+  }
 }
 
 .editor-overlay .editor-overlay-titlefield {

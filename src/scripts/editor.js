@@ -71,12 +71,6 @@ export default class Editor extends React.Component {
     });
   }
 
-  validate = () => {
-    if (this.canvas.state.editing !== null) {
-      this.canvas.editorOverlay.handleDone(); // Trigger saving and closing of form
-    }
-  }
-
   handleMouseDown = (event) => {
     this.setState({
       inserting: event,
