@@ -78,7 +78,7 @@
   }
 
   li:before {
-    font-family: "BSFont";
+    font-family: "Material Icons";
     display: block;
     float: left;
     padding-bottom: 0.2rem;
@@ -87,31 +87,32 @@
   }
 
   li.video:before {
-    content: '\e917';
+    content: $icon-video;
   }
 
   li.coursepresentation:before {
-    content: '\e916';
+    content: $icon-presentation;
   }
 
   li.advancedtext:before {
-    content: '\e90f';
+    content: $icon-text;
   }
 
   li.image:before {
-    content: '\e915';
+    content: $icon-image;
   }
 
   li.interactivevideo:before {
-    content: '\e914';
+    content: $icon-interactive-video;
   }
 
   li.imagehotspots:before {
-    content: '\e913';
+    content: $icon-image-hotspots;
   }
 
   li.branchingquestion:before {
-    content: '\E902';
+    font-family: "CopyPaste";
+    content: $icon-branching-question;
   }
 
   li.reuse-question {

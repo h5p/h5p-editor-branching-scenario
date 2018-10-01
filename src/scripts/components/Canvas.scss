@@ -67,7 +67,7 @@
 
 .alternative-ball::after {
   position: absolute;
-  font-family: "BSFont";
+  font-family: "Material Icons";
   display: block;
   top: -0.85em;
   left: 1.5em;
@@ -83,11 +83,11 @@
 }
 
 .alternative-ball.loop::after {
-  content: "\E906";
+  content: $icon-go-to-existing;
 }
 
 .alternative-ball.endscreenCustom::after {
-  content: "\E907";
+  content: $icon-end-scenario;
 }
 
 .dark-tooltip {
