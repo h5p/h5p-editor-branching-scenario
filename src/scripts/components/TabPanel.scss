@@ -47,6 +47,8 @@
 
   &.bs-editor-content-tab::before {
     content: $icon-edit;
+    font-size: 1.15em;
+    line-height: 1.3em;
   }
 
   &.bs-editor-settings-tab::before {

@@ -188,6 +188,10 @@ export default class Content extends React.Component {
       elementClass += ' fade';
     }
 
+    if (this.props.hasCustomEndScreen) {
+      elementClass += ' endscreenCustom';
+    }
+
     return (
       <Draggable
         ref={ node => this.element = node }

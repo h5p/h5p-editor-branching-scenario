@@ -687,17 +687,20 @@ export default class Canvas extends React.Component {
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const library = this.getLibrary(content.params.type.library);
-        const hasCustomEndScreen = content.params.feedback.title
+        const hasCustomFeedback = content.params.feedback.title
           || content.params.feedback.subtitle
           || content.params.feedback.image
           || content.params.feedback.endScreenScore !== undefined;
-        const hasDefaultEndScreen = !hasCustomEndScreen
+        const hasDefaultEndScreen = !hasCustomFeedback
           && content.params.nextContentId !== undefined
           && content.params.nextContentId < 0
           && content.params.nextContentId === this.props.highlight;
         if (hasDefaultEndScreen || this.props.highlight === id) {
           highlightCurrentNode = true;
         }
+
+        const hasCustomEndScreen = hasCustomFeedback
+          && content.params.nextContentId === -1;
 
         // Draw node
         const label = Content.getTooltip(content);
@@ -725,6 +728,7 @@ export default class Canvas extends React.Component {
             disabled={ contentIsBranching }
             tooltip={ label }
             scale={ this.props.scale }
+            hasCustomEndScreen={ hasCustomEndScreen }
           >
             { label }
           </Content>
@@ -812,10 +816,12 @@ export default class Canvas extends React.Component {
           ));
 
         let alternativeBallClasses = 'alternative-ball';
+        let hasLoopBack = false;
         if (!drawAboveLine) {
           if (id > -1) {
             // Loop to existing node
             alternativeBallClasses += ' loop';
+            hasLoopBack = true;
           }
           else if (id === -1) {
             // Default or custom end scenario
@@ -843,11 +849,17 @@ export default class Canvas extends React.Component {
           <div key={ key }
             className={ alternativeBallClasses }
             aria-label={ /* TODO: l10n */ 'Alternative ' + (num + 1) }
-            onClick={ () => this.handleBallTouch(hasBeenDrawn ? id : -1, key) }
             style={ {
               left: (alternativesOffsetX + nodeCenter - (this.props.nodeSize.spacing.y * 0.75) - 1) + 'px',
               top: (position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * 1.5)) + 'px'
             } }>A{ num + 1 }
+            {
+              hasLoopBack &&
+              <div
+                className='loop-back'
+                onClick={() => this.handleBallTouch(hasBeenDrawn ? id : -1, key)}
+              />
+            }
             <div className="dark-tooltip">
               <div className="dark-text-wrap">{ !alternativeText ? /* TODO: l10n */ 'Alternative ' + (num + 1) : alternativeText }</div>
             </div>
