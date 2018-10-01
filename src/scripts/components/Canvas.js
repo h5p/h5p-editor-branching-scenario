@@ -160,13 +160,6 @@ export default class Canvas extends React.Component {
         placing: id
       });
     }
-    else {
-      // Start editing
-      this.setState({
-        placing: null,
-        editing: id
-      });
-    }
   }
 
   /**
@@ -305,7 +298,8 @@ export default class Canvas extends React.Component {
     H5PEditor.$(this[`draggable-${id}`].element.element).click();
 
     this.setState({
-      editing: id
+      editing: id,
+      placing: null
     });
   }
 
