@@ -266,8 +266,7 @@ export default class Canvas extends React.Component {
     return this.getChildrenIds(start, false)
       .sort((a, b) => a - b)
       .map(id => {
-        return this.state.content[id].params.contentTitle ||
-          getMachineName(this.state.content[id]);
+        return getAlternativeName(this.state.content[id]);
       });
   }
 
