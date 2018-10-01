@@ -1,8 +1,4 @@
-@font-face {
-  font-family: "BSFont";
-  src: url('../../styles/fonts/bs.eot');
-  src: url('../../styles/fonts/bs.woff');
-}
+@import '../../styles/components/icons.scss';
 
 .tabs {
   display: flex;
@@ -42,7 +38,7 @@
   }
 
   &:before {
-    font-family: "BSFont";
+    font-family: "Material Icons";
     display: inline-block;
     width: 100%;
     text-align: center;
@@ -50,23 +46,24 @@
   }
 
   &.bs-editor-content-tab::before {
-    content: "\e91c";
+    content: $icon-edit;
   }
 
   &.bs-editor-settings-tab::before {
-    content: "\e91b";
+    content: $icon-gear;
   }
 
   &.bs-editor-translations-tab::before {
-    content: "\e91a";
+    content: $icon-translation;
   }
 
   &.bs-editor-tutorial-tab::before {
-    content: "\e90b";
+    content: $icon-tutorial;
   }
 
   &.bs-editor-metadata-tab::before {
-    content: "\e901";
+    font-family: "CopyPaste";
+    content: $icon-metadata;
   }
 }
 

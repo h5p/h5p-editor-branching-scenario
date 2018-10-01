@@ -59,7 +59,7 @@
   text-overflow: ellipsis;
 
   &:before {
-    font-family: "BSFont";
+    font-family: "Material Icons";
     display: block;
     float: left;
     padding-bottom: 0.2rem;
@@ -92,7 +92,8 @@
   }
 
   &.branchingquestion:before {
-    content: '\E902';
+    font-family: "CopyPaste";
+    content: $icon-branching-question;
   }
 }
 
@@ -116,7 +117,7 @@
   visibility: hidden;
 
   &:before {
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-gear;
   }
 }

@@ -38,14 +38,8 @@
     border-top: solid 0.042rem #F1F3F6;
   }
 
-  li.start-preview:before {
-    font-family: BSFont;
-    content: $icon-preview;
-    margin-right: 0.3em;
-  }
-
   li.edit-content:before {
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-edit;
     margin-right: 0.3em;
   }
@@ -57,7 +51,7 @@
   }
 
   li.delete-content:before {
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-delete;
     margin-right: 0.3em;
   }

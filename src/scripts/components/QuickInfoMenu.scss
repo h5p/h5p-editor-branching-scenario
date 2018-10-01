@@ -81,7 +81,7 @@
       &:nth-child(1):before {
         color: #1773DA;
         background-color: lighten($accent-col, 40);
-        font-family: "BSFont";
+        font-family: "Material Icons";
         content: $icon-plus-2;
         border: 2px dotted #1773DA;
       }
@@ -89,20 +89,20 @@
       &:nth-child(2):before {
         border-color: $col6;
         background-color: $col6;
-        content: "\00a0";
+        content: "";
       }
 
       &:nth-child(3):before {
         border-color: $accent-col;
         background-color: $accent-col;
-        content: "\00a0";
+        content: "";
       }
 
       &:nth-child(4):before {
         border-color: $accent-col;
         background-color: $accent-col;
         border-radius: 3rem;
-        content: "\00a0";
+        content: "";
       }
 
       &:nth-child(5):before {
@@ -113,7 +113,7 @@
       }
 
       &:nth-child(6):before {
-        font-family: "BSFont";
+        font-family: "Material Icons";
         color: $accent-col;
         content: $icon-end-scenario;
         color: $col14;
@@ -121,10 +121,10 @@
       }
 
       &:nth-child(7):before {
-        font-family: "BSFont";
+        font-family: "Material Icons";
         color: $accent-col;
-        content: $icon-go-to-existing;
         color: $col14;
+        @include icon-go-to-existing();
         border: none;
       }
 
