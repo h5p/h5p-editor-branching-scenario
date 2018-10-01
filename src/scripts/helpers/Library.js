@@ -34,7 +34,8 @@ const getMachineName = (library) => {
 const getAlternativeName = (content) => {
   const library = getMachineName(content)
     .split('.')[1]
-    .replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5');
+    .replace(/([A-Z])([A-Z])([a-z])|([a-z])([A-Z])/g, '$1$4 $2$3$5')
+    .replace(/^Advanced Text$/, 'Text');
 
   const contentTitle = Content.getTooltip(content);
   const name = `${library}: ${contentTitle}`;
