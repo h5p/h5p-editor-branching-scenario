@@ -263,7 +263,7 @@ export default class Canvas extends React.Component {
    * @return {string[]} Titles.
    */
   getChildrenTitles = (start) => {
-    return this.getChildrenIds(start, false)
+    return this.getChildrenIds(start, true)
       .sort((a, b) => a - b)
       .map(id => {
         return getAlternativeName(this.state.content[id]);
