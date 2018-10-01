@@ -971,11 +971,15 @@ export default class Canvas extends React.Component {
           const node = newState.content[id];
           removeChildren = removeChildren || isBranching(node);
 
+          // If node to be removed loops backwards or to itself, use default end scenario
+          const renderedNodes = this.renderedNodes.filter(node => node > -1);
+
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
           if (isBranching(node)) {
             deleteIds = node.params.type.params.branchingQuestion.alternatives
-              .filter(alt => alt.nextContentId >= 0) // Filter end scenarios
+              .filter(alt => alt.nextContentId > -1 &&
+                renderedNodes.indexOf(alt.nextContentId) > renderedNodes.indexOf(id)) // Filter end scenarios and loops
               .map(alt => alt.nextContentId).concat(id);
           }
           else {
@@ -988,9 +992,6 @@ export default class Canvas extends React.Component {
             .forEach(deleteId => {
               // node to be removed, will always be an info node, no BQ
               const deleteNode = newState.content[deleteId];
-
-              // If node to be removed loops backwards or to itself, use default end scenario
-              const renderedNodes = this.renderedNodes.filter(node => node > -1);
 
               let successorId = -1;
               if (deleteNode.params.nextContentId > -1 && renderedNodes.indexOf(deleteNode.params.nextContentId) > renderedNodes.indexOf(deleteId)) {
