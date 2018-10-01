@@ -17,48 +17,6 @@ export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO: The language strings should be passed by app and sanitized before
-    this.l10n = {
-      dialogDelete: {
-        icon: 'icon-delete',
-        confirmationHeader: 'Delete Question',
-        confirmationQuestion: 'Are you sure you want to delete this content?',
-        confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
-        confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
-        textConfirm: 'Delete',
-        textCancel: 'Cancel',
-        handleConfirm: this.handleDelete,
-        handleCancel: this.handleCancel
-      },
-      dialogReplace: {
-        icon: 'icon-replace',
-        confirmationHeader: 'Replace Question',
-        confirmationQuestion: 'Do you really want to replace this question?',
-        confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
-        confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
-        textConfirm: 'Replace',
-        textCancel: 'Cancel',
-        handleConfirm: this.handleDelete,
-        handleCancel: this.handleCancel
-      },
-      quickInfoMenu: {
-        show: 'Show',
-        hide: 'Hide',
-        quickInfo: 'Quick Info',
-        dropzoneTerm: 'Dropzone',
-        dropzoneText: 'It appears when you select or start dragging content',
-        contentTerm: 'Content',
-        branchingQuestionTerm: 'Branching Question',
-        branchingQuestionText: 'Each alternative can lead to different question/content.',
-        alternative: 'Alternative leads to another question/content.',
-        defaultEndScenario: 'Path ends here (with the default end scenario)',
-        customEndScenario: 'Path ends here (with the custom end scenario)',
-        existingQuestion: 'Path takes the learner to an existing question/content. Click to see where it leads to.',
-        stepByStep: 'Step by Step ',
-        tutorial: 'tutorial'
-      }
-    };
-
     this.state = {
       placing: null,
       deleting: null,
@@ -80,7 +38,7 @@ export default class Canvas extends React.Component {
         height: 32
       },
       content: this.props.content,
-      dialog: this.l10n.dialogDelete,
+      dialog: null,
       panning: {
         x: 0,
         y: 0
@@ -119,37 +77,14 @@ export default class Canvas extends React.Component {
   }
 
   /**
-   * Build dialog contents.
-   *
-   * @param {number} id - ID of node in question.
-   * @param {object} params - Template params for particular case.
-   * @return {object} Dialog contents.
-   */
-  buildDialog = (id, params) => {
-    const dialog = params;
-    if (isBranching(this.state.content[id])) {
-      const nodeTitles = this.getChildrenTitles(id)
-        .map((title, index) => <li key={index}>{title}</li>);
-
-      dialog.confirmationDetails = params.confirmationDetailsBQ;
-      dialog.confirmationDetailsList = nodeTitles;
-    }
-    else {
-      if (this.state.content[id].params.nextContentId) {
-        dialog.confirmationDetails = params.confirmationDetailsNO;
-      }
-    }
-    return dialog;
-  }
-
-  /**
    * @param {number} id - Dropzone ID.
    */
   handlePlacing = (id) => {
     if (this.state.placing !== null && this.state.placing !== id) {
       this.setState({
         deleting: id,
-        dialog: this.buildDialog(id, this.l10n.dialogReplace) // TODO: Refactor. Uses the wrong state to determine the next. Should be a much cleaner way to handle this.
+        confirmReplace: true,
+        dialog: 'replace'
       });
       this.props.onDropped(); // TODO: Determine if should really run after set state. Note that this triggers a changing in the props which sets the state again through componentWillReceiveProps, which is deprected. Can we find a better way of doing this?
       // I guess only the parent should keep track of this state? yes
@@ -317,7 +252,7 @@ export default class Canvas extends React.Component {
   handleContentDelete = (id) => {
     this.setState({
       deleting: id,
-      dialog: this.buildDialog(id, this.l10n.dialogDelete) // TODO: See comment in handlePlacing(). There must be a better way to handle this.
+      dialog: 'delete'
     });
   }
 
@@ -1009,6 +944,7 @@ export default class Canvas extends React.Component {
         deleting: null,
         inserting: null,
         editing: null,
+        dialog: null,
         content: [...prevState.content]
       };
 
@@ -1158,7 +1094,8 @@ export default class Canvas extends React.Component {
       placing: null,
       deleting: null,
       editing: null,
-      inserting: null
+      inserting: null,
+      dialog: null
     });
   }
 
@@ -1265,7 +1202,7 @@ export default class Canvas extends React.Component {
         inserting: null,
         placing: prevState.editing,
         deleting: prevState.editing,
-        dialog: this.buildDialog(prevState.editing, this.l10n.dialogDelete) // TODO: See comment in handlePlacing(). There must be a better way to handle this.
+        dialog: 'delete'
       };
     }, this.contentChanged);
   }
@@ -1431,6 +1368,28 @@ export default class Canvas extends React.Component {
     return this.getChildrenIds(focusId, true, true).indexOf(nodeId) === -1;
   }
 
+  renderConfirmationDialogContent = () => {
+    if (isBranching(this.state.content[this.state.deleting])) {
+      return (
+        <div className='confirmation-details'>
+          <p>If you proceed, you will lose all the content attached to this contents alternatives:</p>
+          <ul>
+            { this.getChildrenTitles(this.state.deleting).map((title, index) =>
+              <li key={index}>{title}</li>
+            ) }
+          </ul>
+        </div>
+      );
+    }
+    else {
+      return (
+        <div className='confirmation-details'>
+          <p>You will lose this content, but the children will be attached to the parent content.</p>
+        </div>
+      );
+    }
+  }
+
   render() {
     this.dropzones = [];
     this.dropzonesDisabled = (this.state.placing) ? this.getDisabledDropzones(this.state.placing) : [];
@@ -1509,25 +1468,19 @@ export default class Canvas extends React.Component {
               }) }
             </StartScreen>
           }
-          { this.state.deleting !== null &&
+          { this.state.dialog !== null &&
             <ConfirmationDialog
-              icon={ this.state.dialog.icon } // TODO: Just send the whole dialog object? Should probably be improved when the l10n is being fixed.
-              headerText={ this.state.dialog.confirmationHeader }
-              body={ this.state.dialog.confirmationQuestion }
-              confirmationDetails={ this.state.dialog.confirmationDetails }
-              confirmationDetailsList={ this.state.dialog.confirmationDetailsList }
-              textConfirm={ this.state.dialog.textConfirm }
-              textCancel={ this.state.dialog.textCancel }
-              handleConfirm={ this.state.dialog.handleConfirm } // TODO: Rename to onConfirm ?
-              handleCancel={ this.state.dialog.handleCancel } // TODO: Rename to onCancel ?
-              styleConfirm={ 'dialog-confirm-red' }
-            />
+              action={ this.state.dialog }
+              onConfirm={ this.handleDelete }
+              onCancel={ this.handleCancel }
+            >
+              { this.renderConfirmationDialogContent() }
+            </ConfirmationDialog>
           }
           { tree.nodes.length &&
             <QuickInfoMenu
               fade={ this.props.highlight !== null }
-              l10n={ this.l10n.quickInfoMenu }
-              handleOpenTutorial={ this.props.handleOpenTutorial }
+              onTutorialOpen={ this.props.handleOpenTutorial }
             />
           }
         </div>

@@ -52,21 +52,21 @@ export default class QuickInfoMenu extends React.Component {
 
     return (
       <div className={ 'legend' + expanded + fade } onClick={ this.handleToggle } ref={ element => this.legend = element }>
-        <span>{ this.props.l10n.quickInfo }
+        <span>{ 'Quick Info' }
           <span className="close link-look">
-            { this.state.expanded ? this.props.l10n.hide : this.props.l10n.show }
+            { this.state.expanded ? 'Hide' : 'Show' }
           </span>
         </span>
         <div className={ 'legend-content' + expanded }>
           <ul>
-            <li><strong>{ this.props.l10n.dropzoneTerm }</strong> { this.props.l10n.dropzoneText }</li>
-            <li><strong>{ this.props.l10n.contentTerm }</strong> { this.props.l10n.contentText }</li>
-            <li><strong>{ this.props.l10n.branchingQuestionTerm }</strong> { this.props.l10n.branchingQuestionText }</li>
-            <li>{ this.props.l10n.alternative }</li>
-            <li>{ this.props.l10n.defaultEndScenario }</li>
-            <li>{ this.props.l10n.customEndScenario }</li>
-            <li>{ this.props.l10n.existingQuestion }</li>
-            <li>{ this.props.l10n.stepByStep } <span className="link-look" onClick={ this.props.handleOpenTutorial }>{ this.props.l10n.tutorial }</span></li>
+            <li><strong>{ 'Dropzone' }</strong> { 'It appears when you select or start dragging content' }</li>
+            <li><strong>{ 'Content' }</strong></li>
+            <li><strong>{ 'Branching Question' }</strong> { 'Each alternative can lead to different question/content.' }</li>
+            <li>{ 'Alternative leads to another question/content.' }</li>
+            <li>{ 'Path ends here (with the default end scenario)' }</li>
+            <li>{ 'Path ends here (with the custom end scenario)' }</li>
+            <li>{ 'Path takes the learner to an existing question/content. Click to see where it leads to.' }</li>
+            <li>{ 'Step by Step' } <span className="link-look" onClick={ this.props.onTutorialOpen }>{ 'tutorial' }</span></li>
           </ul>
         </div>
       </div>
