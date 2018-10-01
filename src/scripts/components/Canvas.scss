@@ -69,9 +69,9 @@
   position: absolute;
   font-family: "Material Icons";
   display: block;
-  top: -0.85em;
+  top: -1.2em;
   left: 1.5em;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #f31635;
 }
 
@@ -80,10 +80,6 @@
   background: #f2f2f2;
   color: #1773DA;
   border: solid 2px #1773DA;
-}
-
-.alternative-ball.loop::after {
-  content: $icon-go-to-existing;
 }
 
 .alternative-ball.endscreenCustom::after {
@@ -153,4 +149,68 @@
   top: 0;
   left: 0;
   z-index: 22;
+}
+
+.alternative-ball {
+  .loop-back {
+    position: absolute;
+    display: block;
+    top: -1.15em;
+    left: 1.6em;
+    font-size: 0.9rem;
+    transform: rotate(-45deg);
+    cursor: pointer;
+  }
+
+  .loop-back:after {
+    font-family: "Material Icons";
+    content: "\E627";
+    border-radius: 50%;
+    padding: 0.1em;
+    color: #f31635;
+  }
+
+  .loop-back:hover:after {
+    color: #fff;
+    background: #f31635;
+  }
+}
+
+.draggable {
+  .loop-back {
+    position: absolute;
+    display: block;
+    top: -0.85em;
+    right: -1.05em;
+    font-size: 0.9rem;
+    transform: rotate(-45deg);
+    cursor: pointer;
+  }
+
+  .loop-back:after {
+    font-family: "Material Icons";
+    content: "\E627";
+    border-radius: 50%;
+    padding: 0.1em;
+    color: #f31635;
+  }
+
+  .loop-back:hover:after {
+    color: #fff;
+    background: #f31635;
+  }
+}
+
+.draggable:after {
+  position: absolute;
+  font-family: "Material Icons";
+  display: block;
+  top: -0.5em;
+  right: -0.9em;
+  font-size: 0.9rem;
+  color: #f31635;
+}
+
+.draggable.endscreenCustom:after {
+  content: $icon-end-scenario;
 }

@@ -73,7 +73,7 @@
   }
 
   &.coursepresentation:before {
-    content: '\e916';
+    content: $icon-presentation;
   }
 
   &.image:before {
@@ -92,7 +92,7 @@
   }
 
   &.branchingquestion:before {
-    font-family: "CopyPaste";
+    font-family: "bs";
     content: $icon-branching-question;
   }
 }
@@ -122,7 +122,7 @@
   }
 }
 .content-menu-button.active,
-.draggable.ready:hover .content-menu-button {
+.draggable.ready .draggable-wrapper:hover .content-menu-button {
   opacity: 1;
   visibility: visible;
   transition-delay: 0s;

@@ -6,7 +6,7 @@ $icon-close: "\e5cd";
 
 $icon-video: "\e04b";
 $icon-presentation: "\e63b";
-$icon-text: "\e262";
+$icon-text: "\e264";
 $icon-image: "\e3c4";
 $icon-interactive-video: "\e63a";
 $icon-image-hotspots: "\e913";
@@ -24,17 +24,17 @@ $icon-close: "\e5cd";
 $icon-info: "\e88f";
 $icon-end-scenario: "\e153";
 $icon-go-to-existing: "\e627";
-$icon-full-screen-open: "\e5d1";
-$icon-full-screen-close: "\e5d0";
 
 $icon-translation: "\e8e2";
 $icon-tutorial: "\e8fd";
 
-// Copy Paste icons
+// bs custom icons
 $icon-copy: "\e920";
 $icon-paste: "\e921";
 $icon-branching-question: "\e902";
 $icon-metadata: "\e901";
+$icon-full-screen-open: "\e903";
+$icon-full-screen-close: "\e904";
 
 // Icons that always should be rotated
 @mixin icon-go-to-existing() {

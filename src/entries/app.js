@@ -275,6 +275,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
   BranchingScenarioEditor.prototype.appendTo = function ($wrapper) {
     const self = this;
 
+    // Use full width
+    document.documentElement.style.maxWidth = document.body.style.maxWidth = 'none';
+
     let fullscreen;
     if (H5PEditor.Fullscreen !== undefined) {
       const formWrapper = $wrapper.parent()[0];

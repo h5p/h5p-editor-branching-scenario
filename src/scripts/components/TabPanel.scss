@@ -47,6 +47,8 @@
 
   &.bs-editor-content-tab::before {
     content: $icon-edit;
+    font-size: 1.15em;
+    line-height: 1.3em;
   }
 
   &.bs-editor-settings-tab::before {
@@ -62,7 +64,7 @@
   }
 
   &.bs-editor-metadata-tab::before {
-    font-family: "CopyPaste";
+    font-family: "bs";
     content: $icon-metadata;
   }
 }
