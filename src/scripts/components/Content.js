@@ -235,6 +235,13 @@ export default class Content extends React.Component {
             onDelete={ this.props.onDelete }
           />
         }
+        {
+          this.props.hasLoopBack &&
+          <div
+            className='loop-back'
+            onClick={() => this.props.highlightLinkedContent()}
+          />
+        }
       </Draggable>
     );
   }
