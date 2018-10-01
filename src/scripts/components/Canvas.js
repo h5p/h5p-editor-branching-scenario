@@ -89,17 +89,10 @@ export default class Canvas extends React.Component {
       this.props.onDropped(); // TODO: Determine if should really run after set state. Note that this triggers a changing in the props which sets the state again through componentWillReceiveProps, which is deprected. Can we find a better way of doing this?
       // I guess only the parent should keep track of this state? yes
     }
-    else if (this.state.placing !== id || id === -1) {
+    else {
       // Start placing
       this.setState({
         placing: id
-      });
-    }
-    else {
-      // Start editing
-      this.setState({
-        placing: null,
-        editing: id
       });
     }
   }
@@ -240,7 +233,8 @@ export default class Canvas extends React.Component {
     H5PEditor.$(this[`draggable-${id}`].element.element).click();
 
     this.setState({
-      editing: id
+      editing: id,
+      placing: null
     });
   }
 

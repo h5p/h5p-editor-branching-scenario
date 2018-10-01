@@ -56,6 +56,7 @@
     margin-top: 1rem;
     max-height: calc(100% - 7.55rem);
     overflow-y: auto;
+    max-width: 900px;
   }
 
   .tab-view-title {
@@ -63,6 +64,7 @@
     display: block;
     font-weight: 300;
     color: #1773DA;
+    max-width: 900px;
   }
 
   .tab-view-description {
@@ -70,6 +72,7 @@
     margin-top: 0.3rem;
     display: block;
     color: #626262;
+    max-width: 900px;
   }
 
   .tab-view-info {

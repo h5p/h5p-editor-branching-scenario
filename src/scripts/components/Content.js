@@ -210,7 +210,10 @@ export default class Content extends React.Component {
         onStopped={ this.handleStopped }
         disabled={ this.props.disabled }
       >
-        <div className='draggable-wrapper'>
+        <div
+          className='draggable-wrapper'
+          onDoubleClick={ this.props.onEdit }
+        >
           <div className={ 'draggable-label ' + this.props.contentClass }>
             { this.props.children }
           </div>
