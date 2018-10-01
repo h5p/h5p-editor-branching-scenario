@@ -82,7 +82,7 @@
 
   &:before {
     float: inherit;
-    font-family: "BSFont";
+    font-family: "Material Icons";
     font-size: 1rem;
     font-weight: normal;
     margin-right: 0.3rem;
@@ -114,6 +114,7 @@
   }
 
   &.editor-overlay-icon-branching-question:before {
+    font-family: "CopyPaste";
     content: $icon-branching-question;
   }
 }
