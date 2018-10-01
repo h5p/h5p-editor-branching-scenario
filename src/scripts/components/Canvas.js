@@ -57,7 +57,7 @@ export default class Canvas extends React.Component {
     document.removeEventListener('keydown', this.handleDocumentKeyDown);
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     if (nextProps.inserting) {
       return ({ // Set new state on inserting
         placing: -1,
