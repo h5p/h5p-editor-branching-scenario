@@ -1591,7 +1591,7 @@ export default class Canvas extends React.Component {
           <Content
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
-            width={ this.props.nodeSize.width }
+            width={ this.props.nodeSize.insertingWidth }
             selected={ this.state.placing === -1 }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
