@@ -10,7 +10,7 @@ import ConfirmationDialog from './dialogs/ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
 import BlockInteractionOverlay from './BlockInteractionOverlay';
-import { getMachineName, getAlternativeName, isBranching } from '../helpers/Library';
+import { getMachineName, getAlternativeName, isBranching, hasNextContent } from '../helpers/Library';
 
 /*global H5P*/
 export default class Canvas extends React.Component {
@@ -42,7 +42,8 @@ export default class Canvas extends React.Component {
       panning: {
         x: 0,
         y: 0
-      }
+      },
+      setNextContentId: null
     };
   }
 
@@ -701,8 +702,7 @@ export default class Canvas extends React.Component {
         const hasCustomEndScreen = hasCustomFeedback
           && content.params.nextContentId === -1;
 
-        const hasLoopBack = subtree && subtree.nodes
-          && subtree.nodes.length === 0
+        const hasLoopBack = (subtree === null || subtree.nodes.length === 0)
           && content.params.nextContentId >= 0;
 
         // Draw node
@@ -970,11 +970,9 @@ export default class Canvas extends React.Component {
     // Set new parent for node
     this.setState(prevState => {
       let newState = {
-        placing: null,
         deleting: null,
-        inserting: null,
-        editing: null,
         dialog: null,
+        setNextContentId: null,
         content: [...prevState.content]
       };
 
@@ -986,8 +984,9 @@ export default class Canvas extends React.Component {
        *
        * @param {number[]} ids Id of node to be removed.
        * @param {boolean} removeChildren If true, remove children. Adopt otherwise.
+       * @param {number} [skipChild=null] Avoid removing this part of the subtree
        */
-      const removeNode = (ids, removeChildren=false) => {
+      const removeNode = (ids, removeChildren=false, skipChild = null) => {
         if (typeof ids === 'number') {
           ids = [ids];
         }
@@ -1040,6 +1039,9 @@ export default class Canvas extends React.Component {
                   // Account Id for upcoming node removal
                   if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
                     affectedNode.nextContentId -= 1;
+                    if (skipChild > deleteId) {
+                      skipChild -= 1;
+                    }
                   }
                 });
               });
@@ -1057,10 +1059,10 @@ export default class Canvas extends React.Component {
                   childrenIds = [deleteNode.params.nextContentId];
                 }
                 childrenIds = childrenIds
-                  .filter(id => renderedNodes.indexOf(id) > renderedNodes.indexOf(deleteId - 1)) // Ignore backlinks
+                  .filter(id => renderedNodes.indexOf(id) > renderedNodes.indexOf(deleteId - 1) && id !== skipChild) // Ignore backlinks
                   .sort((a, b) => b - a); // Delete nodes with highest id first to account for node removal
 
-                removeNode(childrenIds, true);
+                removeNode(childrenIds, true, skipChild);
               }
 
               // Swap nodes to set new first node
@@ -1073,6 +1075,31 @@ export default class Canvas extends React.Component {
             });
         });
       };
+
+      if (prevState.setNextContentId !== null) {
+        // Handle delete when dialog is displayed upon changing nextContent through <BranchingOptions>
+        const alternative = hasNextContent(newState.content[prevState.editing], prevState.deleting);
+        if (alternative === -1) {
+          newState.content[prevState.editing].params.nextContentId = prevState.setNextContentId;
+        }
+        else if (alternative !== null) {
+          newState.content[prevState.editing].params.type.params.branchingQuestion.alternatives[alternative].nextContentId = prevState.setNextContentId;
+          // We have to manually trigger the editor sub-react update
+          this.editorOverlay.renderBranchingOptions[alternative](prevState.setNextContentId);
+        }
+        removeNode(prevState.deleting, true, prevState.setNextContentId);
+        return newState;
+      }
+      else {
+        // Stop inserting new <Content>
+        newState.inserting = null;
+
+        // Close <EditorOverlay>
+        newState.editing = null;
+
+        // Stop placing <Content>
+        newState.placing = null;
+      }
 
       if (prevState.placing !== null && prevState.placing !== prevState.deleting) {
         // Replace node
@@ -1182,14 +1209,29 @@ export default class Canvas extends React.Component {
     content[nodeId2] = tmp;
   }
 
-  handleCancel = () => { // TODO: What are we canceling? Can this be used for everything?
-    this.setState({
-      placing: null,
+  handleCancel = () => {
+    // Cancel delete confirmation dialog
+    const newState = {
       deleting: null,
-      editing: null,
-      inserting: null,
       dialog: null
-    });
+    };
+
+    if (this.state.setNextContentId !== null) {
+      // Handle cancel when dialog is displayed upon changing nextContent through <BranchingOptions>
+      newState.setNextContentId = null;
+    }
+    else {
+      // Stop placing content
+      newState.placing = null;
+
+      // Close <EditorOverlay>
+      newState.editing = null;
+
+      // Stop inserting new content
+      newState.inserting = null;
+    }
+
+    this.setState(newState);
   }
 
   componentDidUpdate() {
@@ -1461,6 +1503,38 @@ export default class Canvas extends React.Component {
     return this.getChildrenIds(focusId, true, true).indexOf(nodeId) === -1;
   }
 
+  handleNextContentChange = (params, newId, render = null) => {
+    if (params.nextContentId > -1) {
+      // Check that there's still a reference to the content
+      let found = 0;
+      for (let i = 0; i < this.state.content.length; i++) {
+        found += hasNextContent(this.state.content[i], params.nextContentId, true);
+        if (found > 1) {
+          break;
+        }
+      }
+
+      if (found < 2 && this.renderedNodes.indexOf(params.nextContentId) > this.renderedNodes.indexOf(this.state.editing)) {
+        // Display delete dialog
+        this.setState({
+          setNextContentId: newId,
+          deleting: params.nextContentId,
+          dialog: 'delete'
+        });
+        return;
+      }
+    }
+
+    // No need to check, just update
+    params.nextContentId = newId;
+    if (render !== null) {
+      render(newId);
+    }
+    else {
+      this.forceUpdate();
+    }
+  }
+
   renderConfirmationDialogContent = () => {
     if (isBranching(this.state.content[this.state.deleting])) {
       return (
@@ -1561,15 +1635,6 @@ export default class Canvas extends React.Component {
               }) }
             </StartScreen>
           }
-          { this.state.dialog !== null &&
-            <ConfirmationDialog
-              action={ this.state.dialog }
-              onConfirm={ this.handleDelete }
-              onCancel={ this.handleCancel }
-            >
-              { this.renderConfirmationDialogContent() }
-            </ConfirmationDialog>
-          }
           { tree.nodes.length &&
             <QuickInfoMenu
               fade={ this.props.highlight !== null }
@@ -1586,8 +1651,18 @@ export default class Canvas extends React.Component {
             scoringOption={ this.props.scoringOption }
             onRemove={ this.handleEditorRemove }
             onDone={ this.handleEditorDone }
+            onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
           />
+        }
+        { this.state.dialog !== null &&
+          <ConfirmationDialog
+            action={ this.state.dialog }
+            onConfirm={ this.handleDelete }
+            onCancel={ this.handleCancel }
+          >
+            { this.renderConfirmationDialogContent() }
+          </ConfirmationDialog>
         }
       </div>
     );
