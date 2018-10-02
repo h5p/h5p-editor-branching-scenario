@@ -65,14 +65,16 @@
 
 .draggable-wrapper {
   height: 100%;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
+  border-radius: 3px;
   position: relative;
   background: $col10;
   z-index: 1;
   border: solid 2px transparent;
-  transform: translateY(-2px);
   overflow: hidden;
+}
+
+.canvas .draggable-wrapper {
+  transform: translateY(-2px);
 }
 
 .draggable.branchingquestion .draggable-wrapper {
