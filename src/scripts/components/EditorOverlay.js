@@ -6,6 +6,7 @@ import './EditorOverlay.scss';
 import Canvas from './Canvas';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
 import { isBranching } from '../helpers/Library';
+import Content from "./Content";
 
 export default class EditorOverlay extends React.Component {
 
@@ -197,12 +198,21 @@ export default class EditorOverlay extends React.Component {
     const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
     const feedbackGroupClass = this.props.content.params.nextContentId !== -1 ? ' hide-score' : '';
 
+    const metadata = this.props.content.params.type.metadata;
+    const hasMetadataTitle = metadata
+      && metadata.title
+      && metadata.title.trim().length > 0;
+
+    let title = hasMetadataTitle
+      ? metadata.title
+      : Content.getTooltip(this.props.content, true);
+
     return (
       <div className={`editor-overlay${overlayClass}`}>
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
-          >{ this.props.content.params.type.metadata ? this.props.content.params.type.metadata.title : 'New' }</span>
+          >{ title }</span>
           <span className="buttons">
             <button
               className="button-remove"
