@@ -257,6 +257,16 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
   };
 
   /**
+   * Collect functions to execute once the tree is complete.
+   *
+   * @param {function} ready
+   */
+  BranchingScenarioEditor.prototype.remove = function () {
+    // Reset editor width
+    document.documentElement.style.maxWidth = document.body.style.maxWidth = '';
+  };
+
+  /**
    * Set content for H5P params after it has been changed.
    * Workaround for merging React with save-by-reference principle
    *
