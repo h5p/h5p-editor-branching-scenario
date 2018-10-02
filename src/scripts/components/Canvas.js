@@ -701,7 +701,8 @@ export default class Canvas extends React.Component {
         const hasCustomEndScreen = hasCustomFeedback
           && content.params.nextContentId === -1;
 
-        const hasLoopBack = subtree.nodes.length === 0
+        const hasLoopBack = subtree && subtree.nodes
+          && subtree.nodes.length === 0
           && content.params.nextContentId >= 0;
 
         // Draw node
