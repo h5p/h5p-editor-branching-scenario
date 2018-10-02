@@ -11,9 +11,9 @@ export default class ContentTypeMenu extends React.Component {
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      tooltipInfo: 'Add Informational content to the <strong>Branching Question Set.</strong>',
-      tooltipBranching: 'Add Branching Question to create a custom path in the <strong>Branching Question Set.</strong>',
-      tooltipReuse: 'Add content from the clipboard to the <strong>Branching Question Set.</strong>'
+      tooltipInfo: 'Create new content by dragging content below to dropzones on the right',
+      tooltipBranching: 'Create branching question to add a custom path in the <strong>Branching Scenario</strong>',
+      tooltipReuse: 'Drag "Paste" to a dropzone to insert content from a clipboard'
     };
 
     this.state = {
@@ -206,7 +206,7 @@ export default class ContentTypeMenu extends React.Component {
 
     return (
       <ul className="content-type-buttons">
-        <li className={ className } title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
+        <li ref={ element => element ? this.props.onNodeSize(element.getBoundingClientRect()) : undefined } className={ className } title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
       </ul>
     );
   }
@@ -234,7 +234,7 @@ export default class ContentTypeMenu extends React.Component {
           title="Add from clipboard"
           onMouseDown={ event => this.handleMouseDown(event, 'reuse-question') }
         >
-          From a clipboard
+          Paste
         </li>
       </ul>
     );

@@ -19,6 +19,9 @@ export default class EditorOverlay extends React.Component {
     // Reference to the React form wrapper
     this.form = React.createRef();
 
+    // Reference to the feedback form wrapper
+    this.feedbackForm = React.createRef();
+
     // Reference to the React title field
     this.title = React.createRef();
 
@@ -27,14 +30,14 @@ export default class EditorOverlay extends React.Component {
     // Reference to the React label wrapper
     this.labelWrapper = React.createRef();
 
-    // Must be the same object used by the editor form
-    this.state = this.props.content.params;
-
     // Useful multiple places later
     this.isBranchingQuestion = isBranching(this.props.content);
   }
 
   componentDidMount() {
+    // Move feedback group to feedback form
+    this.feedbackForm.current.appendChild(this.props.content.feedbackFormWrapper);
+
     // Insert editor form
     this.form.current.appendChild(this.props.content.formWrapper);
 
@@ -64,7 +67,14 @@ export default class EditorOverlay extends React.Component {
       ), this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
     }
 
-    this.initSyncMetadataTitles();
+    const library = H5PEditor.findField('type', {
+      children: this.props.content.formChildren,
+    });
+    const titleField = H5PEditor.findField('title', library.metadataForm);
+    titleField.$input.on('change', () => this.forceUpdate());
+
+    // Force visuals to resize after initial render
+    H5P.$window.trigger('resize');
   }
 
   componentWillUnmount() {
@@ -74,53 +84,6 @@ export default class EditorOverlay extends React.Component {
     if (this.$editorFormTitle) {
       this.$editorFormTitle.off(this.titleListenerName);
     }
-  }
-
-  /**
-   * Initalize sync of custom title field and metadata form title field.
-   */
-  initSyncMetadataTitles() {
-    const library = H5PEditor.findField('type', {
-      children: this.props.content.formChildren,
-    });
-
-    this.syncMetadataTitles();
-
-    // For when a library has not been loaded yet
-    library.change(() => {
-      this.syncMetadataTitles();
-    });
-  }
-
-  /**
-   * Sync custom title field with metadata form title field.
-   *
-   * Title from metadata overrules custom title.
-   */
-  syncMetadataTitles = () => {
-    this.$metadataFormTitle = H5PEditor.$(this.form.current)
-      .find('.h5p-metadata-form-wrapper .field-name-title input');
-    this.$editorFormTitle = H5PEditor.$(this.title.current);
-
-    H5PEditor.sync(
-      this.$metadataFormTitle,
-      this.$editorFormTitle,
-      {
-        listenerName: this.titleListenerName,
-        callback: this.handleTitlesSynced
-      }
-    );
-  }
-
-  /**
-   * Update state when title fields have been synced.
-   *
-   * @param {string} valueSet Value the field was set to by sync.
-   */
-  handleTitlesSynced = (valueSet) => {
-    this.setState({
-      contentTitle: valueSet
-    });
   }
 
   /**
@@ -138,6 +101,7 @@ export default class EditorOverlay extends React.Component {
       let nextContentId = alternatives[listIndex].nextContentId;
 
       const branchingUpdated = (value) => {
+        value = parseInt(value);
         branchingQuestionEditor.setNextContentId(listIndex, value);
         nextContentId = value;
         render(); // Update with the new state
@@ -146,14 +110,21 @@ export default class EditorOverlay extends React.Component {
       const render = () => {
         ReactDOM.render((
           <BranchingOptions
-            nextContentId={nextContentId === '' ? undefined : parseInt(nextContentId)}
+            nextContentId={ nextContentId }
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
+            nextContentLabel={'Special action if selected'}
           />
         ), selectorWrapper);
       };
 
+      // Set default value to end scenario
+      const normalizedNextContentId = nextContentId === '' ? -1 : nextContentId;
+      branchingQuestionEditor.setNextContentId(
+        listIndex,
+        normalizedNextContentId
+      );
       render();
     });
   }
@@ -172,26 +143,17 @@ export default class EditorOverlay extends React.Component {
     return valid;
   }
 
-  /**
-   * Update title in header as it is changed in the title field.
-   *
-   * @param {Event} e Change event
-   */
-  handleUpdateTitle = (e) => {
-    this.setState({
-      contentTitle: e.target.value
-    });
-  };
-
   handleNextContentIdChange = (value) => {
-    this.setState({
-      nextContentId: value
-    });
+    this.props.content.params.nextContentId = parseInt(value);
+    this.forceUpdate();
   };
 
   handleDone = () => {
     // Validate all form children to save their current value
-    this.validate();
+    const valid = this.validate();
+    if (!valid) {
+      return; // Don't close form yet
+    }
 
     // Remove any open wysiwyg fields
     if (H5PEditor.Html) {
@@ -208,49 +170,68 @@ export default class EditorOverlay extends React.Component {
       });
     }
 
+    // Collapse branching question list alternatives
+    if (this.isBranchingQuestion) {
+      const branchingQuestionEditor = H5PEditor.findField(
+        'type/branchingQuestion', {
+          children: this.props.content.formChildren,
+        }
+      );
+
+      if (branchingQuestionEditor) {
+        branchingQuestionEditor.collapseListAlternatives();
+      }
+    }
+
     // Update Canvas state
-    this.props.onDone(this.state); // Must use the same params object as H5PEditor
+    this.props.onDone();
   }
 
   render() {
-    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.state.type.library.split('.')[1].split(' ')[0])}`;
-    const scoreClass = this.props.scoringOption !== 'static-end-score'
+    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.props.content.params.type.library.split('.')[1].split(' ')[0])}`;
+    let scoreClass = this.props.scoringOption === 'no-score'
       ? ' hide-scores' : '';
+    if (this.props.scoringOption === 'dynamic-score') {
+      scoreClass = ' dynamic-score';
+    }
+    const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
+    const feedbackGroupClass = this.props.content.params.nextContentId !== -1 ? ' hide-score' : '';
+
     return (
-      <div className='editor-overlay'>
+      <div className={`editor-overlay${overlayClass}`}>
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
-          >{ this.state.contentTitle }</span>
+          >{ this.props.content.params.type.metadata ? this.props.content.params.type.metadata.title : 'New' }</span>
           <span className="buttons">
             <button
-              className="buttonBlue"
+              className="button-remove"
+              onClick={ this.props.onRemove }
+            >
+              Remove { /* TODO: l10 */ }
+            </button>
+            <button
+              className="button-blue"
               onClick={ this.handleDone }
             >Done{/* TODO: l10n */}</button>
           </span>
         </div>
 
         <div className={`editor-overlay-content${scoreClass}`}>
-          <div>
-            <div className="editor-overlay-metadata-title-label-wrapper" ref={ this.labelWrapper }>
-              <label className="editor-overlay-label" htmlFor="title">Title{/* TODO: l10n */}
-                <span className="editor-overlay-label-red">*</span>
-              </label>
-            </div>
-            <input
-              name="title" id="metadata-title-sub" className='editor-overlay-titlefield' type="text" ref={ this.title }
-              value={ this.state.contentTitle } onChange={ this.handleUpdateTitle }/>
-          </div>
-
           <div className='editor-overlay-semantics' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
             <BranchingOptions
-              nextContentId={ this.state.nextContentId === '' ? undefined : parseInt(this.state.nextContentId) }
+              nextContentId={ this.props.content.params.nextContentId }
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
+              isInserting={ this.props.isInserting }
             />
           }
+          <div
+            className={`editor-overlay-feedback-semantics${feedbackGroupClass}`}
+            ref={ this.feedbackForm }
+          />
         </div>
 
       </div>

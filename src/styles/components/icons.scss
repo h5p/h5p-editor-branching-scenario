@@ -1,32 +1,43 @@
-// $icon-plus: "\e91c";
-$icon-plus-2: "\e91d";
-$icon-gear: "\e91b";
-// $icon-translate: "\e91a";
-// $icon-eye: "\e919";
-$icon-preview: "\e918";
-$icon-video: "\e917";
-$icon-presentation: "\e916";
-$icon-text: "\e90f";
-$icon-image: "\e915";
-$icon-interactive-video: "\e914";
+// Material design icons
+$icon-plus: "\e5CD";
+$icon-plus-2: "\e145";
+$icon-gear: "\e8b8";
+$icon-close: "\e5cd";
+
+$icon-video: "\e04b";
+$icon-presentation: "\e63b";
+$icon-text: "\e264";
+$icon-image: "\e3c4";
+$icon-interactive-video: "\e63a";
 $icon-image-hotspots: "\e913";
-// $icon-branching-question: "\E902";
-$icon-zoom-in: "\e912";
-$icon-zoom-out: "\e911";
-$icon-fit-to-canvas: "\e910";
-$icon-edit: "\e90e";
-$icon-delete: "\e90d";
-// $icon-menu: "\e90c";
-// $icon-settings: "\e900";
-// $icon-help: "\e90b";
-// $icon-close: "\e90a";
-$icon-arrow-down: "\e909";
-$icon-info: "\e908";
-$icon-end-scenario: "\e907";
-$icon-go-to-existing: "\e906";
-$icon-full-screen-open: "\e903";
-$icon-full-screen-close: "\e904";
-$icon-no-preview: "\e905";
-// $icon-metadata: "\e901";
+
+$icon-zoom-in: "\e8ff";
+$icon-zoom-out: "\e900";
+$icon-fit-to-canvas: "\e5d0";
+
+$icon-edit: "\e3c9";
+$icon-delete: "\e872";
+$icon-menu: "\e5d2";
+$icon-help: "\e8fd";
+$icon-close: "\e5cd";
+
+$icon-info: "\e88f";
+$icon-end-scenario: "\e153";
+$icon-go-to-existing: "\e627";
+
+$icon-translation: "\e8e2";
+$icon-tutorial: "\e8fd";
+
+// bs custom icons
 $icon-copy: "\e920";
 $icon-paste: "\e921";
+$icon-branching-question: "\e902";
+$icon-metadata: "\e901";
+$icon-full-screen-open: "\e903";
+$icon-full-screen-close: "\e904";
+
+// Icons that always should be rotated
+@mixin icon-go-to-existing() {
+  content: $icon-go-to-existing;
+  transform: rotate(-45deg);
+}

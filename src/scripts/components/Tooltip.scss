@@ -24,9 +24,9 @@
 }
 
 .tooltip::before {
-  font-family: BSFont;
+  font-family: "Material Icons";
   position: absolute;
-  content: "\e908";
+  content: $icon-info;
   font-size: 1.3rem;
   color: #1773DA;
   left: 0.6rem;

@@ -139,6 +139,7 @@ export default class Toolbar extends React.Component {
         <div className="zoom-wrapper">
           <span
             className="zoom-out"
+            title="Zoom out"
             tabIndex="0"
             role="button"
             onClick={ () => this.handleZoom(false) }
@@ -148,17 +149,20 @@ export default class Toolbar extends React.Component {
           </span>
           <span
             className="zoom-in"
+            title="Zoom in"
             tabIndex="0"
             role="button"
             onClick={ () => this.handleZoom(true) }
           />
           <span
             className="fit-to-canvas-icon"
+            title="Zoom to fit"
             role="button"
             onClick={ this.handleFitToCanvas }
           />
           <span
             className="fit-to-canvas-text"
+            title="Zoom to fit"
             tabIndex="0"
             role="button"
             onClick={ this.handleFitToCanvas }
@@ -168,12 +172,13 @@ export default class Toolbar extends React.Component {
         </div>
         <div
           className="missing-end-scenarios"
+          title={`${this.props.numDefaultEndScenarios} alternatives without custom end scenario`}
           role="button"
           tabIndex="0"
           onClick={ this.handleShowPopup }
         >{ this.props.numDefaultEndScenarios }</div>
         <div className={ infoPopupClass }>
-          { this.props.numDefaultEndScenarios } alternatives will lead to the default <em>End Scenario</em>.
+          { this.props.numDefaultEndScenarios } alternatives are missing the custom end scenario. Click here to highlight these.
           { !!this.props.numDefaultEndScenarios &&
             <span> Click <span className="highlight-end-scenarios-button" role="button" tabIndex="0" onClick={ this.handleHighlight }>here</span> to highlight these.</span>
           }

@@ -1,11 +1,10 @@
 @font-face {
-  font-family: "BSFont";
-  src: url('../styles/fonts/bs.eot');
-  src: url('../styles/fonts/bs.woff');
-}
-
-@font-face {
-  font-family: "CopyPaste";
-  src: url('../styles/fonts/copypaste.eot');
-  src: url('../styles/fonts/copypaste.woff');
+  font-family: 'bs';
+  src: url('../styles/fonts/bs.eot?l2n71k');
+  src: url('../styles/fonts/bs.eot?l2n71k#iefix') format('embedded-opentype'),
+  url('../styles/fonts/bs.ttf?l2n71k') format('truetype'),
+  url('../styles/fonts/bs.woff?l2n71k') format('woff'),
+  url('../styles/fonts/bs.svg?l2n71k#bs') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }

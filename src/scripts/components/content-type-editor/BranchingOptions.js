@@ -6,6 +6,11 @@ export default class BranchingOptions extends React.Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      expanded: false,
+      isNewContent: props.isInserting,
+    };
   }
 
   handleExistingContentChange = (e) => {
@@ -19,6 +24,9 @@ export default class BranchingOptions extends React.Component {
   }
 
   handleMainOptionChange = (e) => {
+    this.setState({
+      isNewContent: false,
+    });
     const newValue = e.target.value;
     switch (newValue) {
       case 'new-content':
@@ -36,63 +44,80 @@ export default class BranchingOptions extends React.Component {
   }
 
   render() {
-    const mainSelectorValue = this.props.nextContentId >= 0
+    let mainSelectorValue = this.props.nextContentId >= 0
       ? 'old-content'
       : (this.props.nextContentId === -1
         ? 'end-scenario'
         : 'new-content');
 
+    if (this.state.isNewContent) {
+      mainSelectorValue = 'new-content';
+    }
+
     // TODO: translations
     return (
       <div className='editor-overlay-branching-options'>
-        <div className='field text importance-low'>
-          <div className='h5p-editor-flex-wrapper'>
-            <label className='h5peditor-label-wrapper'>
-              <span className='h5peditor-label'>Next content</span>
-            </label>
+        <fieldset className={ 'field group' + (this.state.expanded ? ' expanded' : '' ) }>
+          <div
+            className="title"
+            title="Expand/Collapse"
+            role="button"
+            onClick={ () => this.setState(prevState => ({expanded: !prevState.expanded})) }
+            onKeyPress={ e => { if (e.which === 32) this.setState(prevState => ({expanded: !prevState.expanded}));} }
+            tabIndex="0">Branching Options{ /* TODO: l10n */ }
           </div>
-          <div className='h5peditor-field-description'>If you select a value it is recommended to provide a feedback after each alternatives that leads to a new content. This will ensure a better learning experience for the viewer.</div>
-        </div>
-        <select
-          value={ mainSelectorValue }
-          onChange={ this.handleMainOptionChange }
-        >
-          <option
-            key="default"
-            value="new-content"
-          > - </option>
-          <option
-            key="end-scenario"
-            value="end-scenario"
-          >End scenario here</option>
-          {
-            this.props.validAlternatives.length > 0 &&
-            <option
-              key="old-content"
-              value="old-content"
-            >Send a viewer to an existing content/question</option>
-          }
-        </select>
-        {
-          this.props.nextContentId >= 0 &&
-          <div>
-            <label htmlFor="nextPath">Select a path to send a user to</label>
-            <select
-              name="nextPath"
-              value={ this.props.nextContentId }
-              onChange={ this.handleExistingContentChange }
-            >
-              {
-                this.props.validAlternatives.map(content => (
+          <div className="content">
+            <div className='field text importance-low'>
+              <label className='h5peditor-label-wrapper'>
+                <span className='h5peditor-label'>
+                  { this.props.nextContentLabel || 'Special action after this content' }
+                </span>
+              </label>
+              <select
+                value={ mainSelectorValue }
+                onChange={ this.handleMainOptionChange }
+              >
+                <option
+                  key="default"
+                  value="new-content"
+                > - </option>
+                <option
+                  key="end-scenario"
+                  value="end-scenario"
+                >Custom end scenario</option>
+                {
+                  this.props.validAlternatives.length > 0 &&
                   <option
-                    key={ 'next-path-' + content.id }
-                    value={ content.id }
-                  >{content.label}</option>
-                ))
-              }
-            </select>
+                    key="old-content"
+                    value="old-content"
+                  >Jump to another branch</option>
+                }
+              </select>
+            </div>
+            {
+              this.props.nextContentId >= 0 &&
+              <div className="field text importance-low">
+                <label className="h5peditor-label-wrapper" htmlFor="nextPath">
+                  <span className="h5peditor-label h5peditor-required">Select a branch to jump to{/* TODO: Use title from semantics */}</span>
+                </label>
+                <select
+                  name="nextPath"
+                  value={ this.props.nextContentId }
+                  onChange={ this.handleExistingContentChange }
+                >
+                  {
+                    this.props.validAlternatives.map(content => (
+                      <option
+                        key={ 'next-path-' + content.id }
+                        value={ content.id }
+                      >{content.label}</option>
+                    ))
+                  }
+                </select>
+              </div>
+            }
           </div>
-        }
+        </fieldset>
       </div>
     );
   }

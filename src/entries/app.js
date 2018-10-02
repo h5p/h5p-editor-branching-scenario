@@ -74,38 +74,8 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params.startScreen.startScreenSubtitle = this.params.startScreen.startScreenSubtitle || '';
     this.params.endScreens = this.params.endScreens || [{}];
 
-    this.settings = {
-      startTitle: this.params.startScreen.startScreenTitle,
-      startSubtitle: this.params.startScreen.startScreenSubtitle,
-      startImage: this.params.startScreen.startScreenImage,
-      endScreenScore: this.params.endScreens[0].endScreenScore,
-      endImage: this.params.endScreens[0].endScreenImage,
-    };
-
     this.passReadies = true;
     parent.ready(() => this.passReadies = false);
-
-    const startScreenImageField = H5PEditor.findSemanticsField(
-      'startScreenImage',
-      this.field
-    );
-    this.startImageChooser = new H5PEditor.widgets.image(
-      this,
-      startScreenImageField,
-      this.settings.startImage,
-      () => {}
-    );
-
-    const endScreenImageField = H5PEditor.findSemanticsField(
-      'endScreenImage',
-      this.field
-    );
-    this.endImageChooser = new H5PEditor.widgets.image(
-      this,
-      endScreenImageField,
-      this.settings.endImage,
-      () => {}
-    );
 
     this.buildContentEditorForms();
   }
@@ -125,7 +95,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       this.params,
       H5P.jQuery(commonFieldsWrapper),
       this,
-      this.parent.library
+      this.parent.currentLibrary
     );
 
     // Note that this is just the initial array, it will be maintained as a state in <Canvas>
@@ -147,6 +117,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     // Create content object that holds the editor form and params
     const content = {
       formWrapper: document.createElement('div'),
+      feedbackFormWrapper: document.createElement('div'),
       formChildren: null,
       params: params
     };
@@ -160,6 +131,23 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       this,
       params.type.library
     );
+
+    // Move last feedback group to its own wrapper
+    let feedbackGroups = content.formWrapper
+      .querySelectorAll('.field-name-feedback');
+    const feedbackGroup = feedbackGroups[feedbackGroups.length - 1];
+
+    content.feedbackFormWrapper.appendChild(feedbackGroup);
+
+    // Add description to feedback group
+    const description = document.createElement('div');
+    description.classList.add('h5p-feedback-description');
+    description.classList.add('h5peditor-field-description');
+    description.textContent = 'It is recommended to provide feedback that motivates and also provides guidance. Leave all fields empty if you don\'t want the user to get feedback after choosing this alternative/viewing this content.';
+
+    const groupWrapper = feedbackGroup.querySelector('.content');
+    groupWrapper.prepend(description);
+
     content.formChildren = this.children;
 
     // For BS we need to know when the sub form is ready/loaded
@@ -185,27 +173,73 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
   };
 
   /**
-   * Update parameters with values delivered by React components.
-   *
-   * @param {Object} data - Data from React components.
-   */
-  BranchingScenarioEditor.prototype.updateParams = function (data) {
-    this.params.startScreen.startScreenTitle = data.startTitle;
-    this.params.startScreen.startScreenSubtitle = data.startSubtitle;
-    this.params.startScreen.startScreenImage = data.startImage;
-    this.params.endScreens[0].endScreenImage = data.endImage;
-    this.params.endScreens[0].endScreenScore = data.endScreenScore;
-  };
-
-  /**
    * Validate the current field.
    *
    * @returns {boolean} True if validatable.
    */
   BranchingScenarioEditor.prototype.validate = function () {
-    // TODO: Run validate on all H5PEditor widgets (OK for children of EditorOverlay)
-    this.editor.validate();
-    return true;
+    let valid = true;
+
+    // settings
+    valid = this.validateChunk(this.children);
+
+    // metadata
+    if (valid) {
+      valid = this.validateChunk(this.parent.metadataForm.children);
+    }
+
+    // translations
+    if (valid) {
+      valid = this.validateChunk(this.findTranslationFields(this.parent.commonFields));
+    }
+
+    // content
+    if (valid) {
+      valid = this.validateChunk(this.content.reduce((a, b) => a.concat(b), []));
+    }
+
+    return valid;
+  };
+
+  /**
+   * Find translation fields.
+   *
+   * @param {object} chunk Chunk to check for fields.
+   * @return {object[]} Fields.
+   */
+  BranchingScenarioEditor.prototype.findTranslationFields = function (chunk) {
+    let fields = [];
+
+    if (typeof chunk !== 'object') {
+      return fields;
+    }
+
+    for (let item in chunk) {
+      const candidate = chunk[item];
+      if (typeof candidate === 'object' && typeof candidate.instance !== 'undefined') {
+        fields.push(candidate.instance);
+      }
+      else {
+        fields = fields.concat(this.findTranslationFields(candidate));
+      }
+    }
+
+    return fields;
+  };
+
+  /**
+   * Validate a chunk of children.
+   *
+   * @param {object[]} chunk Chunk of children.
+   * @return {boolean} True, if all children can be validated.
+   */
+  BranchingScenarioEditor.prototype.validateChunk = function (chunk) {
+    return chunk.every(child => {
+      if (typeof child.validate === 'function') {
+        return child.validate() !== false;
+      }
+      return true;
+    });
   };
 
   /**
@@ -241,6 +275,9 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
   BranchingScenarioEditor.prototype.appendTo = function ($wrapper) {
     const self = this;
 
+    // Use full width
+    document.documentElement.style.maxWidth = document.body.style.maxWidth = 'none';
+
     let fullscreen;
     if (H5PEditor.Fullscreen !== undefined) {
       const formWrapper = $wrapper.parent()[0];
@@ -255,6 +292,13 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
           fullscreen: true
         });
         // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
+
+        document.documentElement.style.fontSize = '18px';
+
+        // Remove any open wysiwyg fields (they do not automatically resize)
+        if (H5PEditor.Html) {
+          H5PEditor.Html.removeWysiwyg();
+        }
       });
 
       fullscreen.on('exited', function () {
@@ -266,6 +310,13 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
           fullscreen: false
         });
         // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
+
+        document.documentElement.style.fontSize = '';
+
+        // Remove any open wysiwyg fields (they do not automatically resize)
+        if (H5PEditor.Html) {
+          H5PEditor.Html.removeWysiwyg();
+        }
       });
     }
     function toggleFullscreen(on) {
@@ -285,10 +336,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         content={ this.content }
         getNewContent={ this.getNewContent.bind(this) }
         libraries={ this.libraries }
-        settings={ this.settings }
-        startImageChooser={ this.startImageChooser }
-        endImageChooser={ this.endImageChooser }
-        updateParams={ this.updateParams.bind(this) }
         onContentChanged={ this.handleContentChanged.bind(this) }
         onToggleFullscreen={ toggleFullscreen }
         main={ this }

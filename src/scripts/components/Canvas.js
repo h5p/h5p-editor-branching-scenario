@@ -17,48 +17,6 @@ export default class Canvas extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO: The language strings should be passed by app and sanitized before
-    this.l10n = {
-      dialogDelete: {
-        icon: 'icon-delete',
-        confirmationHeader: 'Delete Question',
-        confirmationQuestion: 'Are you sure you want to delete this content?',
-        confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
-        confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
-        textConfirm: 'Delete',
-        textCancel: 'Cancel',
-        handleConfirm: this.handleDelete,
-        handleCancel: this.handleCancel
-      },
-      dialogReplace: {
-        icon: 'icon-replace',
-        confirmationHeader: 'Replace Question',
-        confirmationQuestion: 'Do you really want to replace this question?',
-        confirmationDetailsNO: 'You will lose the question, but all its children will be attached to the previous content/alternative.',
-        confirmationDetailsBQ: 'If you proceed, you will lose all the content attached to this contents alternatives:',
-        textConfirm: 'Replace',
-        textCancel: 'Cancel',
-        handleConfirm: this.handleDelete,
-        handleCancel: this.handleCancel
-      },
-      quickInfoMenu: {
-        show: 'Show',
-        hide: 'Hide',
-        quickInfo: 'Quick Info',
-        dropzoneTerm: 'Dropzone',
-        dropzoneText: 'It appears when you select or start dragging content',
-        contentTerm: 'Content',
-        branchingQuestionTerm: 'Branching Question',
-        branchingQuestionText: 'Each alternative can lead to different question/content.',
-        alternative: 'Alternative leads to another question/content.',
-        defaultEndScenario: 'Path ends here (with the default end scenario)',
-        customEndScenario: 'Path ends here (with the custom end scenario)',
-        existingQuestion: 'Path takes the learner to an existing question/content. Click to see where it leads to.',
-        stepByStep: 'Step by Step ',
-        tutorial: 'tutorial'
-      }
-    };
-
     this.state = {
       placing: null,
       deleting: null,
@@ -75,20 +33,12 @@ export default class Canvas extends React.Component {
         content: {
         }
       },
-      nodeSpecs: {
-        width: 121,
-        height: 32,
-        spacing: {
-          x: 29,
-          y: 16
-        }
-      },
       dzSpecs: {
         width: 42,
         height: 32
       },
       content: this.props.content,
-      dialog: this.l10n.dialogDelete,
+      dialog: null,
       panning: {
         x: 0,
         y: 0
@@ -99,39 +49,31 @@ export default class Canvas extends React.Component {
   componentDidMount() {
     // Trigger the initial default end scenarios count
     this.props.onContentChanged(null, this.countDefaultEndScenarios());
+
+    document.addEventListener('keydown', this.handleDocumentKeyDown);
   }
 
-  componentWillReceiveProps(nextProps) { // TODO: Deprected ?
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleDocumentKeyDown);
+  }
+
+  static getDerivedStateFromProps(nextProps) {
     if (nextProps.inserting) {
-      this.setState({
+      return ({ // Set new state on inserting
         placing: -1,
         library: nextProps.inserting.library
       });
     }
+    return null;
   }
 
-  /**
-   * Build dialog contents.
-   *
-   * @param {number} id - ID of node in question.
-   * @param {object} params - Template params for particular case.
-   * @return {object} Dialog contents.
-   */
-  buildDialog = (id, params) => {
-    const dialog = params;
-    if (isBranching(this.state.content[id])) {
-      const nodeTitles = this.getChildrenTitles(id)
-        .map((title, index) => <li key={index}>{title}</li>);
-
-      dialog.confirmationDetails = params.confirmationDetailsBQ;
-      dialog.confirmationDetailsList = nodeTitles;
+  handleDocumentKeyDown = (event) => {
+    switch (event.which) {
+      case 46: // Delete
+        if (this.state.placing !== null) {
+          this.handleContentDelete(this.state.placing);
+        }
     }
-    else {
-      if (this.state.content[id].params.nextContentId) {
-        dialog.confirmationDetails = params.confirmationDetailsNO;
-      }
-    }
-    return dialog;
   }
 
   /**
@@ -141,7 +83,8 @@ export default class Canvas extends React.Component {
     if (this.state.placing !== null && this.state.placing !== id) {
       this.setState({
         deleting: id,
-        dialog: this.buildDialog(id, this.l10n.dialogReplace) // TODO: Refactor. Uses the wrong state to determine the next. Should be a much cleaner way to handle this.
+        confirmReplace: true,
+        dialog: 'replace'
       });
       this.props.onDropped(); // TODO: Determine if should really run after set state. Note that this triggers a changing in the props which sets the state again through componentWillReceiveProps, which is deprected. Can we find a better way of doing this?
       // I guess only the parent should keep track of this state? yes
@@ -286,8 +229,12 @@ export default class Canvas extends React.Component {
   }
 
   handleContentEdit = (id) => {
+    // Workaround for Chrome keeping hover state on the draggable
+    H5PEditor.$(this[`draggable-${id}`].element.element).click();
+
     this.setState({
-      editing: id
+      editing: id,
+      placing: null
     });
   }
 
@@ -299,7 +246,7 @@ export default class Canvas extends React.Component {
   handleContentDelete = (id) => {
     this.setState({
       deleting: id,
-      dialog: this.buildDialog(id, this.l10n.dialogDelete) // TODO: See comment in handlePlacing(). There must be a better way to handle this.
+      dialog: 'delete'
     });
   }
 
@@ -310,11 +257,10 @@ export default class Canvas extends React.Component {
    * @return {string[]} Titles.
    */
   getChildrenTitles = (start) => {
-    return this.getChildrenIds(start, false)
+    return this.getChildrenIds(start, true)
       .sort((a, b) => a - b)
       .map(id => {
-        return this.state.content[id].params.contentTitle ||
-          getMachineName(this.state.content[id]);
+        return getAlternativeName(this.state.content[id]);
       });
   }
 
@@ -602,12 +548,12 @@ export default class Canvas extends React.Component {
     return ( !this.state.editing &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
-        ref={ element => isInitial ? this.initialDropzone = element : this.dropzones.push(element) }
+        ref={ element => { if (isInitial) { this.initialDropzone = element; } this.dropzones.push(element); } }
         nextContentId={ nextContentId }
         parent={ parent }
         alternative={ num }
         position={ position }
-        elementClass={ 'dropzone' + (isInitial ? ' disabled' : '') }
+        elementClass={ 'dropzone' + (isInitial && !this.props.inserting ? ' disabled' : '') }
         style={
           {
             left: position.x + 'px',
@@ -683,10 +629,16 @@ export default class Canvas extends React.Component {
 
     const parentIsBranching = (parent !== undefined && isBranching(this.state.content[parent]));
 
-    let firstX, lastX, bigY = y + (this.state.nodeSpecs.spacing.y * 7.5); // The highest we'll ever be
+    let firstX, lastX, bigY = y + (this.props.nodeSize.spacing.y * 7.5); // The highest we'll ever be
+
+    // x position of first alternative (of a subtree)
+    let firstAlternativeX;
+
     branch.forEach((id, num) => {
       let drawAboveLine = false;
       const content = this.state.content[id];
+      const contentIsBranching = (content && isBranching(content));
+
       const hasBeenDrawn = (renderedNodes.indexOf(id) !== -1);
 
       renderedNodes.push(id);
@@ -702,16 +654,13 @@ export default class Canvas extends React.Component {
       //   distanceYFactor += 2.5; // space for DZ
       // }
 
-      const branchY = y + distanceYFactor * this.state.nodeSpecs.spacing.y;
-
-      // Determine if we are or parent is a branching question
-      const contentIsBranching = (content && isBranching(content));
+      const branchY = y + distanceYFactor * this.props.nodeSize.spacing.y;
 
       // Determine if we have any children
       const children = (hasBeenDrawn ? null : (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.params.nextContentId] : null)));
 
       if (x !== 0 && num > 0) {
-        x += this.state.nodeSpecs.spacing.x; // Add spacing between nodes
+        x += this.props.nodeSize.spacing.x; // Add spacing between nodes
       }
 
       // Draw subtree first so we know where to position the node
@@ -721,22 +670,42 @@ export default class Canvas extends React.Component {
       // Determine position of node
       let position = {
         x: x,
-        y: branchY - (this.state.nodeSpecs.spacing.y * 2) // *2 for the element itself
+        y: branchY - (this.props.nodeSize.spacing.y * 2) // *2 for the element itself
       };
 
-      if (subtreeWidth >= this.state.nodeSpecs.width) {
+      if (subtreeWidth >= this.props.nodeSize.width) {
         // Center parent above subtree
-        position.x += ((subtree.x - x) / 2) - (this.state.nodeSpecs.width / 2);
+        position.x += ((subtree.x - x) / 2) - (this.props.nodeSize.width / 2);
       }
 
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const library = this.getLibrary(content.params.type.library);
-        if ((content.params.nextContentId !== undefined && content.params.nextContentId < 0 && content.params.nextContentId === this.props.highlight) || this.props.highlight === id) {
+        const hasCustomFeedback = content.params.feedback.title
+          || content.params.feedback.subtitle
+          || content.params.feedback.image
+          || content.params.feedback.endScreenScore !== undefined;
+        const hasDefaultEndScreen = !hasCustomFeedback
+          && content.params.nextContentId !== undefined
+          && content.params.nextContentId < 0
+          && content.params.nextContentId === this.props.highlight;
+
+        const isHighlightingContent = hasDefaultEndScreen
+          || this.props.highlight === id
+          || this.props.onlyThisBall === id;
+
+        if (isHighlightingContent) {
           highlightCurrentNode = true;
         }
 
+        const hasCustomEndScreen = hasCustomFeedback
+          && content.params.nextContentId === -1;
+
+        const hasLoopBack = subtree.nodes.length === 0
+          && content.params.nextContentId >= 0;
+
         // Draw node
+        const label = Content.getTooltip(content);
         nodes.push(
           <Content
             key={ id }
@@ -749,7 +718,7 @@ export default class Canvas extends React.Component {
               }
             } }
             position={ position }
-            width={ this.state.nodeSpecs.width }
+            width={ this.props.nodeSize.width }
             selected={ this.state.placing === id }
             onPlacing={ () => this.handlePlacing(id) }
             onMove={ () => this.handleMove(id) }
@@ -759,21 +728,29 @@ export default class Canvas extends React.Component {
             onCopy={ () => this.handleContentCopy(id) }
             onDelete={ () => this.handleContentDelete(id) }
             disabled={ contentIsBranching }
-            tooltip={ Content.getTooltip(content) }
+            tooltip={ label }
             scale={ this.props.scale }
+            hasCustomEndScreen={ hasCustomEndScreen }
+            hasLoopBack={ hasLoopBack}
+            highlightLinkedContent={() => {
+              this.highlightLinkedContent(
+                content.params.nextContentId,
+                id
+              );
+            }}
           >
-            { library.title }
+            { label }
           </Content>
         );
         drawAboveLine = true;
       }
 
       const isLoop = (parentIsBranching && !drawAboveLine && id > -1);
-      const nodeWidth = (content && !isLoop? (this.state.nodeSpecs.width / 2) : 21); // Half width actually...
+      const nodeWidth = (content && !isLoop? (this.props.nodeSize.width / 2) : 21); // Half width actually...
       const nodeCenter = position.x + nodeWidth;
 
       distanceYFactor -= parentIsBranching ? 4.5 : 2; // 2 = height factor of Draggable
-      const aboveLineHeight = this.state.nodeSpecs.spacing.y * distanceYFactor; // *3.5 = enough room for DZ
+      const aboveLineHeight = this.props.nodeSize.spacing.y * distanceYFactor; // *3.5 = enough room for DZ
 
       // Add vertical line above (except for top node)
       if (content && id !== 0 && drawAboveLine) {
@@ -797,46 +774,63 @@ export default class Canvas extends React.Component {
         nodes.push(
           <div key={ id + '-vbelow' } className={ 'vertical-line 2' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
-            top: (position.y + this.state.nodeSpecs.height) + 'px',
-            height: (this.state.nodeSpecs.spacing.y / 2) + 'px'
+            top: (position.y + this.props.nodeSize.height) + 'px',
+            height: (this.props.nodeSize.spacing.y / 2) + 'px'
           } }/>
         );
 
         // Add horizontal line below
         nodes.push(
           <div key={ id + '-hbelow' } className={ 'horizontal-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: (x + (children[0] === undefined || children[0] < 0 ? this.state.dzSpecs.width / 2 : this.state.nodeSpecs.width / 2)) + 'px',
-            top: (position.y + this.state.nodeSpecs.height + (this.state.nodeSpecs.spacing.y / 2)) + 'px',
+            left: subtree.firstAlternativeX + 'px',
+            top: (position.y + this.props.nodeSize.height + (this.props.nodeSize.spacing.y / 2)) + 'px',
             width: (subtree.dX + 2) + 'px'
           } }/>
         );
       }
 
       if (parentIsBranching) {
+        const alternatives = this.state.content[parent].params.type.params.branchingQuestion.alternatives;
+
+        // Offset for centering alternatives below BQ node if their total width < node width
+        const alternativesEmpty = alternatives.filter(alt => alt.nextContentId < 0).length;
+        const width = alternativesEmpty * this.state.dzSpecs.width +
+          (alternatives.length - alternativesEmpty) * this.props.nodeSize.width +
+          (alternatives.length - 1) * this.props.nodeSize.spacing.x;
+        const alternativesOffsetX = (this.props.nodeSize.width > width) ? ((this.props.nodeSize.width - width) / 2) : 0;
+
+        // Remember position of first alternative for rendering parent node
+        if (num === 0) {
+          firstAlternativeX = alternativesOffsetX + nodeCenter;
+        }
+
+        // Add vertical line above alternative ball
         nodes.push(
           <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line 3' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: nodeCenter + 'px',
-            top: ((position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 2 : 0)) + 'px',
-            height: (this.state.nodeSpecs.spacing.y * (branch.length > 1 ? 0.375 : 1)) + 'px'
+            left: alternativesOffsetX + nodeCenter + 'px',
+            top: ((position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 2 : 0)) + 'px',
+            height: (this.props.nodeSize.spacing.y * (branch.length > 1 ? 0.375 : 1)) + 'px'
           } }/>
         );
 
         const key = parent + '-abox-' + num;
 
-        const bqParams = this.state.content[parent].params.type.params;
-        const alternative = bqParams.branchingQuestion
-          && bqParams.branchingQuestion.alternatives
-          && bqParams.branchingQuestion.alternatives[num];
-        const hasFeedback = alternative
-          && alternative.addFeedback
+        const alternative = alternatives[num];
+        const hasFeedback = !!(alternative
           && alternative.feedback
-          && alternative.feedback.title;
+          && (alternative.feedback.title
+            || alternative.feedback.subtitle
+            || alternative.feedback.image
+            || alternative.feedback.endScreenScore !== undefined
+          ));
 
         let alternativeBallClasses = 'alternative-ball';
+        let hasLoopBack = false;
         if (!drawAboveLine) {
           if (id > -1) {
             // Loop to existing node
             alternativeBallClasses += ' loop';
+            hasLoopBack = true;
           }
           else if (id === -1) {
             // Default or custom end scenario
@@ -858,16 +852,26 @@ export default class Canvas extends React.Component {
           }
         }
 
-        const alternativeText = this.state.content[parent].params.type.params.branchingQuestion.alternatives[num].text;
+        // Add alternatives ball
+        const alternativeText = alternatives[num].text;
         nodes.push(
           <div key={ key }
             className={ alternativeBallClasses }
             aria-label={ /* TODO: l10n */ 'Alternative ' + (num + 1) }
-            onClick={ () => this.handleBallTouch(hasBeenDrawn ? id : -1, key) }
+            onDoubleClick={() => {
+              this.handleContentEdit(id);
+            }}
             style={ {
-              left: (nodeCenter - (this.state.nodeSpecs.spacing.y * 0.75) - 1) + 'px',
-              top: (position.y - aboveLineHeight - (this.state.nodeSpecs.spacing.y * 1.5)) + 'px'
+              left: (alternativesOffsetX + nodeCenter - (this.props.nodeSize.spacing.y * 0.75) - 1) + 'px',
+              top: (position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * 1.5)) + 'px'
             } }>A{ num + 1 }
+            {
+              hasLoopBack &&
+              <div
+                className='loop-back'
+                onClick={() => this.handleBallTouch(hasBeenDrawn ? id : -1, key)}
+              />
+            }
             <div className="dark-tooltip">
               <div className="dark-text-wrap">{ !alternativeText ? /* TODO: l10n */ 'Alternative ' + (num + 1) : alternativeText }</div>
             </div>
@@ -877,9 +881,9 @@ export default class Canvas extends React.Component {
         // Add dropzone under empty BQ alternative if not of BQ being moved
         if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
           nodes.push(this.renderDropzone(-1, {
-            x: nodeCenter - (this.state.dzSpecs.width / 2),
+            x: alternativesOffsetX + nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
-            // y: position.y - 42 + 2 * this.state.nodeSpecs.spacing.y // for expandable tree
+            // y: position.y - 42 + 2 * this.props.nodeSize.spacing.y // for expandable tree
           }, parent, num));
         }
       }
@@ -889,7 +893,7 @@ export default class Canvas extends React.Component {
         const dzDistance = ((aboveLineHeight - this.state.dzSpecs.height) / 2);
 
         // Add dropzone above
-        if (this.state.placing !== parent && (!this.isDropzoneDisabled(id) || this.isOuterNode(this.state.placing, id))) {
+        if (content && this.state.placing !== parent && (!this.isDropzoneDisabled(id) || this.isOuterNode(this.state.placing, id))) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - dzDistance // for fixed tree
@@ -901,15 +905,15 @@ export default class Canvas extends React.Component {
         if (content && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id)) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
-            y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance // for fixed tree
-            // y: position.y + (this.state.nodeSpecs.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (this.state.dzSpecs.height / 2) : 0) // for expandable tree
+            y: position.y + (this.props.nodeSize.spacing.y * 2) + dzDistance // for fixed tree
+            // y: position.y + (this.props.nodeSize.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (this.state.dzSpecs.height / 2) : 0) // for expandable tree
           }, id, parentIsBranching ? num + 1 : 1));
         }
       }
 
       // Increase same level offset + offset required by subtree
-      const elementWidth = (content ? this.state.nodeSpecs.width : this.state.dzSpecs.width);
-      x += (subtreeWidth >= this.state.nodeSpecs.width ? subtreeWidth : elementWidth);
+      const elementWidth = (content ? this.props.nodeSize.width : this.state.dzSpecs.width);
+      x += (subtreeWidth >= this.props.nodeSize.width ? subtreeWidth : elementWidth);
 
       if (subtree) {
         // Merge our trees
@@ -932,7 +936,8 @@ export default class Canvas extends React.Component {
       nodes: nodes,
       x: x,
       y: bigY,
-      dX: (firstX !== undefined ? lastX - firstX : 0) // Width of this subtree level only (used for pretty trees)
+      dX: (firstX !== undefined ? lastX - firstX : 0), // Width of this subtree level only (used for pretty trees)
+      firstAlternativeX: firstAlternativeX
     };
   }
 
@@ -954,6 +959,12 @@ export default class Canvas extends React.Component {
     }
   }
 
+  highlightLinkedContent = (nextContentId, currentContentId) => {
+    if (nextContentId > -1 && currentContentId > -1) {
+      this.props.onHighlight(nextContentId, currentContentId);
+    }
+  };
+
   handleDelete = () => {
     // Set new parent for node
     this.setState(prevState => {
@@ -962,6 +973,7 @@ export default class Canvas extends React.Component {
         deleting: null,
         inserting: null,
         editing: null,
+        dialog: null,
         content: [...prevState.content]
       };
 
@@ -983,11 +995,15 @@ export default class Canvas extends React.Component {
           const node = newState.content[id];
           removeChildren = removeChildren || isBranching(node);
 
+          // If node to be removed loops backwards or to itself, use default end scenario
+          const renderedNodes = this.renderedNodes.filter(node => node > -1);
+
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
           if (isBranching(node)) {
             deleteIds = node.params.type.params.branchingQuestion.alternatives
-              .filter(alt => alt.nextContentId >= 0) // Filter end scenarios
+              .filter(alt => alt.nextContentId > -1 &&
+                renderedNodes.indexOf(alt.nextContentId) > renderedNodes.indexOf(id)) // Filter end scenarios and loops
               .map(alt => alt.nextContentId).concat(id);
           }
           else {
@@ -1000,9 +1016,6 @@ export default class Canvas extends React.Component {
             .forEach(deleteId => {
               // node to be removed, will always be an info node, no BQ
               const deleteNode = newState.content[deleteId];
-
-              // If node to be removed loops backwards or to itself, use default end scenario
-              const renderedNodes = this.renderedNodes.filter(node => node > -1);
 
               let successorId = -1;
               if (deleteNode.params.nextContentId > -1 && renderedNodes.indexOf(deleteNode.params.nextContentId) > renderedNodes.indexOf(deleteId)) {
@@ -1051,7 +1064,7 @@ export default class Canvas extends React.Component {
         });
       };
 
-      if (prevState.placing !== prevState.deleting) {
+      if (prevState.placing !== null && prevState.placing !== prevState.deleting) {
         // Replace node
         const nextContentId = prevState.content[prevState.deleting].params.nextContentId;
 
@@ -1111,38 +1124,24 @@ export default class Canvas extends React.Component {
       placing: null,
       deleting: null,
       editing: null,
-      inserting: null
+      inserting: null,
+      dialog: null
     });
   }
 
   componentDidUpdate() {
     // Center the tree
-    if (this.props.center && this.tree) {
-      let width, posX, y;
-
-      if (this['draggable-1']) {
-        // Center on 1st node
-        width = this.state.nodeSpecs.width;
-        posX = this['draggable-0'].props.position.x;
-        y = 0;
-      }
-      else if (this.dropzones[0]) {
-        // Center on top DZ (used for empty scenarios)
-        width = 41.59;
-        posX = this.dropzones[0].props.position.x;
-        y = 122; // Align with StartScreen's hardcoded value
-      }
-
-      if (width !== undefined && posX !== undefined && y !== undefined) {
-        // Do the centering
-
-        // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
-        // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
-        const center = (this.treewrap.getBoundingClientRect().width / 2) - ((width * this.props.scale) / 2);
+    if (this.props.center && this.tree && this['draggable-0']) {
+      // Center on 1st node
+      // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
+      // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
+      const treeWrapWidth = this.treewrap.getBoundingClientRect().width;
+      if (treeWrapWidth !== 0) {
+        const center = (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
         this.setState({
           panning: {
-            x: (center - (posX * this.props.scale)),
-            y: y
+            x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
+            y: 0
           }
         }, this.props.onCanvasCentered);
       }
@@ -1150,8 +1149,11 @@ export default class Canvas extends React.Component {
 
     // Center inital dropzone
     if (this.initialDropzone) {
-      const center = (this.treewrap.getBoundingClientRect().width / 2) - (41.59 / 2);
-      this.initialDropzone.element.style.left = center + 'px';
+      const treeWrapWidth = this.treewrap.getBoundingClientRect().width;
+      if (treeWrapWidth !== 0) {
+        const center = (treeWrapWidth / 2) - (41.59 / 2);
+        this.initialDropzone.element.style.left = center + 'px';
+      }
     }
 
     // Translate the tree
@@ -1178,16 +1180,29 @@ export default class Canvas extends React.Component {
     this.state.content.forEach(content => {
       if (isBranching(content)) {
         content.params.type.params.branchingQuestion.alternatives.forEach(alternative => {
-          const hasFeedback = alternative.addFeedback
-            && alternative.feedback
-            && alternative.feedback.title;
+          const hasFeedback = !!(alternative.feedback
+            && (alternative.feedback.title
+              || alternative.feedback.subtitle
+              || alternative.feedback.image
+              || alternative.feedback.endScreenScore !== undefined
+            ));
           if (alternative.nextContentId === -1 && !hasFeedback) {
             numMissingEndScenarios++;
           }
         });
       }
       else if (content.params.nextContentId === -1) {
-        numMissingEndScenarios++;
+        const hasCustomEnding = content.params.feedback
+          && (
+            content.params.feedback.title
+            || content.params.feedback.subtitle
+            || content.params.feedback.image
+            || content.params.feedback.endScreenScore !== undefined
+          );
+
+        if (!hasCustomEnding) {
+          numMissingEndScenarios++;
+        }
       }
     });
     return numMissingEndScenarios;
@@ -1202,18 +1217,25 @@ export default class Canvas extends React.Component {
     ), this.countDefaultEndScenarios());
   }
 
-  handleEditorDone = (params) => {
-    // Update content state for Canvas
-    this.setState(prevState => {
-      let newState = {
-        content: [...prevState.content],
-        editing: null,
-        inserting: null
-      };
-      newState.content[this.state.editing].params = params;
-      return newState;
+  handleEditorDone = () => {
+    // Update content state for Canvas (params are updated by reference)
+    this.setState({
+      editing: null,
+      inserting: null
     }, this.contentChanged);
   };
+
+  handleEditorRemove = () => {
+    this.setState(prevState => {
+      return {
+        editing: null,
+        inserting: null,
+        placing: prevState.editing,
+        deleting: prevState.editing,
+        dialog: 'delete'
+      };
+    }, this.contentChanged);
+  }
 
   /**
    * Convert camel case to kebab case.
@@ -1238,26 +1260,27 @@ export default class Canvas extends React.Component {
     const treewrapRect = this.treewrap.getBoundingClientRect();
     const treeRect = this.tree.getBoundingClientRect();
 
-    const wideLoad = (treeRect.width > treewrapRect.width);
-    const highLoad = (treeRect.height > treewrapRect.height);
-
     const padding = (this.props.scale * 64); // Allow exceeding by this much
+
+    const wideLoad = (treeRect.width + (padding * 4) > treewrapRect.width);
+    const highLoad = (treeRect.height + padding > treewrapRect.height);
+
 
     // Limit X movement
     if (wideLoad) {
       if (position.x > padding) {
         position.x = padding; // Max X
       }
-      else if ((treewrapRect.width - position.x - padding) > treeRect.width) {
-        position.x = (treewrapRect.width - treeRect.width - padding); // Min X
+      else if ((treewrapRect.width - position.x - (padding * 4)) > treeRect.width) {
+        position.x = (treewrapRect.width - treeRect.width - (padding * 4)); // Min X
       }
     }
     else {
-      if (position.x < 0) {
-        position.x = 0; // Min X
+      if (position.x < (padding / 2)) {
+        position.x = (padding / 2); // Min X
       }
-      else if ((position.x + treeRect.width) > treewrapRect.width) {
-        position.x = (treewrapRect.width - treeRect.width); // Max X
+      else if ((position.x + treeRect.width + padding) > treewrapRect.width) {
+        position.x = (treewrapRect.width - treeRect.width - padding); // Max X
       }
     }
 
@@ -1274,8 +1297,8 @@ export default class Canvas extends React.Component {
       if (position.y < 0) {
         position.y = 0; // Min Y
       }
-      else if ((position.y + treeRect.height) > treewrapRect.height) {
-        position.y = (treewrapRect.height - treeRect.height); // Max Y
+      else if ((position.y + treeRect.height + padding) > treewrapRect.height) {
+        position.y = (treewrapRect.height - treeRect.height - padding); // Max Y
       }
     }
   }
@@ -1375,6 +1398,28 @@ export default class Canvas extends React.Component {
     return this.getChildrenIds(focusId, true, true).indexOf(nodeId) === -1;
   }
 
+  renderConfirmationDialogContent = () => {
+    if (isBranching(this.state.content[this.state.deleting])) {
+      return (
+        <div className='confirmation-details'>
+          <p>If you proceed, you will lose all the content attached to this contents alternatives:</p>
+          <ul>
+            { this.getChildrenTitles(this.state.deleting).map((title, index) =>
+              <li key={index}>{title}</li>
+            ) }
+          </ul>
+        </div>
+      );
+    }
+    else {
+      return (
+        <div className='confirmation-details'>
+          <p>You will lose this content, but the children will be attached to the parent content.</p>
+        </div>
+      );
+    }
+  }
+
   render() {
     this.dropzones = [];
     this.dropzonesDisabled = (this.state.placing) ? this.getDisabledDropzones(this.state.placing) : [];
@@ -1409,7 +1454,7 @@ export default class Canvas extends React.Component {
           <Content
             inserting={ this.props.inserting }
             ref={ element => this['draggable--1'] = element }
-            width={ this.state.nodeSpecs.width }
+            width={ this.props.nodeSize.width }
             selected={ this.state.placing === -1 }
             onMove={ () => this.handleMove(-1) }
             onDropped={ () => this.handleDropped(-1) }
@@ -1444,7 +1489,8 @@ export default class Canvas extends React.Component {
           </Draggable>
           { !tree.nodes.length &&
             <StartScreen
-              handleClicked={ this.props.handleOpenTutorial }
+              handleClick={ this.props.onDropped }
+              handleTutorialClick={ this.props.handleOpenTutorial }
             >
               { this.renderDropzone(-9, {
                 x: 361.635,
@@ -1452,35 +1498,34 @@ export default class Canvas extends React.Component {
               }) }
             </StartScreen>
           }
-          { this.state.deleting !== null &&
+          { this.state.dialog !== null &&
             <ConfirmationDialog
-              icon={ this.state.dialog.icon } // TODO: Just send the whole dialog object? Should probably be improved when the l10n is being fixed.
-              headerText={ this.state.dialog.confirmationHeader }
-              body={ this.state.dialog.confirmationQuestion }
-              confirmationDetails={ this.state.dialog.confirmationDetails }
-              confirmationDetailsList={ this.state.dialog.confirmationDetailsList }
-              textConfirm={ this.state.dialog.textConfirm }
-              textCancel={ this.state.dialog.textCancel }
-              handleConfirm={ this.state.dialog.handleConfirm } // TODO: Rename to onConfirm ?
-              handleCancel={ this.state.dialog.handleCancel } // TODO: Rename to onCancel ?
+              action={ this.state.dialog }
+              onConfirm={ this.handleDelete }
+              onCancel={ this.handleCancel }
+            >
+              { this.renderConfirmationDialogContent() }
+            </ConfirmationDialog>
+          }
+          { tree.nodes.length &&
+            <QuickInfoMenu
+              fade={ this.props.highlight !== null }
+              onTutorialOpen={ this.props.handleOpenTutorial }
             />
           }
-          { this.state.editing !== null &&
-            <EditorOverlay
-              ref={ node => this.editorOverlay = node }
-              content={ interaction }
-              semantics={ this.props.semantics }
-              validAlternatives={ validAlternatives }
-              scoringOption={ this.props.scoringOption }
-              onDone={ this.handleEditorDone }
-            />
-          }
-          <QuickInfoMenu
-            expanded={ false }
-            l10n={ this.l10n.quickInfoMenu }
-            handleOpenTutorial={ this.props.handleOpenTutorial }
-          />
         </div>
+        { this.state.editing !== null &&
+          <EditorOverlay
+            ref={ node => this.editorOverlay = node }
+            content={ interaction }
+            semantics={ this.props.semantics }
+            validAlternatives={ validAlternatives }
+            scoringOption={ this.props.scoringOption }
+            onRemove={ this.handleEditorRemove }
+            onDone={ this.handleEditorDone }
+            isInserting={ this.props.inserting }
+          />
+        }
       </div>
     );
   }
@@ -1490,7 +1535,7 @@ Canvas.propTypes = {
   width: PropTypes.number,
   inserting: PropTypes.object,
   highlight: PropTypes.number,
-  onlyThisBall: PropTypes.string,
+  onlyThisBall: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   scale: PropTypes.number,
   center: PropTypes.bool,
   onCanvasCentered: PropTypes.func,

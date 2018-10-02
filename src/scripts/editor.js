@@ -23,7 +23,6 @@ export default class Editor extends React.Component {
 
     this.state = {
       activeIndex: 0,
-      settings: props.settings,
       libraries: null, // Needs to be loaded via AJAX
       numDefaultEndScenarios: 0,
       highlight: null,
@@ -34,6 +33,14 @@ export default class Editor extends React.Component {
       scoringOption: null,
       fullscreen: false,
       showFullScreenDialog: isFullScreenCapable,
+      nodeSize: {
+        width: 176,
+        height: 32,
+        spacing: {
+          x: 29,
+          y: 16
+        }
+      }
     };
   }
 
@@ -42,7 +49,9 @@ export default class Editor extends React.Component {
     window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesLoaded);
 
     // Add title field
-    this.props.main.parent.mainTitleField.$item.appendTo(this.topbar);
+    const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
+    titleField.$item.find('input')[0].placeholder = 'Enter title here';
+    titleField.$item.appendTo(this.topbar);
   }
 
   handleLibrariesLoaded = (libraries) => {
@@ -60,37 +69,6 @@ export default class Editor extends React.Component {
     this.setState({
       libraries: loadedLibraries
     });
-  }
-
-  /**
-   * Update settings
-   * TODO: For a more general solution such as the fullscreen editor, this
-   *       should be more abstract
-   *
-   * @param {Event} event - Change event.
-   */
-  handleSettingsChange = (event) => {
-    const target = event.target;
-    let value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-
-    if (name === 'endScreenScore') {
-      value = parseInt(value);
-    }
-
-    // TODO: It seems the next state depends on the current, this should be handled inside the setState() updater using prevState.
-    const settings = this.state.settings;
-    settings[[name]] = value;
-    this.setState({settings: settings});
-
-    // TODO: maintained in parent as well? We don't really need to have a local state then
-    this.props.updateParams(settings);
-  }
-
-  validate = () => {
-    if (this.canvas.state.editing !== null) {
-      this.canvas.editorOverlay.handleDone(); // Trigger saving and closing of form
-    }
   }
 
   handleMouseDown = (event) => {
@@ -224,6 +202,21 @@ export default class Editor extends React.Component {
     });
   };
 
+  handleNodeSize = (rect) => {
+    if ((rect.width && this.state.nodeSize.width !== rect.width) || (rect.height && this.state.nodeSize.height !== rect.height)) {
+      this.setState({
+        nodeSize: {
+          width: rect.width,
+          height: rect.height,
+          spacing: {
+            x: 29,
+            y: 16
+          }
+        },
+      });
+    }
+  }
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -246,10 +239,22 @@ export default class Editor extends React.Component {
         }
         <div className="topbar" ref={ element => this.topbar = element }>
           { H5PEditor.Fullscreen !== undefined &&
-            <div className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') } role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }/>
+            <div
+              className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') }
+              title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
+              role="button"
+              tabIndex="0"
+              onClick={ this.handleToggleFullscreen }
+            />
           }
           { this.state.fullscreen &&
-            <div className="proceed-button" role="button" tabIndex="0" onClick={ this.handleToggleFullscreen }>Proceed to Save{/* TODO: l10n */}</div>
+            <div
+              className="proceed-button"
+              title="Proceed to save your Branching Scenario"
+              role="button"
+              tabIndex="0"
+              onClick={ this.handleToggleFullscreen }
+            >Proceed to Save{/* TODO: l10n */}</div>
           }
         </div>
         <Tabs className="tab-view-wrapper"
@@ -258,12 +263,13 @@ export default class Editor extends React.Component {
         >
           <Tab
             onMouseUp={ this.handleMouseUp }
-            title="add content"
+            title="Create content"
             className="bs-editor-content-tab has-submenu">
             <ContentTypeMenu
               inserting={ this.state.inserting }
               libraries={ this.state.libraries }
               onMouseDown={ this.handleMouseDown }
+              onNodeSize={ this.handleNodeSize }
             />
             <Canvas
               ref={ node => this.canvas = node }
@@ -285,6 +291,7 @@ export default class Editor extends React.Component {
               translate={ this.state.translate }
               onCanvasTranslated={ this.handleCanvasTranslated }
               scoringOption={ this.state.scoringOption }
+              nodeSize={ this.state.nodeSize }
             />
             <Toolbar
               numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
@@ -295,30 +302,25 @@ export default class Editor extends React.Component {
               contentRect={ this.tree }
             />
           </Tab>
-          <Tab title="settings" className="bs-editor-settings-tab">
+          <Tab title="Settings" className="bs-editor-settings-tab">
             <TabViewSettings
               main={this.props.main}
-              value={this.state.settings}
-              startImageChooser={this.props.startImageChooser}
-              endImageChooser={this.props.endImageChooser}
-              onChange={this.handleSettingsChange}
               updateScoringOption={this.handleScoringOptionChange}
             />
           </Tab>
-          <Tab title="translations" className="bs-editor-translations-tab">
+          <Tab title="Interface translations" className="bs-editor-translations-tab">
             <TabViewTranslations
               parent={this.props.parent}
             />
           </Tab>
-          <Tab title="tutorial" className="bs-editor-tutorial-tab">
+          <Tab title="Get help" className="bs-editor-tutorial-tab">
             <TabViewTutorial
               handleOpenCanvas={ this.handleOpenCanvas }
             />
           </Tab>
-          <Tab title="metadata" className="bs-editor-metadata-tab">
+          <Tab title="Metadata" className="bs-editor-metadata-tab">
             <TabViewMetadata
-              $metadataForm={ this.props.main.parent.$metadataForm }
-              $mainTitleField={ this.props.main.parent.mainTitleField.$item }
+              metadataForm={ this.props.main.parent.metadataForm }
             />
           </Tab>
         </Tabs>
@@ -328,9 +330,5 @@ export default class Editor extends React.Component {
 }
 
 Editor.propTypes = {
-  libraries: PropTypes.array,
-  settings: PropTypes.object,
-  updateParams: PropTypes.func,
-  startImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
-  endImageChooser: PropTypes.instanceOf(H5PEditor.widgets.image),
+  libraries: PropTypes.array
 };

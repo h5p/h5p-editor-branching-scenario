@@ -13,6 +13,7 @@ export default class Tabs extends React.Component {
     return (
       <li
         key={ key }
+        title={ tab.props.title }
         className={[tab.props.className, this.props.activeIndex == key ? 'active' : ''].join(' ')}
         onClick={ () => this.props.onChange(key) }>
       </li>

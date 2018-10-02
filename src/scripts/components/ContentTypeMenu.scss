@@ -4,11 +4,11 @@
   display: inline-block;
   background-color: #363b42;
   height: 55em;
-  width: 10em;
-  min-width: 10em;
+  width: 13em;
+  min-width: 13em;
 
   .loading {
-    padding: 1rem;
+    padding: 1em;
     color: white;
   }
 }
@@ -20,11 +20,15 @@
 .label-info {
   position: relative;
   color: white;
-  font-size: 0.75rem;
-  line-height: 0.8rem;
-  padding-top: 1rem;
-  padding-left: 1rem;
+  font-size: 0.75em;
+  line-height: 1.25em;
+  padding-top: 1.333333333333333em;
+  padding-left: 1.333333333333333em;
   padding-bottom: 0;
+  font-weight: 300;
+  display: block;
+  margin-bottom: 0.6666666666666667em;
+  margin-top: 0.6666666666666667em;
 }
 
 .content-type-buttons {
@@ -43,13 +47,13 @@
   user-select: none;
 
   li {
-    width: 100%;
+    width: 11rem;
     height: 2rem;
     background: #2B2F36;
     padding: 0.5rem;
     display: block;
     box-sizing: border-box;
-    font-size: 0.7rem;
+    font-size: 0.7em;
     margin-bottom: 0.5rem;
     cursor: pointer;
     line-height: 0.875rem;
@@ -60,7 +64,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    transition: all 0.5s ease;
   }
 
   li:hover {
@@ -75,7 +78,7 @@
   }
 
   li:before {
-    font-family: "BSFont";
+    font-family: "Material Icons";
     display: block;
     float: left;
     padding-bottom: 0.2rem;
@@ -84,31 +87,32 @@
   }
 
   li.video:before {
-    content: '\e917';
+    content: $icon-video;
   }
 
   li.coursepresentation:before {
-    content: '\e916';
+    content: $icon-presentation;
   }
 
   li.advancedtext:before {
-    content: '\e90f';
+    content: $icon-text;
   }
 
   li.image:before {
-    content: '\e915';
+    content: $icon-image;
   }
 
   li.interactivevideo:before {
-    content: '\e914';
+    content: $icon-interactive-video;
   }
 
   li.imagehotspots:before {
-    content: '\e913';
+    content: $icon-image-hotspots;
   }
 
   li.branchingquestion:before {
-    content: '\E902';
+    font-family: "bs";
+    content: $icon-branching-question;
   }
 
   li.reuse-question {
@@ -120,7 +124,7 @@
     }
 
     &:before {
-      font-family: "CopyPaste";
+      font-family: "bs";
       content: $icon-paste;
     }
   }

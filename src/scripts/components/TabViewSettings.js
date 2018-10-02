@@ -1,40 +1,77 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import TooltipButton from './TooltipButton';
+import './TabViewSettings.scss';
 
 export default class TabViewSettings extends React.Component {
   constructor(props) {
     super(props);
 
-    this.refStartImageChooser = React.createRef();
-    this.refEndImageChooser = React.createRef();
+    this.refStartScreen = React.createRef();
+    this.refEndScreen = React.createRef();
     this.refScoringOption= React.createRef();
+
+    const params = this.props.main.params;
+
+    // Prepare fields for separate fieldsets
+    const startScreenField = H5PEditor.findSemanticsField(
+      'startScreen',
+      this.props.main.field
+    );
+    this.startScreenWrapper = document.createElement('div');
+
+    const endScreenField = H5PEditor.findSemanticsField(
+      'endScreens',
+      this.props.main.field
+    );
+    this.endScreenWrapper = document.createElement('div');
 
     const scoringOptionField = H5PEditor.findSemanticsField(
       'scoringOption',
       this.props.main.field
     );
-    const scoringOptionWrapper = document.createElement('div');
-    scoringOptionWrapper.classList.add('h5p-behavioural-settings');
-    const params = this.props.main.params;
+    this.scoringOptionWrapper = document.createElement('div');
 
+
+    // Fill fields
+    H5PEditor.processSemanticsChunk(
+      [startScreenField],
+      params,
+      H5PEditor.$(this.startScreenWrapper),
+      this.props.main
+    );
+    // Backup children
+    let children = [].concat(this.props.main.children);
+
+    const fakeParams = {};
+    fakeParams[endScreenField.field.name] = params.endScreens[0];
+    H5PEditor.processSemanticsChunk(
+      [endScreenField.field],
+      fakeParams,
+      H5PEditor.$(this.endScreenWrapper),
+      this.props.main
+    );
+    children = children.concat(this.props.main.children);
 
     H5PEditor.processSemanticsChunk(
       [scoringOptionField],
       params,
-      H5PEditor.$(scoringOptionWrapper),
+      H5PEditor.$(this.scoringOptionWrapper),
       this.props.main
     );
+    children = children.concat(this.props.main.children);
+
+    // Restore children
+    this.props.main.children = children;
 
     // Grab the select and listen for any changes to it
-    H5PEditor.followField(this.props.main, 'scoringOption', () => {
-      // Update scoring option
-      this.setState({
-        scoring: params.scoringOption
-      });
+    this.$scoringField = H5PEditor.$(this.endScreenWrapper).find('.field-name-endScreenScore');
+    H5PEditor.followField(this.props.main, scoringOptionField.name + '/' + scoringOptionField.name, () => {
+      // Can't use showWhen, because we don't have access to scoringOption in endScreen chunk
+      this.$scoringField.toggleClass('no-display', params.scoringOption !== 'static-end-score');
+
       this.props.updateScoringOption();
     });
-
-    this.scoringOptionWrapper = scoringOptionWrapper;
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
@@ -42,57 +79,11 @@ export default class TabViewSettings extends React.Component {
       tooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
       tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
     };
-
-    this.state = {
-      scoring: params.scoringOption
-    };
   }
 
   componentDidMount() {
-    /*
-		 * This is hacking the old widget to quickly suit the new prerequisites.
-		 * TODO: Create a new widget that can also be used in the fullscreen editor later
-		 */
-    this.props.startImageChooser.appendTo(this.refStartImageChooser.current);
-    const startImage = document.getElementById('startImage').firstChild;
-    startImage.removeChild(startImage.childNodes[0]);
-
-    this.props.startImageChooser.on('changedImage', event => {
-      // Pretend to be a React event
-      event.target = {
-        type: 'h5p-image',
-        name: 'startImage',
-        value: event.data
-      };
-      this.props.onChange(event);
-    });
-
-    // Same as above for default endscreen image
-    this.props.endImageChooser.appendTo(this.refEndImageChooser.current);
-    const endImage = document.getElementById('endImage').firstChild;
-    endImage.removeChild(endImage.childNodes[0]);
-
-    this.props.endImageChooser.on('changedImage', event => {
-      // Pretend to be a React event
-      event.target = {
-        type: 'h5p-image',
-        name: 'endImage',
-        value: event.data
-      };
-      this.props.onChange(event);
-    });
-
-    // Allow buttons inside labels being clickable
-    const manualFocus = document.getElementsByClassName('manual-focus');
-    for (let i = 0; i < manualFocus.length; i++) {
-      manualFocus[i].addEventListener('click', event => {
-        event.preventDefault();
-        if (manualFocus[i].htmlFor) {
-          document.getElementById(manualFocus[i].htmlFor).focus();
-        }
-      });
-    }
-
+    this.refStartScreen.current.appendChild(this.startScreenWrapper);
+    this.refEndScreen.current.appendChild(this.endScreenWrapper);
     this.refScoringOption.current.appendChild(this.scoringOptionWrapper);
   }
 
@@ -102,91 +93,45 @@ export default class TabViewSettings extends React.Component {
         <span className="tab-view-title">Settings</span>
         <span className="tab-view-description">Below are the settings for your <strong>Branching Questions</strong></span>
         <div className="tab-view-white-box">
-          <form>
-            <fieldset>
-              <legend className="tab-view-info">
-                Configure starting screen
-                <TooltipButton
-                  text={ this.l10n.tooltipStartingScreen }
-                  tooltipClass={ 'tooltip below' }
-                />
-              </legend>
-              <label htmlFor="startTitle">Course title</label>
-              <input
-                id="startTitle"
-                type="text"
-                name="startTitle"
-                value={ this.props.value.startTitle }
-                placeholder="Title for your course"
-                onChange={ this.props.onChange }
+          <fieldset>
+            <legend className="tab-view-info">
+              Configure starting screen
+              <TooltipButton
+                text={ this.l10n.tooltipStartingScreen }
+                tooltipClass={ 'tooltip below' }
               />
-              <label htmlFor="startSubtitle">Course details</label>
-              <input
-                id="startSubtitle"
-                type="text"
-                name="startSubtitle"
-                value={ this.props.value.startSubtitle }
-                placeholder="Details about the course"
-                onChange={ this.props.onChange }
+            </legend>
+            <div
+              ref={ this.refStartScreen }
+              className='h5p-scoring-option-wrapper'
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="tab-view-info">
+            Configure the default "End scenario" screen
+              <TooltipButton
+                text={ this.l10n.tooltipEndScenario }
               />
-              <label htmlFor="startImage">Upload the image</label>
-              <div
-                id="startImage"
-                name="startImage"
-                ref={ this.refStartImageChooser }
-              />
-            </fieldset>
-            <fieldset>
-              <legend className="tab-view-info">
-                Configure the default "End Scenario" screen
-                <TooltipButton
-                  text={ this.l10n.tooltipEndScenario }
-                />
-              </legend>
-              {
-                this.state.scoring === 'static-end-score' &&
-                <div className="h5p-end-score-wrapper">
-                  <label htmlFor="endScreenScore">Score for the default end scenario</label>
-                  <input
-                    id="endScreenScore"
-                    type="number"
-                    name="endScreenScore"
-                    value={ this.props.value.endScreenScore }
-                    onChange={ this.props.onChange }
-                  />
-                </div>
-              }
-              <label className="tab-view-info manual-focus" htmlFor="endFeedback">
-                Textual feedback for the user
-                <TooltipButton
-                  text={ this.l10n.tooltipEndFeedback }
-                />
-              </label>
-              <input
-                id="endFeedback"
-                type="text"
-                name="endFeedback"
-                placeholder="Some feedback for the user"
-                value={ this.props.value.endFeedback }
-                onChange={ this.props.onChange }
-              />
-              <label htmlFor="endImage">Upload the image</label>
-              <div
-                id="endImage"
-                name="endImage"
-                ref={ this.refEndImageChooser }
-              />
-            </fieldset>
-            <fieldset>
-              <legend className="tab-view-info">Behavioural settings</legend>
-              <div
-                ref={this.refScoringOption}
-                className='h5p-scoring-option-wrapper'
-              />
-            </fieldset>
-          </form>
+            </legend>
+            <div
+              ref={ this.refEndScreen }
+              className='h5p-scoring-option-wrapper'
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="tab-view-info">Behavioural settings</legend>
+            <div
+              ref={this.refScoringOption}
+              className='h5p-scoring-option-wrapper'
+            />
+          </fieldset>
         </div>
       </div>
     );
   }
 }
+
+TabViewSettings.propTypes = {
+  main: PropTypes.object,
+  updateScoringOption: PropTypes.func
+};

@@ -24,10 +24,16 @@ export default class Content extends React.Component {
    * @return {string}
    */
   static getTooltip(content) {
-    const lib = content.params.type.library.split(' ')[0];
-    const fallbackTip = lib.replace('H5P.', '');
+    const lib = content.params.type.library;
+    const machineName = content.params.type.library.split(' ')[0];
+    const libraryMetadata = H5PEditor.LibraryListCache.libraryCache[lib];
+    let fallbackTip = libraryMetadata && libraryMetadata.title ? libraryMetadata.title : '';
+
+    if (!fallbackTip) {
+      fallbackTip = machineName.replace('H5P.', '');
+    }
     let html;
-    switch (lib) {
+    switch (machineName) {
       case 'H5P.AdvancedText':
         if (content.params.type.params.text) {
           html = Content.stripHTML(content.params.type.params.text);
@@ -36,13 +42,10 @@ export default class Content extends React.Component {
           html = content.params.type.metadata.title;
         }
         return (html !== undefined ? html : fallbackTip);
-      case 'H5P.BranchingQuestion':
-        return (content.params.type.params.branchingQuestion
-          && content.params.type.params.branchingQuestion.question)
-          ? Content.stripHTML(content.params.type.params.branchingQuestion.question)
-          : fallbackTip;
       default:
-        return content.params.type.metadata ? content.params.type.metadata.title : fallbackTip;
+        return (content.params.type.metadata && content.params.type.metadata.title)
+          ? content.params.type.metadata.title
+          : fallbackTip;
     }
   }
 
@@ -185,6 +188,10 @@ export default class Content extends React.Component {
       elementClass += ' fade';
     }
 
+    if (this.props.hasCustomEndScreen) {
+      elementClass += ' endscreenCustom';
+    }
+
     return (
       <Draggable
         ref={ node => this.element = node }
@@ -201,8 +208,12 @@ export default class Content extends React.Component {
         onStarted={ this.props.onPlacing }
         onMoved={ this.handleMoved }
         onStopped={ this.handleStopped }
+        disabled={ this.props.disabled }
       >
-        <div className='draggable-wrapper'>
+        <div
+          className='draggable-wrapper'
+          onDoubleClick={ this.props.onEdit }
+        >
           <div className={ 'draggable-label ' + this.props.contentClass }>
             { this.props.children }
           </div>
@@ -218,9 +229,17 @@ export default class Content extends React.Component {
         }
         { this.state.contentMenuActive &&
           <SubMenu
+            isContent={ this.props.children !== 'Branching Question' }
             onEdit={ () => this.handleSubMenuAction('onEdit') }
             onCopy={ () => this.handleSubMenuAction('onCopy') }
             onDelete={ this.props.onDelete }
+          />
+        }
+        {
+          this.props.hasLoopBack &&
+          <div
+            className='loop-back'
+            onClick={() => this.props.highlightLinkedContent()}
           />
         }
       </Draggable>

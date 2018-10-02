@@ -1,51 +1,3 @@
-a {
-  color: #1773DA;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-input[type=text], input[type=number], select, .editor-path-dropzone {
-  box-sizing: border-box;
-  display: inline-block;
-  border-radius: 4px;
-  vertical-align: middle;
-  border: 2px solid #e2e5ee;
-  width: 50%;
-  padding: 0.958em;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  font-size: 0.833em;
-  transition: all 0.1s ease; }
-
-.editor-path-dropzone {
-  margin-top: 0.7rem;
-}
-
-input[type=text]:focus, input[type=number]:focus, select:focus {
-  border-color: #98cbe8;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(152, 203, 232, 0.6); }
-
-input[type=checkbox] {
-  background-color: #363b42;
-  border: solid 2px #cccccc;
-  margin: 0.3rem; }
-
-input[type="button"], input[type="submit"] {
-  font-size: 100%;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  border-radius: 2px;
-  cursor: pointer; }
-
-form {
-  height: 100%;
-}
-
 .h5p-branchingscenario-editor .h5peditor-form {
   .tab-panel {
   	display: none;
@@ -70,7 +22,7 @@ form {
     background-color: #F1F3F6;
     box-sizing: border-box;
     display: block;
-    width: calc(100% - 2rem);
+    width: 100%;
     box-sizing: border-box;
     display: block;
     position: absolute;
@@ -104,6 +56,7 @@ form {
     margin-top: 1rem;
     max-height: calc(100% - 7.55rem);
     overflow-y: auto;
+    max-width: 900px;
   }
 
   .tab-view-title {
@@ -111,6 +64,7 @@ form {
     display: block;
     font-weight: 300;
     color: #1773DA;
+    max-width: 900px;
   }
 
   .tab-view-description {
@@ -118,6 +72,7 @@ form {
     margin-top: 0.3rem;
     display: block;
     color: #626262;
+    max-width: 900px;
   }
 
   .tab-view-info {
@@ -145,9 +100,8 @@ form {
     color: #363b42; }
 
   .tab-view-info-tip::before {
-    font-family: BSFont;
     position: absolute;
-    content: "\1F6C8";
+    content: "";
     font-size: 1.3rem;
     color: #1773DA;
     left: 0.6rem;

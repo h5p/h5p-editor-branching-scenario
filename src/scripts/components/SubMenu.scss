@@ -12,7 +12,8 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   margin: 0;
   list-style: none;
-  padding: 0;
+  padding: 0.25rem;
+  font-size: 0.75rem;
 
   li {
     padding: 0.5rem;
@@ -37,26 +38,20 @@
     border-top: solid 0.042rem #F1F3F6;
   }
 
-  li.start-preview:before {
-    font-family: BSFont;
-    content: $icon-preview;
-    margin-right: 0.3em;
-  }
-
   li.edit-content:before {
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-edit;
     margin-right: 0.3em;
   }
 
   li.copy-content:before {
-    font-family: CopyPaste;
+    font-family: bs;
     content: $icon-copy;
     margin-right: 0.3em;
   }
 
   li.delete-content:before {
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-delete;
     margin-right: 0.3em;
   }

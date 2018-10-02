@@ -3,15 +3,14 @@
 .editor-overlay {
   background: #fff;
   border-radius: 5px;
-  width: 80%;
-  max-width: 80rem;
-  max-height: 80%;
-  height: 80%;
+  width: 90%;
+  max-width: 53rem;
+  max-height: 90%;
+  height: 90%;
   position: absolute;
-  transition: all 5s ease-in-out;
-  transform: translate(-50%, -50%);
   left: 50%;
   top: 50%;
+  transform: translate(-50%,-50%);
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   font-size: 0.7rem;
   z-index:61;
@@ -28,10 +27,6 @@
 
   .field.library  > .libwrap {
     margin-top: 0;
-  }
-
-  > :not(.library) {
-    display: none;
   }
 }
 
@@ -81,14 +76,21 @@
   text-overflow: ellipsis;
   overflow: hidden;
   color: #363b42;
-  font-size: 0.7rem;
-  padding-top: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  padding-top: 0.8em;
 
   &:before {
     float: inherit;
-    font-family: "BSFont";
+    font-family: "Material Icons";
     font-size: 1rem;
+    font-weight: normal;
     margin-right: 0.3rem;
+    padding-right: 0.5em;
+  }
+
+  &.editor-overlay-icon-course-presentation:before {
+    content: $icon-presentation;
   }
 
   &.editor-overlay-icon-advanced-text:before {
@@ -110,6 +112,11 @@
   &.editor-overlay-icon-video:before {
     content: $icon-video;
   }
+
+  &.editor-overlay-icon-branching-question:before {
+    font-family: "bs";
+    content: $icon-branching-question;
+  }
 }
 
 .editor-overlay .editor-overlay-header .buttons {
@@ -117,7 +124,7 @@
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  padding: 0.7em 1.5rem;
+  padding: 0.7em;
   white-space: nowrap;
 }
 
@@ -138,8 +145,10 @@
   background-color: #dbdee3;
 }
 
-.editor-overlay .editor-overlay-header .buttons .buttonBlue {
-  font-size: 100%;
+.editor-overlay .editor-overlay-header .buttons .button-blue {
+  font-size: 0.85rem;
+  font-weight: bold;
+  font-family: H5PRoboto;
   padding: 0.4rem 1rem;
   text-decoration: none;
   border-radius: 2px;
@@ -148,10 +157,31 @@
   color: #fff;
   background-color: #1773DA;
   border: solid 2px #1773DA;
+
+  &:not(:first-child) {
+    margin-left: 1em;
+  }
 }
 
-.editor-overlay .editor-overlay-header .buttons .buttonBlue:hover {
+.editor-overlay .editor-overlay-header .buttons .button-blue:hover {
   background-color: #1567c3;
+}
+
+.editor-overlay .editor-overlay-header .buttons .button-remove {
+  font-size: 0.85rem;
+  font-family: H5PRoboto;
+  padding: 0.4rem 1rem;
+  text-decoration: none;
+  border-radius: 2px;
+  cursor: pointer;
+
+  color: #a00;
+  background: none;
+  border: none;
+
+  &:not(:first-child) {
+    margin-left: 1em;
+  }
 }
 
 .editor-overlay .editor-overlay-titlefield {
@@ -162,15 +192,9 @@
 }
 
 .editor-overlay .editor-overlay-content {
-  padding: 0.7rem 1.5rem;
+  padding: 1.5rem;
   box-sizing: border-box;
   overflow-y: auto;
-}
-
-.editor-overlay .editor-overlay-semantics {
-  padding: 0.8rem;
-  border: solid 2px rgba(18, 14, 14, 0.1);
-  margin: 0.7rem 0.2rem;
 }
 
 .editor-overlay .editor-overlay-footer {
@@ -196,8 +220,8 @@
   content: '\e912';
 }
 
-.editor-overlay .h5p-editor-branching-question {
-  .content.hide-score .field-name-endScreenScore {
+.editor-overlay .editor-overlay-content:not(.dynamic-score) {
+  .h5p-editor-branching-question .content.hide-score .field-name-endScreenScore {
     display: none;
   }
 }
@@ -206,4 +230,23 @@
   .h5p-editor-branching-question .field-name-endScreenScore {
     display: none;
   }
+}
+
+.editor-overlay {
+  .editor-overlay-feedback-semantics {
+    margin-top: 2em;
+  }
+
+  .editor-overlay-content:not(.dynamic-score) {
+    .editor-overlay-feedback-semantics.hide-score .field-name-endScreenScore {
+      display: none;
+    }
+  }
+}
+
+.editor-overlay.h5p-branching-question .editor-overlay-feedback-semantics {
+  display: none;
+}
+.editor-overlay-semantics {
+  margin-bottom: 20px;
 }

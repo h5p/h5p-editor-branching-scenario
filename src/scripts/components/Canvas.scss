@@ -60,18 +60,18 @@
   line-height: 2.4;
   text-align: center;
   font-weight: bold;
-  border: solid 2px #1773DA;
-  background-color: #1773DA;
+  border: solid 2px #396ad1;
+  background-color: #396ad1;
   cursor: default;
 }
 
 .alternative-ball::after {
   position: absolute;
-  font-family: "BSFont";
+  font-family: "Material Icons";
   display: block;
-  top: -0.85em;
+  top: -1.2em;
   left: 1.5em;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #f31635;
 }
 
@@ -82,12 +82,8 @@
   border: solid 2px #1773DA;
 }
 
-.alternative-ball.loop::after {
-  content: "\E906";
-}
-
 .alternative-ball.endscreenCustom::after {
-  content: "\E907";
+  content: $icon-end-scenario;
 }
 
 .dark-tooltip {
@@ -137,7 +133,8 @@
 
 .dark .draggable,
 .draggable.highlight {
-  box-shadow: 0 0 4px 1px #1773DA;
+  border: solid 1px #8fc3ff;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 1), 0 0 8px rgb(81, 192, 255);
   pointer-events: none;
 }
 .dark .fade {
@@ -152,4 +149,68 @@
   top: 0;
   left: 0;
   z-index: 22;
+}
+
+.alternative-ball {
+  .loop-back {
+    position: absolute;
+    display: block;
+    top: -1.15em;
+    left: 1.6em;
+    font-size: 0.9rem;
+    transform: rotate(-45deg);
+    cursor: pointer;
+  }
+
+  .loop-back:after {
+    font-family: "Material Icons";
+    content: "\E627";
+    border-radius: 50%;
+    padding: 0.1em;
+    color: #f31635;
+  }
+
+  .loop-back:hover:after {
+    color: #fff;
+    background: #f31635;
+  }
+}
+
+.draggable {
+  .loop-back {
+    position: absolute;
+    display: block;
+    top: -0.85em;
+    right: -1.05em;
+    font-size: 0.9rem;
+    transform: rotate(-45deg);
+    cursor: pointer;
+  }
+
+  .loop-back:after {
+    font-family: "Material Icons";
+    content: "\E627";
+    border-radius: 50%;
+    padding: 0.1em;
+    color: #f31635;
+  }
+
+  .loop-back:hover:after {
+    color: #fff;
+    background: #f31635;
+  }
+}
+
+.draggable:after {
+  position: absolute;
+  font-family: "Material Icons";
+  display: block;
+  top: -0.5em;
+  right: -0.9em;
+  font-size: 0.9rem;
+  color: #f31635;
+}
+
+.draggable.endscreenCustom:after {
+  content: $icon-end-scenario;
 }

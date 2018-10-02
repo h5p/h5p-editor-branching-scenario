@@ -10,9 +10,12 @@
   color: #e9ebee;
   display: flex;
 }
+.h5peditor-form.h5peditor-fullscreen .toolbar {
+  position: fixed;
+}
 .missing-end-scenarios {
-  border: #1773DA solid 2px;
-  color: #1773DA;
+  border: #549AEC solid 2px;
+  color: #549AEC;
   font-weight: bold;
   border-radius: 50%;
   width: 1.5em;
@@ -61,8 +64,8 @@
   top: 0.5em;
 }
 .close-info-popup-button:after {
-  font-family: "BSFont";
-  content: "\e90a";
+  font-family: "Material Icons";
+  content: $icon-close;
 }
 .zoom-wrapper {
   padding: 0.5em;
@@ -82,7 +85,7 @@
   cursor: pointer;
 
   &:before {
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-zoom-in;
   }
 }
@@ -95,7 +98,7 @@
   cursor: pointer;
 
   &:before {
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-zoom-out;
   }
 }
@@ -106,7 +109,7 @@
   &:before {
     font-size: 1.75em;
     cursor: pointer;
-    font-family: BSFont;
+    font-family: "Material Icons";
     content: $icon-fit-to-canvas;
   }
 }
