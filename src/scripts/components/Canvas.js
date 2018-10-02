@@ -859,7 +859,7 @@ export default class Canvas extends React.Component {
             className={ alternativeBallClasses }
             aria-label={ /* TODO: l10n */ 'Alternative ' + (num + 1) }
             onDoubleClick={() => {
-              this.handleContentEdit(id);
+              this.handleContentEdit(parent);
             }}
             style={ {
               left: (alternativesOffsetX + nodeCenter - (this.props.nodeSize.spacing.y * 0.75) - 1) + 'px',
