@@ -1068,7 +1068,7 @@ export default class Canvas extends React.Component {
               }
 
               // Remove form
-              deleteNode.formChildren.forEach(child => child.remove());
+              H5PEditor.removeChildren(deleteNode.formChildren);
             });
         });
       };
