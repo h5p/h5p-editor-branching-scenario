@@ -203,10 +203,16 @@ export default class Editor extends React.Component {
   };
 
   handleNodeSize = (rect) => {
-    if ((rect.width && this.state.nodeSize.width !== rect.width) || (rect.height && this.state.nodeSize.height !== rect.height)) {
+    let width;
+    if (rect.width) {
+      // The canvas nodes are a bit larger than the menu nodes
+      width = Math.ceil(rect.width * (176 / 152));
+    }
+    if ((rect.width && this.state.nodeSize.width !== width) || (rect.height && this.state.nodeSize.height !== rect.height)) {
       this.setState({
         nodeSize: {
-          width: rect.width,
+          insertingWidth: rect.width,
+          width: width,
           height: rect.height,
           spacing: {
             x: 29,
