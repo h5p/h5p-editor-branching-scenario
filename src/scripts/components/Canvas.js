@@ -1603,7 +1603,7 @@ export default class Canvas extends React.Component {
             { this.props.inserting.library.title }
           </Content>
         }
-        <div className={`canvas${this.state.placing ? ' placing-draggable' : ''}`}>
+        <div className={`canvas${this.state.placing !== null ? ' placing-draggable' : ''}`}>
           <Draggable
             ref={ node => this.treewrap = node }
             className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }

@@ -2,7 +2,7 @@
 
 .content-type-menu {
   display: inline-block;
-  background-color: #363b42;
+  background-color: $col1;
   height: 55em;
   width: 11.5em;
   min-width: 11.5em;
@@ -74,7 +74,7 @@
 
   li:active {
     border: solid 1px $accent-col;
-    background-color: #191e22;
+    background-color: $col6;
   }
 
   li:before {

@@ -101,6 +101,15 @@
   background-color: $draggable-replacing-background;
 }
 
+.canvas.placing-draggable .draggable:hover .draggable-wrapper {
+  background-color: $draggable-replacing-background;
+}
+
+.canvas.placing-draggable .draggable:hover .dropzone-wrapper {
+  border-color: $drop-zone-highlight-border;
+  background-color: $drop-zone-highlight-background;
+}
+
 .draggable-label {
   margin: 0.5rem 2rem 0.5rem 0.5rem;
   overflow: hidden;
@@ -170,7 +179,7 @@
   }
 }
 .content-menu-button.active,
-.draggable.ready .draggable-wrapper:hover .content-menu-button {
+.canvas:not(.placing-draggable) .draggable.ready .draggable-wrapper:hover .content-menu-button {
   opacity: 1;
   visibility: visible;
   transition-delay: 0s;
