@@ -913,7 +913,7 @@ export default class Canvas extends React.Component {
       }
 
       // Increase same level offset + offset required by subtree
-      const elementWidth = (content ? this.props.nodeSize.width : this.state.dzSpecs.width);
+      const elementWidth = (content ? (parentIsBranching && !drawAboveLine && id > -1 ? this.state.dzSpecs.width : this.props.nodeSize.width) : this.state.dzSpecs.width);
       x += (subtreeWidth >= this.props.nodeSize.width ? subtreeWidth : elementWidth);
 
       if (subtree) {
