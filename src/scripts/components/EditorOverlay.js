@@ -6,6 +6,7 @@ import './EditorOverlay.scss';
 import Canvas from './Canvas';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
 import { isBranching } from '../helpers/Library';
+import Content from "./Content";
 
 export default class EditorOverlay extends React.Component {
 
@@ -146,12 +147,31 @@ export default class EditorOverlay extends React.Component {
     this.props.onNextContentChange(this.props.content.params, parseInt(value));
   };
 
+  /**
+   * Handle click on "remove".
+   */
+  handleRemove = () => {
+    this.finalizeForm();
+    this.props.onRemove();
+  }
+
+  /**
+   * Handle click on "done".
+   */
   handleDone = () => {
+    this.finalizeForm();
+
+    // Update Canvas state
+    this.props.onDone();
+  }
+
+
+  /**
+   * Validate and update form on closing.
+   */
+  finalizeForm = () => {
     // Validate all form children to save their current value
-    const valid = this.validate();
-    if (!valid) {
-      return; // Don't close form yet
-    }
+    this.validate();
 
     // Remove any open wysiwyg fields
     if (H5PEditor.Html) {
@@ -180,9 +200,6 @@ export default class EditorOverlay extends React.Component {
         branchingQuestionEditor.collapseListAlternatives();
       }
     }
-
-    // Update Canvas state
-    this.props.onDone();
   }
 
   render() {
@@ -195,16 +212,25 @@ export default class EditorOverlay extends React.Component {
     const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
     const feedbackGroupClass = this.props.content.params.nextContentId !== -1 ? ' hide-score' : '';
 
+    const metadata = this.props.content.params.type.metadata;
+    const hasMetadataTitle = metadata
+      && metadata.title
+      && metadata.title.trim().length > 0;
+
+    let title = hasMetadataTitle
+      ? metadata.title
+      : Content.getTooltip(this.props.content, true);
+
     return (
       <div className={`editor-overlay${overlayClass}`}>
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }
-          >{ this.props.content.params.type.metadata ? this.props.content.params.type.metadata.title : 'New' }</span>
+          >{ title }</span>
           <span className="buttons">
             <button
               className="button-remove"
-              onClick={ this.props.onRemove }
+              onClick={ this.handleRemove }
             >
               Remove { /* TODO: l10 */ }
             </button>

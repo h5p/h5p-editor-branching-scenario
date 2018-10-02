@@ -62,7 +62,7 @@
   font-weight: bold;
   border: solid 2px #396ad1;
   background-color: #396ad1;
-  cursor: default;
+  cursor: pointer;
 }
 
 .alternative-ball::after {
@@ -78,8 +78,8 @@
 .alternative-ball.endscreen {
   background-color: #f2f2f2;
   background: #f2f2f2;
-  color: #1773DA;
-  border: solid 2px #1773DA;
+  color: $accent-col;
+  border: solid 2px $accent-col;
 }
 
 .alternative-ball.endscreenCustom::after {
@@ -131,8 +131,7 @@
   white-space: nowrap;
 }
 
-.dark .draggable,
-.draggable.highlight {
+.dark .draggable {
   border: solid 1px #8fc3ff;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 1), 0 0 8px rgb(81, 192, 255);
   pointer-events: none;

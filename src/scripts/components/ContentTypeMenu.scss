@@ -48,8 +48,8 @@
 
   li {
     width: 11rem;
-    height: 2rem;
-    background: #2B2F36;
+    height: 2.2rem;
+    background: $col10;
     padding: 0.5rem;
     display: block;
     box-sizing: border-box;
@@ -59,7 +59,7 @@
     line-height: 0.875rem;
     color: #e9ebee;
     font-weight: 400;
-    border: solid 1px #2B2F36;
+    border: solid 2px $col10;
     border-radius: 3px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -69,11 +69,11 @@
   li:hover {
     color: #e9ebee;
     background-color: #525863;
-    border: dotted 1px #e9ebee;
+    border: solid 2px $draggable-hover-border;
   }
 
   li:active {
-    border: solid 1px #1773DA;
+    border: solid 1px $accent-col;
     background-color: #191e22;
   }
 
@@ -118,7 +118,7 @@
   li.reuse-question {
     &.disabled {
       border: initial;
-      background: #2B2F36;
+      background: $col10;
       opacity: 0.3;
       cursor: auto;
     }
