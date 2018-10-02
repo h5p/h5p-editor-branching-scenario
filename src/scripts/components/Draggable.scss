@@ -6,7 +6,7 @@
   position:absolute;
   height: 2rem;
   box-sizing: border-box;
-  background: #2B2F36;
+  background: $col10;
   margin-bottom: 0.5rem;
 
   font-size: 0.7rem;
@@ -20,14 +20,15 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   z-index: 10;
+  transition: box-shadow 0.2s ease;
 
-  &:hover {
+  &.dragging:hover {
     box-shadow: rgba(0, 0, 0, 0.4) 0 3px 10px;
     transition: box-shadow 0.2s ease;
   }
 
   &.branchingquestion {
-    background: #396ad1;
+    background: $bq-background;
     color: #fff;
     cursor: default;
 
@@ -35,6 +36,24 @@
       box-shadow: none;
     }
   }
+
+  .dropzone-wrapper {
+    position: absolute;
+    width: calc(100% + 3px);
+    height: calc(100% + 8px);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    border-radius: 3px;
+    color: $accent-col;
+    background-color: $drop-zone-background;
+    border: dotted 2px $accent-col;
+    visibility: hidden;
+  }
+}
+
+.canvas.placing-draggable .draggable:not(.selected) .dropzone-wrapper {
+  visibility: visible;
 }
 
 .selected {
@@ -50,7 +69,37 @@
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
   position: relative;
+  background: $col10;
+  z-index: 1;
+  border: solid 2px transparent;
+  transform: translateY(-2px);
   overflow: hidden;
+}
+
+.draggable.branchingquestion .draggable-wrapper {
+  background: $bq-background;
+}
+
+.selected .draggable-wrapper {
+  border-color: $draggable-active-border;
+}
+
+.canvas .draggable-wrapper {
+  border-width: 3px;
+  transform: translateY(-3px);
+}
+
+.canvas .selected .draggable-wrapper {
+  box-shadow: rgba(0,0,0,0.4) 0 3px 10px;
+}
+
+.draggable.highlight .dropzone-wrapper {
+  border-color: $drop-zone-highlight-border;
+  background-color: $drop-zone-highlight-background;
+}
+
+.draggable.highlight .draggable-wrapper {
+  background-color: $draggable-replacing-background;
 }
 
 .draggable-label {
@@ -98,8 +147,8 @@
 }
 
 .content-menu-button {
-  top: 0em;
-  background: $red;
+  top: 0;
+  background: #000;
   opacity: 0;
   width: 1.9rem;
   height: 2.1rem;

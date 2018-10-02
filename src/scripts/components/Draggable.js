@@ -117,8 +117,14 @@ export default class Draggable extends React.Component {
 
   render() {
     return (
-      <div ref={ node => this.element = node } className={ this.props.className } onMouseDown={ this.handleMouseDown } style={ this.props.style }>
-        { this.props.children }
+      <div
+        ref={node => this.element = node}
+        className={this.props.className}
+        onMouseDown={this.handleMouseDown}
+        style={this.props.style}
+      >
+        {this.props.children}
+        <div className='dropzone-wrapper'/>
       </div>
     );
   }
