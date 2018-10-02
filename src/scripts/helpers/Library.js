@@ -43,8 +43,40 @@ const getAlternativeName = (content) => {
   return name.length > 80 ? name.substr(0, 77) + '...' : name;
 };
 
+/**
+ * Determine if the content has the given nextContentId
+ *
+ * @param {Object} content
+ * @param {number} id
+ * @param {boolean} [num=null] Return num instead of ID
+ * @return {number} ID of alternative, -1 for content or null if not found
+ */
+const hasNextContent = (content, id, num = null) => {
+  if (isBranching(content)) {
+    if (num !== null) {
+      num = 0;
+    }
+    for (let i = 0; i < content.params.type.params.branchingQuestion.alternatives.length; i++) {
+      if (content.params.type.params.branchingQuestion.alternatives[i].nextContentId === id) {
+        if (num === null) {
+          return i;
+        }
+        else {
+          num++;
+        }
+      }
+    }
+    return num;
+  }
+  else if (content.params.nextContentId === id) {
+    return num !== null ? 1 : -1;
+  }
+  return num !== null ? 0 : null;
+};
+
 export {
   isBranching,
   getAlternativeName,
   getMachineName,
+  hasNextContent,
 };

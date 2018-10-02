@@ -95,19 +95,17 @@ export default class EditorOverlay extends React.Component {
     if (!branchingQuestionEditor) {
       throw Error('Unable to locate Branching Question Editor. Did someone change Core?');
     }
+    this.renderBranchingOptions = [];
 
     // Add <BranchingOptions> to each alternative in Branching Question
     branchingQuestionEditor.setAlternatives((listIndex, selectorWrapper) => {
       let nextContentId = alternatives[listIndex].nextContentId;
 
       const branchingUpdated = (value) => {
-        value = parseInt(value);
-        branchingQuestionEditor.setNextContentId(listIndex, value);
-        nextContentId = value;
-        render(); // Update with the new state
+        this.props.onNextContentChange(alternatives[listIndex], parseInt(value), render);
       };
 
-      const render = () => {
+      const render = (nextContentId) => {
         ReactDOM.render((
           <BranchingOptions
             nextContentId={ nextContentId }
@@ -118,6 +116,7 @@ export default class EditorOverlay extends React.Component {
           />
         ), selectorWrapper);
       };
+      this.renderBranchingOptions[listIndex] = render;
 
       // Set default value to end scenario
       const normalizedNextContentId = nextContentId === '' ? -1 : nextContentId;
@@ -125,7 +124,7 @@ export default class EditorOverlay extends React.Component {
         listIndex,
         normalizedNextContentId
       );
-      render();
+      render(nextContentId);
     });
   }
 
@@ -144,8 +143,7 @@ export default class EditorOverlay extends React.Component {
   }
 
   handleNextContentIdChange = (value) => {
-    this.props.content.params.nextContentId = parseInt(value);
-    this.forceUpdate();
+    this.props.onNextContentChange(this.props.content.params, parseInt(value));
   };
 
   handleDone = () => {
