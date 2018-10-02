@@ -998,6 +998,9 @@ export default class Canvas extends React.Component {
                 successorId = deleteNode.params.nextContentId;
               }
 
+              // Keep track if first node is being deleted to swap nodes later
+              const newFirstNode = (deleteId === 0) ? successorId - 1 : undefined;
+
               // Exchange all links pointing to node to be deleted to its successor instead.
               newState.content.forEach(node => {
                 const affectedNodes = (isBranching(node)) ?
@@ -1034,6 +1037,11 @@ export default class Canvas extends React.Component {
                 removeNode(childrenIds, true);
               }
 
+              // Swap nodes to set new first node
+              if (newFirstNode > -1) {
+                this.swapNodes(newState.content, 0, newFirstNode);
+              }
+
               // Remove form
               deleteNode.formChildren.forEach(child => child.remove());
             });
@@ -1055,33 +1063,56 @@ export default class Canvas extends React.Component {
           newState.editing = prevState.deleting;
         }
         else {
-          // Replace with existing node
+          // Replace info node with existing info node (BQs can't be repalced or moved)
 
-          // BQs take their children with them and don't leave a node to attach
-          const nodeToAttach = isBranching(newState.content[prevState.placing]) ?
-            -1 :
-            newState.content[prevState.placing].params.nextContentId;
+          // If both nodes are adjacent, we can just delete
+          if (newState.content[prevState.placing].params.nextContentId !== prevState.deleting &&
+            newState.content[prevState.deleting].params.nextContentId !== prevState.placing) {
 
-          // Point parent of "placing" to successor of "placing"
-          this.replaceChild(
-            this.getParent(prevState.placing, newState.content),
-            nodeToAttach,
-            prevState.placing
-          );
+            // BQs take their children with them and don't leave a node to attach
+            const nodeToAttach = isBranching(newState.content[prevState.placing]) ?
+              -1 :
+              newState.content[prevState.placing].params.nextContentId;
 
-          // Point parent of "deleting" to "placing"
-          this.replaceChild(
-            this.getParent(prevState.deleting, newState.content),
-            prevState.placing,
-            prevState.deleting
-          );
+            // Handle first node being moved somewhere else (has no predecessor)
+            const newFirstNode = (prevState.placing === 0) ?
+              newState.content[prevState.placing].params.nextContentId :
+              undefined;
 
-          // Point "placing" to successor of "deleting"
-          this.replaceChild(
-            newState.content[prevState.placing],
-            newState.content[prevState.deleting].params.nextContentId,
-            newState.content[prevState.placing].params.nextContentId
-          );
+            // Point parent of "placing" to successor of "placing"
+            this.replaceChild(
+              this.getParent(prevState.placing, newState.content),
+              nodeToAttach,
+              prevState.placing
+            );
+
+            // Point "placing" to successor of "deleting"
+            this.replaceChild(
+              newState.content[prevState.placing],
+              newState.content[prevState.deleting].params.nextContentId,
+              newState.content[prevState.placing].params.nextContentId
+            );
+
+            if (prevState.deleting === 0) {
+              // Point "deleting" to "placing" (special case for first node)
+              this.replaceChild(
+                newState.content[prevState.deleting],
+                prevState.placing
+              );
+            }
+            else {
+              // Point parent of "deleting" to "placing"
+              this.replaceChild(
+                this.getParent(prevState.deleting, newState.content),
+                prevState.placing,
+                prevState.deleting
+              );
+            }
+
+            if (newFirstNode) {
+              this.swapNodes(newState.content, 0, newFirstNode);
+            }
+          }
 
           removeNode(prevState.deleting);
         }
@@ -1093,6 +1124,36 @@ export default class Canvas extends React.Component {
 
       return newState;
     }, this.contentChanged);
+  }
+
+  /**
+   * Swap position of two nodes in tree.
+   *
+   * @param {content} Content.
+   * @param {number} nodeId1 Id of node 1.
+   * @param {number} nodeId2 Id of node 2.
+   */
+  swapNodes = (content, nodeId1, nodeId2) => {
+    // Update links
+    content.forEach(node => {
+      const successorIds = (isBranching(node)) ?
+        node.params.type.params.branchingQuestion.alternatives :
+        [node.params];
+
+      successorIds.forEach(alt => {
+        if (alt.nextContentId === nodeId1) {
+          alt.nextContentId = nodeId2;
+        }
+        else if (alt.nextContentId === nodeId2) {
+          alt.nextContentId = nodeId1;
+        }
+      });
+    });
+
+    // Swap node position
+    const tmp = content[nodeId1];
+    content[nodeId1] = content[nodeId2];
+    content[nodeId2] = tmp;
   }
 
   handleCancel = () => { // TODO: What are we canceling? Can this be used for everything?
