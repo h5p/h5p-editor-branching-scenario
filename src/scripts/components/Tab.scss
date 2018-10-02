@@ -1,3 +1,5 @@
+@import '../../styles/main.scss';
+
 .h5p-branchingscenario-editor .h5peditor-form {
   .tab-panel {
   	display: none;
@@ -37,7 +39,7 @@
   }
 
   .tab-view-full-page fieldset legend {
-    color: #363b42;
+    color: $col1;
     background-color: white;
     padding: 0.6rem;
     font-weight: bold;
@@ -97,7 +99,7 @@
     font-size: 0.75rem;
     line-height: 0.9rem;
     font-family: "Roboto";
-    color: #363b42; }
+    color: $col1; }
 
   .tab-view-info-tip::before {
     position: absolute;

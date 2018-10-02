@@ -1,4 +1,5 @@
 @import '../../styles/components/icons.scss';
+@import '../../styles/main.scss';
 
 .tabs {
   display: flex;
@@ -17,7 +18,7 @@
   padding: 0;
   background: grey;
   list-style-type: none;
-  background-color: #191e22;
+  background-color: $col6;
 }
 
 .tabs-nav li {
@@ -25,15 +26,15 @@
   width: 3em;
   box-sizing: border-box;
   text-align: center;
-  color: #d1d2d2;
+  color: $main-grey;
   cursor: pointer;
   transition: all 0.1s ease-in-out;
-  border-left: solid 3px #191e22;
+  border-left: solid 3px $col6;
   border-right: solid 3px transparent;
 
   &:hover {
-    background-color: #363b42;
-    border-left-color: #363b42;
+    background-color: $col1;
+    border-left-color: $col1;
     color: #fff;
   }
 
@@ -74,7 +75,7 @@
   border-left-color: #F1F3F6;
 
   &:before {
-    color: #363b42;
+    color: $col1;
   }
 
   &:hover {
@@ -84,19 +85,19 @@
 }
 
 .tabs-nav li.has-submenu {
-  border-left-color: #191e22;
+  border-left-color: $col6;
 
   &:before {
-    color: #d1d2d2;
+    color: $main-grey;
   }
 
   &:hover {
-    border-left-color: #363b42;
+    border-left-color: $col1;
   }
 }
 
 .tabs-nav li.has-submenu.active {
-  background-color: #363b42;
+  background-color: $col1;
   border-left-color: #1773DA;
 
   &:before {
