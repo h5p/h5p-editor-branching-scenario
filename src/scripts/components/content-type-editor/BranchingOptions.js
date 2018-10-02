@@ -8,7 +8,8 @@ export default class BranchingOptions extends React.Component {
     super(props);
 
     this.state = {
-      expanded: false
+      expanded: false,
+      isNewContent: props.isInserting,
     };
   }
 
@@ -23,6 +24,9 @@ export default class BranchingOptions extends React.Component {
   }
 
   handleMainOptionChange = (e) => {
+    this.setState({
+      isNewContent: false,
+    });
     const newValue = e.target.value;
     switch (newValue) {
       case 'new-content':
@@ -40,11 +44,15 @@ export default class BranchingOptions extends React.Component {
   }
 
   render() {
-    const mainSelectorValue = this.props.nextContentId >= 0
+    let mainSelectorValue = this.props.nextContentId >= 0
       ? 'old-content'
       : (this.props.nextContentId === -1
         ? 'end-scenario'
         : 'new-content');
+
+    if (this.state.isNewContent) {
+      mainSelectorValue = 'new-content';
+    }
 
     // TODO: translations
     return (

@@ -225,6 +225,7 @@ export default class EditorOverlay extends React.Component {
               nextContentId={ this.props.content.params.nextContentId }
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
+              isInserting={ this.props.isInserting }
             />
           }
           <div

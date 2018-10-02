@@ -1523,6 +1523,7 @@ export default class Canvas extends React.Component {
             scoringOption={ this.props.scoringOption }
             onRemove={ this.handleEditorRemove }
             onDone={ this.handleEditorDone }
+            isInserting={ this.props.inserting }
           />
         }
       </div>
