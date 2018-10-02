@@ -149,7 +149,29 @@ export default class EditorOverlay extends React.Component {
     this.forceUpdate();
   };
 
+  /**
+   * Handle click on "remove".
+   */
+  handleRemove = () => {
+    this.finalizeForm();
+    this.props.onRemove();
+  }
+
+  /**
+   * Handle click on "done".
+   */
   handleDone = () => {
+    this.finalizeForm();
+
+    // Update Canvas state
+    this.props.onDone();
+  }
+
+
+  /**
+   * Validate and update form on closing.
+   */
+  finalizeForm = () => {
     // Validate all form children to save their current value
     this.validate();
 
@@ -180,9 +202,6 @@ export default class EditorOverlay extends React.Component {
         branchingQuestionEditor.collapseListAlternatives();
       }
     }
-
-    // Update Canvas state
-    this.props.onDone();
   }
 
   render() {
@@ -213,7 +232,7 @@ export default class EditorOverlay extends React.Component {
           <span className="buttons">
             <button
               className="button-remove"
-              onClick={ this.props.onRemove }
+              onClick={ this.handleRemove }
             >
               Remove { /* TODO: l10 */ }
             </button>
