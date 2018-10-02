@@ -689,12 +689,20 @@ export default class Canvas extends React.Component {
           && content.params.nextContentId !== undefined
           && content.params.nextContentId < 0
           && content.params.nextContentId === this.props.highlight;
-        if (hasDefaultEndScreen || this.props.highlight === id) {
+
+        const isHighlightingContent = hasDefaultEndScreen
+          || this.props.highlight === id
+          || this.props.onlyThisBall === id;
+
+        if (isHighlightingContent) {
           highlightCurrentNode = true;
         }
 
         const hasCustomEndScreen = hasCustomFeedback
           && content.params.nextContentId === -1;
+
+        const hasLoopBack = subtree.nodes.length === 0
+          && content.params.nextContentId >= 0;
 
         // Draw node
         const label = Content.getTooltip(content);
@@ -723,6 +731,13 @@ export default class Canvas extends React.Component {
             tooltip={ label }
             scale={ this.props.scale }
             hasCustomEndScreen={ hasCustomEndScreen }
+            hasLoopBack={ hasLoopBack}
+            highlightLinkedContent={() => {
+              this.highlightLinkedContent(
+                content.params.nextContentId,
+                id
+              );
+            }}
           >
             { label }
           </Content>
@@ -843,6 +858,9 @@ export default class Canvas extends React.Component {
           <div key={ key }
             className={ alternativeBallClasses }
             aria-label={ /* TODO: l10n */ 'Alternative ' + (num + 1) }
+            onDoubleClick={() => {
+              this.handleContentEdit(id);
+            }}
             style={ {
               left: (alternativesOffsetX + nodeCenter - (this.props.nodeSize.spacing.y * 0.75) - 1) + 'px',
               top: (position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * 1.5)) + 'px'
@@ -940,6 +958,12 @@ export default class Canvas extends React.Component {
       this.props.onHighlight(id, onlyThisBall);
     }
   }
+
+  highlightLinkedContent = (nextContentId, currentContentId) => {
+    if (nextContentId > -1 && currentContentId > -1) {
+      this.props.onHighlight(nextContentId, currentContentId);
+    }
+  };
 
   handleDelete = () => {
     // Set new parent for node
@@ -1561,6 +1585,7 @@ export default class Canvas extends React.Component {
             scoringOption={ this.props.scoringOption }
             onRemove={ this.handleEditorRemove }
             onDone={ this.handleEditorDone }
+            isInserting={ this.props.inserting }
           />
         }
       </div>
@@ -1572,7 +1597,7 @@ Canvas.propTypes = {
   width: PropTypes.number,
   inserting: PropTypes.object,
   highlight: PropTypes.number,
-  onlyThisBall: PropTypes.string,
+  onlyThisBall: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   scale: PropTypes.number,
   center: PropTypes.bool,
   onCanvasCentered: PropTypes.func,
