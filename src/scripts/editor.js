@@ -38,7 +38,7 @@ export default class Editor extends React.Component {
         height: 32,
         spacing: {
           x: 29,
-          y: 16
+          y: 17
         }
       }
     };
@@ -216,7 +216,7 @@ export default class Editor extends React.Component {
           height: rect.height,
           spacing: {
             x: 29,
-            y: 16
+            y: 17
           }
         },
       });
