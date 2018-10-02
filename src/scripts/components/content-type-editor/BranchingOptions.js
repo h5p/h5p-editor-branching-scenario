@@ -7,9 +7,17 @@ export default class BranchingOptions extends React.Component {
   constructor(props) {
     super(props);
 
+    const initialSelectedMainOption = this.props.isInserting
+      ? 'new-content'
+      : (
+        this.props.nextContentId >= 0
+          ? 'old-content'
+          : 'end-scenario'
+      );
+
     this.state = {
       expanded: false,
-      isNewContent: props.isInserting,
+      selectedMainOption: initialSelectedMainOption,
     };
   }
 
@@ -24,10 +32,10 @@ export default class BranchingOptions extends React.Component {
   }
 
   handleMainOptionChange = (e) => {
-    this.setState({
-      isNewContent: false,
-    });
     const newValue = e.target.value;
+    this.setState({
+      selectedMainOption: newValue,
+    });
     switch (newValue) {
       case 'new-content':
         this.updateContentSelected(-1);
@@ -44,16 +52,6 @@ export default class BranchingOptions extends React.Component {
   }
 
   render() {
-    let mainSelectorValue = this.props.nextContentId >= 0
-      ? 'old-content'
-      : (this.props.nextContentId === -1
-        ? 'end-scenario'
-        : 'new-content');
-
-    if (this.state.isNewContent) {
-      mainSelectorValue = 'new-content';
-    }
-
     // TODO: translations
     return (
       <div className='editor-overlay-branching-options'>
@@ -74,7 +72,7 @@ export default class BranchingOptions extends React.Component {
                 </span>
               </label>
               <select
-                value={ mainSelectorValue }
+                value={ this.state.selectedMainOption }
                 onChange={ this.handleMainOptionChange }
               >
                 <option

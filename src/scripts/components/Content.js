@@ -21,9 +21,10 @@ export default class Content extends React.Component {
   /**
    * Determines a useful tooltip for the content
    * @param {Object} content
+   * @param {boolean} [forceLibraryTitle] Setting this will try to get library title as specified in library json
    * @return {string}
    */
-  static getTooltip(content) {
+  static getTooltip(content, forceLibraryTitle) {
     const lib = content.params.type.library;
     const machineName = content.params.type.library.split(' ')[0];
     const libraryMetadata = H5PEditor.LibraryListCache.libraryCache[lib];
@@ -32,16 +33,37 @@ export default class Content extends React.Component {
     if (!fallbackTip) {
       fallbackTip = machineName.replace('H5P.', '');
     }
+
+    // Allow force getting library title
+    if (forceLibraryTitle) {
+      return fallbackTip;
+    }
+
     let html;
+    const params = content.params.type.params;
     switch (machineName) {
       case 'H5P.AdvancedText':
-        if (content.params.type.params.text) {
-          html = Content.stripHTML(content.params.type.params.text);
+        if (params.text) {
+          html = Content.stripHTML(params.text);
         }
         if (html === undefined && content.params.type.metadata) {
           html = content.params.type.metadata.title;
         }
         return (html !== undefined ? html : fallbackTip);
+
+      case 'H5P.BranchingQuestion':
+        return (params.branchingQuestion
+          && params.branchingQuestion.question
+          && params.branchingQuestion.question.trim().length > 0)
+          ? Content.stripHTML(params.branchingQuestion.question)
+          : (
+            (content.params.type.metadata
+            && content.params.type.metadata.title
+            && content.params.type.metadata.title.trim().length > 0)
+              ? content.params.type.metadata.title
+              : fallbackTip
+          );
+
       default:
         return (content.params.type.metadata && content.params.type.metadata.title)
           ? content.params.type.metadata.title
