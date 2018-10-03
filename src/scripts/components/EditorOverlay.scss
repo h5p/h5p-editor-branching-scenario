@@ -19,18 +19,6 @@
   flex-direction: column;
 }
 
-.editor-overlay .editor-overlay-library {
-  .field.library > .h5peditor-copypaste-wrap,
-  .field.library > select,
-  .field.library > .h5p-editor-flex-wrapper {
-    display: none;
-  }
-
-  .field.library  > .libwrap {
-    margin-top: 0;
-  }
-}
-
 .editor-overlay .editor-overlay-header {
   margin: 0;
   padding: 0;
@@ -47,11 +35,6 @@
 }
 
 .editor-overlay .editor-overlay-content {
-  .editor-overlay-metadata-title-label-wrapper {
-    display: flex;
-    flex-direction: row;
-  }
-
   .editor-overlay-label {
     font-weight: 600;
     font-size: 16px;
