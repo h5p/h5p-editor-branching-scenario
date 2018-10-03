@@ -796,7 +796,9 @@ export default class Canvas extends React.Component {
         const alternatives = this.state.content[parent].params.type.params.branchingQuestion.alternatives;
 
         // Offset for centering alternatives below BQ node if their total width < node width
-        const alternativesEmpty = alternatives.filter(alt => alt.nextContentId < 0).length;
+        const alternativesEmpty = alternatives.filter(alt => {
+          return alt.nextContentId < 0 || renderedNodes.indexOf(alt.nextContentId) > -1;
+        }).length;
         const width = alternativesEmpty * this.state.dzSpecs.width +
           (alternatives.length - alternativesEmpty) * this.props.nodeSize.width +
           (alternatives.length - 1) * this.props.nodeSize.spacing.x;
