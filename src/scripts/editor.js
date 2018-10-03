@@ -22,6 +22,7 @@ export default class Editor extends React.Component {
     const isFullScreenCapable = H5PEditor.Fullscreen !== undefined;
 
     this.state = {
+      insertingId: 0, // Provides unique id for each element being inserted to resolve timing issues
       activeIndex: 0,
       libraries: null, // Needs to be loaded via AJAX
       numDefaultEndScenarios: 0,
@@ -178,9 +179,10 @@ export default class Editor extends React.Component {
    * Handle inserting in Canvas
    */
   handleInsertingDone = () => {
-    this.setState({
-      inserting: null
-    });
+    this.setState((state) => ({
+      insertingId: state.insertingId + 1,
+      inserting: null,
+    }));
   }
 
   handleToggleFullscreen = () => {
@@ -298,6 +300,7 @@ export default class Editor extends React.Component {
               onCanvasTranslated={ this.handleCanvasTranslated }
               scoringOption={ this.state.scoringOption }
               nodeSize={ this.state.nodeSize }
+              insertingId={ this.state.insertingId }
             />
             <Toolbar
               numDefaultEndScenarios={ this.state.numDefaultEndScenarios }

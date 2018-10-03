@@ -37,6 +37,7 @@ export default class Canvas extends React.Component {
         width: 42,
         height: 32
       },
+      insertingId: null,
       content: this.props.content,
       dialog: null,
       panning: {
@@ -58,9 +59,10 @@ export default class Canvas extends React.Component {
     document.removeEventListener('keydown', this.handleDocumentKeyDown);
   }
 
-  static getDerivedStateFromProps(nextProps) {
-    if (nextProps.inserting) {
+  static getDerivedStateFromProps(nextProps, state) {
+    if (nextProps.inserting && nextProps.insertingId !== state.insertingId) {
       return ({ // Set new state on inserting
+        insertingId: nextProps.insertingId,
         placing: -1,
         library: nextProps.inserting.library
       });
