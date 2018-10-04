@@ -23,14 +23,6 @@ export default class EditorOverlay extends React.Component {
     // Reference to the feedback form wrapper
     this.feedbackForm = React.createRef();
 
-    // Reference to the React title field
-    this.title = React.createRef();
-
-    this.titleListenerName = 'input.metadata-subcontent-sync';
-
-    // Reference to the React label wrapper
-    this.labelWrapper = React.createRef();
-
     // Useful multiple places later
     this.isBranchingQuestion = isBranching(this.props.content);
   }
@@ -41,12 +33,6 @@ export default class EditorOverlay extends React.Component {
 
     // Insert editor form
     this.form.current.appendChild(this.props.content.formWrapper);
-
-    // Get metadata button from form and use it for custom title
-    H5PEditor.$(this.props.content.formWrapper)
-      .find('.h5p-metadata-button-wrapper')
-      .clone(true, true)
-      .appendTo(H5PEditor.$(this.labelWrapper.current));
 
     // Listen for the ready event from the sub form
     if (this.props.content.ready === true) {
@@ -76,15 +62,6 @@ export default class EditorOverlay extends React.Component {
 
     // Force visuals to resize after initial render
     H5P.$window.trigger('resize');
-  }
-
-  componentWillUnmount() {
-    if (this.$metadataFormTitle) {
-      this.$metadataFormTitle.off(this.titleListenerName);
-    }
-    if (this.$editorFormTitle) {
-      this.$editorFormTitle.off(this.titleListenerName);
-    }
   }
 
   /**
