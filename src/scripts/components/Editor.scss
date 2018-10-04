@@ -41,7 +41,7 @@
       padding: 0.53em 0.5em;
       color: $main-grey;
       border: solid 1px $col6;
-      margin: 0.47em 0em 0.47em 0;
+      margin: 0.47em 0em 0.47em 3.2em;
       min-width: 15.3em;
       max-width: 25em;
       font-size: 0.9375em;
@@ -72,6 +72,7 @@
   line-height: 1;
   flex-grow: 0;
   min-width: 3em;
+  position: absolute;
 
   &:before {
     font-family: "bs";

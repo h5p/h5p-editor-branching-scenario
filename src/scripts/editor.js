@@ -246,14 +246,14 @@ export default class Editor extends React.Component {
           </BlockInteractionOverlay>
         }
         <div className="topbar" ref={ element => this.topbar = element }>
-          { H5PEditor.Fullscreen !== undefined &&
+          { /* H5PEditor.Fullscreen !== undefined &&
             <div
               className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') }
               title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
               role="button"
               tabIndex="0"
               onClick={ this.handleToggleFullscreen }
-            />
+            /> */
           }
           { this.state.fullscreen &&
             <div

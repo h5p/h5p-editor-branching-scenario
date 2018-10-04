@@ -290,7 +290,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     document.documentElement.style.maxWidth = document.body.style.maxWidth = 'none';
 
     let fullscreen;
-    if (H5PEditor.Fullscreen !== undefined) {
+    /*if (H5PEditor.Fullscreen !== undefined) {
       const formWrapper = $wrapper.parent()[0];
       fullscreen = new H5PEditor.Fullscreen(formWrapper);
 
@@ -329,7 +329,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
           H5PEditor.Html.removeWysiwyg();
         }
       });
-    }
+    }*/
     function toggleFullscreen(on) {
       if (fullscreen) {
         if (on) {
