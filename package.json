@@ -9,11 +9,11 @@
     "watch": "./node_modules/.bin/webpack --watch"
   },
   "devDependencies": {
-    "annyang": "^2.4.0",
+    "annyang": "^2.6.1",
     "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.3",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.6",
     "babel-jest": "^17.0.0",
     "babel-loader": "^6.4.1",
     "babel-plugin-transform-es2015-destructuring": "^6.18.0",
@@ -25,23 +25,21 @@
     "cross-env": "^3.1.4",
     "css-loader": "^0.25.0",
     "eslint": "^4.19.1",
-    "eslint-plugin-babel": "^5.1.0",
-    "eslint-plugin-react": "^7.7.0",
-    "jest-cli": "^17.0.0",
-    "node-sass": "^4.8.3",
+    "eslint-plugin-babel": "^5.2.1",
+    "eslint-plugin-react": "^7.11.1",
+    "node-sass": "^4.9.3",
     "react-addons-test-utils": "^15.1.0",
     "react-test-renderer": "^15.4.2",
-    "resolve-url-loader": "^2.3.0",
-    "sass-loader": "^7.0.1",
+    "resolve-url-loader": "^2.3.1",
+    "sass-loader": "^7.1.0",
     "style-loader": "^0.13.1",
-    "url-loader": "^1.0.1",
-    "webpack": "^1.14.0"
+    "url-loader": "^1.1.1",
+    "webpack": "^2.7.0"
   },
   "dependencies": {
     "prop-types": "^15.6.1",
     "react": "^16.3.1",
-    "react-dom": "^16.3.1",
-    "webpack": "^2.2.1"
+    "react-dom": "^16.3.1"
   },
   "keywords": [],
   "author": "",
