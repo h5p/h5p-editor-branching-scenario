@@ -1136,7 +1136,7 @@ export default class Canvas extends React.Component {
           // Replace with fresh node
 
           newState.content[prevState.deleting] = this.props.getNewContent(this.getNewContentParams());
-          newState.content[prevState.deleting].params.nextContentId = nextContentId;
+          this.attachChild(newState.content[prevState.deleting], nextContentId);
           newState.editing = prevState.deleting;
         }
         else {
