@@ -308,10 +308,22 @@ export default class Canvas extends React.Component {
   }
 
   getNewContentParams = () => {
+    // For Branching Question we have to add defaults that can be used until the editor is loaded
     return {
       type: {
         library: this.state.library.name,
-        params: {},
+        params: this.state.library.className !== 'branchingquestion' ? {} : {
+          branchingQuestion: {
+            alternatives: [
+              {
+                nextContentId: -1
+              },
+              {
+                nextContentId: -1
+              }
+            ]
+          }
+        },
         subContentId: H5P.createUUID()
       },
       contentTitle: H5PEditor.LibraryListCache.getDefaultTitle(this.state.library.name),
