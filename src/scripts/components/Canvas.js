@@ -1236,6 +1236,10 @@ export default class Canvas extends React.Component {
   }
 
   handleCancel = () => {
+    if (this.state.deleting && this[`draggable-${this.state.deleting}`]) {
+      this[`draggable-${this.state.deleting}`].dehighlight();
+    }
+
     // Cancel delete confirmation dialog
     const newState = {
       deleting: null,
