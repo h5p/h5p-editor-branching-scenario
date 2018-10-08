@@ -771,10 +771,10 @@ export default class Canvas extends React.Component {
       if (content && id !== 0 && drawAboveLine) {
         const compensation = (parentIsBranching ? 3 : 0);
         nodes.push(
-          <div key={ id + '-vabove' } className={ 'vertical-line 1' + (this.props.highlight !== null ? ' fade' : '') } style={ {
+          <div key={ id + '-vabove' } className={ 'vertical-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
             top: (position.y - aboveLineHeight + compensation) + 'px',
-            height: (aboveLineHeight - compensation) + 'px'
+            height: (aboveLineHeight - compensation - 3) + 'px'
           } }/>
         );
       }
@@ -787,7 +787,7 @@ export default class Canvas extends React.Component {
           content.params.type.params.branchingQuestion.alternatives.length > 1) {
         // Add vertical line below
         nodes.push(
-          <div key={ id + '-vbelow' } className={ 'vertical-line 2' + (this.props.highlight !== null ? ' fade' : '') } style={ {
+          <div key={ id + '-vbelow' } className={ 'vertical-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: nodeCenter + 'px',
             top: (position.y + this.props.nodeSize.height) + 'px',
             height: (this.props.nodeSize.spacing.y / 2) + 'px'
@@ -828,10 +828,10 @@ export default class Canvas extends React.Component {
 
         // Add vertical line above alternative ball
         nodes.push(
-          <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line 3' + (this.props.highlight !== null ? ' fade' : '') } style={ {
+          <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: alternativesOffsetX + nodeCenter + 'px',
-            top: ((position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 2 : 0)) + 'px',
-            height: (this.props.nodeSize.spacing.y * (branch.length > 1 ? 0.375 : 1)) + 'px'
+            top: ((position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 4 : 1)) + 'px',
+            height: ((this.props.nodeSize.spacing.y * (branch.length > 1 ? 0.375 : 1)) - (branch.length > 1 ? 2 : 1)) + 'px'
           } }/>
         );
 
