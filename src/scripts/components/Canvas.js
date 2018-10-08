@@ -1127,7 +1127,9 @@ export default class Canvas extends React.Component {
 
       if (prevState.placing !== null && prevState.placing !== prevState.deleting) {
         // Replace node
-        const nextContentId = prevState.content[prevState.deleting].params.nextContentId;
+
+        // Keep next node as successor
+        const nextContentId = (isBranching(prevState.content[prevState.deleting])) ? -1 : prevState.content[prevState.deleting].params.nextContentId;
 
         // Remove form
         newState.content[prevState.deleting].formChildren.forEach(child => child.remove());
