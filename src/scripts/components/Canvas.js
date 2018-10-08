@@ -178,16 +178,16 @@ export default class Canvas extends React.Component {
     const draggable = this['draggable-' + id];
     const intersections = this.getIntersections(draggable);
 
-    if (intersections.length === 0) {
+    // Dropzone with largest intersection
+    const dropzone = (intersections.length > 0) ? intersections[0] : null;
+
+    if (!dropzone || dropzone instanceof Content && dropzone.props.disabled) {
       this.setState({
         placing: null
       });
       this.props.onDropped(); // TODO: See handlePlacing. Should be called after setstate or could it be done differently.
       return;
     }
-
-    // Dropzone with largest intersection
-    const dropzone = intersections[0];
 
     if (dropzone instanceof Content && !this.state.editing) {
       // Replace existing node
@@ -719,6 +719,9 @@ export default class Canvas extends React.Component {
         const hasLoopBack = (subtree === null || subtree.nodes.length === 0)
           && content.params.nextContentId >= 0;
 
+        const isPlacingBranchingQuestion = this.state.placing === -1 &&
+          this.state.library && this.state.library.title === 'Branching Question';
+
         // Draw node
         const label = Content.getTooltip(content);
         nodes.push(
@@ -742,7 +745,7 @@ export default class Canvas extends React.Component {
             onEdit={ () => this.handleContentEdit(id) }
             onCopy={ () => this.handleContentCopy(id) }
             onDelete={ () => this.handleContentDelete(id) }
-            disabled={ contentIsBranching }
+            disabled={ contentIsBranching && (!this.state.placing || isPlacingBranchingQuestion) }
             tooltip={ label }
             scale={ this.props.scale }
             hasCustomEndScreen={ hasCustomEndScreen }
