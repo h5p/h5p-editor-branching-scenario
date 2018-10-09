@@ -216,6 +216,10 @@ export default class Content extends React.Component {
       elementClass += ' endscreenCustom';
     }
 
+    if (!this.props.disabled) {
+      elementClass += ' not-disabled';
+    }
+
     return (
       <Draggable
         ref={ node => this.element = node }

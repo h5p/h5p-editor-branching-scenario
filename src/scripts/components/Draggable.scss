@@ -103,7 +103,7 @@
   background-color: $draggable-replacing-background;
 }
 
-.canvas.placing-draggable .draggable:hover .draggable-wrapper {
+.canvas.placing-draggable .draggable.not-disabled:hover .draggable-wrapper {
   background-color: $draggable-replacing-background;
 }
 

@@ -745,7 +745,7 @@ export default class Canvas extends React.Component {
             onEdit={ () => this.handleContentEdit(id) }
             onCopy={ () => this.handleContentCopy(id) }
             onDelete={ () => this.handleContentDelete(id) }
-            disabled={ contentIsBranching && (!this.state.placing || isPlacingBranchingQuestion) }
+            disabled={ (contentIsBranching && (!this.state.placing || isPlacingBranchingQuestion)) || this.isDropzoneDisabled(id) }
             tooltip={ label }
             scale={ this.props.scale }
             hasCustomEndScreen={ hasCustomEndScreen }
@@ -1516,7 +1516,7 @@ export default class Canvas extends React.Component {
    * @return {boolean} True, if dropzone is "disabled", else false.
    */
   isDropzoneDisabled = (id) => {
-    if (!this.dropzonesDisabled || !id || id < 0) {
+    if (!this.dropzonesDisabled || id === undefined || id === null || id < 0) {
       return false;
     }
 
