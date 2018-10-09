@@ -549,7 +549,7 @@ export default class Canvas extends React.Component {
 
       props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
       return newState;
-    });
+    }, this.contentChanged);
   }
 
   renderDropzone(id, position, parent, num, parentIsBranching) {
