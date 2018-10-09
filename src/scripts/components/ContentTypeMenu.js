@@ -49,7 +49,7 @@ export default class ContentTypeMenu extends React.Component {
     }
 
     // Get library from clipboard
-    let defaults;
+    let pasted;
     let inUse = library;
     if (library === 'reuse-question') {
 
@@ -78,10 +78,7 @@ export default class ContentTypeMenu extends React.Component {
         });
       }
 
-      defaults = {
-        params: clipboard.generic.params,
-        specific: clipboard.specific
-      };
+      pasted = clipboard;
     }
 
     // Prevent
@@ -98,7 +95,7 @@ export default class ContentTypeMenu extends React.Component {
         y: event.currentTarget.offsetTop
       },
       library: library,
-      defaults: defaults
+      pasted: pasted
     });
   }
 

@@ -22,7 +22,6 @@ export default class Canvas extends React.Component {
       deleting: null,
       inserting: null,
       editing: null,
-      freshContent: false,
       editorContents: {
         top: {
           icon: '',
@@ -195,40 +194,15 @@ export default class Canvas extends React.Component {
     }
     else {
       // Put new node or put existing node at new place
-      const defaults = (draggable.props.inserting) ? draggable.props.inserting.defaults : undefined;
-
-      // When info node is moved, check if parent is BQ and needs updating
-      if (id > -1) {
-        const noNodeToAttach =
-          isBranching(this.state.content[id]) || // moved node is BQ, will keep children
-          !this.state.content[id].params.nextContentId ||
-          this.state.content[id].params.nextContentId < 0;
-
-        if (noNodeToAttach) {
-          // Info node has no children that would be attached to *old* parent, latter needs update
-          const parent = this.getParent(id, this.state.content);
-
-          if (parent && isBranching(parent)) {
-            // Parent is BQ, update needed
-            parent.params.type.params.branchingQuestion.alternatives
-              .forEach(alt => {
-                if (alt.nextContentId === id) {
-                  alt.nextContentId = -1;
-                }
-              });
-          }
-        }
-      }
-
-      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative, defaults);
+      this.placeInTree(id, dropzone.props.nextContentId, dropzone.props.parent, dropzone.props.alternative);
     }
   }
 
-  handleDropzoneClick = (nextContentId, parent, alternative, defaults) => {
+  handleDropzoneClick = (nextContentId, parent, alternative) => {
     if (this.state.placing === null) {
       return;
     }
-    this.placeInTree(this.state.placing, nextContentId, parent, alternative, defaults);
+    this.placeInTree(this.state.placing, nextContentId, parent, alternative);
   }
 
   handleContentEdit = (id) => {
@@ -308,6 +282,40 @@ export default class Canvas extends React.Component {
   }
 
   getNewContentParams = () => {
+
+    if (this.props.inserting && this.props.inserting.pasted) {
+
+      /**
+       * Help check if we support the pasted content type
+       * @private
+       * @param {string} lib
+       * @return {boolean}
+       */
+      const supported = (lib) => {
+        for (var i = 0; i < this.props.libraries.length; i++) {
+          if (this.props.libraries[i].restricted !== true && this.props.libraries[i].name === lib) {
+            return true; // Library is supported and allowed
+          }
+        }
+
+        return false;
+      };
+
+      if (this.props.inserting.pasted.from === 'H5PEditor.BranchingScenario' &&
+          (!this.props.inserting.pasted.generic || supported(this.props.inserting.pasted.generic.library))) {
+        // Non generic part = must be content from another BS
+        this.props.inserting.pasted.specific.nextContentId = -1;
+        return this.props.inserting.pasted.specific;
+      }
+      else if (this.props.inserting.pasted.generic && supported(this.props.inserting.pasted.generic.library)) {
+        // Supported library from another content type
+        return {
+          type: this.props.inserting.pasted.generic,
+          showContentTitle: false
+        };
+      }
+    }
+
     // For Branching Question we have to add defaults that can be used until the editor is loaded
     return {
       type: {
@@ -326,7 +334,6 @@ export default class Canvas extends React.Component {
         },
         subContentId: H5P.createUUID()
       },
-      contentTitle: H5PEditor.LibraryListCache.getDefaultTitle(this.state.library.name),
       showContentTitle: false
     };
   }
@@ -427,11 +434,8 @@ export default class Canvas extends React.Component {
    * @param {number} nextContentId ID of next node.
    * @param {number} parent ID of the parent node.
    * @param {number} alternative Number of dropzone alternative.
-   * @param {object} [defaults] Default values for content.
-   * @param {object} [defaults.params] Content params.
-   * @param {object} [defaults.specific] Specific form options.
    */
-  placeInTree(id, nextContentId, parent, alternative, defaults = {}) { // TODO: Better way to transfer defaults since it's only relevant for new nodes, state?
+  placeInTree(id, nextContentId, parent, alternative) {
     this.setState((prevState, props) => {
       let newState = {
         placing: null,
@@ -440,16 +444,9 @@ export default class Canvas extends React.Component {
         content: [...prevState.content],
       };
 
-      defaults.specific = defaults.specific || {};
-
       // Handle inserting of new node
       if (id === -1) {
-        newState.freshContent = true; // TODO: Is this still needed?
-        const defaultParams = this.getNewContentParams();
-        // TODO: Is this missing when replacing with new content?
-        defaultParams.type.params = defaults.params || defaultParams.type.params;
-        defaultParams.contentTitle = defaults.specific.contentTitle || defaultParams.contentTitle;
-        newState.content.push(this.props.getNewContent(defaultParams));
+        newState.content.push(this.props.getNewContent(this.getNewContentParams()));
         id = newState.content.length - 1;
         newState.editing = id;
         if (id === 0) {
@@ -461,8 +458,27 @@ export default class Canvas extends React.Component {
           return newState;
         }
       }
-      else {
-        newState.freshContent = false;
+      else if (id > -1) {
+        // When info node is moved, check if parent is BQ and needs updating
+        const noNodeToAttach =
+          isBranching(this.state.content[id]) || // moved node is BQ, will keep children
+          !this.state.content[id].params.nextContentId ||
+          this.state.content[id].params.nextContentId < 0;
+
+        if (noNodeToAttach) {
+          // Info node has no children that would be attached to *old* parent, latter needs update
+          const parent = this.getParent(id, this.state.content);
+
+          if (parent && isBranching(parent)) {
+            // Parent is BQ, update needed
+            parent.params.type.params.branchingQuestion.alternatives
+              .forEach(alt => {
+                if (alt.nextContentId === id) {
+                  alt.nextContentId = -1;
+                }
+              });
+          }
+        }
       }
 
       // When placing after a leaf node keep track of it so we can update it
@@ -558,7 +574,6 @@ export default class Canvas extends React.Component {
       num = 0;
     }
 
-    const defaults = (this.props.inserting) ? this.props.inserting.defaults : {};
     const isInitial = (id === -9);
     return ( !this.state.editing &&
       <Dropzone
@@ -575,7 +590,7 @@ export default class Canvas extends React.Component {
             top: position.y + 'px'
           }
         }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num, defaults) }
+        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num) }
       />
     );
   }
@@ -1199,7 +1214,7 @@ export default class Canvas extends React.Component {
           removeNode(prevState.deleting);
         }
       }
-      else if (prevState.editing !== null && prevState.freshContent === true || prevState.deleting !== null) {
+      else if (prevState.deleting !== null) {
         // Delete node
         removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
@@ -1459,11 +1474,10 @@ export default class Canvas extends React.Component {
           this.setState({
             placing: null
           });
+          this.props.onDropped();
         }
       }, 0);
     }
-
-    this.props.onDropped(); // TODO: See TODO in handlePlacing()
   }
 
   // For debugging
