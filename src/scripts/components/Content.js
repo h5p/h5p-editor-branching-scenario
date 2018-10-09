@@ -101,7 +101,9 @@ export default class Content extends React.Component {
   }
 
   highlight() {
-    this.element.element.classList.add('highlight');
+    if (!this.props.disabled) {
+      this.element.element.classList.add('highlight');
+    }
   }
 
   dehighlight() {
@@ -263,6 +265,9 @@ export default class Content extends React.Component {
             className='loop-back'
             onClick={() => this.props.highlightLinkedContent()}
           />
+        }
+        { !this.props.disabled &&
+          <div className='dropzone-wrapper'/>
         }
       </Draggable>
     );

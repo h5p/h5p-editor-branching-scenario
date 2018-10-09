@@ -549,7 +549,7 @@ export default class Canvas extends React.Component {
 
       props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
       return newState;
-    });
+    }, this.contentChanged);
   }
 
   renderDropzone(id, position, parent, num, parentIsBranching) {
@@ -812,6 +812,9 @@ export default class Canvas extends React.Component {
 
         // Offset for centering alternatives below BQ node if their total width < node width
         const alternativesEmpty = alternatives.filter((alt,index) => {
+          if (alt.nextContentId === undefined) {
+            return true; // Avoid crashing
+          }
           const hasContentChild = nodes.some(node => {
             return node.key === alt.nextContentId.toString();
           });
@@ -833,8 +836,8 @@ export default class Canvas extends React.Component {
         nodes.push(
           <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
             left: alternativesOffsetX + nodeCenter + 'px',
-            top: ((position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 4 : 1)) + 'px',
-            height: ((this.props.nodeSize.spacing.y * (branch.length > 1 ? 0.375 : 1)) - (branch.length > 1 ? 2 : 1)) + 'px'
+            top: ((position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 3 : 1)) + 'px',
+            height: ((this.props.nodeSize.spacing.y * (branch.length > 1 ? 0.375 : 1)) - (branch.length > 1 ? 1 : 1)) + 'px'
           } }/>
         );
 
@@ -1236,7 +1239,7 @@ export default class Canvas extends React.Component {
   }
 
   handleCancel = () => {
-    if (this.state.deleting && this[`draggable-${this.state.deleting}`]) {
+    if (this.state.deleting !== null && this[`draggable-${this.state.deleting}`]) {
       this[`draggable-${this.state.deleting}`].dehighlight();
     }
 
