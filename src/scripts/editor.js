@@ -33,7 +33,7 @@ export default class Editor extends React.Component {
       translate: null,
       scoringOption: null,
       fullscreen: false,
-      showFullScreenDialog: isFullScreenCapable,
+      showFullScreenDialog: false, // TODO: Set to isFullScreenCapable when we want to add it in again
       nodeSize: {
         width: 176,
         height: 32,
