@@ -812,6 +812,9 @@ export default class Canvas extends React.Component {
 
         // Offset for centering alternatives below BQ node if their total width < node width
         const alternativesEmpty = alternatives.filter((alt,index) => {
+          if (alt.nextContentId === undefined) {
+            return true; // Avoid crashing
+          }
           const hasContentChild = nodes.some(node => {
             return node.key === alt.nextContentId.toString();
           });
