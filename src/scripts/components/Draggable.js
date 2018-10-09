@@ -124,7 +124,6 @@ export default class Draggable extends React.Component {
         style={this.props.style}
       >
         {this.props.children}
-        <div className='dropzone-wrapper'/>
       </div>
     );
   }
