@@ -830,12 +830,24 @@ export default class Canvas extends React.Component {
           if (alt.nextContentId === undefined) {
             return true; // Avoid crashing
           }
-          const hasContentChild = nodes.some(node => {
-            return node.key === alt.nextContentId.toString();
-          });
-          const isFirstChild = branch.indexOf(alt.nextContentId) === index;
+          const isRenderedInOtherTree = alt.nextContentId === -1 ? true
+            : renderedNodes.indexOf(alt.nextContentId) > -1;
 
-          return alt.nextContentId < 0 || (!hasContentChild || !isFirstChild);
+          // Assume that child will be rendered if we can't find it anywhere
+          let isRenderedAsChild = true;
+
+          // Check if node is rendered as child if we're on the corresponding index
+          if (num === index) {
+            isRenderedAsChild = nodes.some(node => {
+              return node.key === alt.nextContentId.toString();
+            });
+          }
+          const isRenderedAsPreviousAlt = branch.indexOf(alt.nextContentId) !== index;
+
+          const isEmpty = !isRenderedAsChild
+            && (isRenderedInOtherTree || isRenderedAsPreviousAlt);
+
+          return alt.nextContentId < 0 || isEmpty;
         }).length;
         const width = alternativesEmpty * this.state.dzSpecs.width +
           (alternatives.length - alternativesEmpty) * this.props.nodeSize.width +
