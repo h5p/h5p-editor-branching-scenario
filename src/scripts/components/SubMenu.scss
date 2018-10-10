@@ -14,6 +14,7 @@
   list-style: none;
   padding: 0.25rem;
   font-size: 0.75rem;
+  z-index: 1;
 
   li {
     padding: 0.5rem;
@@ -38,22 +39,24 @@
     border-top: solid 0.042rem #F1F3F6;
   }
 
-  li.edit-content:before {
+  li:before {
     font-family: "Material Icons";
-    content: $icon-edit;
     margin-right: 0.3em;
+    line-height: 1;
+    vertical-align: bottom;
+  }
+
+  li.edit-content:before {
+    content: $icon-edit;
   }
 
   li.copy-content:before {
     font-family: bs;
     content: $icon-copy;
-    margin-right: 0.3em;
   }
 
   li.delete-content:before {
-    font-family: "Material Icons";
     content: $icon-delete;
-    margin-right: 0.3em;
   }
 
   .active {
