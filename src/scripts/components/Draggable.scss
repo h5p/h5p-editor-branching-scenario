@@ -185,7 +185,7 @@
   }
 }
 .content-menu-button.active,
-.canvas:not(.placing-draggable) .draggable.ready .draggable-wrapper:hover .content-menu-button {
+.draggable.ready .draggable-wrapper:hover .content-menu-button {
   opacity: 1;
   visibility: visible;
   transition-delay: 0s;
