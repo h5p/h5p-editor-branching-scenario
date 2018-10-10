@@ -116,6 +116,10 @@
   margin: 0.5rem 2rem 0.5rem 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
 
   &:before {
     font-family: "Material Icons";

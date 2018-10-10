@@ -63,6 +63,10 @@
   border: solid 2px #396ad1;
   background-color: #396ad1;
   cursor: pointer;
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
 }
 
 .alternative-ball::after {
