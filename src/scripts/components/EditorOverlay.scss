@@ -176,7 +176,7 @@
 }
 
 .editor-overlay .editor-overlay-content {
-  padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+  padding: 1.125rem 1.5rem 1.5rem 1.5rem;
   box-sizing: border-box;
   overflow-y: auto;
 }
@@ -218,7 +218,7 @@
 
 .editor-overlay {
   .editor-overlay-feedback-semantics {
-    margin-top: 2em;
+    margin: 2em 0;
   }
 
   .editor-overlay-content:not(.dynamic-score) {
