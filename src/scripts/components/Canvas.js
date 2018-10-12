@@ -708,6 +708,7 @@ export default class Canvas extends React.Component {
         position.x += ((subtree.x - x) / 2) - (this.props.nodeSize.width / 2);
       }
 
+      let contentHasLoopBack = false;
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const library = this.getLibrary(content.params.type.library);
@@ -731,8 +732,10 @@ export default class Canvas extends React.Component {
         const hasCustomEndScreen = hasCustomFeedback
           && content.params.nextContentId === -1;
 
-        const hasLoopBack = (subtree === null || subtree.nodes.length === 0)
-          && content.params.nextContentId >= 0;
+        if ((subtree === null || subtree.nodes.length === 0)
+            && content.params.nextContentId >= 0) {
+          contentHasLoopBack = true;
+        }
 
         const isPlacingBranchingQuestion = this.state.placing === -1 &&
           this.state.library && this.state.library.title === 'Branching Question';
@@ -764,7 +767,7 @@ export default class Canvas extends React.Component {
             tooltip={ label }
             scale={ this.props.scale }
             hasCustomEndScreen={ hasCustomEndScreen }
-            hasLoopBack={ hasLoopBack}
+            hasLoopBack={ contentHasLoopBack}
             highlightLinkedContent={() => {
               this.highlightLinkedContent(
                 content.params.nextContentId,
@@ -957,7 +960,7 @@ export default class Canvas extends React.Component {
         }
 
         // Add dropzone below if there's no subtree
-        if (content && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id)) {
+        if (content && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id) && !contentHasLoopBack) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y + (this.props.nodeSize.spacing.y * 2) + dzDistance // for fixed tree
