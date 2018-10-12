@@ -1080,15 +1080,15 @@ export default class Canvas extends React.Component {
               const newFirstNode = (deleteId === 0) ? successorId - 1 : undefined;
 
               // Exchange all links pointing to node to be deleted to its successor instead.
-              newState.content.forEach(node => {
+              newState.content.forEach((node, index) => {
                 const affectedNodes = (isBranching(node)) ?
                   node.params.type.params.branchingQuestion.alternatives :
                   [node.params];
 
                 affectedNodes.forEach(affectedNode => {
                   if (affectedNode.nextContentId === deleteId) {
-                    // Loops shall vanish with their nodes
-                    affectedNode.nextContentId = isBranching(node) ? -1 : successorId;
+                    // Updated next content but also avoid looping back to self
+                    affectedNode.nextContentId = (successorId === index ? -1 : successorId);
                   }
                   // Account Id for upcoming node removal
                   if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
