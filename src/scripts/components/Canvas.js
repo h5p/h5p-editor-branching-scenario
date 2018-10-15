@@ -514,12 +514,16 @@ export default class Canvas extends React.Component {
 
         // Mark IDs for bumping due to array changes
         bumpIdsUntil = nextId + 1;
-      }
 
-      // One node can have multiple parents through loops.
-      // When moving we only want to change the value for the first parent
-      // (not the loops). That is why we have this variable
-      this.hasChangedParentLink = false;
+        // There is no parent so there is nothing to update.
+        this.hasChangedParentLink = true;
+      }
+      else {
+        // One node can have multiple parents through loops.
+        // When moving we only want to change the value for the first parent
+        // (not the loops). That is why we have this variable
+        this.hasChangedParentLink = false;
+      }
 
       newState.content.forEach((content, index) => {
         if (index === bumpIdsUntil) {
