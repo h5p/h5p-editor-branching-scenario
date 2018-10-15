@@ -339,15 +339,16 @@ export default class Canvas extends React.Component {
   }
 
   /**
-   * TODO: Could be a static ?
+   * Update nextContentId for content or alternative params
    *
    * @param {number} id ID of node that was added/moved
    * @param {number} nextContentId ID that needs to be updated
    */
   updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil) {
     // Make old parent point directly to our old children
-    if (leaf.nextContentId === id) {
+    if (this.hasChangedParentLink === false && leaf.nextContentId === id) {
       leaf.nextContentId = (nextId < 0 ? undefined : nextId);
+      this.hasChangedParentLink = true;
     }
 
     // Make our new parent aware of us
@@ -514,6 +515,11 @@ export default class Canvas extends React.Component {
         // Mark IDs for bumping due to array changes
         bumpIdsUntil = nextId + 1;
       }
+
+      // One node can have multiple parents through loops.
+      // When moving we only want to change the value for the first parent
+      // (not the loops). That is why we have this variable
+      this.hasChangedParentLink = false;
 
       newState.content.forEach((content, index) => {
         if (index === bumpIdsUntil) {
