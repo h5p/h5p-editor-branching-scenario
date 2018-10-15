@@ -41,7 +41,8 @@ export default class Editor extends React.Component {
           x: 29,
           y: 17
         }
-      }
+      },
+      zoomDisabled: true
     };
   }
 
@@ -144,6 +145,7 @@ export default class Editor extends React.Component {
     }
 
     this.setState({
+      zoomDisabled: !content || content.length === 0,
       numDefaultEndScenarios: numDefaultEndScenarios
     });
   }
@@ -303,12 +305,13 @@ export default class Editor extends React.Component {
               insertingId={ this.state.insertingId }
             />
             <Toolbar
+              disabled={ this.state.zoomDisabled }
               numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
               onHighlight={ this.handleHighlight }
               scale={ this.state.scale }
               onScaleChanged={ this.handleScaleChanged }
-              containerRect={ this.treewrap }
-              contentRect={ this.tree }
+              containerRect={ this.treewrap } /* TODO: Don't send refs as props on render... */
+              contentRect={ this.tree } /* TODO: Don't send refs as props on render... */
             />
           </Tab>
           <Tab title="Settings" className="bs-editor-settings-tab">

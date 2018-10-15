@@ -80,40 +80,60 @@
   justify-content: center;
 
 }
-.zoom-in {
-  font-size: 1.75em;
+.zoom-in,
+.zoom-out {
+  font-size: 1.5em;
   cursor: pointer;
-
-  &:before {
-    font-family: "Material Icons";
-    content: $icon-zoom-in;
-  }
+  padding: 0.125em;
+  line-height: 1;
+  height: 1em;
+}
+.zoom-in:before {
+  font-family: "Material Icons";
+  content: $icon-zoom-in;
+}
+.zoom-out:before {
+  font-family: "Material Icons";
+  content: $icon-zoom-out;
 }
 .zoom-status {
   width: 3em;
   padding: 0 1em 0 1em;
 }
-.zoom-out {
-  font-size: 1.75em;
-  cursor: pointer;
-
-  &:before {
-    font-family: "Material Icons";
-    content: $icon-zoom-out;
-  }
-}
 .fit-to-canvas-icon {
   margin-left: 2em;
   margin-top: 0.2em;
+}
+.fit-to-canvas {
+  cursor: pointer;
+  padding: 0.125em 0.3em 0.125em 0.125em;
+  margin-left: 1em;
+  line-height: 1.6em;
 
   &:before {
-    font-size: 1.75em;
-    cursor: pointer;
     font-family: "Material Icons";
     content: $icon-fit-to-canvas;
+    font-size: 1.5em;
+    vertical-align: middle;
+    margin-right: 0.125em;
   }
 }
-.fit-to-canvas-text {
-  margin-left: 0.1em;
-  cursor: pointer;
+.zoom-in,
+.zoom-out,
+.fit-to-canvas {
+  &:hover {
+    background: #32393f;
+  }
+  &:active {
+    background: #020405;
+  }
+  &.disabled {
+    opacity: 0.5;
+    cursor: default;
+
+    &:hover,
+    &:active {
+      background: transparent;
+    }
+  }
 }

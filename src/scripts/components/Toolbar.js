@@ -66,6 +66,10 @@ export default class Toolbar extends React.Component {
    * @param {bolean} zoomin Zoom direction. true = zoom in, false = zoom out.
    */
   handleZoom = (zoomin = true) => {
+    if (this.props.disabled) {
+      return;
+    }
+
     let newScale;
 
     // Get closest zoom level
@@ -134,11 +138,23 @@ export default class Toolbar extends React.Component {
       infoPopupClass += ' visible';
     }
 
+    let zoomOutClass = 'zoom-out';
+    if (this.props.disabled || this.state.scale <= this.zoomLevels[0]) {
+      // Disable zoom out
+      zoomOutClass += ' disabled';
+    }
+
+    let zoomInClass = 'zoom-in';
+    if (this.props.disabled || this.state.scale >= this.zoomLevels[this.zoomLevels.length - 1]) {
+      // Disable zoom out
+      zoomInClass += ' disabled';
+    }
+
     return (
       <div className="toolbar">
         <div className="zoom-wrapper">
           <span
-            className="zoom-out"
+            className={ zoomOutClass }
             title="Zoom out"
             tabIndex="0"
             role="button"
@@ -148,20 +164,14 @@ export default class Toolbar extends React.Component {
             { `${Math.round(this.state.scale * 100)} %`}
           </span>
           <span
-            className="zoom-in"
+            className={ zoomInClass }
             title="Zoom in"
             tabIndex="0"
             role="button"
             onClick={ () => this.handleZoom(true) }
           />
           <span
-            className="fit-to-canvas-icon"
-            title="Zoom to fit"
-            role="button"
-            onClick={ this.handleFitToCanvas }
-          />
-          <span
-            className="fit-to-canvas-text"
+            className={ 'fit-to-canvas' + (this.props.disabled ? ' disabled' : '') }
             title="Zoom to fit"
             tabIndex="0"
             role="button"
