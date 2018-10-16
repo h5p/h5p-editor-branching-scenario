@@ -909,12 +909,20 @@ export default class Canvas extends React.Component {
         }
 
         // Do not highlight custom end scenarios
-        const skipHighlighting = hasFeedback ||
-          (
-            this.props.highlight !== null
-            && (this.props.highlight !== id || highlightCurrentNode)
-          );
-        if (skipHighlighting) {
+        const highlightingDefaultEndings = this.props.highlight === -1;
+        const highlightingLink = this.props.highlight >= 0
+          && this.props.onlyThisBall !== null;
+        let fadeOut = false;
+        if (highlightingDefaultEndings) {
+          // Fade out if we have a custom ending or no ending
+          fadeOut = hasFeedback || id !== -1;
+        }
+        else if (highlightingLink) {
+          const isLinkedHighlight = this.props.onlyThisBall === key;
+          fadeOut = !isLinkedHighlight;
+        }
+
+        if (fadeOut) {
           if (this.props.onlyThisBall === null || this.props.onlyThisBall !== key) {
             alternativeBallClasses += ' fade';
           }
