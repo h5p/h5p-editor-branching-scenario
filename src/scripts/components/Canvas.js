@@ -846,19 +846,20 @@ export default class Canvas extends React.Component {
           const isRenderedInOtherTree = alt.nextContentId === -1 ? true
             : renderedNodes.indexOf(alt.nextContentId) > -1;
 
-          // Assume that child will be rendered if we can't find it anywhere
-          let isRenderedAsChild = true;
-
+          let isRenderedAsChild = false;
           // Check if node is rendered as child if we're on the corresponding index
-          if (num === index) {
+          if (num >= index) {
             isRenderedAsChild = nodes.some(node => {
               return node.key === alt.nextContentId.toString();
             });
           }
           const isRenderedAsPreviousAlt = branch.indexOf(alt.nextContentId) !== index;
 
-          const isEmpty = !isRenderedAsChild
-            && (isRenderedInOtherTree || isRenderedAsPreviousAlt);
+          let isEmpty = num >= index
+            ? isRenderedInOtherTree && !isRenderedAsChild
+            : isRenderedInOtherTree;
+
+          isEmpty = isEmpty || (!isRenderedAsChild && isRenderedAsPreviousAlt);
 
           return alt.nextContentId < 0 || isEmpty;
         }).length;
@@ -909,12 +910,20 @@ export default class Canvas extends React.Component {
         }
 
         // Do not highlight custom end scenarios
-        const skipHighlighting = hasFeedback ||
-          (
-            this.props.highlight !== null
-            && (this.props.highlight !== id || highlightCurrentNode)
-          );
-        if (skipHighlighting) {
+        const highlightingDefaultEndings = this.props.highlight === -1;
+        const highlightingLink = this.props.highlight >= 0
+          && this.props.onlyThisBall !== null;
+        let fadeOut = false;
+        if (highlightingDefaultEndings) {
+          // Fade out if we have a custom ending or no ending
+          fadeOut = hasFeedback || id !== -1;
+        }
+        else if (highlightingLink) {
+          const isLinkedHighlight = this.props.onlyThisBall === key;
+          fadeOut = !isLinkedHighlight;
+        }
+
+        if (fadeOut) {
           if (this.props.onlyThisBall === null || this.props.onlyThisBall !== key) {
             alternativeBallClasses += ' fade';
           }
