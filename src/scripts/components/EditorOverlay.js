@@ -47,11 +47,29 @@ export default class EditorOverlay extends React.Component {
     // This will run once the sub content form is loaded
     if (this.isBranchingQuestion) {
       // Create and render a sub React DOM inside one of the editor widgets
-      this.addBranchingOptionsToEditor(H5PEditor.findField(
+      const bqField = H5PEditor.findField(
         'type/branchingQuestion', {
           children: this.props.content.formChildren,
         }
-      ), this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
+      );
+      this.addBranchingOptionsToEditor(bqField, this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
+
+      bqField.children.forEach(child => {
+        if (child.getName !== undefined && child.getName() === 'alternatives') {
+          child.widget.setConfirmHandler((item, id, buttonOffset, confirm) => {
+            if (this.props.onNextContentChange(this.props.content.params.type.params.branchingQuestion.alternatives[id], -2, null)) {
+              // Delete dialog is displayed
+              this.renderBranchingOptions[id] = confirm;
+            }
+            else {
+              // Use default list dialog
+              child.widget.defaultConfirmHandler(item, id, buttonOffset, confirm);
+            }
+            
+          });
+          return false; // Stop loop
+        }
+      });
     }
 
     const library = H5PEditor.findField('type', {
