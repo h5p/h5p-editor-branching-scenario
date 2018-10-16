@@ -21,6 +21,10 @@
     bottom: auto;
     top: 120%;
   }
+
+  &.wide {
+    width: 32rem;
+  }
 }
 
 .tooltip::before {
