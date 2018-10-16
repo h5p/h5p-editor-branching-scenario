@@ -25,14 +25,48 @@ export default class EditorOverlay extends React.Component {
 
     // Useful multiple places later
     this.isBranchingQuestion = isBranching(this.props.content);
+
+    this.validAltCount = this.props.validAlternatives
+      ? this.props.validAlternatives.length : 0;
   }
 
   componentDidMount() {
+    this.attachEditorForm();
+  }
+
+  componentDidUpdate() {
+    const validAltCount = this.props.validAlternatives
+      ? this.props.validAlternatives.length : 0;
+
+    // Alternatives has been deleted
+    if (validAltCount !== this.validAltCount) {
+      this.attachEditorForm();
+      this.validAltCount = validAltCount;
+    }
+  }
+
+  /**
+   * (Re-)Generates editor form from valid alternatives
+   */
+  attachEditorForm() {
+    // Remove all children
+    const feedbackForm = this.feedbackForm.current;
+    while (feedbackForm.firstChild) {
+      feedbackForm.removeChild(feedbackForm.firstChild);
+    }
+
     // Move feedback group to feedback form
-    this.feedbackForm.current.appendChild(this.props.content.feedbackFormWrapper);
+    feedbackForm.appendChild(this.props.content.feedbackFormWrapper);
+
+
+    // Remove all children
+    const form = this.form.current;
+    while (form.firstChild) {
+      form.removeChild(form.firstChild);
+    }
 
     // Insert editor form
-    this.form.current.appendChild(this.props.content.formWrapper);
+    form.appendChild(this.props.content.formWrapper);
 
     // Listen for the ready event from the sub form
     if (this.props.content.ready === true) {
