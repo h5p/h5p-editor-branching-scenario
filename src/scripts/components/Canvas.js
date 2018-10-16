@@ -857,8 +857,8 @@ export default class Canvas extends React.Component {
           }
           const isRenderedAsPreviousAlt = branch.indexOf(alt.nextContentId) !== index;
 
-          const isEmpty = !isRenderedAsChild
-            && (isRenderedInOtherTree || isRenderedAsPreviousAlt);
+          const isEmpty = isRenderedInOtherTree
+            || (!isRenderedAsChild && isRenderedAsPreviousAlt);
 
           return alt.nextContentId < 0 || isEmpty;
         }).length;
