@@ -850,15 +850,18 @@ export default class Canvas extends React.Component {
           let isRenderedAsChild = true;
 
           // Check if node is rendered as child if we're on the corresponding index
-          if (num === index) {
+          if (num >= index) {
             isRenderedAsChild = nodes.some(node => {
               return node.key === alt.nextContentId.toString();
             });
           }
           const isRenderedAsPreviousAlt = branch.indexOf(alt.nextContentId) !== index;
 
-          const isEmpty = isRenderedInOtherTree
-            || (!isRenderedAsChild && isRenderedAsPreviousAlt);
+          let isEmpty = num >= index
+            ? isRenderedInOtherTree && !isRenderedAsChild
+            : isRenderedInOtherTree;
+
+          isEmpty = isEmpty || (!isRenderedAsChild && isRenderedAsPreviousAlt);
 
           return alt.nextContentId < 0 || isEmpty;
         }).length;
