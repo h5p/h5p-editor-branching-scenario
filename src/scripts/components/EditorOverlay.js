@@ -99,7 +99,7 @@ export default class EditorOverlay extends React.Component {
               // Use default list dialog
               child.widget.defaultConfirmHandler(item, id, buttonOffset, confirm);
             }
-            
+
           });
           return false; // Stop loop
         }
@@ -238,7 +238,14 @@ export default class EditorOverlay extends React.Component {
     if (this.props.scoringOption === 'dynamic-score') {
       scoreClass = ' dynamic-score';
     }
-    const overlayClass = this.isBranchingQuestion ? ' h5p-branching-question' : '';
+
+    let wrapperClass = 'editor-overlay';
+    if (this.isBranchingQuestion) {
+      wrapperClass += ' h5p-branching-question';
+    }
+    if (this.props.moveDown) {
+      wrapperClass += ' move-down';
+    }
     const feedbackGroupClass = this.props.content.params.nextContentId !== -1 ? ' hide-score' : '';
 
     const metadata = this.props.content.params.type.metadata;
@@ -251,7 +258,7 @@ export default class EditorOverlay extends React.Component {
       : Content.getTooltip(this.props.content, true);
 
     return (
-      <div className={`editor-overlay${overlayClass}`}>
+      <div className={ wrapperClass }>
         <div className='editor-overlay-header'>
           <span
             className={ iconClass }

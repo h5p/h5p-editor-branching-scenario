@@ -65,6 +65,15 @@ export default class BranchingOptions extends React.Component {
     }
   }
 
+  static getDerivedStateFromProps(nextProps) {
+    if (nextProps.nextContentId >= 0) {
+      return ({ // Make sure to auto-select old content if nextContentId is set
+        selectedMainOption: 'old-content'
+      });
+    }
+    return null;
+  }
+
   render() {
     // TODO: translations
     return (

@@ -1304,6 +1304,11 @@ export default class Canvas extends React.Component {
     if (this.state.setNextContentId !== null) {
       // Handle cancel when dialog is displayed upon changing nextContent through <BranchingOptions>
       newState.setNextContentId = null;
+
+      const alternative = hasNextContent(this.state.content[this.state.editing], this.state.deleting);
+      if (alternative === -1) {
+        this.editorOverlay.forceUpdate();
+      }
     }
     else {
       // Stop placing content
@@ -1545,9 +1550,9 @@ export default class Canvas extends React.Component {
     // No BQ or info content shall be droppable on itself
     let dropzonesDisabled = [id];
 
-    // No node shall not be able to replace BQs
+    // No BQ shall be able to replace BQs
     this.state.content.forEach((node, index) => {
-      if (isBranching(node)) {
+      if (isBranching(node) && isBranching(this.state.content[id])) {
         dropzonesDisabled.push(index);
       }
     });
@@ -1600,7 +1605,7 @@ export default class Canvas extends React.Component {
         this.setState({
           setNextContentId: newId,
           deleting: params.nextContentId,
-          dialog: 'delete'
+          dialog: 'delete' + (newId === -2 ? ' alternative' : '')
         });
         return true;
       }
@@ -1617,7 +1622,22 @@ export default class Canvas extends React.Component {
   }
 
   renderConfirmationDialogContent = () => {
-    if (isBranching(this.state.content[this.state.deleting])) {
+    if (this.state.setNextContentId === -2) {
+      const children = this.getChildrenTitles(this.state.deleting);
+      // Add self to list of content
+      children.unshift(getAlternativeName(this.state.content[this.state.deleting]));
+      return (
+        <div className='confirmation-details'>
+          <p>If you proceed, you will lose all the content attached to this alternative:</p>
+          <ul>
+            { children.map((title, index) =>
+              <li key={index}>{title}</li>
+            ) }
+          </ul>
+        </div>
+      );
+    }
+    else if (isBranching(this.state.content[this.state.deleting])) {
       return (
         <div className='confirmation-details'>
           <p>If you proceed, you will lose all the content attached to this contents alternatives:</p>
@@ -1734,6 +1754,7 @@ export default class Canvas extends React.Component {
             onDone={ this.handleEditorDone }
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
+            moveDown={ this.state.dialog !== null }
           />
         }
         { this.state.dialog !== null &&
