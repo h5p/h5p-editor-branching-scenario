@@ -1600,7 +1600,7 @@ export default class Canvas extends React.Component {
         this.setState({
           setNextContentId: newId,
           deleting: params.nextContentId,
-          dialog: 'delete'
+          dialog: 'delete' + (newId === -2 ? ' alternative' : '')
         });
         return true;
       }
@@ -1617,7 +1617,22 @@ export default class Canvas extends React.Component {
   }
 
   renderConfirmationDialogContent = () => {
-    if (isBranching(this.state.content[this.state.deleting])) {
+    if (this.state.setNextContentId === -2) {
+      const children = this.getChildrenTitles(this.state.deleting);
+      // Add self to list of content
+      children.unshift(getAlternativeName(this.state.content[this.state.deleting]));
+      return (
+        <div className='confirmation-details'>
+          <p>If you proceed, you will lose all the content attached to this alternative:</p>
+          <ul>
+            { children.map((title, index) =>
+              <li key={index}>{title}</li>
+            ) }
+          </ul>
+        </div>
+      );
+    }
+    else if (isBranching(this.state.content[this.state.deleting])) {
       return (
         <div className='confirmation-details'>
           <p>If you proceed, you will lose all the content attached to this contents alternatives:</p>

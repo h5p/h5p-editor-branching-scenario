@@ -12,6 +12,12 @@ const ConfirmationDialog = (props) => {
       confirm = 'Delete';
       break;
 
+    case 'delete alternative':
+      title = 'Delete Alternative'; // TODO: l10n
+      question = 'Are you sure you want to delete this alternative?';
+      confirm = 'Delete';
+      break;
+
     case 'replace':
       title = 'Replace Content'; // TODO: l10n
       question = 'Are you sure you want to replace this content?';
