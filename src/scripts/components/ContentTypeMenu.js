@@ -174,7 +174,7 @@ export default class ContentTypeMenu extends React.Component {
       }
 
       return <li
-        key={ Math.random() }
+        key={ className }
         className={ className }
         onMouseDown={ event => this.handleMouseDown(event, library) }
       >

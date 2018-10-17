@@ -63,10 +63,17 @@ export default class Editor extends React.Component {
   }
 
   handleWindowResize = () => {
-    this.setState({
-      center: true
-    });
-  }
+    this.resizeTimeout = null;
+    if (!this.resizeTimeout) {
+      // Throttle centering to ~15fps
+      this.resizeTimeout = setTimeout(() => {
+        this.resizeTimeout = null;
+        this.setState({
+          center: true
+        });
+      }, 66);
+    }
+  };
 
   handleLibrariesLoaded = (libraries) => {
     let loadedLibraries = [];
