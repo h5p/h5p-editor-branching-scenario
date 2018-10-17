@@ -7,11 +7,11 @@ export default class BranchingOptions extends React.Component {
   constructor(props) {
     super(props);
 
-    const initialSelectedMainOption = this.props.isInserting
-      ? 'new-content'
+    const initialSelectedMainOption = this.props.nextContentId >= 0
+      ? 'old-content'
       : (
-        this.props.nextContentId >= 0
-          ? 'old-content'
+        this.props.isInserting
+          ? 'new-content'
           : 'end-scenario'
       );
 
