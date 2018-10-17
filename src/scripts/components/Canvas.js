@@ -1159,7 +1159,10 @@ export default class Canvas extends React.Component {
           newState.content[prevState.editing].params.nextContentId = prevState.setNextContentId;
         }
         else if (alternative !== null) {
-          newState.content[prevState.editing].params.type.params.branchingQuestion.alternatives[alternative].nextContentId = prevState.setNextContentId;
+          if (prevState.setNextContentId !== -2) { // -2 = deleting entire alternative (handled by H5PEditor)
+            // Update alternative
+            newState.content[prevState.editing].params.type.params.branchingQuestion.alternatives[alternative].nextContentId = prevState.setNextContentId;
+          }
           // We have to manually trigger the editor sub-react update
           this.editorOverlay.renderBranchingOptions[alternative](prevState.setNextContentId);
         }
@@ -1578,9 +1581,6 @@ export default class Canvas extends React.Component {
    * @param {number} nodeId Id of node to test.
    */
   isOuterNode(focusId, nodeId) {
-    if (!focusId || !nodeId) {
-      return;
-    }
     return this.getChildrenIds(focusId, true, true).indexOf(nodeId) === -1;
   }
 
@@ -1602,7 +1602,7 @@ export default class Canvas extends React.Component {
           deleting: params.nextContentId,
           dialog: 'delete'
         });
-        return;
+        return true;
       }
     }
 
