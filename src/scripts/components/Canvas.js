@@ -1545,9 +1545,9 @@ export default class Canvas extends React.Component {
     // No BQ or info content shall be droppable on itself
     let dropzonesDisabled = [id];
 
-    // No node shall not be able to replace BQs
+    // No BQ shall be able to replace BQs
     this.state.content.forEach((node, index) => {
-      if (isBranching(node)) {
+      if (isBranching(node) && isBranching(this.state.content[id])) {
         dropzonesDisabled.push(index);
       }
     });
