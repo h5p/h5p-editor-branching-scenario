@@ -77,7 +77,8 @@ export default class TabViewSettings extends React.Component {
     this.l10n = {
       tooltipStartingScreen: 'Starting screen is an intro screen that should give a learner additional information about the course',
       tooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
-      tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.'
+      tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.',
+      tooltipScoringOptions: '<p><b>Statically set score for each end scenario</b><br />The author gives points for each scenario</p><p><b>Dynamically calculate score from user answers</b><br />The author gives points for each content and/or for each alternative inside branching question<br />The final score is calculated as a sum of points that the user earned until he reached the end</p><p><b>No scoring</b><br />Upon reaching the end - the user will get only feedback</p>'
     };
   }
 
@@ -119,7 +120,13 @@ export default class TabViewSettings extends React.Component {
             />
           </fieldset>
           <fieldset>
-            <legend className="tab-view-info">Behavioural settings</legend>
+            <legend className="tab-view-info">
+              Scoring options
+              <TooltipButton
+                text={ this.l10n.tooltipScoringOptions }
+                tooltipClass={ 'tooltip wide' }
+              />
+            </legend>
             <div
               ref={this.refScoringOption}
               className='h5p-scoring-option-wrapper'
