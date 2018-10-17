@@ -21,6 +21,20 @@ export default class BranchingOptions extends React.Component {
     };
   }
 
+  componentDidUpdate(prevProps) {
+    // Handle changes to next content id when component is updated
+    if (prevProps.nextContentId !== this.props.nextContentId) {
+      // Update selected main option if next content id was changed.
+      const updatedSelectedMainOption = this.props.nextContentId >= 0
+        ? 'old-content'
+        : 'end-scenario';
+
+      this.setState({
+        selectedMainOption: updatedSelectedMainOption,
+      });
+    }
+  }
+
   handleExistingContentChange = (e) => {
     this.updateContentSelected(e.target.value);
   }
