@@ -17,6 +17,14 @@
   line-height: 0.9rem;
   color: $col1;
 
+  p:first-child {
+    margin-top: 0;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
   &.below {
     bottom: auto;
     top: 120%;
