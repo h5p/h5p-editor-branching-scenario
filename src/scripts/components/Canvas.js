@@ -1581,9 +1581,6 @@ export default class Canvas extends React.Component {
    * @param {number} nodeId Id of node to test.
    */
   isOuterNode(focusId, nodeId) {
-    if (!focusId || !nodeId) {
-      return;
-    }
     return this.getChildrenIds(focusId, true, true).indexOf(nodeId) === -1;
   }
 
