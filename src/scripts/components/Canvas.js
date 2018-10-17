@@ -1754,6 +1754,7 @@ export default class Canvas extends React.Component {
             onDone={ this.handleEditorDone }
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
+            moveDown={ this.state.dialog !== null }
           />
         }
         { this.state.dialog !== null &&
