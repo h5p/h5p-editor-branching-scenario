@@ -1304,6 +1304,11 @@ export default class Canvas extends React.Component {
     if (this.state.setNextContentId !== null) {
       // Handle cancel when dialog is displayed upon changing nextContent through <BranchingOptions>
       newState.setNextContentId = null;
+
+      const alternative = hasNextContent(this.state.content[this.state.editing], this.state.deleting);
+      if (alternative === -1) {
+        this.editorOverlay.forceUpdate();
+      }
     }
     else {
       // Stop placing content
@@ -1749,6 +1754,7 @@ export default class Canvas extends React.Component {
             onDone={ this.handleEditorDone }
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
+            moveDown={ this.state.dialog !== null }
           />
         }
         { this.state.dialog !== null &&
