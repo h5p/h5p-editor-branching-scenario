@@ -3,7 +3,7 @@ import './Dialog.scss';
 
 const Dialog = (props) => {
   return (
-    <div className={`confirmation-dialog ${props.classes}`}>
+    <div className={`confirmation-dialog ${typeof props.classes !== 'undefined' ? props.classes : ''}`}>
       <div className='confirmation-dialog-header'>
         {props.icon}
         <span className='header-text'>{props.headerText}</span>
