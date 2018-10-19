@@ -91,7 +91,7 @@ export default class EditorOverlay extends React.Component {
       bqField.children.forEach(child => {
         if (child.getName !== undefined && child.getName() === 'alternatives') {
           child.widget.setConfirmHandler((item, id, buttonOffset, confirm) => {
-            if (this.props.onNextContentChange(this.props.content.params.type.params.branchingQuestion.alternatives[id], -2, null)) {
+            if (this.props.onNextContentChange(this.props.content.params.type.params.branchingQuestion.alternatives[id], -2, null)) {  // -2 = deleting entire alternative (handled by H5PEditor)
               // Delete dialog is displayed
               this.renderBranchingOptions[id] = confirm;
             }
@@ -128,7 +128,7 @@ export default class EditorOverlay extends React.Component {
     this.renderBranchingOptions = [];
 
     // Add <BranchingOptions> to each alternative in Branching Question
-    branchingQuestionEditor.setAlternatives((listIndex, selectorWrapper) => {
+    branchingQuestionEditor.setAlternatives((listIndex, selectorWrapper, feedbackGroup) => {
       let nextContentId = alternatives[listIndex].nextContentId;
 
       const branchingUpdated = (value) => {
@@ -143,6 +143,7 @@ export default class EditorOverlay extends React.Component {
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
             nextContentLabel={'Special action if selected'}
+            feedbackGroup={ feedbackGroup }
           />
         ), selectorWrapper);
       };
@@ -286,6 +287,7 @@ export default class EditorOverlay extends React.Component {
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
               isInserting={ this.props.isInserting }
+              feedbackGroup={ this.props.content.formChildren[3] }
             />
           }
           <div

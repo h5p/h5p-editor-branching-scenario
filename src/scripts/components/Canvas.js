@@ -953,7 +953,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative if not of BQ being moved
-        if (this.state.placing !== null && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
+        if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
           nodes.push(this.renderDropzone(-1, {
             x: alternativesOffsetX + nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
@@ -1602,7 +1602,7 @@ export default class Canvas extends React.Component {
         this.setState({
           setNextContentId: newId,
           deleting: params.nextContentId,
-          dialog: 'delete' + (newId === -2 ? ' alternative' : '')
+          dialog: 'delete' + (newId === -2 ? ' alternative' : '')  // -2 = deleting entire alternative (handled by H5PEditor)
         });
         return true;
       }
@@ -1619,7 +1619,7 @@ export default class Canvas extends React.Component {
   }
 
   renderConfirmationDialogContent = () => {
-    if (this.state.setNextContentId === -2) {
+    if (this.state.setNextContentId === -2) {  // -2 = deleting entire alternative (handled by H5PEditor)
       const children = this.getChildrenTitles(this.state.deleting);
       // Add self to list of content
       children.unshift(getAlternativeName(this.state.content[this.state.deleting]));

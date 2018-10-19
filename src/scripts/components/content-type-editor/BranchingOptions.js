@@ -21,18 +21,41 @@ export default class BranchingOptions extends React.Component {
     };
   }
 
-  componentDidUpdate(prevProps) {
-    // Handle changes to next content id when component is updated
-    if (prevProps.nextContentId !== this.props.nextContentId) {
-      // Update selected main option if next content id was changed.
-      const updatedSelectedMainOption = this.props.nextContentId >= 0
-        ? 'old-content'
-        : 'end-scenario';
-
-      this.setState({
-        selectedMainOption: updatedSelectedMainOption,
-      });
+  componentDidMount() {
+    if (this.props.feedbackGroup !== undefined) {
+      this.props.feedbackGroup.$group.appendTo(this.contentWrapper);
     }
+  }
+
+  static getDerivedStateFromProps(props) {
+    return ({ // Update selected option
+      selectedMainOption: props.nextContentId >= 0
+        ? 'old-content'
+        : (BranchingOptions.hasFeedback(props) ? 'end-scenario' : 'new-content')
+    });
+  }
+
+  componentDidUpdate() {
+    if (this.props.feedbackGroup !== undefined) {
+      this.props.feedbackGroup.$group.appendTo(this.contentWrapper);
+      this.props.feedbackGroup.$group.toggle(this.state.selectedMainOption !== 'new-content');
+
+      if (this.state.selectedMainOption !== 'new-content') {
+        // Update field labels to match parent option
+        this.props.feedbackGroup.$title.html(this.state.selectedMainOption === 'end-scenario' ? 'Customize end scenario' : this.props.feedbackGroup.field.label);
+        this.props.feedbackGroup.children[0].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Custom end scenario title' : this.props.feedbackGroup.children[0].field.label);
+        this.props.feedbackGroup.children[1].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Custom end scenario text' : this.props.feedbackGroup.children[1].field.label);
+        this.props.feedbackGroup.children[2].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Custom end scenario image' : this.props.feedbackGroup.children[2].field.label);
+      }
+    }
+  }
+
+  static hasFeedback(props) {
+    if (props.feedbackGroup === undefined || props.feedbackGroup.params === undefined) {
+      return false;
+    }
+    // Same as view(!)
+    return !!(props.feedbackGroup.params.title || props.feedbackGroup.params.subtitle || props.feedbackGroup.params.image);
   }
 
   handleExistingContentChange = (e) => {
@@ -53,25 +76,28 @@ export default class BranchingOptions extends React.Component {
     switch (newValue) {
       case 'new-content':
         this.updateContentSelected(-1);
+
+        // Clear all feedback values
+        if (this.props.feedbackGroup) {
+          this.props.feedbackGroup.children[0].$input.val('').change();
+          this.props.feedbackGroup.children[1].$input.val('').change();
+          this.props.feedbackGroup.children[2].removeImage();
+        }
         break;
 
       case 'end-scenario':
         this.updateContentSelected(-1);
+
+        if (this.props.feedbackGroup && this.props.feedbackGroup.params) {
+          // A small hack to make feedback group display again
+          this.props.feedbackGroup.params.title = ' ';
+        }
         break;
 
       case 'old-content':
         this.updateContentSelected(this.props.validAlternatives[0].id);
         break;
     }
-  }
-
-  static getDerivedStateFromProps(nextProps) {
-    if (nextProps.nextContentId >= 0) {
-      return ({ // Make sure to auto-select old content if nextContentId is set
-        selectedMainOption: 'old-content'
-      });
-    }
-    return null;
   }
 
   render() {
@@ -87,7 +113,7 @@ export default class BranchingOptions extends React.Component {
             onKeyPress={ e => { if (e.which === 32) this.setState(prevState => ({expanded: !prevState.expanded}));} }
             tabIndex="0">Branching Options{ /* TODO: l10n */ }
           </div>
-          <div className="content">
+          <div className="content" ref={ element => this.contentWrapper = element }>
             <div className='field text importance-low'>
               <label className='h5peditor-label-wrapper'>
                 <span className='h5peditor-label'>
