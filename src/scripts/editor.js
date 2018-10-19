@@ -93,9 +93,12 @@ export default class Editor extends React.Component {
   }
 
   handleMouseDown = (event) => {
-    this.setState({
-      inserting: event,
-      highlight: null
+    this.setState(prevState => {
+      return {
+        inserting: event,
+        insertingId: prevState.insertingId + 1,
+        highlight: null
+      };
     });
   }
 
