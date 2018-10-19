@@ -287,6 +287,7 @@ export default class EditorOverlay extends React.Component {
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
               isInserting={ this.props.isInserting }
+              feedbackGroup={ this.props.content.formChildren[3] }
             />
           }
           <div

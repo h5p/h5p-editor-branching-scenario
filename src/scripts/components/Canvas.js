@@ -583,7 +583,7 @@ export default class Canvas extends React.Component {
     if (num === undefined) {
       num = 0;
     }
-  
+
     const isInitial = (id === -9);
     return ( !this.state.editing &&
       <Dropzone
