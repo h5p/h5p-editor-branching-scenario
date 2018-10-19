@@ -583,7 +583,7 @@ export default class Canvas extends React.Component {
     if (num === undefined) {
       num = 0;
     }
-
+  
     const isInitial = (id === -9);
     return ( !this.state.editing &&
       <Dropzone
@@ -953,7 +953,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative if not of BQ being moved
-        if (this.state.placing !== null && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
+        if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
           nodes.push(this.renderDropzone(-1, {
             x: alternativesOffsetX + nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
