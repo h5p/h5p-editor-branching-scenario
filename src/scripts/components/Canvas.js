@@ -718,7 +718,6 @@ export default class Canvas extends React.Component {
         position.x += ((subtree.x - x) / 2) - (this.props.nodeSize.width / 2);
       }
 
-      let contentHasLoopBack = false;
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const library = this.getLibrary(content.params.type.library);
@@ -742,10 +741,8 @@ export default class Canvas extends React.Component {
         const hasCustomEndScreen = hasCustomFeedback
           && content.params.nextContentId === -1;
 
-        if ((subtree === null || subtree.nodes.length === 0)
-            && content.params.nextContentId >= 0) {
-          contentHasLoopBack = true;
-        }
+        const contentHasLoopBack = (subtree === null || subtree.nodes.length === 0)
+          && content.params.nextContentId >=0;
 
         const isPlacingBranchingQuestion = this.state.placing === -1 &&
           this.state.library && this.state.library.title === 'Branching Question';
@@ -956,7 +953,7 @@ export default class Canvas extends React.Component {
         );
 
         // Add dropzone under empty BQ alternative if not of BQ being moved
-        if (this.state.placing !== null && !content && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
+        if (this.state.placing !== null && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
           nodes.push(this.renderDropzone(-1, {
             x: alternativesOffsetX + nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
@@ -979,7 +976,7 @@ export default class Canvas extends React.Component {
         }
 
         // Add dropzone below if there's no subtree
-        if (content && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id) && !contentHasLoopBack) {
+        if (content && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id)) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y + (this.props.nodeSize.spacing.y * 2) + dzDistance // for fixed tree
