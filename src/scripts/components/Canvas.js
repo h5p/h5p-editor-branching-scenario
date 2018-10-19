@@ -773,7 +773,7 @@ export default class Canvas extends React.Component {
             onEdit={ () => this.handleContentEdit(id) }
             onCopy={ () => this.handleContentCopy(id) }
             onDelete={ () => this.handleContentDelete(id) }
-            disabled={ (contentIsBranching && (!this.state.placing || isPlacingBranchingQuestion)) || this.isDropzoneDisabled(id) }
+            disabled={ (contentIsBranching && (this.state.placing === null || isPlacingBranchingQuestion)) || this.isDropzoneDisabled(id) }
             tooltip={ label }
             scale={ this.props.scale }
             hasCustomEndScreen={ hasCustomEndScreen }
@@ -1660,7 +1660,7 @@ export default class Canvas extends React.Component {
 
   render() {
     this.dropzones = [];
-    this.dropzonesDisabled = (this.state.placing) ? this.getDisabledDropzones(this.state.placing) : [];
+    this.dropzonesDisabled = (this.state.placing !== null) ? this.getDisabledDropzones(this.state.placing) : [];
 
     // Generate the tree
     const tree = this.renderTree(0);
