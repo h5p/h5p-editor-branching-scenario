@@ -12,6 +12,13 @@ export default class Draggable extends React.Component {
     };
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.started && prevProps.started !== this.props.started) {
+      // Required for switching to other Draggables in ContentMenu when placing
+      this.state = this.prepareMouseMove(this.props.started);
+    }
+  }
+
   handleMouseDown = (event) => {
     const isExcludedTarget = event.target.classList.contains('loop-back')
       || event.target.classList.contains('content-menu-button');
