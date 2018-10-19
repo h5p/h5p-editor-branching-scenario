@@ -128,7 +128,7 @@ export default class EditorOverlay extends React.Component {
     this.renderBranchingOptions = [];
 
     // Add <BranchingOptions> to each alternative in Branching Question
-    branchingQuestionEditor.setAlternatives((listIndex, selectorWrapper) => {
+    branchingQuestionEditor.setAlternatives((listIndex, selectorWrapper, feedbackGroup) => {
       let nextContentId = alternatives[listIndex].nextContentId;
 
       const branchingUpdated = (value) => {
@@ -143,6 +143,7 @@ export default class EditorOverlay extends React.Component {
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
             nextContentLabel={'Special action if selected'}
+            feedbackGroup={ feedbackGroup }
           />
         ), selectorWrapper);
       };
