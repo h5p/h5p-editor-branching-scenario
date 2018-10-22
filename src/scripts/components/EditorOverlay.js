@@ -129,7 +129,9 @@ export default class EditorOverlay extends React.Component {
 
     // Add <BranchingOptions> to each alternative in Branching Question
     branchingQuestionEditor.setAlternatives((listIndex, selectorWrapper, feedbackGroup) => {
-      let nextContentId = alternatives[listIndex].nextContentId;
+      let nextContentId = (typeof alternatives === 'undefined' || listIndex + 1 > alternatives.length) ?
+        -1 :
+        alternatives[listIndex].nextContentId;
 
       const branchingUpdated = (value) => {
         this.props.onNextContentChange(alternatives[listIndex], parseInt(value), render);
@@ -210,7 +212,7 @@ export default class EditorOverlay extends React.Component {
 
     if (this.isBranchingQuestion) {
       // Change non-selected "Next Content" to default end scenario.
-      const alternatives = this.props.content.params.type.params.branchingQuestion.alternatives;
+      const alternatives = this.props.content.params.type.params.branchingQuestion.alternatives || [];
       alternatives.forEach((alternative, index) => {
         if (alternative.nextContentId === undefined) {
           alternatives[index].nextContentId = -1;
