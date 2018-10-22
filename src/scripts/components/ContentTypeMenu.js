@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './ContentTypeMenu.scss';
 import TooltipButton from './TooltipButton';
-import { isBranching, getMachineName } from '../helpers/Library';
+import { isBranching, getMachineName, find } from '../helpers/Library';
 
 export default class ContentTypeMenu extends React.Component {
 
@@ -65,7 +65,7 @@ export default class ContentTypeMenu extends React.Component {
       }
 
       library = (this.props.libraries) ?
-        this.props.libraries.find(library => library.name === clipboard.generic.library) :
+        find(this.props.libraries, library => library.name === clipboard.generic.library) :
         undefined;
       if (typeof library === 'undefined') {
         return;
@@ -195,7 +195,7 @@ export default class ContentTypeMenu extends React.Component {
         <div className="loading">Loading…</div>
       );
     }
-    const bs = this.props.libraries.find(library => library.className === 'branchingquestion');
+    const bs = find(this.props.libraries, library => library.className === 'branchingquestion');
     let className = bs.className;
     if (this.props.inserting && this.props.inserting.library === bs && this.state.inUse === bs) {
       className += ' greyout';

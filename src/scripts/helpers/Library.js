@@ -76,9 +76,25 @@ const hasNextContent = (content, id, num = null) => {
   return num !== null ? 0 : null;
 };
 
+/**
+ * Help find something in an array
+ *
+ * @param {Array} arr
+ * @param {function} ev Callback
+ * @return {*} Array value where ev = true
+ */
+const find = (arr, ev) => {
+  for (let i = 0; i < arr.length; i++) {
+    if (ev(arr[i], i)) {
+      return arr[i];
+    }
+  }
+};
+
 export {
   isBranching,
   getAlternativeName,
   getMachineName,
   hasNextContent,
+  find,
 };

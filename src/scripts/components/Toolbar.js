@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { find } from '../helpers/Library';
+
 import './Toolbar.scss';
 
 export default class Toolbar extends React.Component {
@@ -82,7 +84,7 @@ export default class Toolbar extends React.Component {
         pos = this.zoomLevels.length - 1;
       }
       else {
-        pos = this.zoomLevels.indexOf(this.zoomLevels.find(level => level > this.state.scale));
+        pos = this.zoomLevels.indexOf(find(this.zoomLevels, level => level > this.state.scale));
       }
     }
 

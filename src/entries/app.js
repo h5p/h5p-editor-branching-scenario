@@ -147,7 +147,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     description.textContent = 'It is recommended to provide feedback that motivates and also provides guidance. Leave all fields empty if you don\'t want the user to get feedback after choosing this alternative/viewing this content.';
 
     const groupWrapper = feedbackGroup.querySelector('.content');
-    groupWrapper.prepend(description);
+    groupWrapper.insertBefore(description, groupWrapper.firstChild);
 
     content.formChildren = this.children;
 
