@@ -56,13 +56,15 @@ const hasNextContent = (content, id, num = null) => {
     if (num !== null) {
       num = 0;
     }
-    for (let i = 0; i < content.params.type.params.branchingQuestion.alternatives.length; i++) {
-      if (content.params.type.params.branchingQuestion.alternatives[i].nextContentId === id) {
-        if (num === null) {
-          return i;
-        }
-        else {
-          num++;
+    if (typeof content.params.type.params.branchingQuestion.alternatives !== 'undefined') {
+      for (let i = 0; i < content.params.type.params.branchingQuestion.alternatives.length; i++) {
+        if (content.params.type.params.branchingQuestion.alternatives[i].nextContentId === id) {
+          if (num === null) {
+            return i;
+          }
+          else {
+            num++;
+          }
         }
       }
     }

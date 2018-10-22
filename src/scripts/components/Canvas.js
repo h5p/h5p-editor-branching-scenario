@@ -268,7 +268,8 @@ export default class Canvas extends React.Component {
       nextIds = [node.params.nextContentId];
     }
     else {
-      nextIds = node.params.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId);
+      const alternatives = node.params.type.params.branchingQuestion.alternatives || [];
+      nextIds = alternatives.map(alt => alt.nextContentId);
     }
 
     nextIds
@@ -1074,7 +1075,8 @@ export default class Canvas extends React.Component {
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
           if (isBranching(node)) {
-            deleteIds = node.params.type.params.branchingQuestion.alternatives
+            const alternatives = node.params.type.params.branchingQuestion.alternatives || [];
+            deleteIds = alternatives
               .filter(alt => alt.nextContentId > -1 &&
                 renderedNodes.indexOf(alt.nextContentId) > renderedNodes.indexOf(id)) // Filter end scenarios and loops
               .map(alt => alt.nextContentId).concat(id);
@@ -1101,7 +1103,7 @@ export default class Canvas extends React.Component {
               // Exchange all links pointing to node to be deleted to its successor instead.
               newState.content.forEach((node, index) => {
                 const affectedNodes = (isBranching(node)) ?
-                  node.params.type.params.branchingQuestion.alternatives :
+                  node.params.type.params.branchingQuestion.alternatives || []:
                   [node.params];
 
                 affectedNodes.forEach(affectedNode => {
@@ -1126,7 +1128,8 @@ export default class Canvas extends React.Component {
               if (removeChildren === true) {
                 let childrenIds;
                 if (isBranching(deleteNode)) {
-                  childrenIds = deleteNode.params.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId);
+                  const alternatives = deleteNode.params.type.params.branchingQuestion.alternatives || [];
+                  childrenIds = alternatives.map(alt => alt.nextContentId);
                 }
                 else {
                   childrenIds = [deleteNode.params.nextContentId];
