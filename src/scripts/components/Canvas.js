@@ -1371,7 +1371,8 @@ export default class Canvas extends React.Component {
     let numMissingEndScenarios = 0;
     this.state.content.forEach(content => {
       if (isBranching(content)) {
-        content.params.type.params.branchingQuestion.alternatives.forEach(alternative => {
+        const alternatives = content.params.type.params.branchingQuestion.alternatives || [];
+        alternatives.forEach(alternative => {
           const hasFeedback = !!(alternative.feedback
             && (alternative.feedback.title
               || alternative.feedback.subtitle
