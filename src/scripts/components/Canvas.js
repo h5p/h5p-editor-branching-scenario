@@ -1642,7 +1642,7 @@ export default class Canvas extends React.Component {
   }
 
   renderConfirmationDialogContent = () => {
-    if (this.state.setNextContentId === -2) {  // -2 = deleting entire alternative (handled by H5PEditor)
+    if (this.state.setNextContentId === -2 || this.state.setNextContentId !== null) {  // -2 = deleting entire alternative (handled by H5PEditor)
       const children = this.getChildrenTitles(this.state.deleting);
       // Add self to list of content
       children.unshift(getAlternativeName(this.state.content[this.state.deleting]));
