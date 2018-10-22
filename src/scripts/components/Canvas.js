@@ -1163,19 +1163,29 @@ export default class Canvas extends React.Component {
 
       if (prevState.setNextContentId !== null) {
         // Handle delete when dialog is displayed upon changing nextContent through <BranchingOptions>
-        const alternative = hasNextContent(newState.content[prevState.editing], prevState.deleting);
+        const editingNode = newState.content[prevState.editing];
+        const alternative = hasNextContent(editingNode, prevState.deleting);
         if (alternative === -1) {
-          newState.content[prevState.editing].params.nextContentId = prevState.setNextContentId;
+          editingNode.params.nextContentId = prevState.setNextContentId;
         }
         else if (alternative !== null) {
           if (prevState.setNextContentId !== -2) { // -2 = deleting entire alternative (handled by H5PEditor)
             // Update alternative
-            newState.content[prevState.editing].params.type.params.branchingQuestion.alternatives[alternative].nextContentId = prevState.setNextContentId;
+            editingNode.params.type.params.branchingQuestion.alternatives[alternative].nextContentId = prevState.setNextContentId;
           }
           // We have to manually trigger the editor sub-react update
           this.editorOverlay.renderBranchingOptions[alternative](prevState.setNextContentId);
         }
+
         removeNode(prevState.deleting, true, prevState.setNextContentId);
+
+        // Update editing ID after remove to avoid dialog crashing...
+        for (let i = 0; i < newState.content.length; i++) {
+          if (newState.content[i] === editingNode) {
+            newState.editing = i;
+          }
+        }
+
         return newState;
       }
       else {
