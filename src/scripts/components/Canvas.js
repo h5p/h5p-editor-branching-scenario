@@ -231,10 +231,12 @@ export default class Canvas extends React.Component {
    * Get titles of all children nodes sorted by ID.
    *
    * @param {number} start ID of start node.
+   * @param {number} skip Exclude
    * @return {string[]} Titles.
    */
-  getChildrenTitles = (start) => {
+  getChildrenTitles = (start, skip = null) => {
     return this.getChildrenIds(start, true)
+      .filter(id => id !== skip)
       .sort((a, b) => a - b)
       .map(id => {
         return getAlternativeName(this.state.content[id]);
@@ -278,7 +280,8 @@ export default class Canvas extends React.Component {
         childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true));
       });
 
-    return childrenIds;
+    // Remove any duplicates
+    return childrenIds.filter((id, idx) => childrenIds.indexOf(id) === idx);
   }
 
   getNewContentParams = () => {
@@ -1076,6 +1079,7 @@ export default class Canvas extends React.Component {
           if (isBranching(node)) {
             deleteIds = node.params.type.params.branchingQuestion.alternatives
               .filter(alt => alt.nextContentId > -1 &&
+                alt.nextContentId !== skipChild &&
                 renderedNodes.indexOf(alt.nextContentId) > renderedNodes.indexOf(id)) // Filter end scenarios and loops
               .map(alt => alt.nextContentId).concat(id);
           }
@@ -1084,15 +1088,20 @@ export default class Canvas extends React.Component {
           }
 
           deleteIds
-            .filter(id => id !== undefined)
+            .filter((id, idx) => id !== undefined && deleteIds.indexOf(id) === idx) // Remove duplicates and empties
             .sort((a, b) => b - a) // Delete nodes with highest id first to account for node removal
             .forEach(deleteId => {
               // node to be removed, will always be an info node, no BQ
               const deleteNode = newState.content[deleteId];
 
               let successorId = -1;
-              if (deleteNode.params.nextContentId > -1 && renderedNodes.indexOf(deleteNode.params.nextContentId) > renderedNodes.indexOf(deleteId)) {
-                successorId = deleteNode.params.nextContentId;
+              if (deleteNode.params.nextContentId > -1) {
+                if (renderedNodes.indexOf(deleteNode.params.nextContentId) > renderedNodes.indexOf(deleteId)) {
+                  successorId = deleteNode.params.nextContentId;
+                }
+                else if (skipChild) {
+                  successorId = skipChild;
+                }
               }
 
               // Keep track if first node is being deleted to swap nodes later
@@ -1132,7 +1141,7 @@ export default class Canvas extends React.Component {
                   childrenIds = [deleteNode.params.nextContentId];
                 }
                 childrenIds = childrenIds
-                  .filter(id => renderedNodes.indexOf(id) > renderedNodes.indexOf(deleteId - 1) && id !== skipChild) // Ignore backlinks
+                  .filter((id, idx) => renderedNodes.indexOf(id) > renderedNodes.indexOf(deleteId - 1) && id !== skipChild && childrenIds.indexOf(id) === idx) // Ignore backlinks and duplicates
                   .sort((a, b) => b - a); // Delete nodes with highest id first to account for node removal
 
                 removeNode(childrenIds, true, skipChild);
@@ -1245,7 +1254,7 @@ export default class Canvas extends React.Component {
             }
           }
 
-          removeNode(prevState.deleting);
+          removeNode(prevState.deleting, false, prevState.placing);
         }
       }
       else if (prevState.deleting !== null) {
@@ -1639,7 +1648,7 @@ export default class Canvas extends React.Component {
         <div className='confirmation-details'>
           <p>If you proceed, you will lose all the content attached to this contents alternatives:</p>
           <ul>
-            { this.getChildrenTitles(this.state.deleting).map((title, index) =>
+            { this.getChildrenTitles(this.state.deleting, this.state.placing).map((title, index) =>
               <li key={index}>{title}</li>
             ) }
           </ul>
