@@ -1121,9 +1121,9 @@ export default class Canvas extends React.Component {
                   // Account Id for upcoming node removal
                   if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
                     affectedNode.nextContentId -= 1;
-                    if (skipChild > deleteId) {
-                      skipChild -= 1;
-                    }
+                  }
+                  if (skipChild > deleteId) {
+                    skipChild -= 1;
                   }
                 });
               });
