@@ -81,12 +81,9 @@ export default class EditorOverlay extends React.Component {
     // This will run once the sub content form is loaded
     if (this.isBranchingQuestion) {
       // Create and render a sub React DOM inside one of the editor widgets
-      const bqField = H5PEditor.findField(
-        'type/branchingQuestion', {
-          children: this.props.content.formChildren,
-        }
-      );
-      this.addBranchingOptionsToEditor(bqField, this.props.validAlternatives, this.props.content.params.type.params.branchingQuestion.alternatives);
+      const bqField = this.findField('type/branchingQuestion');
+      this.addBranchingOptionsToEditor(bqField, this.props.validAlternatives,
+        this.props.content.params.type.params.branchingQuestion.alternatives);
 
       bqField.children.forEach(child => {
         if (child.getName !== undefined && child.getName() === 'alternatives') {
@@ -106,9 +103,7 @@ export default class EditorOverlay extends React.Component {
       });
     }
 
-    const library = H5PEditor.findField('type', {
-      children: this.props.content.formChildren,
-    });
+    const library = this.findField('type');
     const titleField = H5PEditor.findField('title', library.metadataForm);
     titleField.$input.on('change', () => this.forceUpdate());
 
@@ -158,6 +153,15 @@ export default class EditorOverlay extends React.Component {
         normalizedNextContentId
       );
       render(nextContentId);
+    });
+  }
+
+  /**
+   * Makes it easy to find a field in the current content form
+   */
+  findField = (path) => {
+    return H5PEditor.findField(path, {
+      children: this.props.content.formChildren,
     });
   }
 
@@ -218,16 +222,9 @@ export default class EditorOverlay extends React.Component {
           alternatives[index].nextContentId = -1;
         }
       });
-    }
 
-    // Collapse branching question list alternatives
-    if (this.isBranchingQuestion) {
-      const branchingQuestionEditor = H5PEditor.findField(
-        'type/branchingQuestion', {
-          children: this.props.content.formChildren,
-        }
-      );
-
+      // Collapse branching question list alternatives
+      const branchingQuestionEditor = this.findField('type/branchingQuestion');
       if (branchingQuestionEditor) {
         branchingQuestionEditor.collapseListAlternatives();
       }
@@ -260,6 +257,8 @@ export default class EditorOverlay extends React.Component {
       ? metadata.title
       : Content.getTooltip(this.props.content, true);
 
+    const feedbackGroupField = (!this.isBranchingQuestion ? this.findField('feedback') : null);
+
     return (
       <div className={ wrapperClass }>
         <div className='editor-overlay-header'>
@@ -289,7 +288,7 @@ export default class EditorOverlay extends React.Component {
               validAlternatives={ this.props.validAlternatives }
               onChangeContent={ this.handleNextContentIdChange }
               isInserting={ this.props.isInserting }
-              feedbackGroup={ this.props.content.formChildren[3] }
+              feedbackGroup={ feedbackGroupField }
             />
           }
           <div
