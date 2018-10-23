@@ -979,8 +979,8 @@ export default class Canvas extends React.Component {
           }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0, parentIsBranching));
         }
 
-        // Add dropzone below if there's no subtree
-        if (content && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id)) {
+        // Add dropzone below if there's no subtree (or BQ implicitly with no alternatives)
+        if (content && !isBranching(content) && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id)) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
             y: position.y + (this.props.nodeSize.spacing.y * 2) + dzDistance // for fixed tree
