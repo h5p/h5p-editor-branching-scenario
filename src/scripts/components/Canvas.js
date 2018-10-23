@@ -588,7 +588,7 @@ export default class Canvas extends React.Component {
       num = 0;
     }
 
-    const isInitial = (id === -9);
+    const isInitial = (id === -9); // -9 is a special case for the first drop zone since it behaves a bit differently
     return ( !this.state.editing &&
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
