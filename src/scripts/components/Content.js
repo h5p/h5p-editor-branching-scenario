@@ -84,11 +84,11 @@ export default class Content extends React.Component {
   getPoints = () => {
     const raw = this.element.getBoundingClientRect();
     return [{
-      x: raw.x,
-      y: raw.y
+      x: raw.left,
+      y: raw.top
     }, {
-      x: raw.x + raw.width,
-      y: raw.y + raw.height
+      x: raw.left + raw.width,
+      y: raw.top + raw.height
     }];
   }
 
