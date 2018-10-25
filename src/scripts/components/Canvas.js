@@ -1117,8 +1117,11 @@ export default class Canvas extends React.Component {
 
                 affectedNodes.forEach(affectedNode => {
                   if (affectedNode.nextContentId === deleteId) {
-                    // Updated next content but also avoid looping back to self
-                    affectedNode.nextContentId = (successorId === index ? -1 : successorId);
+                    // Updated next content but also avoid looping back to self or other node that was deleted
+                    affectedNode.nextContentId = ((successorId === index || renderedNodes.indexOf(deleteId) < index) ?
+                      -1 :
+                      successorId
+                    );
                   }
                   // Account Id for upcoming node removal
                   if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
