@@ -725,7 +725,7 @@ export default class Canvas extends React.Component {
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const library = this.getLibrary(content.params.type.library);
-        const hasCustomFeedback = content.params.feedback.title
+        const hasCustomFeedback = content.params.feedback.title && content.params.feedback.title.trim() !== ''
           || content.params.feedback.subtitle
           || content.params.feedback.image
           || content.params.feedback.endScreenScore !== undefined;
@@ -888,7 +888,7 @@ export default class Canvas extends React.Component {
         const alternative = alternatives[num];
         const hasFeedback = !!(alternative
           && alternative.feedback
-          && (alternative.feedback.title
+          && (alternative.feedback.title && alternative.feedback.title.trim() !== ''
             || alternative.feedback.subtitle
             || alternative.feedback.image
             || alternative.feedback.endScreenScore !== undefined
