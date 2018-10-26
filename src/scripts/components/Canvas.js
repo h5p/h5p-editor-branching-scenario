@@ -309,12 +309,12 @@ export default class Canvas extends React.Component {
           (!this.props.inserting.pasted.generic || supported(this.props.inserting.pasted.generic.library))) {
         // Non generic part = must be content from another BS
         this.props.inserting.pasted.specific.nextContentId = -1;
-        return this.props.inserting.pasted.specific;
+        return H5P.cloneObject(this.props.inserting.pasted.specific, true);
       }
       else if (this.props.inserting.pasted.generic && supported(this.props.inserting.pasted.generic.library)) {
         // Supported library from another content type
         return {
-          type: this.props.inserting.pasted.generic,
+          type: H5P.cloneObject(this.props.inserting.pasted.generic, true),
           showContentTitle: false
         };
       }
