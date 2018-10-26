@@ -1639,13 +1639,16 @@ export default class Canvas extends React.Component {
       }
     }
 
-    // No need to check, just update
-    params.nextContentId = newId;
-    if (render !== null) {
-      render(newId);
-    }
-    else {
-      this.forceUpdate();
+    // Skip update when trying to delete the entire alternative
+    if (newId !== -2) {
+      // No need to display confirm dialog, just update
+      params.nextContentId = newId;
+      if (render !== null) {
+        render(newId);
+      }
+      else {
+        this.forceUpdate();
+      }
     }
   }
 
