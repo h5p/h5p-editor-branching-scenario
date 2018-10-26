@@ -1073,7 +1073,7 @@ export default class Canvas extends React.Component {
           removeChildren = removeChildren || isBranching(node);
 
           // If node to be removed loops backwards or to itself, use default end scenario
-          const renderedNodes = this.renderedNodes.filter(node => node > -1);
+          let renderedNodes = this.renderedNodes.filter(node => node > -1);
 
           // If node: delete this node. If BQ: delete this node and its children
           let deleteIds;
@@ -1132,6 +1132,11 @@ export default class Canvas extends React.Component {
                   }
                 });
               });
+
+              // Remove node in rendered nodes and update indices
+              renderedNodes = renderedNodes
+                .filter(node => node !== deleteId)
+                .map(node => (node >= deleteId) ? node - 1  : node);
 
               // Remove node
               newState.content.splice(deleteId, 1);
