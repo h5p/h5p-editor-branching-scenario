@@ -55,7 +55,7 @@ export default class BranchingOptions extends React.Component {
       return false;
     }
     // Same as view(!)
-    return !!(props.feedbackGroup.params.title || props.feedbackGroup.params.subtitle || props.feedbackGroup.params.image || props.feedback.params.endScreenScore !== undefined);
+    return !!(props.feedbackGroup.params.title || props.feedbackGroup.params.subtitle || props.feedbackGroup.params.image || props.feedbackGroup.params.endScreenScore !== undefined);
   }
 
   handleExistingContentChange = (e) => {
