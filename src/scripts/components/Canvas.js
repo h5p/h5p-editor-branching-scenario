@@ -363,15 +363,18 @@ export default class Canvas extends React.Component {
     }
 
     // Make our new parent aware of us
-    if (nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
+    if (this.hasChangedParentLink === false && nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
       leaf.nextContentId = id;
+      this.hasChangedParentLink = true;
     }
+
+    // TODO: Something is still wrong with some of these IDs
 
     // Bump IDs of non-end-scenario-nodes if array has changed
     if (leaf.nextContentId >= 0 && leaf.nextContentId < bumpIdsUntil) {
-      // When looping back to a node who became new top node, update accordingly
+      // When looping back to a node that became new top node, update accordingly
       const loopingBack = contentId && this.renderedNodes.indexOf(contentId) > this.renderedNodes.indexOf(leaf.nextContentId);
-      const loopTargetIsNewTop = (id === 0 && nextId === leaf.nextContentId);
+      const loopTargetIsNewTop = (nextContentId === 0 && id === leaf.nextContentId);
       if (loopingBack && loopTargetIsNewTop) {
         leaf.nextContentId = 0;
       }
@@ -550,7 +553,10 @@ export default class Canvas extends React.Component {
         }
 
         // Id of node being checked
-        const contentId = index - (index >= bumpIdsUntil ? 1 : 0);
+
+        // const contentId = index - (index >= bumpIdsUntil ? 1 : 0);
+        // TODO: Should both be the same, just for testing
+        const contentId = this.state.content.indexOf(content);
 
         if (isBranching(content)) {
           var hasAlternatives = content.params.type.params
@@ -558,7 +564,7 @@ export default class Canvas extends React.Component {
             && content.params.type.params.branchingQuestion.alternatives;
           if (hasAlternatives) {
             content.params.type.params.branchingQuestion.alternatives.forEach(alternative =>
-              this.updateNextContentId(alternative, id, nextId, nextContentId, bumpIdsUntil));
+              this.updateNextContentId(alternative, id, nextId, nextContentId, bumpIdsUntil, contentId));
           }
         }
         else {
