@@ -1711,6 +1711,20 @@ export default class Canvas extends React.Component {
 
     return (
       <div className="wrapper">
+        { this.state.editing !== null &&
+          <EditorOverlay
+            ref={ node => this.editorOverlay = node }
+            content={ interaction }
+            semantics={ this.props.semantics }
+            validAlternatives={ validAlternatives }
+            scoringOption={ this.props.scoringOption }
+            onRemove={ this.handleEditorRemove }
+            onDone={ this.handleEditorDone }
+            onNextContentChange={ this.handleNextContentChange }
+            isInserting={ this.props.inserting }
+            moveDown={ this.state.dialog !== null }
+          />
+        }
         { (this.state.deleting !== null || this.state.editing !== null) &&
           <BlockInteractionOverlay />
         }
@@ -1769,20 +1783,6 @@ export default class Canvas extends React.Component {
             />
           }
         </div>
-        { this.state.editing !== null &&
-          <EditorOverlay
-            ref={ node => this.editorOverlay = node }
-            content={ interaction }
-            semantics={ this.props.semantics }
-            validAlternatives={ validAlternatives }
-            scoringOption={ this.props.scoringOption }
-            onRemove={ this.handleEditorRemove }
-            onDone={ this.handleEditorDone }
-            onNextContentChange={ this.handleNextContentChange }
-            isInserting={ this.props.inserting }
-            moveDown={ this.state.dialog !== null }
-          />
-        }
         { this.state.dialog !== null &&
           <ConfirmationDialog
             action={ this.state.dialog }
