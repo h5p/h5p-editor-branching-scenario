@@ -346,12 +346,16 @@ export default class Canvas extends React.Component {
   }
 
   /**
-   * Update nextContentId for content or alternative params
+   * Update nextContentId for content or alternative params.
    *
+   * @param {object} leaf Params of node whose nextContentId should be updated
    * @param {number} id ID of node that was added/moved
+   * @param {number} nextId nextContentId of node that was added/moved
    * @param {number} nextContentId ID that needs to be updated
+   * @param {number} bumpIdsUntil Node id to update to at max
+   * @param {number} contentId ID of leaf node whose nextContentId should be updated
    */
-  updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil) {
+  updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil, contentId) {
     // Make old parent point directly to our old children
     if (this.hasChangedParentLink === false && leaf.nextContentId === id) {
       leaf.nextContentId = (nextId < 0 ? undefined : nextId);
@@ -365,7 +369,15 @@ export default class Canvas extends React.Component {
 
     // Bump IDs of non-end-scenario-nodes if array has changed
     if (leaf.nextContentId >= 0 && leaf.nextContentId < bumpIdsUntil) {
-      leaf.nextContentId++;
+      // When looping back to a node who became new top node, update accordingly
+      const loopingBack = contentId && this.renderedNodes.indexOf(contentId) > this.renderedNodes.indexOf(leaf.nextContentId);
+      const loopTargetIsNewTop = (id === 0 && nextId === leaf.nextContentId);
+      if (loopingBack && loopTargetIsNewTop) {
+        leaf.nextContentId = 0;
+      }
+      else {
+        leaf.nextContentId++;
+      }
     }
   }
 
@@ -537,6 +549,9 @@ export default class Canvas extends React.Component {
           return; // Duplicate in array, must not be processed twice.
         }
 
+        // Id of node being checked
+        const contentId = index - (index >= bumpIdsUntil ? 1 : 0);
+
         if (isBranching(content)) {
           var hasAlternatives = content.params.type.params
             && content.params.type.params.branchingQuestion
@@ -547,7 +562,7 @@ export default class Canvas extends React.Component {
           }
         }
         else {
-          this.updateNextContentId(content.params, id, nextId, nextContentId, bumpIdsUntil);
+          this.updateNextContentId(content.params, id, nextId, nextContentId, bumpIdsUntil, contentId);
         }
       });
 
