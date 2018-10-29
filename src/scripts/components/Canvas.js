@@ -308,7 +308,10 @@ export default class Canvas extends React.Component {
       if (this.props.inserting.pasted.from === 'H5PEditor.BranchingScenario' &&
           (!this.props.inserting.pasted.generic || supported(this.props.inserting.pasted.generic.library))) {
         // Non generic part = must be content from another BS
-        this.props.inserting.pasted.specific.nextContentId = -1;
+        if (!isBranching({params: this.props.inserting.pasted.specific})) {
+          this.props.inserting.pasted.specific.nextContentId = -1;
+          // Note for BS alternatives this is done in <ContentTypeMenu>
+        }
         return this.props.inserting.pasted.specific;
       }
       else if (this.props.inserting.pasted.generic && supported(this.props.inserting.pasted.generic.library)) {
