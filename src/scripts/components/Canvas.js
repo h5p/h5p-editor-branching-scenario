@@ -343,10 +343,14 @@ export default class Canvas extends React.Component {
   }
 
   /**
-   * Update nextContentId for content or alternative params
+   * Update nextContentId for content or alternative params.
    *
+   * @param {object} leaf Params of node whose nextContentId should be updated
    * @param {number} id ID of node that was added/moved
+   * @param {number} nextId nextContentId of node that was added/moved
    * @param {number} nextContentId ID that needs to be updated
+   * @param {number} bumpIdsUntil Node id to update to at max
+   * @param {number} contentId ID of leaf node whose nextContentId should be updated
    */
   updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil, contentId) {
     // Make old parent point directly to our old children
