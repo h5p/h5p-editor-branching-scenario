@@ -95,7 +95,8 @@ export default class ContentTypeMenu extends React.Component {
         y: event.currentTarget.offsetTop
       },
       library: library,
-      pasted: pasted
+      // Cloned here, because the clipboard is deliberately cached in core
+      pasted: H5P.cloneObject(pasted, true)
     });
   }
 
