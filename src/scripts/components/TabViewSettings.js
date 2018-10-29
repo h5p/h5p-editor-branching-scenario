@@ -68,7 +68,7 @@ export default class TabViewSettings extends React.Component {
     this.$scoringField = H5PEditor.$(this.endScreenWrapper).find('.field-name-endScreenScore');
     H5PEditor.followField(this.props.main, scoringOptionField.name + '/' + scoringOptionField.name, () => {
       // Can't use showWhen, because we don't have access to scoringOption in endScreen chunk
-      this.$scoringField.toggleClass('no-display', params.scoringOption !== 'static-end-score');
+      this.$scoringField.toggleClass('no-display', params.scoringOption !== undefined && params.scoringOption !== 'static-end-score');
 
       this.props.updateScoringOption();
     });
