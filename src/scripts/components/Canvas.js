@@ -353,43 +353,41 @@ export default class Canvas extends React.Component {
    * @param {number} nextId nextContentId of node that was added/moved
    * @param {number} nextContentId ID that needs to be updated
    * @param {number} bumpIdsUntil Node id to update to at max
-   * @param {number} contentId ID of leaf node whose nextContentId should be updated
    */
-  updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil, contentId) {
+  updateNextContentId = (leaf, id, nextId, nextContentId, bumpIdsUntil) => {
+    let skipBumping = false;
+
     // Make old parent point directly to our old children
-    if (this.hasChangedOldParentLink === false && leaf.nextContentId === id) {
-      leaf.nextContentId = (nextId < 0 ? undefined : nextId);
-      this.hasChangedOldParentLink = true;
+    if (leaf.nextContentId === id) {
+      if (this.hasChangedOldParentLink === false) {
+        leaf.nextContentId = (nextId < 0 ? undefined : nextId);
+        this.hasChangedOldParentLink = true;
+      }
+      else if (nextContentId === 0) {
+        // Update old loops to point to the new top node
+        leaf.nextContentId = 0;
+        skipBumping = true;
+      }
     }
 
     // Make our new parent aware of us
-    if (this.hasChangedNewParentLink === false && nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
+    if (nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
       leaf.nextContentId = id;
-      this.hasChangedNewParentLink = true;
     }
 
-    // Bump IDs of non-end-scenario-nodes if array has changed
-    if (leaf.nextContentId >= 0 && leaf.nextContentId < bumpIdsUntil) {
-      // When looping back to a node who became new top node, update accordingly
-      const loopingBack = contentId && this.renderedNodes.indexOf(contentId) > this.renderedNodes.indexOf(leaf.nextContentId);
-      const loopTargetIsNewTop = (id === 0 && nextId === leaf.nextContentId);
-      if (loopingBack && loopTargetIsNewTop) {
-        leaf.nextContentId = 0;
-      }
-      else {
-        leaf.nextContentId++;
-      }
+    // Bump nextContentIds for the parts of the array that changed
+    if (!skipBumping && leaf.nextContentId > -1 && leaf.nextContentId < bumpIdsUntil) {
+      leaf.nextContentId++;
     }
   }
 
   /**
    * Attach child to existing node.
-   * TODO: Could be a static ?
    *
    * @param {object} content Content node.
    * @param {number} id Id of child node.
    */
-  attachChild = (content, nextContentId) => {
+  static attachChild(content, nextContentId) {
     if (nextContentId === undefined || nextContentId < 0) {
       nextContentId = -1;
     }
@@ -444,7 +442,7 @@ export default class Canvas extends React.Component {
       });
     }
     else {
-      this.attachChild(content, newChildId);
+      Canvas.attachChild(content, newChildId);
     }
   }
 
@@ -479,35 +477,12 @@ export default class Canvas extends React.Component {
           return newState;
         }
       }
-      else if (id > -1) {
-        // When info node is moved, check if parent is BQ and needs updating
-        const noNodeToAttach =
-          isBranching(this.state.content[id]) || // moved node is BQ, will keep children
-          !this.state.content[id].params.nextContentId ||
-          this.state.content[id].params.nextContentId < 0;
-
-        if (noNodeToAttach) {
-          // Info node has no children that would be attached to *old* parent, latter needs update
-          const parent = this.getParent(id, this.state.content);
-
-          if (parent && isBranching(parent)) {
-            // Parent is BQ, update needed
-            parent.params.type.params.branchingQuestion.alternatives
-              .forEach(alt => {
-                if (alt.nextContentId === id) {
-                  alt.nextContentId = -1;
-                }
-              });
-          }
-        }
-      }
 
       // When placing after a leaf node keep track of it so we can update it
       // after processing the new content array
       if (parent !== undefined) {
         parent = newState.content[parent];
       }
-
       const parentIsBranching = (parent && isBranching(parent));
 
       const nextId = newState.content[id].params.nextContentId;
@@ -525,49 +500,76 @@ export default class Canvas extends React.Component {
 
         // Mark IDs for bumping due to array changes
         bumpIdsUntil = id + 1;
+
+        // Remove old entry
+        newState.content.splice(bumpIdsUntil, 1);
+
+        // Place the previous top node after this one
+        Canvas.attachChild(newState.content[0], 1);
       }
 
       // Handle moving current top node to somewhere else
       if (id === 0) {
+
         // Place our current next node at the top
         newState.content.splice(0, 0, newState.content[nextId]);
 
-        // Mark IDs for bumping due to array changes
+        // Mark nextContentIds for bumping due to array changes
         bumpIdsUntil = nextId + 1;
+
+        // Remove old entry
+        newState.content.splice(bumpIdsUntil, 1);
+
+        // Start using our new children
+        Canvas.attachChild(newState.content[1], nextContentId === 1 ? 2 : nextContentId);
 
         // There is no parent so there is nothing to update.
         this.hasChangedOldParentLink = true;
-        this.hasChangedNewParentLink = true;
       }
       else {
         // One node can have multiple parents through loops.
         // When moving we only want to change the value for the first parent
         // (not the loops). That is why we have this variable
         this.hasChangedOldParentLink = false;
-        this.hasChangedNewParentLink = false;
       }
 
-      newState.content.forEach((content, index) => {
-        if (index === bumpIdsUntil) {
-          return; // Duplicate in array, must not be processed twice.
-        }
+      if (nextContentId !== 0 && id !== 0) {
+        Canvas.attachChild(newState.content[id], nextContentId);
+      }
 
-        // Id of node being checked
-        const contentId = index - (index >= bumpIdsUntil ? 1 : 0);
-
-        if (isBranching(content)) {
-          var hasAlternatives = content.params.type.params
-            && content.params.type.params.branchingQuestion
-            && content.params.type.params.branchingQuestion.alternatives;
-          if (hasAlternatives) {
-            content.params.type.params.branchingQuestion.alternatives.forEach(alternative =>
-              this.updateNextContentId(alternative, id, nextId, nextContentId, bumpIdsUntil));
+      const processed = [];
+      const recursiveTreeUpdate = (branch, branchingParent = null) => {
+        branch.forEach((index, num) => {
+          if (index === undefined || index === -1) {
+            return; // Skip
           }
-        }
-        else {
-          this.updateNextContentId(content.params, id, nextId, nextContentId, bumpIdsUntil, contentId);
-        }
-      });
+
+          // Determine if content or alternative
+          const isContent = (branchingParent === null);
+          const content = isContent ? newState.content[index] : null;
+
+          if (isContent) {
+            // Prevent loops and double processing of content
+            if (processed.indexOf(index) !== -1) {
+              return;
+            }
+            processed.push(index);
+          }
+
+          const isBranchingContent = isContent && isBranching(content);
+          const alternative = isContent ? null : branchingParent.params.type.params.branchingQuestion.alternatives[num];
+
+          // Update IDs
+          if (!isBranchingContent && !(nextContentId === 0 && index === 0)) { // Skip update for new top nodes (already updated) or Branching Question (update alternatives instead)
+            this.updateNextContentId((isContent ? content.params : alternative), id, nextId, nextContentId, bumpIdsUntil);
+          }
+
+          // Update subtree first
+          const nextBranch = isBranchingContent ? Canvas.getBranchingChildren(content) : [isContent ? content.params.nextContentId : alternative.nextContentId];
+          recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null);
+        });
+      };
+      recursiveTreeUpdate([0]);
 
       // Update parent directly when placing a new leaf node
       if (parent !== undefined) {
@@ -577,25 +579,6 @@ export default class Canvas extends React.Component {
         else {
           parent.params.nextContentId = (id === 0 ? 1 : id);
         }
-      }
-
-      // Continue handling new top node
-      if (nextContentId === 0) {
-        // Remove old entry
-        newState.content.splice(bumpIdsUntil, 1);
-
-        // Use the previous top node as children
-        this.attachChild(newState.content[0], 1);
-      }
-      else if (id === 0) {
-        // Remove duplicate entry
-        newState.content.splice(bumpIdsUntil, 1);
-
-        // Start using our new children
-        this.attachChild(newState.content[1], nextContentId === 1 ? 2 : nextContentId);
-      }
-      else {
-        this.attachChild(newState.content[id], nextContentId);
       }
 
       props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
@@ -646,7 +629,7 @@ export default class Canvas extends React.Component {
     };
   }
 
-  getBranchingChildren(content) { // TODO: Could be a static on <Content> ?
+  static getBranchingChildren(content) {
     if (!content.params.type || !content.params.type.params ||
         !content.params.type.params.branchingQuestion ||
         !content.params.type.params.branchingQuestion.alternatives ||
@@ -722,7 +705,7 @@ export default class Canvas extends React.Component {
       const branchY = y + distanceYFactor * this.props.nodeSize.spacing.y;
 
       // Determine if we have any children
-      const children = (hasBeenDrawn ? null : (contentIsBranching ? this.getBranchingChildren(content) : (content ? [content.params.nextContentId] : null)));
+      const children = (hasBeenDrawn ? null : (contentIsBranching ? Canvas.getBranchingChildren(content) : (content ? [content.params.nextContentId] : null)));
 
       if (x !== 0 && num > 0) {
         x += this.props.nodeSize.spacing.x; // Add spacing between nodes
@@ -767,7 +750,7 @@ export default class Canvas extends React.Component {
           && content.params.nextContentId === -1;
 
         const contentHasLoopBack = (subtree === null || subtree.nodes.length === 0)
-          && content.params.nextContentId >=0;
+          && content.params.nextContentId >= 0;
 
         const isPlacingBranchingQuestion = this.state.placing === -1 &&
           this.state.library && this.state.library.title === 'Branching Question';
@@ -1040,18 +1023,6 @@ export default class Canvas extends React.Component {
     };
   }
 
-  updateNextContentIdAfterReplace(leaf, id, nextId) {
-    // Move current children of the moved node to grand parent
-    if (leaf.nextContentId === id) {
-      leaf.nextContentId = nextId;
-    }
-
-    // Decrease all next ID values larger than the deleted node
-    if (leaf.nextContentId > id) {
-      leaf.nextContentId--;
-    }
-  }
-
   handleBallTouch = (id, onlyThisBall) => {
     if (id > -1) {
       this.props.onHighlight(id, onlyThisBall);
@@ -1241,7 +1212,7 @@ export default class Canvas extends React.Component {
           // Replace with fresh node
 
           newState.content[prevState.deleting] = this.props.getNewContent(this.getNewContentParams());
-          this.attachChild(newState.content[prevState.deleting], nextContentId);
+          Canvas.attachChild(newState.content[prevState.deleting], nextContentId);
           newState.editing = prevState.deleting;
         }
         else {
