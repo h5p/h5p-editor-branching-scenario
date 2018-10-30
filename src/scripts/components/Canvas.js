@@ -357,14 +357,15 @@ export default class Canvas extends React.Component {
    */
   updateNextContentId(leaf, id, nextId, nextContentId, bumpIdsUntil, contentId) {
     // Make old parent point directly to our old children
-    if (this.hasChangedParentLink === false && leaf.nextContentId === id) {
+    if (this.hasChangedOldParentLink === false && leaf.nextContentId === id) {
       leaf.nextContentId = (nextId < 0 ? undefined : nextId);
-      this.hasChangedParentLink = true;
+      this.hasChangedOldParentLink = true;
     }
 
     // Make our new parent aware of us
-    if (nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
+    if (this.hasChangedNewParentLink === false && nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
       leaf.nextContentId = id;
+      this.hasChangedNewParentLink = true;
     }
 
     // Bump IDs of non-end-scenario-nodes if array has changed
@@ -535,13 +536,15 @@ export default class Canvas extends React.Component {
         bumpIdsUntil = nextId + 1;
 
         // There is no parent so there is nothing to update.
-        this.hasChangedParentLink = true;
+        this.hasChangedOldParentLink = true;
+        this.hasChangedNewParentLink = true;
       }
       else {
         // One node can have multiple parents through loops.
         // When moving we only want to change the value for the first parent
         // (not the loops). That is why we have this variable
-        this.hasChangedParentLink = false;
+        this.hasChangedOldParentLink = false;
+        this.hasChangedNewParentLink = false;
       }
 
       newState.content.forEach((content, index) => {
