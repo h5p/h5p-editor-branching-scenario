@@ -357,6 +357,14 @@ export default class Canvas extends React.Component {
   updateNextContentId = (leaf, id, nextId, nextContentId, bumpIdsUntil) => {
     let skipBumping = false;
 
+    if (id === 0 && leaf.nextContentId === nextId) {
+      // Special case, the top node has been moved and the next node is now the
+      // new top node. Now this leaf used to loop to the next node, but should
+      // now point to the new top node.
+      leaf.nextContentId = 0;
+      skipBumping = true;
+    }
+
     // Make old parent point directly to our old children
     if (leaf.nextContentId === id) {
       if (this.hasChangedOldParentLink === false) {
@@ -372,7 +380,10 @@ export default class Canvas extends React.Component {
 
     // Make our new parent aware of us
     if (nextContentId !== undefined && leaf.nextContentId === nextContentId && nextContentId !== 0) {
-      leaf.nextContentId = id;
+      if (this.hasChangedNewParentLink === false) {
+        leaf.nextContentId = id;
+        this.hasChangedNewParentLink = true;
+      }
     }
 
     // Bump nextContentIds for the parts of the array that changed
@@ -532,6 +543,7 @@ export default class Canvas extends React.Component {
         // (not the loops). That is why we have this variable
         this.hasChangedOldParentLink = false;
       }
+      this.hasChangedNewParentLink = false; // Only update the first new parent
 
       if (nextContentId !== 0 && id !== 0) {
         Canvas.attachChild(newState.content[id], nextContentId);
@@ -906,7 +918,7 @@ export default class Canvas extends React.Component {
             alternativeBallClasses += ' loop';
             hasLoopBack = true;
           }
-          else if (id === -1) {
+          else {
             // Default or custom end scenario
             alternativeBallClasses += hasFeedback
               ? ' endscreenCustom'
