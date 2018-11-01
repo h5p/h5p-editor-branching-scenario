@@ -42,7 +42,7 @@ export default class Editor extends React.Component {
           y: 17
         }
       },
-      zoomDisabled: true
+      zoomDisabled: !this.props.content || this.props.content.length === 0
     };
   }
 
@@ -162,14 +162,16 @@ export default class Editor extends React.Component {
   }
 
   handleContentChanged = (content, numDefaultEndScenarios) => {
-    if (content) {
+    const newState = {
+      numDefaultEndScenarios: numDefaultEndScenarios
+    };
+
+    if (content !== null) {
       this.props.onContentChanged(content);
+      newState.zoomDisabled = (content.length === 0);
     }
 
-    this.setState({
-      zoomDisabled: !content || content.length === 0,
-      numDefaultEndScenarios: numDefaultEndScenarios
-    });
+    this.setState(newState);
   }
 
   /**
