@@ -101,6 +101,10 @@ export default class EditorOverlay extends React.Component {
           return false; // Stop loop
         }
       });
+
+      // Hide the showContentTitle checkbox for BQ content
+      const showContentTitleField = this.findField('showContentTitle');
+      showContentTitleField.$item.remove();
     }
 
     const library = this.findField('type');
