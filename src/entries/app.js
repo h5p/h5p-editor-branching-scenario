@@ -123,6 +123,11 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       params: params
     };
 
+    if (content.params.nextContentId !== undefined && isBranching(content)) {
+      // Branching Questions with nextContentId will crash on delete...
+      delete content.params.nextContentId;
+    }
+
     content.formWrapper.classList.add('editor-overlay-library');
 
     H5PEditor.processSemanticsChunk(
