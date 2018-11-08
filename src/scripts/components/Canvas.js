@@ -1281,6 +1281,8 @@ export default class Canvas extends React.Component {
 
           removeNode(prevState.deleting, false, prevState.placing);
         }
+
+        this[`draggable-${prevState.deleting}`].dehighlight();
       }
       else if (prevState.deleting !== null) {
         // Delete node
