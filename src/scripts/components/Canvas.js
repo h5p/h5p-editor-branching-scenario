@@ -431,7 +431,7 @@ export default class Canvas extends React.Component {
    * @param {number} [oldChildId] Id of old child
    */
   replaceChild = (content, newChildId, oldChildId) => {
-    if (!content || !newChildId) {
+    if (!content || newChildId === undefined) {
       return;
     }
 
