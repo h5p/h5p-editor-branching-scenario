@@ -496,7 +496,11 @@ export default class Canvas extends React.Component {
       }
       const parentIsBranching = (parent && isBranching(parent));
 
-      const nextId = newState.content[id].params.nextContentId;
+      // Prevent loops from being attached to parent node later
+      let nextId = newState.content[id].params.nextContentId;
+      if (this.renderedNodes.indexOf(nextId) < this.renderedNodes.indexOf(id)) {
+        nextId = -1;
+      }
 
       // Handle adding new top node before the current one
       let bumpIdsUntil = -1;
@@ -546,7 +550,18 @@ export default class Canvas extends React.Component {
       this.hasChangedNewParentLink = false; // Only update the first new parent
 
       if (nextContentId !== 0 && id !== 0) {
-        Canvas.attachChild(newState.content[id], nextContentId);
+        let successorId = nextContentId;
+
+        // Keep loop if noded being moved had one
+        if (!isBranching(newState.content[id])) {
+          const loopCandidateId = newState.content[id].params.nextContentId;
+          if (successorId === undefined &&
+              this.renderedNodes.indexOf(loopCandidateId) < this.renderedNodes.indexOf(id)) {
+            successorId = loopCandidateId;
+          }
+        }
+
+        Canvas.attachChild(newState.content[id], successorId);
       }
 
       const processed = [];
