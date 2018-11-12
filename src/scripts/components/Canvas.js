@@ -587,7 +587,7 @@ export default class Canvas extends React.Component {
           const alternative = isContent ? null : branchingParent.params.type.params.branchingQuestion.alternatives[num];
 
           // Update IDs
-          if (!isBranchingContent && !(nextContentId === 0 && index === 0)) { // Skip update for new top nodes (already updated) or Branching Question (update alternatives instead)
+          if (!isBranchingContent && !(nextContentId === 0 && index === 0) && processed.length > 1) { // Skip update for new top nodes (already updated) or Branching Question (update alternatives instead)
             this.updateNextContentId((isContent ? content.params : alternative), id, nextId, nextContentId, bumpIdsUntil);
           }
 
