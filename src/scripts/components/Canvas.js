@@ -368,7 +368,7 @@ export default class Canvas extends React.Component {
     // Make old parent point directly to our old children
     if (leaf.nextContentId === id) {
       if (this.hasChangedOldParentLink === false) {
-        leaf.nextContentId = (nextId < 0 ? undefined : nextId);
+        leaf.nextContentId = (nextId < 0 ? -1 : nextId);
         this.hasChangedOldParentLink = true;
       }
       else if (nextContentId === 0) {
