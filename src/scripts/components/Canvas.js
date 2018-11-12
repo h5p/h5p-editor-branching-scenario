@@ -536,7 +536,7 @@ export default class Canvas extends React.Component {
         newState.content.splice(bumpIdsUntil, 1);
 
         // Start using our new children
-        Canvas.attachChild(newState.content[1], nextContentId === 1 ? 2 : nextContentId);
+        Canvas.attachChild(newState.content[1], nextContentId === nextId ? nextId + 1 : nextContentId);
 
         // There is no parent so there is nothing to update.
         this.hasChangedOldParentLink = true;
