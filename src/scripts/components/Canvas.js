@@ -1640,10 +1640,16 @@ export default class Canvas extends React.Component {
 
   handleNextContentChange = (params, newId, render = null) => {
     if (params.nextContentId > -1) {
-      // Check that there's still a reference to the content
+      // Check that there's still a reference to the content that's not a loop
       let found = 0;
       for (let i = 0; i < this.state.content.length; i++) {
-        found += hasNextContent(this.state.content[i], params.nextContentId, true);
+        const hasReference = hasNextContent(this.state.content[i], params.nextContentId, true);
+        const isLooping = this.renderedNodes.indexOf(params.nextContentId) < this.renderedNodes.indexOf(i);
+
+        if (hasReference && !isLooping) {
+          found += hasNextContent(this.state.content[i], params.nextContentId, true);
+        }
+
         if (found > 1) {
           break;
         }
