@@ -1729,6 +1729,7 @@ export default class Canvas extends React.Component {
     const interaction = this.state.content[this.state.editing];
 
     let validAlternatives = [];
+    let hideFeedbackScore = false;
     if (interaction) {
       // Determine valid alternatives for the content being edited
       this.state.content.forEach((content, index) => {
@@ -1739,6 +1740,10 @@ export default class Canvas extends React.Component {
           });
         }
       });
+
+      // No feedback score fields when static scoring and node has a successor
+      hideFeedbackScore = (this.props.scoringOption === undefined || this.props.scoringOption === 'static-end-score')
+        && !isBranching(interaction) && interaction.params.nextContentId !== -1;
     }
 
     return (
@@ -1755,6 +1760,7 @@ export default class Canvas extends React.Component {
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
             moveDown={ this.state.dialog !== null }
+            hideFeedbackScore={ hideFeedbackScore }
           />
         }
         { (this.state.deleting !== null || this.state.editing !== null) &&
