@@ -231,11 +231,12 @@ export default class Canvas extends React.Component {
    * Get titles of all children nodes sorted by ID.
    *
    * @param {number} start ID of start node.
-   * @param {number} skip Exclude
+   * @param {number} [skip] Exclude single item
+   * @param {number} [skipBranch] Exclude item + descendants
    * @return {string[]} Titles.
    */
-  getChildrenTitles = (start, skip = null) => {
-    return this.getChildrenIds(start, true)
+  getChildrenTitles = (start, skip = null, skipBranch = null) => {
+    return this.getChildrenIds(start, true, false, skipBranch)
       .filter(id => id !== skip)
       .sort((a, b) => a - b)
       .map(id => {
@@ -249,10 +250,11 @@ export default class Canvas extends React.Component {
    * @param {number} start ID of start node.
    * @param {boolean} [includeBranching=true] If false, ids of BQs will not be returned.
    * @param {boolean} [sub=false] If true, sub call.
+   * @param {number} [skip] Exclude item
    * @return {number[]} IDs.
    */
-  getChildrenIds = (start, includeBranching = true, sub = false) => {
-    if (start < 0) {
+  getChildrenIds = (start, includeBranching = true, sub = false, skip = null) => {
+    if (start < 0 || start === skip) {
       return [];
     }
     const node = this.state.content[start];
@@ -278,7 +280,7 @@ export default class Canvas extends React.Component {
       .filter(id => id !== undefined && id > -1)
       .filter(id => this.renderedNodes.indexOf(id) > this.renderedNodes.indexOf(start)) // prevent loops
       .forEach(id => {
-        childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true));
+        childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true, skip));
       });
 
     // Remove any duplicates
@@ -1693,7 +1695,7 @@ export default class Canvas extends React.Component {
 
   renderConfirmationDialogContent = () => {
     if (this.state.setNextContentId === -2 || this.state.setNextContentId !== null) {  // -2 = deleting entire alternative (handled by H5PEditor)
-      const children = this.getChildrenTitles(this.state.deleting);
+      const children = this.getChildrenTitles(this.state.deleting, null, this.state.setNextContentId);
       // Add self to list of content
       children.unshift(getAlternativeName(this.state.content[this.state.deleting]));
       return (
