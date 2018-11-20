@@ -567,7 +567,7 @@ export default class Canvas extends React.Component {
       }
 
       const processed = [];
-      const recursiveTreeUpdate = (branch, branchingParent = null) => {
+      const recursiveTreeUpdate = (branch, branchingParent = null, branchingParentId = null) => {
         branch.forEach((index, num) => {
           if (index === undefined || index === -1) {
             return; // Skip
@@ -589,13 +589,13 @@ export default class Canvas extends React.Component {
           const alternative = isContent ? null : branchingParent.params.type.params.branchingQuestion.alternatives[num];
 
           // Update IDs
-          if (!isBranchingContent && !(nextContentId === 0 && index === 0) && processed.length > 1) { // Skip update for new top nodes (already updated) or Branching Question (update alternatives instead)
+          if (!isBranchingContent && !(nextContentId === 0 && (index === 0 || branchingParentId === 0))) { // Skip update for new top nodes (already updated) or Branching Question (update alternatives instead)
             this.updateNextContentId((isContent ? content.params : alternative), id, nextId, nextContentId, bumpIdsUntil);
           }
 
           // Update subtree first
           const nextBranch = isBranchingContent ? Canvas.getBranchingChildren(content) : [isContent ? content.params.nextContentId : alternative.nextContentId];
-          recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null);
+          recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null, isBranchingContent ? index : null);
         });
       };
       recursiveTreeUpdate([0]);
