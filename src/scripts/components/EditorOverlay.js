@@ -58,6 +58,11 @@ export default class EditorOverlay extends React.Component {
     // Move feedback group to feedback form
     feedbackForm.appendChild(this.props.content.feedbackFormWrapper);
 
+    // Toggle feedback score field as needed
+    const scoreField = this.findField('feedback/endScreenScore');
+    if (scoreField.$item) {
+      scoreField.$item.toggle(!(scoreField && scoreField.$item && this.props.hideFeedbackScore));
+    }
 
     // Remove all children
     const form = this.form.current;

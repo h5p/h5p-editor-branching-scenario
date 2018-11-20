@@ -13,7 +13,7 @@ export default class TabViewTutorial extends React.Component {
         <span className="tab-view-description">Learn how to use <strong>Branching Scenario</strong> editor</span>
         <div className="tab-view-white-box">
           <iframe
-            src="https://jelenas-chocolate-factory.h5p.com/content/1290505124378050537/embed"
+            src="https://documentation.h5p.com/content/1290532202058682888/embed"
             width="100%"
             height="100%"
             frameBorder="0"

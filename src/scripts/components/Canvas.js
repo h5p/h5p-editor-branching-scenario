@@ -368,7 +368,7 @@ export default class Canvas extends React.Component {
     // Make old parent point directly to our old children
     if (leaf.nextContentId === id) {
       if (this.hasChangedOldParentLink === false) {
-        leaf.nextContentId = (nextId < 0 ? undefined : nextId);
+        leaf.nextContentId = (nextId < 0 ? -1 : nextId);
         this.hasChangedOldParentLink = true;
       }
       else if (nextContentId === 0) {
@@ -496,7 +496,11 @@ export default class Canvas extends React.Component {
       }
       const parentIsBranching = (parent && isBranching(parent));
 
-      const nextId = newState.content[id].params.nextContentId;
+      // Prevent loops from being attached to parent node later
+      let nextId = newState.content[id].params.nextContentId;
+      if (this.renderedNodes.indexOf(nextId) < this.renderedNodes.indexOf(id)) {
+        nextId = -1;
+      }
 
       // Handle adding new top node before the current one
       let bumpIdsUntil = -1;
@@ -532,7 +536,7 @@ export default class Canvas extends React.Component {
         newState.content.splice(bumpIdsUntil, 1);
 
         // Start using our new children
-        Canvas.attachChild(newState.content[1], nextContentId === 1 ? 2 : nextContentId);
+        Canvas.attachChild(newState.content[1], nextContentId === nextId ? nextId + 1 : nextContentId);
 
         // There is no parent so there is nothing to update.
         this.hasChangedOldParentLink = true;
@@ -546,7 +550,18 @@ export default class Canvas extends React.Component {
       this.hasChangedNewParentLink = false; // Only update the first new parent
 
       if (nextContentId !== 0 && id !== 0) {
-        Canvas.attachChild(newState.content[id], nextContentId);
+        let successorId = nextContentId;
+
+        // Keep loop if noded being moved had one
+        if (!isBranching(newState.content[id])) {
+          const loopCandidateId = newState.content[id].params.nextContentId;
+          if (successorId === undefined &&
+              this.renderedNodes.indexOf(loopCandidateId) < this.renderedNodes.indexOf(id)) {
+            successorId = loopCandidateId;
+          }
+        }
+
+        Canvas.attachChild(newState.content[id], successorId);
       }
 
       const processed = [];
@@ -572,7 +587,7 @@ export default class Canvas extends React.Component {
           const alternative = isContent ? null : branchingParent.params.type.params.branchingQuestion.alternatives[num];
 
           // Update IDs
-          if (!isBranchingContent && !(nextContentId === 0 && index === 0)) { // Skip update for new top nodes (already updated) or Branching Question (update alternatives instead)
+          if (!isBranchingContent && !(nextContentId === 0 && index === 0) && processed.length > 1) { // Skip update for new top nodes (already updated) or Branching Question (update alternatives instead)
             this.updateNextContentId((isContent ? content.params : alternative), id, nextId, nextContentId, bumpIdsUntil);
           }
 
@@ -1637,10 +1652,16 @@ export default class Canvas extends React.Component {
 
   handleNextContentChange = (params, newId, render = null) => {
     if (params.nextContentId > -1) {
-      // Check that there's still a reference to the content
+      // Check that there's still a reference to the content that's not a loop
       let found = 0;
       for (let i = 0; i < this.state.content.length; i++) {
-        found += hasNextContent(this.state.content[i], params.nextContentId, true);
+        const hasReference = hasNextContent(this.state.content[i], params.nextContentId, true);
+        const isLooping = this.renderedNodes.indexOf(params.nextContentId) < this.renderedNodes.indexOf(i);
+
+        if (hasReference && !isLooping) {
+          found += hasNextContent(this.state.content[i], params.nextContentId, true);
+        }
+
         if (found > 1) {
           break;
         }
@@ -1720,6 +1741,7 @@ export default class Canvas extends React.Component {
     const interaction = this.state.content[this.state.editing];
 
     let validAlternatives = [];
+    let hideFeedbackScore = false;
     if (interaction) {
       // Determine valid alternatives for the content being edited
       this.state.content.forEach((content, index) => {
@@ -1730,6 +1752,10 @@ export default class Canvas extends React.Component {
           });
         }
       });
+
+      // No feedback score fields when static scoring and node has a successor
+      hideFeedbackScore = (this.props.scoringOption === undefined || this.props.scoringOption === 'static-end-score')
+        && !isBranching(interaction) && interaction.params.nextContentId !== -1;
     }
 
     return (
@@ -1746,6 +1772,7 @@ export default class Canvas extends React.Component {
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
             moveDown={ this.state.dialog !== null }
+            hideFeedbackScore={ hideFeedbackScore }
           />
         }
         { (this.state.deleting !== null || this.state.editing !== null) &&
