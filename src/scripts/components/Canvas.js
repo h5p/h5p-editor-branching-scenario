@@ -1062,6 +1062,134 @@ export default class Canvas extends React.Component {
     }
   };
 
+  /**
+   * Remove an info node. Not intended for branching questions.
+   * @param {object[]} content Content nodes.
+   * @param {number} deleteId Id of node to be deleted.
+   */
+  spliceInfoNode = (content, deleteId) => {
+    if (deleteId >= content.length) {
+      return;
+    }
+
+    // Special case: First node to be deleted, swap it with successor
+    if (deleteId === 0 && content.length > 1) {
+      const swapId = content[0].params.nextContentId;
+      this.swapNodes(content, 0, content[deleteId].params.nextContentId);
+      content[swapId].params.nextContentId = swapId;
+      deleteId = swapId;
+    }
+
+    // Retrieve node to be deleted
+    const deleteNode = content[deleteId];
+
+    // Update the links away from delete node
+    this.replaceNodeIds(content, deleteId, deleteNode.params.nextContentId);
+
+    // Adjust nextContentIds to account for removed node
+    this.setNodeOffset(content, deleteId, -1);
+    this.renderedNodes = this.renderedNodes
+      .map(nodeId => (nodeId > deleteId) ? nodeId - 1  : nodeId);
+
+    // Remove node from data structure
+    content.splice(deleteId, 1);
+    this.renderedNodes = this.renderedNodes
+      .filter(nodeId => nodeId !== deleteId);
+
+    H5PEditor.removeChildren(deleteNode.formChildren);
+  }
+
+  /**
+   * Splice a Branching Question.
+   * @param {object[]} content Content with nodes.
+   * @param {number} deleteId Id of BQ to be deleted.
+   */
+  spliceBranchingQuestion = (content, deleteId) => {
+    // Compile list of nodes that need to be removed
+    let children = this.getChildrenIds(deleteId, true, true);
+
+    while (children.length > 0) {
+      // Will delete from the bottom up, getChildrenIds provides correct order
+      const deleteId = children.pop();
+
+      // Here works for BQs as well, as they'll never have children
+      this.spliceInfoNode(content, deleteId);
+
+      // Account for node removal
+      children = children.map(childId => childId > deleteId ? childId -= 1 : childId);
+    }
+  }
+
+  /**
+   * Replace next content ids.
+   * @param {object[]} content Nodes.
+   * @param {number} oldId Id to be replaced.
+   * @param {number} newId Replacing id.
+   * @param {object} [options={}] Options.
+   * @param {boolean} [options.keepLoops] If true, loops will not be filtered.
+   */
+  replaceNodeIds = (content, oldId, newId, options = {}) => {
+    content.forEach((itemNode, index) => {
+      let nodesToCheck;
+      if (isBranching(itemNode)) {
+        nodesToCheck = itemNode.params.type.params.branchingQuestion.alternatives || [];
+      }
+      else {
+        nodesToCheck = [itemNode.params];
+      }
+
+      nodesToCheck.forEach(node => {
+        if (node.nextContentId === oldId) {
+          if (options.keepLoops !== true &&
+              this.renderedNodes.indexOf(newId) <= this.renderedNodes.indexOf(index)) {
+            node.nextContentId = -1;
+          }
+          else {
+            node.nextContentId = newId;
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Add an offset to a node's next content ids.
+   * @param {object[]} content Content with nodes.
+   * @param {number} maxUntouchedId Highest id that will not be changed.
+   * @param {number} offest Offset.
+   */
+  setNodeOffset = (content, maxUntouchedId, offset) => {
+    content.forEach(itemNode => {
+      let nodesToCheck;
+      if (isBranching(itemNode)) {
+        nodesToCheck = itemNode.params.type.params.branchingQuestion.alternatives || [];
+      }
+      else {
+        nodesToCheck = [itemNode.params];
+      }
+
+      nodesToCheck.forEach(node => {
+        if (node.nextContentId > maxUntouchedId) {
+          node.nextContentId = node.nextContentId + offset;
+        }
+      });
+    });
+  }
+
+  /**
+   * Remove a node.
+   * @param {object[]} content Content with nodes.
+   * @param {number} deleteId Id of node to be removed.
+   */
+  removeNode = (content, deleteId) => {
+    if (isBranching(content[deleteId])) {
+      this.spliceBranchingQuestion(content, deleteId);
+    }
+    else {
+      this.spliceInfoNode(content, deleteId);
+    }
+  }
+
   handleDelete = () => {
     // Set new parent for node
     this.setState(prevState => {
@@ -1070,122 +1198,6 @@ export default class Canvas extends React.Component {
         dialog: null,
         setNextContentId: null,
         content: [...prevState.content]
-      };
-
-      // TODO: Don't place large named functions inside other functions, find a cleaner and easier to understand way of doing this.
-      // If we can find a simple way to group/prefix content state mutating functions that would be great.
-
-      /**
-       * Delete node.
-       *
-       * @param {number[]} ids Id of node to be removed.
-       * @param {boolean} removeChildren If true, remove children. Adopt otherwise.
-       * @param {number} [skipChild=null] Avoid removing this part of the subtree
-       */
-      const removeNode = (ids, removeChildren=false, skipChild = null) => {
-        if (typeof ids === 'number') {
-          ids = [ids];
-        }
-
-        ids.forEach(id => {
-          const node = newState.content[id];
-          removeChildren = removeChildren || isBranching(node);
-
-          // If node to be removed loops backwards or to itself, use default end scenario
-          let renderedNodes = this.renderedNodes.filter(node => node > -1);
-
-          // If node: delete this node. If BQ: delete this node and its children
-          let deleteIds;
-          if (isBranching(node)) {
-            const alternatives = node.params.type.params.branchingQuestion.alternatives || [];
-            deleteIds = alternatives
-              .filter(alt => alt.nextContentId > -1 &&
-                alt.nextContentId !== skipChild &&
-                renderedNodes.indexOf(alt.nextContentId) > renderedNodes.indexOf(id)) // Filter end scenarios and loops
-              .map(alt => alt.nextContentId).concat(id);
-          }
-          else {
-            deleteIds = [id];
-          }
-
-          deleteIds
-            .filter((id, idx) => id !== undefined && deleteIds.indexOf(id) === idx) // Remove duplicates and empties
-            .sort((a, b) => b - a) // Delete nodes with highest id first to account for node removal
-            .forEach(deleteId => {
-              // node to be removed, will always be an info node, no BQ
-              const deleteNode = newState.content[deleteId];
-
-              let successorId = -1;
-              if (deleteNode.params.nextContentId > -1) {
-                if (renderedNodes.indexOf(deleteNode.params.nextContentId) > renderedNodes.indexOf(deleteId)) {
-                  successorId = deleteNode.params.nextContentId;
-                }
-                else if (skipChild) {
-                  successorId = skipChild;
-                }
-              }
-
-              // Keep track if first node is being deleted to swap nodes later
-              const newFirstNode = (deleteId === 0) ? successorId - 1 : undefined;
-
-              // Exchange all links pointing to node to be deleted to its successor instead.
-              newState.content.forEach((node, index) => {
-                const affectedNodes = (isBranching(node)) ?
-                  node.params.type.params.branchingQuestion.alternatives || []:
-                  [node.params];
-
-                affectedNodes.forEach(affectedNode => {
-                  if (affectedNode.nextContentId === deleteId) {
-                    // Updated next content but also avoid looping back to self or other node that was deleted
-                    affectedNode.nextContentId = ((successorId === index || renderedNodes.indexOf(deleteId) < index) ?
-                      -1 :
-                      successorId
-                    );
-                  }
-                  // Account Id for upcoming node removal
-                  if (affectedNode.nextContentId !== undefined && affectedNode.nextContentId >= deleteId) {
-                    affectedNode.nextContentId -= 1;
-                  }
-                  if (skipChild > deleteId) {
-                    skipChild -= 1;
-                  }
-                });
-              });
-
-              // Remove node in rendered nodes and update indices
-              renderedNodes = renderedNodes
-                .filter(node => node !== deleteId)
-                .map(node => (node >= deleteId) ? node - 1  : node);
-
-              // Remove node
-              newState.content.splice(deleteId, 1);
-
-              // Purge children
-              if (removeChildren === true) {
-                let childrenIds;
-                if (isBranching(deleteNode)) {
-                  const alternatives = deleteNode.params.type.params.branchingQuestion.alternatives || [];
-                  childrenIds = alternatives.map(alt => alt.nextContentId);
-                }
-                else {
-                  childrenIds = [deleteNode.params.nextContentId];
-                }
-                childrenIds = childrenIds
-                  .filter((id, idx) => renderedNodes.indexOf(id) > renderedNodes.indexOf(deleteId - 1) && id !== skipChild && childrenIds.indexOf(id) === idx) // Ignore backlinks and duplicates
-                  .sort((a, b) => b - a); // Delete nodes with highest id first to account for node removal
-
-                removeNode(childrenIds, true, skipChild);
-              }
-
-              // Swap nodes to set new first node
-              if (newFirstNode > -1) {
-                this.swapNodes(newState.content, 0, newFirstNode);
-              }
-
-              // Remove form
-              H5PEditor.removeChildren(deleteNode.formChildren);
-            });
-        });
       };
 
       if (prevState.setNextContentId !== null) {
@@ -1204,7 +1216,7 @@ export default class Canvas extends React.Component {
           this.editorOverlay.renderBranchingOptions[alternative](prevState.setNextContentId);
         }
 
-        removeNode(prevState.deleting, true, prevState.setNextContentId);
+        this.removeNode(newState.content, prevState.deleting);
 
         // Update editing ID after remove to avoid dialog crashing...
         for (let i = 0; i < newState.content.length; i++) {
@@ -1294,14 +1306,14 @@ export default class Canvas extends React.Component {
             }
           }
 
-          removeNode(prevState.deleting, false, prevState.placing);
+          this.removeNode(newState.content, prevState.deleting);
         }
 
         this[`draggable-${prevState.deleting}`].dehighlight();
       }
       else if (prevState.deleting !== null) {
         // Delete node
-        removeNode(prevState.editing !== null ? prevState.editing : prevState.deleting);
+        this.removeNode(newState.content, prevState.editing !== null ? prevState.editing : prevState.deleting);
       }
 
       return newState;
