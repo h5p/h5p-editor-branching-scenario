@@ -370,7 +370,7 @@ export default class Canvas extends React.Component {
     // Make old parent point directly to our old children
     if (leaf.nextContentId === id) {
       if (this.hasChangedOldParentLink === false) {
-        leaf.nextContentId = (nextId < 0 ? -1 : nextId);
+        leaf.nextContentId = (nextId < 0 ? undefined : nextId);
         this.hasChangedOldParentLink = true;
       }
       else if (nextContentId === 0) {
@@ -758,11 +758,7 @@ export default class Canvas extends React.Component {
       let highlightCurrentNode = false;
       if (content && !hasBeenDrawn) {
         const library = this.getLibrary(content.params.type.library);
-        const hasCustomFeedback = content.params.feedback.title && content.params.feedback.title.trim() !== ''
-          || content.params.feedback.subtitle
-          || content.params.feedback.image
-          || content.params.feedback.endScreenScore !== undefined;
-        const hasDefaultEndScreen = !hasCustomFeedback
+        const hasDefaultEndScreen = !this.hasFeedback(content)
           && content.params.nextContentId !== undefined
           && content.params.nextContentId < 0
           && content.params.nextContentId === this.props.highlight;
@@ -774,9 +770,6 @@ export default class Canvas extends React.Component {
         if (isHighlightingContent) {
           highlightCurrentNode = true;
         }
-
-        const hasCustomEndScreen = hasCustomFeedback
-          && content.params.nextContentId === -1;
 
         const contentHasLoopBack = (subtree === null || subtree.nodes.length === 0)
           && content.params.nextContentId >= 0;
@@ -810,7 +803,7 @@ export default class Canvas extends React.Component {
             disabled={ (contentIsBranching && (this.state.placing === null || isPlacingBranchingQuestion)) || this.isDropzoneDisabled(id) }
             tooltip={ label }
             scale={ this.props.scale }
-            hasCustomEndScreen={ hasCustomEndScreen }
+            hasCustomEndScreen={ this.hasCustomEndScreen(content) }
             hasLoopBack={ contentHasLoopBack}
             highlightLinkedContent={() => {
               this.highlightLinkedContent(
@@ -919,13 +912,7 @@ export default class Canvas extends React.Component {
         const key = parent + '-abox-' + num;
 
         const alternative = alternatives[num];
-        const hasFeedback = !!(alternative
-          && alternative.feedback
-          && (alternative.feedback.title && alternative.feedback.title.trim() !== ''
-            || alternative.feedback.subtitle
-            || alternative.feedback.image
-            || alternative.feedback.endScreenScore !== undefined
-          ));
+        const hasCustomEndScreen = this.hasCustomEndScreen(alternative);
 
         let alternativeBallClasses = 'alternative-ball';
         let hasLoopBack = false;
@@ -937,7 +924,7 @@ export default class Canvas extends React.Component {
           }
           else {
             // Default or custom end scenario
-            alternativeBallClasses += hasFeedback
+            alternativeBallClasses += hasCustomEndScreen
               ? ' endscreenCustom'
               : ' endscreen';
           }
@@ -950,7 +937,7 @@ export default class Canvas extends React.Component {
         let fadeOut = false;
         if (highlightingDefaultEndings) {
           // Fade out if we have a custom ending or no ending
-          fadeOut = hasFeedback || id !== -1;
+          fadeOut = hasCustomEndScreen || id !== -1;
         }
         else if (highlightingLink) {
           const isLinkedHighlight = this.props.onlyThisBall === key;
@@ -1050,6 +1037,52 @@ export default class Canvas extends React.Component {
       dX: (firstX !== undefined ? lastX - firstX : 0), // Width of this subtree level only (used for pretty trees)
       firstAlternativeX: firstAlternativeX
     };
+  }
+
+  /**
+   * Check if content has feedback.
+   * @param {object} input Content or alternative.
+   * @return {boolean} True, if there's some feedback item given, else false.
+   */
+  hasFeedback = (input) => {
+    input = input.params || input;
+
+    return input.feedback !== undefined && (
+      (input.feedback.title && input.feedback.title.trim() !== '') ||
+      input.feedback.subtitle ||
+      input.feedback.image ||
+      input.feedback.endScreenScore !== undefined
+    );
+  }
+
+  /**
+   * Check if input has an end screen, could be default or custom.
+   * @param {object} input Content or alternative.
+   * @return {boolean} True, if input has an end screen, else false.
+   */
+  hasEndScreen = (input) => {
+    if (input.params && isBranching(input)) {
+      // Branching Questions never have an end screen themselves
+      return false;
+    }
+    input = input.params || input;
+
+    return input.nextContentId === -1 || input.nextContentId === undefined;
+  }
+
+  /**
+   * Check if input has a custom end screen.
+   * @param {object} input Content or alternative.
+   * @return {boolean} True, if input has a custom end screen, else false.
+   */
+  hasCustomEndScreen = (input) => {
+    if (input.params && isBranching(input)) {
+      // Branching Questions never have an end screen themselves
+      return false;
+    }
+    input = input.params || input;
+
+    return this.hasEndScreen(input) && this.hasFeedback(input);
   }
 
   handleBallTouch = (id, onlyThisBall) => {
@@ -1438,29 +1471,13 @@ export default class Canvas extends React.Component {
       if (isBranching(content)) {
         const alternatives = content.params.type.params.branchingQuestion.alternatives || [];
         alternatives.forEach(alternative => {
-          const hasFeedback = !!(alternative.feedback
-            && (alternative.feedback.title
-              || alternative.feedback.subtitle
-              || alternative.feedback.image
-              || alternative.feedback.endScreenScore !== undefined
-            ));
-          if (alternative.nextContentId === -1 && !hasFeedback) {
+          if (this.hasEndScreen(alternative) && !this.hasCustomEndScreen(alternative)) {
             numMissingEndScenarios++;
           }
         });
       }
-      else if (content.params.nextContentId === -1) {
-        const hasCustomEnding = content.params.feedback
-          && (
-            content.params.feedback.title
-            || content.params.feedback.subtitle
-            || content.params.feedback.image
-            || content.params.feedback.endScreenScore !== undefined
-          );
-
-        if (!hasCustomEnding) {
-          numMissingEndScenarios++;
-        }
+      else if ( this.hasEndScreen(content) && !this.hasCustomEndScreen(content)) {
+        numMissingEndScenarios++;
       }
     });
     return numMissingEndScenarios;
