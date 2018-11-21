@@ -58,12 +58,6 @@ export default class EditorOverlay extends React.Component {
     // Move feedback group to feedback form
     feedbackForm.appendChild(this.props.content.feedbackFormWrapper);
 
-    // Toggle feedback score field as needed
-    const scoreField = this.findField('feedback/endScreenScore');
-    if (scoreField.$item) {
-      scoreField.$item.toggle(!(scoreField && scoreField.$item && this.props.hideFeedbackScore));
-    }
-
     // Remove all children
     const form = this.form.current;
     while (form.firstChild) {
@@ -150,6 +144,7 @@ export default class EditorOverlay extends React.Component {
             alternativeIndex={listIndex}
             nextContentLabel={'Special action if selected'}
             feedbackGroup={ feedbackGroup }
+            showScoreField={ this.props.hideFeedbackScore }
           />
         ), selectorWrapper);
       };
@@ -298,6 +293,7 @@ export default class EditorOverlay extends React.Component {
               onChangeContent={ this.handleNextContentIdChange }
               isInserting={ this.props.isInserting }
               feedbackGroup={ feedbackGroupField }
+              showScoreField={ this.props.hideFeedbackScore }
             />
           }
           <div
