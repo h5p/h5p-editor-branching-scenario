@@ -1111,7 +1111,7 @@ export default class Canvas extends React.Component {
     if (deleteId === 0 && content.length > 1) {
       const swapId = content[0].params.nextContentId;
       this.swapNodes(content, 0, content[deleteId].params.nextContentId);
-      content[swapId].params.nextContentId = swapId;
+      content[swapId].params.nextContentId = 0;
       deleteId = swapId;
     }
 
