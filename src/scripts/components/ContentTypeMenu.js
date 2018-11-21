@@ -96,7 +96,7 @@ export default class ContentTypeMenu extends React.Component {
       },
       library: library,
       // Cloned here, because the clipboard is deliberately cached in core
-      pasted: H5P.jQuery(pasted).extend(true, {})[0]
+      pasted: pasted ? H5P.jQuery.extend(true, {}, pasted) : null
     });
   }
 
