@@ -18,6 +18,11 @@
       "machineName": "H5P.MaterialDesignIcons",
       "majorVersion": 1,
       "minorVersion": 0
+    },
+    {
+      "machineName": "H5P.BranchingQuestion",
+      "majorVersion": 1,
+      "minorVersion": 0
     }
   ]
 }
