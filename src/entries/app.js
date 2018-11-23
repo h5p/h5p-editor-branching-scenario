@@ -336,13 +336,18 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         }
       });
     }*/
+
+    let exitSemiFullscreen;
     function toggleFullscreen(on) {
-      if (fullscreen) {
-        if (on) {
-          fullscreen.enter();
+      if (on) {
+        if (!exitSemiFullscreen) {
+          exitSemiFullscreen = H5PEditor.semiFullscreen($wrapper);
         }
-        else {
-          fullscreen.exit();
+      }
+      else {
+        if (exitSemiFullscreen) {
+          exitSemiFullscreen();
+          exitSemiFullscreen = null;
         }
       }
     }
