@@ -292,62 +292,73 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
   BranchingScenarioEditor.prototype.appendTo = function ($wrapper) {
     const self = this;
 
+    // Keep track of when we can exit semi-fullscreen
+    let exitSemiFullscreen;
+
     // Use full width
     document.documentElement.style.maxWidth = document.body.style.maxWidth = 'none';
 
-    let fullscreen;
-    /*if (H5PEditor.Fullscreen !== undefined) {
-      const formWrapper = $wrapper.parent()[0];
-      fullscreen = new H5PEditor.Fullscreen(formWrapper);
-
-      fullscreen.on('entered', function () {
-        formWrapper.classList.add('h5peditor-fullscreen');
-
-        // Center tree after entering fullscreen
-        self.editor.setState({
-          center: true,
-          fullscreen: true
-        });
-        // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
-
-        document.documentElement.style.fontSize = '18px';
-
-        // Remove any open wysiwyg fields (they do not automatically resize)
-        if (H5PEditor.Html) {
-          H5PEditor.Html.removeWysiwyg();
-        }
+    /**
+     * Runs after semi-fullscreen has been entered.
+     *
+     * @private
+     */
+    const handleEnterSemiFullscreen = function () {
+      // Center tree after entering fullscreen
+      self.editor.setState({
+        center: true,
+        fullscreen: true
       });
+      // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
 
-      fullscreen.on('exited', function () {
-        formWrapper.classList.remove('h5peditor-fullscreen');
+      // Make some things a little bit bigger
+      document.documentElement.style.fontSize = '18px';
 
-        // Center tree after exiting fullscreen
-        self.editor.setState({
-          center: true,
-          fullscreen: false
-        });
-        // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
+      // Remove any open wysiwyg fields (they do not automatically resize)
+      if (H5PEditor.Html) {
+        H5PEditor.Html.removeWysiwyg();
+      }
+    };
 
-        document.documentElement.style.fontSize = '';
+    /**
+     * Runs after semi-fullscreen has been exited.
+     *
+     * @private
+     */
+    const handleExitSemiFullscreen = function () {
+      exitSemiFullscreen = null;
 
-        // Remove any open wysiwyg fields (they do not automatically resize)
-        if (H5PEditor.Html) {
-          H5PEditor.Html.removeWysiwyg();
-        }
+      // Center tree after exiting fullscreen
+      self.editor.setState({
+        center: true,
+        fullscreen: false
       });
-    }*/
+      // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
 
-    let exitSemiFullscreen;
-    function toggleFullscreen(on) {
+      // Reset size
+      document.documentElement.style.fontSize = '';
+
+      // Remove any open wysiwyg fields (they do not automatically resize)
+      if (H5PEditor.Html) {
+        H5PEditor.Html.removeWysiwyg();
+      }
+    };
+
+    /**
+     * Handles toggling of semi-fullscreen mode.
+     *
+     * @private
+     * @param {boolean} on
+     */
+    function toggleSemiFullscreen(on) {
       if (on) {
         if (!exitSemiFullscreen) {
-          exitSemiFullscreen = H5PEditor.semiFullscreen($wrapper);
+          exitSemiFullscreen = H5PEditor.semiFullscreen($wrapper, handleEnterSemiFullscreen, handleExitSemiFullscreen);
         }
       }
       else {
         if (exitSemiFullscreen) {
           exitSemiFullscreen();
-          exitSemiFullscreen = null;
         }
       }
     }
@@ -359,7 +370,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         getNewContent={ this.getNewContent.bind(this) }
         libraries={ this.libraries }
         onContentChanged={ this.handleContentChanged.bind(this) }
-        onToggleFullscreen={ toggleFullscreen }
+        onToggleFullscreen={ toggleSemiFullscreen }
         main={ this }
       />), $wrapper.get(0)
     );
