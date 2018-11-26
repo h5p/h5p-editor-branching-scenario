@@ -1778,8 +1778,6 @@ export default class Canvas extends React.Component {
       });
     }
 
-    const hideFeedbackScore = (this.props.scoringOption === undefined || this.props.scoringOption === 'static-end-score');
-
     return (
       <div className="wrapper">
         { this.state.editing !== null &&
@@ -1794,7 +1792,7 @@ export default class Canvas extends React.Component {
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
             moveDown={ this.state.dialog !== null }
-            hideFeedbackScore={ hideFeedbackScore }
+            scoringOption={ this.props.scoringOption }
           />
         }
         { (this.state.deleting !== null || this.state.editing !== null) &&

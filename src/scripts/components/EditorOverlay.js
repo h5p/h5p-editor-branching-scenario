@@ -144,7 +144,7 @@ export default class EditorOverlay extends React.Component {
             alternativeIndex={listIndex}
             nextContentLabel={'Special action if selected'}
             feedbackGroup={ feedbackGroup }
-            showScoreField={ this.props.hideFeedbackScore }
+            scoringOption={ this.props.scoringOption }
           />
         ), selectorWrapper);
       };
@@ -293,7 +293,7 @@ export default class EditorOverlay extends React.Component {
               onChangeContent={ this.handleNextContentIdChange }
               isInserting={ this.props.isInserting }
               feedbackGroup={ feedbackGroupField }
-              showScoreField={ this.props.hideFeedbackScore }
+              scoringOption={ this.props.scoringOption }
             />
           }
           <div
