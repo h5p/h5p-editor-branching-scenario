@@ -967,7 +967,7 @@ export default class Canvas extends React.Component {
               />
             }
             <div className="dark-tooltip">
-              <div className="dark-text-wrap">{ !alternativeText ? /* TODO: l10n */ 'Alternative ' + (num + 1) : alternativeText }</div>
+              <div className="dark-text-wrap">{ !alternativeText ? /* TODO: l10n */ 'Alternative ' + (num + 1) : Content.stripHTML(alternativeText) }</div>
             </div>
           </div>
         );

@@ -66,7 +66,7 @@ export default class Content extends React.Component {
 
       default:
         return (content.params.type.metadata && content.params.type.metadata.title)
-          ? content.params.type.metadata.title
+          ? Content.stripHTML(content.params.type.metadata.title)
           : fallbackTip;
     }
   }

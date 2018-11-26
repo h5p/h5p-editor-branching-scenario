@@ -258,7 +258,7 @@ export default class EditorOverlay extends React.Component {
       && metadata.title.trim().length > 0;
 
     let title = hasMetadataTitle
-      ? metadata.title
+      ? Content.stripHTML(metadata.title)
       : Content.getTooltip(this.props.content, true);
 
     const feedbackGroupField = (!this.isBranchingQuestion ? this.findField('feedback') : null);
