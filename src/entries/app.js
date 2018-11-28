@@ -312,7 +312,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
 
       // Make some things a little bit bigger
-      document.documentElement.style.fontSize = '18px';
+      //document.documentElement.style.fontSize = '18px';
 
       // Remove any open wysiwyg fields (they do not automatically resize)
       if (H5PEditor.Html) {
@@ -336,7 +336,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       // TODO: It would be better if we could center on the current tree center the user has set, like zoom does!
 
       // Reset size
-      document.documentElement.style.fontSize = '';
+      //document.documentElement.style.fontSize = '';
 
       // Remove any open wysiwyg fields (they do not automatically resize)
       if (H5PEditor.Html) {
