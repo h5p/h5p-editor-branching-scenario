@@ -1570,8 +1570,8 @@ export default class Canvas extends React.Component {
       if (position.y > padding) {
         position.y = padding; // Max Y
       }
-      else if ((treewrapRect.height - position.y - padding) > treeRect.height) {
-        position.y = (treewrapRect.height - treeRect.height - padding); // Min Y
+      else if ((treewrapRect.height - position.y - padding * 4) > treeRect.height) {
+        position.y = (treewrapRect.height - treeRect.height - padding * 4); // Min Y
       }
     }
     else {
