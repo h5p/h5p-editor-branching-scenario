@@ -37,6 +37,9 @@ export default class BranchingOptions extends React.Component {
 
   componentDidUpdate() {
     if (this.props.feedbackGroup !== undefined) {
+      if (H5PEditor.Html) {
+        H5PEditor.Html.removeWysiwyg();
+      }
       this.props.feedbackGroup.$group.appendTo(this.contentWrapper);
       this.props.feedbackGroup.$group.toggle(this.state.selectedMainOption !== 'new-content');
 
