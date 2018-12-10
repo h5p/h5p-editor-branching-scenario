@@ -342,7 +342,7 @@ export default class Editor extends React.Component {
               updateScoringOption={this.handleScoringOptionChange}
             />
           </Tab>
-          <Tab title="Interface translations" className="bs-editor-translations-tab">
+          <Tab title="Translations" className="bs-editor-translations-tab">
             <TabViewTranslations
               parent={this.props.parent}
             />
