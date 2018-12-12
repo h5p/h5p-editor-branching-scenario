@@ -6,6 +6,7 @@ import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
 import Content from './Content.js';
+import Tree from './Tree.js';
 import ConfirmationDialog from './dialogs/ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
@@ -137,8 +138,8 @@ export default class Canvas extends React.Component {
    * @return {object} Parent node.
    */
   getParent = (id, contentNodes) => {
-    return this.renderedNodes
-      .slice(0, this.renderedNodes.indexOf(id)) // get all node IDs that were rendered on top
+    return this.tree.processed
+      .slice(0, this.tree.processed.indexOf(id)) // get all node IDs that were rendered on top
       .filter(candidate => candidate > -1) // except end scenarios
       .map(candidate => contentNodes[candidate]) // get nodes to IDs
       .filter(candidate => { // get all parents of the child
@@ -170,14 +171,7 @@ export default class Canvas extends React.Component {
     });
   }
 
-  handleDropped = (id) => {
-    // Check if the node overlaps with one of the drop zones
-    const draggable = this['draggable-' + id];
-    const intersections = this.getIntersections(draggable);
-
-    // Dropzone with largest intersection
-    const dropzone = (intersections.length > 0) ? intersections[0] : null;
-
+  handleDropped = (id, dropzone) => {
     if (!dropzone || dropzone instanceof Content && dropzone.props.disabled) {
       this.setState({
         placing: null
@@ -205,7 +199,8 @@ export default class Canvas extends React.Component {
 
   handleContentEdit = (id) => {
     // Workaround for Chrome keeping hover state on the draggable
-    H5PEditor.$(this[`draggable-${id}`].element.element).click();
+    H5PEditor.$(this.tree[`draggable-${id}`].element.element).click();
+    // TODO: Not very React like...
 
     this.setState({
       editing: id,
@@ -276,7 +271,8 @@ export default class Canvas extends React.Component {
 
     nextIds
       .filter(id => id !== undefined && id > -1)
-      .filter(id => this.renderedNodes.indexOf(id) > this.renderedNodes.indexOf(start)) // prevent loops
+      .filter(id => this.tree.processed.indexOf(id) > this.tree.processed.indexOf(start)) // prevent loops
+      // TODO: Not very react like...
       .forEach(id => {
         childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true, skip));
       });
@@ -496,7 +492,7 @@ export default class Canvas extends React.Component {
 
       // Prevent loops from being attached to parent node later
       let nextId = newState.content[id].params.nextContentId;
-      if (this.renderedNodes.indexOf(nextId) < this.renderedNodes.indexOf(id)) {
+      if (this.tree.processed.indexOf(nextId) < this.tree.processed.indexOf(id)) {
         nextId = -1;
       }
 
@@ -554,7 +550,7 @@ export default class Canvas extends React.Component {
         if (!isBranching(newState.content[id])) {
           const loopCandidateId = newState.content[id].params.nextContentId;
           if (successorId === undefined &&
-              this.renderedNodes.indexOf(loopCandidateId) < this.renderedNodes.indexOf(id)) {
+              this.tree.processed.indexOf(loopCandidateId) < this.tree.processed.indexOf(id)) {
             successorId = loopCandidateId;
           }
         }
@@ -1119,13 +1115,14 @@ export default class Canvas extends React.Component {
 
     // Adjust nextContentIds to account for removed node
     this.setNodeOffset(content, deleteId, -1);
-    this.renderedNodes = this.renderedNodes
+    this.tree.processed = this.tree.processed
       .map(nodeId => (nodeId > deleteId) ? nodeId - 1  : nodeId);
 
     // Remove node from data structure
     content.splice(deleteId, 1);
-    this.renderedNodes = this.renderedNodes
+    this.tree.processed = this.tree.processed
       .filter(nodeId => nodeId !== deleteId);
+    // TODO: Isn't there a better way to do this?
 
     H5PEditor.removeChildren(deleteNode.formChildren);
   }
@@ -1172,7 +1169,7 @@ export default class Canvas extends React.Component {
       nodesToCheck.forEach(node => {
         if (node.nextContentId === oldId) {
           if (options.keepLoops !== true &&
-              this.renderedNodes.indexOf(newId) <= this.renderedNodes.indexOf(index)) {
+              this.tree.processed.indexOf(newId) <= this.tree.processed.indexOf(index)) {
             node.nextContentId = -1;
           }
           else {
@@ -1427,7 +1424,7 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.props.center && this.tree && this['draggable-0']) {
+    if (this.props.center && this.tree && this.tree.element && this['draggable-0']) {
       // Center on 1st node
       // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
       // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
@@ -1539,7 +1536,7 @@ export default class Canvas extends React.Component {
   panningLimits = (position) => {
     // Limits, you have to have them
     const treewrapRect = this.treewrap.getBoundingClientRect();
-    const treeRect = this.tree.getBoundingClientRect();
+    const treeRect = this.tree.element.getBoundingClientRect();
 
     const padding = (this.props.scale * 64); // Allow exceeding by this much
 
@@ -1608,21 +1605,6 @@ export default class Canvas extends React.Component {
     }
   }
 
-  // For debugging
-  logNodes = caller => {
-    console.log('NODES', caller);
-    this.state.content.forEach((node, index) => {
-      const target = (isBranching(node)) ?
-        (node.params.type.params.branchingQuestion && node.params.type.params.branchingQuestion.alternatives ?
-          node.params.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId).join(' | ') :
-          -1) : node.params.nextContentId;
-      console.log(`${index} --> ${target}`);
-    });
-    console.log('==========');
-    console.log('d:', this.state.deleting, 'e:',this.state.editing, 'i:', this.state.inserting, 'p:', this.state.placing);
-    console.warn(this.state.content);
-  }
-
   /**
    * Create list of dropzones that Draggable should not be droppable on.
    *
@@ -1681,7 +1663,8 @@ export default class Canvas extends React.Component {
       let found = 0;
       for (let i = 0; i < this.state.content.length; i++) {
         const hasReference = hasNextContent(this.state.content[i], params.nextContentId, true);
-        const isLooping = this.renderedNodes.indexOf(params.nextContentId) < this.renderedNodes.indexOf(i);
+        const isLooping = this.tree.processed.indexOf(params.nextContentId) < this.tree.processed.indexOf(i);
+        // TODO: Not very React like...
 
         if (hasReference && !isLooping) {
           found += hasNextContent(this.state.content[i], params.nextContentId, true);
@@ -1692,7 +1675,8 @@ export default class Canvas extends React.Component {
         }
       }
 
-      if (found < 2 && this.renderedNodes.indexOf(params.nextContentId) > this.renderedNodes.indexOf(this.state.editing)) {
+      if (found < 2 && this.tree.processed.indexOf(params.nextContentId) > this.tree.processed.indexOf(this.state.editing)) {
+        // TODO: Not very React like... maybe a function for this instead?
         // Display delete dialog
         this.setState({
           setNextContentId: newId,
@@ -1757,12 +1741,6 @@ export default class Canvas extends React.Component {
     this.dropzones = [];
     this.dropzonesDisabled = (this.state.placing !== null) ? this.getDisabledDropzones(this.state.placing) : [];
 
-    // Generate the tree
-    const tree = this.renderTree(0);
-
-    // Usful for debugging tree rendering
-    // this.logNodes('render');
-
     const interaction = this.state.content[this.state.editing];
 
     let validAlternatives = [];
@@ -1823,19 +1801,28 @@ export default class Canvas extends React.Component {
             onMoved={ this.handleMoved }
             onStopped={ this.handleStopped }
           >
-            <div
-              className="nodetree"
-              ref={ node => this.tree = node }
-              style={ {
-                width: tree.x + 'px',
-                height: tree.y + 'px',
-                transform: 'translate(' + this.state.panning.x + 'px,' + this.state.panning.y + 'px) scale(' + this.props.scale + ',' + this.props.scale + ')'
-              } }
-            >
-              { tree.nodes }
-            </div>
+            { !this.props.libraries &&
+              <div key={ 'loading' } className="loading">Loading…</div>
+            }
+            { this.props.libraries &&
+              <Tree
+                ref={ node => this.tree = node }
+                content={ this.state.content }
+                panning={ this.state.panning }
+                scale={ this.props.scale }
+                highlight={ this.props.highlight }
+                nodeSize={ this.props.nodeSize }
+                placing={ this.state.placing }
+                getLibrary={ library => this.getLibrary(library) }
+                onPlacing={ this.handlePlacing }
+                onDropped={ this.handleDropped }
+                onEdit={ this.handleContentEdit }
+                onCopy={ this.handleContentCopy }
+                onDelete={ this.handleContentDelete }
+              />
+            }
           </Draggable>
-          { !tree.nodes.length &&
+          { !this.state.content.length &&
             <StartScreen
               handleClick={ this.props.onDropped }
               handleTutorialClick={ this.props.handleOpenTutorial }
@@ -1846,7 +1833,7 @@ export default class Canvas extends React.Component {
               }) }
             </StartScreen>
           }
-          { tree.nodes.length &&
+          { this.state.content.length &&
             <QuickInfoMenu
               fade={ this.props.highlight !== null }
               onTutorialOpen={ this.props.handleOpenTutorial }
