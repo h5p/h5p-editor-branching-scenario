@@ -13,6 +13,8 @@ export default class Tree extends React.Component {
       width: 42,
       height: 32
     };
+
+    this.emptyAlternativeSize = 0.3463414634146341;
   }
 
   /**
@@ -130,7 +132,7 @@ export default class Tree extends React.Component {
     };
 
     // Increase row width
-    this.xs[y] += (id === null ? 0.25 : 1);
+    this.xs[y] += (id === null ? this.emptyAlternativeSize : 1);
 
     return node;
   }
@@ -216,11 +218,6 @@ export default class Tree extends React.Component {
   renderBranch = (branch, extraBeauty) => {
     this.applyBeautyModifiers(branch, extraBeauty);
 
-    if (branch.id === null) {
-      // Skip empty alternatives
-      return {x: 0, y: 0};
-    }
-
     // Keep track of indentation space per depth level
     this.updateIndentation(branch);
 
@@ -262,10 +259,10 @@ export default class Tree extends React.Component {
    * @param {Object} branch
    */
   updateIndentation = (branch) => {
-    if (this.xs[branch.y] !== undefined && branch.x < this.xs[branch.y] + 1) {
-      branch.x = this.xs[branch.y] + 1;
+    if (this.xs[branch.y] !== undefined && branch.x < this.xs[branch.y]) {
+      branch.x = this.xs[branch.y];
     }
-    this.xs[branch.y] = branch.x;
+    this.xs[branch.y] = branch.x + (branch.id === null ? this.emptyAlternativeSize : 1);
   }
 
   /**
@@ -308,6 +305,9 @@ export default class Tree extends React.Component {
    * @return {Object} x,y
    */
   renderNode = (branch) => {
+    if (branch.id === null) {
+      return;
+    }
 
     // TODO
     const content = this.props.content[branch.id];
@@ -528,8 +528,9 @@ export default class Tree extends React.Component {
    * @return {Object} x,y
    */
   createSize = (branch) => {
+    const size = (branch.id === null ? this.emptyAlternativeSize : 1);
     return {
-      x: branch.x + 1,
+      x: branch.x + size,
       y: branch.y + 1
     };
   }
