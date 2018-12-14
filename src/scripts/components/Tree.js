@@ -351,14 +351,14 @@ export default class Tree extends React.Component {
     const label = Content.getTooltip(this.props.content[branch.id]);
     const hasLoop = (!branch.children.length && content.params.nextContentId >= 0);
 
-    const hasCustomFeedback = !contentIsBranching && this.hasCustomFeedback(content);
+    const hasCustomFeedback = !contentIsBranching && this.hasCustomFeedback(content) && content.params.nextContentId === -1;
     const isDropzone = this.isPlacing() && !(contentIsBranching && this.isPlacingNewBranching());
 
     let fade = (this.props.highlight !== null);
     if (this.props.onlyThisBall !== null && (this.props.highlight === branch.id || this.props.onlyThisBall === branch.id)) {
       fade = false; // Highlighing this content
     }
-    if (this.props.highlight === -1 && content.params.nextContentId === -1 && !hasCustomFeedback) {
+    if (this.props.highlight === -1 && !hasCustomFeedback) {
       fade = false; // Highlighing default endings
     }
 
