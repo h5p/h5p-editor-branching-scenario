@@ -13,8 +13,6 @@ export default class Tree extends React.Component {
       width: 42,
       height: 32
     };
-
-    this.emptyAlternativeSize = 0.3463414634146341;
   }
 
   /**
@@ -35,7 +33,7 @@ export default class Tree extends React.Component {
     this.processed = [];
 
     // Create root branch
-    return this.createBranch(0, -1);
+    return this.createBranch(0, -1, 1);
   }
 
   /**
@@ -54,33 +52,37 @@ export default class Tree extends React.Component {
    *
    * @param {number} id Node identifier (content array index)
    * @param {number} y Depth level
+   * @param {number} height Of the current level (BQ uses 2x)
    * @return {Object} Complete branch layout
    */
-  createBranch = (id, y) => {
-    if (id < 0) {
+  createBranch = (id, y, height) => {
+    if (id === undefined || id < 0 || !this.props.content[id]) {
       // Reserve space for empty alterantive
-      return this.createNode(null, y);
+      return this.createNode(null, y, height);
     }
-
-    if (this.isAlreadyProcessed(id)) {
-      return; // Skip
+    else if (this.isAlreadyProcessed(id)) {
+      // Reserve space for loop alterantive
+      return this.createNode(id, y, height, true);
     }
     this.processed.push(id); // Mark as processed
 
     const content = this.props.content[id];
     const contentIsBranching = isBranching(content);
     const children = this.getChildren(content, contentIsBranching);
-    const branch = this.createNode(id, y);
+    const branch = this.createNode(id, y, height);
 
     // Loop through children
     for (let i = 0; i < children.length; i++) {
-      if (children[i] < 0 && !contentIsBranching) {
+      if ((children[i] === undefined || children[i] < 0) && !contentIsBranching) {
         continue; // Do not reserve for leaf nodes, only alternatives
       }
 
       // and create sub-branches
-      const subBranch = this.createBranch(children[i], y + (contentIsBranching ? 2 : 1)); // TODO: Make pretty
-      if (subBranch) {
+      const subBranch = this.createBranch(children[i], y + height, (contentIsBranching ? 2 : 1));
+
+      // Skip empty and content sub-branches that are only loops to save processing
+      const isLoopAfterContent = (!contentIsBranching && subBranch && subBranch.loop);
+      if (!isLoopAfterContent && subBranch) {
         // stored in an hierarchy for easy rendering
         branch.children.push(subBranch);
 
@@ -96,8 +98,6 @@ export default class Tree extends React.Component {
     // Determine necessary offset to make the parent + subtree center on top of each other
     this.determineBeautyModifier(branch);
 
-    //console.log(content.params.type.params, branch);
-
     return branch;
   }
 
@@ -106,33 +106,51 @@ export default class Tree extends React.Component {
    * @return {Array}
    */
   getChildren = (content, contentIsBranching) => {
-    return contentIsBranching ? getBranchingChildren(content) : [content.params.nextContentId];
+    let children = contentIsBranching ? getBranchingChildren(content) : [content.params.nextContentId];
+    if (!children) {
+      children = [];
+    }
+    return children;
   }
 
   /**
    * Create an object to keep track of each tree node and its properties.
    * Will automatically assign the next available position in the tree layout.
    *
+   * @param {number} id
+   * @param {number} y
+   * @param {number} height
+   * @param {boolean} loop
    * @return {Object}
    */
-  createNode = (id, y) => {
-    y = y + 1;
-    if (this.xs[y] === undefined) {
-      this.xs[y] = 0; // The start of a new row
+  createNode = (id, y, height, loop) => {
+    let x = 0;
+    y = y + height;
+    for (let i = 0; i < height; i++) {
+      if (this.xs[y - i] === undefined) {
+        this.xs[y - i] = 0; // The start of a new row
+      }
+      if (this.xs[y - i] > x) {
+        x = this.xs[y - i]; // Use the largest row
+      }
     }
 
     const node = {
       id: id,
-      x: this.xs[y],
+      x: x,
       y: y,
       children: [],
       beautyModifier: 0,
       parent: null,
-      num: 0 // Sibling number
+      num: 0, // Sibling number
+      loop: !!loop,
+      isBranching: (id !== null && isBranching(this.props.content[id]))
     };
 
     // Increase row width
-    this.xs[y] += (id === null ? this.emptyAlternativeSize : 1);
+    for (let i = 0; i < height; i++) {
+      this.xs[y - i] = x + this.getNodeWidth(node);
+    }
 
     return node;
   }
@@ -172,14 +190,13 @@ export default class Tree extends React.Component {
     if (branch.children.length) {
       const firstChild = branch.children[0];
       const lastChild = branch.children[branch.children.length - 1];
-      let offset = (lastChild.x - firstChild.x + 1);
+      let offset = ((lastChild.x + this.getNodeWidth(lastChild)) - firstChild.x);
       if (offset) {
         offset = (offset / 2) - 0.5;
       }
       offset += firstChild.x;
       if (firstChild.beautyModifier < 0) {
         // Compensate for centering
-        //console.log(branch, offset, firstChild.beautyModifier);
         offset -= firstChild.beautyModifier;
       }
       branch.beautyModifier = (branch.x - offset);
@@ -202,6 +219,7 @@ export default class Tree extends React.Component {
     // Use global context to keep track of all dropzone elements in the tree
     this.dropzones = [];
 
+    // Render the root branch
     const tree = this.renderBranch(layout, 0);
     tree.nodes = this.nodes;
 
@@ -213,18 +231,19 @@ export default class Tree extends React.Component {
    *
    * @param {Object} branch
    * @param {numnber} extraBeauty Comes from our parent and is use to move the whole sub-tree
+   * @param {boolean} parentIsBranching
    * @return {Object} size
    */
-  renderBranch = (branch, extraBeauty) => {
+  renderBranch = (branch, extraBeauty, parentIsBranching) => {
     this.applyBeautyModifiers(branch, extraBeauty);
 
     // Keep track of indentation space per depth level
-    this.updateIndentation(branch);
+    const beautyModifier = this.updateIndentation(branch, parentIsBranching);
 
     const size = this.createSize(branch);
     for (let i = 0; i < branch.children.length; i++) {
       const subBeauty = (branch.beautyModifier > 0 ? branch.beautyModifier : 0);
-      const subSize = this.renderBranch(branch.children[i], subBeauty + extraBeauty);
+      const subSize = this.renderBranch(branch.children[i], subBeauty + extraBeauty + beautyModifier, branch.isBranching);
 
       // Keep track of the total size of the branch
       this.updateSize(size, subSize);
@@ -254,15 +273,30 @@ export default class Tree extends React.Component {
   }
 
   /**
-   * Avoid overlapping between sub-trees.
+   * Avoid overlapping between sub-trees. Works by reference.
    *
    * @param {Object} branch
+   * @param {boolean} parentIsBranching
+   * @return {number} Beauty change for children
    */
-  updateIndentation = (branch) => {
+  updateIndentation = (branch, parentIsBranching) => {
+    let change = 0;
     if (this.xs[branch.y] !== undefined && branch.x < this.xs[branch.y]) {
+      change = this.xs[branch.y] - branch.x;
       branch.x = this.xs[branch.y];
     }
-    this.xs[branch.y] = branch.x + (branch.id === null ? this.emptyAlternativeSize : 1);
+
+    // Must do previous level for branchings
+    if (parentIsBranching && this.xs[branch.y - 1] !== undefined && branch.x < this.xs[branch.y - 1]) {
+      change += this.xs[branch.y - 1] - branch.x;
+      branch.x = this.xs[branch.y - 1];
+    }
+
+    this.xs[branch.y] = branch.x + this.getNodeWidth(branch);
+    if (parentIsBranching) {
+      this.xs[branch.y - 1] = this.xs[branch.y];
+    }
+    return change;
   }
 
   /**
@@ -278,6 +312,7 @@ export default class Tree extends React.Component {
     if (subSize.y > size.y) {
       size.y = subSize.y;
     }
+    size.beautyModifier += subSize.beautyModifier;
   }
 
   /**
@@ -289,12 +324,13 @@ export default class Tree extends React.Component {
     if (branch.children.length) {
       const firstChild = branch.children[0];
       const lastChild = branch.children[branch.children.length - 1];
-      let offset = (lastChild.x - firstChild.x + 1);
+      let offset = ((lastChild.x + this.getNodeWidth(lastChild)) - firstChild.x);
       if (offset) {
         offset = (offset / 2) - 0.5;
       }
       offset += firstChild.x;
       branch.x = offset;
+      this.xs[branch.y] = branch.x + 1;
     }
   }
 
@@ -305,15 +341,12 @@ export default class Tree extends React.Component {
    * @return {Object} x,y
    */
   renderNode = (branch) => {
-    if (branch.id === null) {
-      return;
+    if (branch.id === null || branch.loop) {
+      return; // Prevent rendering nodes for empty alternatives and loops
     }
 
-    // TODO
     const content = this.props.content[branch.id];
-    const contentIsBranching = isBranching(content);
-
-    let highlightCurrentNode = false;
+    const contentIsBranching = branch.isBranching;
 
     // Determine position of node
     const verticalNodeSpacing = (this.props.nodeSize.spacing.y + this.dzSpecs.height);
@@ -323,16 +356,25 @@ export default class Tree extends React.Component {
     };
 
     const label = Content.getTooltip(this.props.content[branch.id]);
+    const hasLoop = (!branch.children.length && content.params.nextContentId >= 0);
+
+    let fade = (this.props.highlight !== null);
+    if (this.props.onlyThisBall !== null && (this.props.highlight === branch.id || this.props.onlyThisBall === branch.id)) {
+      fade = false; // Highlighing this content
+    }
+
+    const hasCustomFeedback = !contentIsBranching && this.hasCustomFeedback(content);
+    const isDropzone = this.isPlacing() && !(contentIsBranching && this.isPlacingNewBranching());
 
     this.nodes.push(
       <Content
         key={ branch.id }
         id={ branch.id }
-        fade={ this.props.highlight !== null && !highlightCurrentNode }
+        fade={ fade }
         ref={ element => {
           this['draggable-' + branch.id] = element;
-          if (!this.isDropzoneDisabled(branch.id)) {
-            // This node is also a drop zones for replacing it
+          if (isDropzone) {
+            // This node is also a dropzone for replacing it
             this.dropzones.push(element);
           }
         } }
@@ -340,22 +382,21 @@ export default class Tree extends React.Component {
         width={ this.props.nodeSize.width }
         selected={ this.props.placing === branch.id }
         onPlacing={ () => this.props.onPlacing(branch.id) }
-        onMove={ () => this.handleMove(branch.id) }
-        onDropped={ () => this.handleDropped(branch.id) }
+        onMove={ () => this.handleMove(branch.id, this['draggable-' + branch.id]) }
+        onDropped={ () => this.handleDropped(branch.id, this['draggable-' + branch.id]) }
         contentClass={ this.getClassName(branch.id) }
         onEdit={ () => this.props.onEdit(branch.id) }
         onCopy={ () => this.props.onCopy(branch.id) }
         onDelete={ () => this.props.onDelete(branch.id) }
-        disabled={ this.isDisabled(branch.id) }
+        disabled={ this.isPlacing() ? !isDropzone : contentIsBranching }
         tooltip={ label }
         scale={ this.props.scale }
-        hasCustomEndScreen={ false /* TODO this.hasCustomEndScreen(content) */ }
-        hasLoopBack={ false /* TODO contentHasLoopBack */ }
+        hasCustomEndScreen={ hasCustomFeedback }
+        hasLoopBack={ hasLoop }
         highlightLinkedContent={ () => {
-          /*this.highlightLinkedContent( TODO
-            content.params.nextContentId,
-            id
-          );*/
+          if (content.params.nextContentId > -1) {
+            this.props.onHighlight(content.params.nextContentId, branch.id);
+          }
         } }
       >
         { label }
@@ -365,36 +406,36 @@ export default class Tree extends React.Component {
     // Use for drawing lines and dropzones relative to the node's center
     const nodeCenter = position.x + (this.props.nodeSize.width / 2);
 
-    // Used for ??
-    const parent = (branch.parent ? this.props.content[branch.parent] : null);
-    const parentIsBranching = (parent && isBranching(parent)); // TODO: This is only used for drawing alternatives ?
-
+    // Add vertical line above all except first node
     if (branch.id !== 0) {
       this.renderLine('vertical', branch.id + '-vabove', verticalNodeSpacing - 3, nodeCenter - 1, position.y - verticalNodeSpacing);
     }
 
     if (contentIsBranching) {
+      // Add vertical line below Branching Questions
       this.renderLine('vertical', branch.id + '-vbelow', verticalNodeSpacing, nodeCenter - 1, position.y + this.props.nodeSize.height - 1);
+      // Add alterantive balls
       const size = this.renderAlternativeBalls(branch);
+      // Add horizontal line between first and line alternative
       this.renderLine('horizontal', branch.id + '-hbelow', size.lastX - size.firstX + 2, size.firstX + 13, position.y + this.props.nodeSize.height + verticalNodeSpacing - 1);
     }
 
     // Add dropzones when placing, except for below the one being moved and for end scenarios
     if (this.isPlacing() && !this.isPlacing(branch.id)) {
-      // TODO: Let's use a separate function for this
 
       // Add dropzone above
-      // TODO: Add and explain logic...
-      if (!this.isPlacing(branch.parent)) { // && (!this.isDropzoneDisabled(branch.id) || this.isOuterNode(this.state.placing, id))) {
+      if (!this.isPlacing(branch.parent)) {
+        const parent = (branch.parent ? this.props.content[branch.parent] : null);
+        const parentIsBranching = (parent && isBranching(parent));
+
         this.renderDropzone(branch.id,
-          nodeCenter - (this.dzSpecs.width / 2), // TODO: Parts of this should be moved to renderDropzone
-          //position.y - this.dzSpecs.height - this.props.nodeSize.spacing.y - 3,
+          nodeCenter - (this.dzSpecs.width / 2),
           position.y - verticalNodeSpacing + (this.props.nodeSize.spacing.y / 2) - 2,
           parentIsBranching ? parent : undefined, branch.num, parentIsBranching);
       }
 
       // Add dropzone below if there's no subtree (or BQ implicitly with no alternatives)
-      if (!contentIsBranching && !branch.children.length && !this.isDropzoneDisabled(branch.id)) {
+      if (!contentIsBranching && !branch.children.length) {
         this.renderDropzone(branch.id,
           nodeCenter - (this.dzSpecs.width / 2),
           position.y + this.props.nodeSize.height + (this.props.nodeSize.spacing.y / 2) - 2,
@@ -406,8 +447,9 @@ export default class Tree extends React.Component {
   /**
    * Draw a vertical line.
    *
+   * @param {string} type 'vertical' or 'horizontal'
    * @param {string} key
-   * @param {number} height
+   * @param {number} size
    * @param {number} x
    * @param {number} y
    */
@@ -423,10 +465,14 @@ export default class Tree extends React.Component {
   }
 
   /**
+   * Help render a dropzone.
    *
-   *
-   * @param {Object} branch
-   * @return {Object} x,y
+   * @param {number} id
+   * @param {number} x
+   * @param {number} y
+   * @param {Object} parent
+   * @param {number} num Sibling number
+   * @param {boolean} parentIsBranching
    */
   renderDropzone = (id, x, y, parent, num, parentIsBranching) => {
     const nextContentId = (parent === undefined || parentIsBranching) ? id : undefined;
@@ -448,7 +494,7 @@ export default class Tree extends React.Component {
           left: x + 'px',
           top: y + 'px'
         } }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num) }
+        onClick={ () => this.props.handleDropzoneClick(nextContentId, parent, num) }
       />
     );
   }
@@ -465,18 +511,45 @@ export default class Tree extends React.Component {
     let lastX = 0;
 
     for (let i = 0; i < branch.children.length; i++) {
+      // The child branch
+      const node = branch.children[i];
+      const isEmpty = (node.id === null);
+
+      // React key
       const key = branch.id + '-abox-' + i;
       const text = alternatives[i].text;
-      const isEmpty = (branch.children[i].id === null);
 
-      const verticalNodeSpacing = (this.props.nodeSize.spacing.y + this.dzSpecs.height);
-      let alternativeBallClasses = 'alternative-ball';
+      const hasCustomFeedback = this.hasCustomFeedback(alternatives[i]);
+
+      let fade = (this.props.highlight !== null);
+      let className = 'alternative-ball';
+      if (node.loop) {
+        className += ' loop';
+      }
+      else if (isEmpty) {
+        if (hasCustomFeedback) {
+          className += ' endscreenCustom';
+        }
+        else {
+          className += ' endscreen';
+          if (this.props.highlight === -1) {
+            fade = false; // Highlighing default endings
+          }
+        }
+      }
+      if (this.props.onlyThisBall === key) {
+        fade = false; // Highlighing a link
+      }
+      if (fade) {
+        className += ' fade'; // Not highlighing this item
+      }
 
       // Determine position later used for size
+      const verticalNodeSpacing = (this.props.nodeSize.spacing.y + this.dzSpecs.height);
       const posX = (branch.children[i].x * (this.props.nodeSize.width + this.props.nodeSize.spacing.x));
       const posY = ((branch.children[i].y - 1) * (this.props.nodeSize.height + verticalNodeSpacing));
 
-      lastX = (posX + ((isEmpty ? this.dzSpecs.width : this.props.nodeSize.width) / 2) - 14);
+      lastX = (posX + ((isEmpty || node.loop ? this.dzSpecs.width : this.props.nodeSize.width) / 2) - 14);
       if (!firstX) {
         firstX = lastX;
       }
@@ -488,20 +561,20 @@ export default class Tree extends React.Component {
       // Add the ball
       this.nodes.push(
         <div key={ key }
-          className={ alternativeBallClasses }
+          className={ className }
           aria-label={ /* TODO: l10n */ 'Alternative ' + (i + 1) }
           onDoubleClick={() => {
-            this.props.onContentEdit(branch.id);
+            this.props.onEdit(branch.id);
           }}
           style={ {
             left: lastX + 'px',
             top: (posY + 7) + 'px'
           } }>A{ i + 1 }
           {
-            false && // hasLoopBack &&
+            node.loop &&
             <div
               className='loop-back'
-              onClick={() => this.handleBallTouch(hasBeenDrawn ? id : -1, key)} // TODO
+              onClick={ () => this.props.onHighlight(node.id, key) }
             />
           }
           <div className="dark-tooltip">
@@ -510,7 +583,8 @@ export default class Tree extends React.Component {
         </div>
       );
 
-      if (isEmpty && this.isPlacing()) { // TODO: And not loop etc
+      if ((isEmpty || node.loop) && this.isPlacing()) {
+        // Add dropzone below empty alternative
         this.renderDropzone(-1, posX, posY + this.props.nodeSize.height + (this.props.nodeSize.spacing.y / 2) - 2, branch.id, i);
       }
     }
@@ -528,11 +602,21 @@ export default class Tree extends React.Component {
    * @return {Object} x,y
    */
   createSize = (branch) => {
-    const size = (branch.id === null ? this.emptyAlternativeSize : 1);
     return {
-      x: branch.x + size,
-      y: branch.y + 1
+      x: branch.x + this.getNodeWidth(branch),
+      y: branch.y + 1, // TODO: 2x for BQ?
     };
+  }
+
+  /**
+   * Get the size of the given branch node.
+   *
+   * @param {Object} branch
+   * @return {number}
+   */
+  getNodeWidth = (branch) => {
+    // For empty alternatives, relative DZ + relative spacing
+    return (branch.id === null || branch.loop ? 0.3463414634146341 : 1);
   }
 
   /**
@@ -551,13 +635,12 @@ export default class Tree extends React.Component {
    *
    * @param {number} id Content id
    */
-  handleMove = (id) => {
-    const draggable = this['draggable-' + id];
+  handleMove = (id, draggable) => {
     const intersections = this.getIntersections(draggable);
 
     // Highlight dropzones with largest intersection with draggable
     this.dropzones.forEach(dropzone => {
-      if (!dropzone || dropzone === draggable || this.isDropzoneDisabled(dropzone.props.id)) {
+      if (!dropzone || dropzone === draggable) {
         return; // Skip
       }
 
@@ -574,10 +657,10 @@ export default class Tree extends React.Component {
    * Handle draggable stopped moving.
    *
    * @param {number} id Content id
+   * @param {Object} draggable
    */
-  handleDropped = (id) => {
+  handleDropped = (id, draggable) => {
     // Check if the node overlaps with one of the drop zones
-    const draggable = this['draggable-' + id];
     const intersections = this.getIntersections(draggable);
 
     // Dropzone with largest intersection
@@ -607,34 +690,33 @@ export default class Tree extends React.Component {
   }
 
   /**
-   * Grouping size attributes together prevents loneliness
+   * Determine if the given node has custom feedback set.
    *
-   * @param {number} id
-   * @return {string}
+   * @param {Object} node Content or alternative.
+   * @return {boolean}
    */
-  isDisabled = (id) => {
-    // TODO
-    return false;
-    //isBranching(content)
-    /*const isPlacingBranchingQuestion = this.state.placing === -1 &&
-      this.state.library && this.state.library.title === 'Branching Question';
+  hasCustomFeedback = (node) => {
+    node = node.params || node;
 
-    disabled={ (contentIsBranching && (this.props.placing === null || isPlacingBranchingQuestion)) /*|| this.isDropzoneDisabled(branch.id)*/ //}
-
+    return node.feedback !== undefined && (
+      (node.feedback.title && node.feedback.title.trim() !== '') ||
+      node.feedback.subtitle ||
+      node.feedback.image ||
+      node.feedback.endScreenScore !== undefined
+    );
   }
 
   /**
-   * Determine if dropzones has been disabled for the given content
+   * Check if we're inserting a new branching question
    *
-   * @param {number} id Content id
    * @return {boolean}
    */
-  isDropzoneDisabled = (id) => {
-    if (!this.disabledDropzones || id === undefined || id === null || id < 0) {
-      return false;
-    }
-
-    return this.disabledDropzones.indexOf(id) !== -1;
+  isPlacingNewBranching = () => {
+    return (
+      this.props.placing === -1 &&
+      this.props.library &&
+      this.props.library.title === 'Branching Question'
+    );
   }
 
   /**
@@ -649,11 +731,8 @@ export default class Tree extends React.Component {
   }
 
   render() {
-    console.log('RENDERING');
-    console.log('---------');
     // Create inital tree layout (very dense)
     const layout = this.createTreeLayout();
-    console.log(JSON.parse(JSON.stringify(layout)));
 
     // Render the beautiful tree
     const tree = this.renderTree(layout);

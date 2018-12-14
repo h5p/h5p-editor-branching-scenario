@@ -982,7 +982,7 @@ export default class Canvas extends React.Component {
       if (!hasBeenDrawn && this.state.placing !== null && this.state.placing !== id && id >= 0) {
         const dzDistance = ((aboveLineHeight - this.state.dzSpecs.height) / 2);
 
-        // Add dropzone above
+        // Add dropzone above (no moving parent AND not disabled or is outer )
         if (content && this.state.placing !== parent && (!this.isDropzoneDisabled(id) || this.isOuterNode(this.state.placing, id))) {
           nodes.push(this.renderDropzone(id, {
             x: nodeCenter - (this.state.dzSpecs.width / 2),
@@ -1782,8 +1782,8 @@ export default class Canvas extends React.Component {
             ref={ element => this['draggable--1'] = element }
             width={ this.props.nodeSize.insertingWidth }
             selected={ this.state.placing === -1 }
-            onMove={ () => this.handleMove(-1) }
-            onDropped={ () => this.handleDropped(-1) }
+            onMove={ () => this.tree.handleMove(-1, this['draggable--1']) }
+            onDropped={ () => this.tree.handleDropped(-1, this['draggable--1']) }
             contentClass={ this.props.inserting.library.className }
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
@@ -1811,14 +1811,18 @@ export default class Canvas extends React.Component {
                 panning={ this.state.panning }
                 scale={ this.props.scale }
                 highlight={ this.props.highlight }
+                onlyThisBall={ this.props.onlyThisBall }
                 nodeSize={ this.props.nodeSize }
                 placing={ this.state.placing }
+                library={ this.state.library }
                 getLibrary={ library => this.getLibrary(library) }
                 onPlacing={ this.handlePlacing }
                 onDropped={ this.handleDropped }
                 onEdit={ this.handleContentEdit }
                 onCopy={ this.handleContentCopy }
                 onDelete={ this.handleContentDelete }
+                onHighlight={ this.props.onHighlight }
+                onDropzoneClick={ this.handleDropzoneClick }
               />
             }
           </Draggable>
@@ -1827,10 +1831,20 @@ export default class Canvas extends React.Component {
               handleClick={ this.props.onDropped }
               handleTutorialClick={ this.props.handleOpenTutorial }
             >
-              { this.renderDropzone(-9, {
-                x: 361.635,
-                y: 130
-              }) }
+              <Dropzone
+                key={ 'f---9/undefined-dz-0' }
+                ref={ element => this.initialDropzone = element }
+                nextContentId={ -9 }
+                parent={ undefined }
+                alternative={ 0 }
+                position={ {x: 361.635, y: 130} }
+                elementClass={ 'dropzone' + (!this.props.inserting ? ' disabled' : '') }
+                style={ {
+                  left: '361.635px',
+                  top: '130px'
+                } }
+                onClick={ () => this.handleDropzoneClick(-9, undefined, 0) }
+              />
             </StartScreen>
           }
           { this.state.content.length &&
