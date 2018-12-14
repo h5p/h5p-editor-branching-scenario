@@ -1424,7 +1424,7 @@ export default class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Center the tree
-    if (this.props.center && this.tree && this.tree.element && this['draggable-0']) {
+    if (this.props.center && this.tree && this.tree.element && this.tree['draggable-0']) {
       // Center on 1st node
       // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
       // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
@@ -1433,7 +1433,7 @@ export default class Canvas extends React.Component {
         const center = (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
         this.setState({
           panning: {
-            x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
+            x: (center - (this.tree['draggable-0'].props.position.x * this.props.scale)),
             y: 0
           }
         }, this.props.onCanvasCentered);
