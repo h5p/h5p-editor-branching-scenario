@@ -216,9 +216,6 @@ export default class Tree extends React.Component {
     // Use global context to keep track of all the nodes for rendering
     this.nodes = [];
 
-    // Use global context to keep track of all dropzone elements in the tree
-    this.dropzones = [];
-
     // Render the root branch
     const tree = this.renderBranch(layout, 0);
     tree.nodes = this.nodes;
@@ -375,7 +372,7 @@ export default class Tree extends React.Component {
           this['draggable-' + branch.id] = element;
           if (isDropzone) {
             // This node is also a dropzone for replacing it
-            this.dropzones.push(element);
+            this.props.dropzones.push(element);
           }
         } }
         position={ position }
@@ -484,7 +481,7 @@ export default class Tree extends React.Component {
     this.nodes.push(
       <Dropzone
         key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
-        ref={ element => { if (isInitial) { this.initialDropzone = element; } this.dropzones.push(element); } }
+        ref={ element => { if (isInitial) { this.initialDropzone = element; } this.props.dropzones.push(element); } }
         nextContentId={ nextContentId }
         parent={ parent }
         alternative={ num }
@@ -639,7 +636,7 @@ export default class Tree extends React.Component {
     const intersections = this.getIntersections(draggable);
 
     // Highlight dropzones with largest intersection with draggable
-    this.dropzones.forEach(dropzone => {
+    this.props.dropzones.forEach(dropzone => {
       if (!dropzone || dropzone === draggable) {
         return; // Skip
       }
@@ -677,7 +674,7 @@ export default class Tree extends React.Component {
     const points = draggable.getPoints();
 
     // Get largest intersections
-    return this.dropzones
+    return this.props.dropzones
       .filter(dropzone => dropzone && dropzone !== draggable && dropzone.overlap(points))
       .map(dropzone => {
         return {

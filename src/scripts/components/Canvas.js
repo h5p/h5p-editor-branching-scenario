@@ -1738,8 +1738,8 @@ export default class Canvas extends React.Component {
   }
 
   render() {
+    // Use global context to keep track of all dropzone elements in the tree
     this.dropzones = [];
-    this.dropzonesDisabled = (this.state.placing !== null) ? this.getDisabledDropzones(this.state.placing) : [];
 
     const interaction = this.state.content[this.state.editing];
 
@@ -1816,6 +1816,7 @@ export default class Canvas extends React.Component {
                 placing={ this.state.placing }
                 library={ this.state.library }
                 getLibrary={ library => this.getLibrary(library) }
+                dropzones={ this.dropzones }
                 onPlacing={ this.handlePlacing }
                 onDropped={ this.handleDropped }
                 onEdit={ this.handleContentEdit }
@@ -1833,7 +1834,7 @@ export default class Canvas extends React.Component {
             >
               <Dropzone
                 key={ 'f---9/undefined-dz-0' }
-                ref={ element => this.initialDropzone = element }
+                ref={ element => { this.initialDropzone = element; this.dropzones.push(element); } }
                 nextContentId={ -9 }
                 parent={ undefined }
                 alternative={ 0 }
