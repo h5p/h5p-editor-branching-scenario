@@ -1289,7 +1289,7 @@ export default class Canvas extends React.Component {
     else if (isBranching(this.state.content[this.state.deleting])) {
       return (
         <div className='confirmation-details'>
-          <p>If you proceed, you will lose all the content attached to this contents alternatives:</p>
+          <p>If you proceed you will lose all content attached to this branch:</p>
           <ul>
             { this.getChildrenTitles(this.state.deleting, this.state.placing).map((title, index) =>
               <li key={index}>{title}</li>
@@ -1301,7 +1301,7 @@ export default class Canvas extends React.Component {
     else {
       return (
         <div className='confirmation-details'>
-          <p>You will lose this content, but the children will be attached to the parent content.</p>
+          <p>Only this content will be deleted and removed from the branch.</p>
         </div>
       );
     }

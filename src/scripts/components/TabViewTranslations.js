@@ -18,8 +18,8 @@ export default class TabViewTranslations extends React.Component {
   render() {
     return (
       <div id="translate-interface" className="tab tab-view-full-page large-padding">
-        <span className="tab-view-title">Interface Translations</span>
-        <span className="tab-view-description">All content types fields included in this <strong>Branching Scenario</strong> can be customized. Below are the fields that are translateable.</span>
+        <span className="tab-view-title">Translations</span>
+        <span className="tab-view-description">The language and labels used in all content types can be customised by editing the fields below.</span>
         <div className="tab-view-white-box" ref={this.commonFields} />
       </div>
     );
