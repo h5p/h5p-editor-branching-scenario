@@ -33,7 +33,7 @@ export default class Tree extends React.Component {
     this.processed = [];
 
     // Create root branch
-    return this.createBranch(0, -1, 1);
+    return this.createBranch(0, 0, 1);
   }
 
   /**
@@ -217,7 +217,7 @@ export default class Tree extends React.Component {
     this.nodes = [];
 
     // Render the root branch
-    const tree = this.renderBranch(layout, 0);
+    const tree = this.createPosition(this.renderBranch(layout, 0));
     tree.nodes = this.nodes;
 
     return tree;
@@ -346,22 +346,21 @@ export default class Tree extends React.Component {
     const contentIsBranching = branch.isBranching;
 
     // Determine position of node
-    const verticalNodeSpacing = (this.props.nodeSize.spacing.y + this.dzSpecs.height);
-    const position = {
-      x: branch.x * (this.props.nodeSize.width + this.props.nodeSize.spacing.x),
-      y: branch.y * (this.props.nodeSize.height + verticalNodeSpacing)
-    };
+    const position = this.createPosition(branch);
 
     const label = Content.getTooltip(this.props.content[branch.id]);
     const hasLoop = (!branch.children.length && content.params.nextContentId >= 0);
+
+    const hasCustomFeedback = !contentIsBranching && this.hasCustomFeedback(content);
+    const isDropzone = this.isPlacing() && !(contentIsBranching && this.isPlacingNewBranching());
 
     let fade = (this.props.highlight !== null);
     if (this.props.onlyThisBall !== null && (this.props.highlight === branch.id || this.props.onlyThisBall === branch.id)) {
       fade = false; // Highlighing this content
     }
-
-    const hasCustomFeedback = !contentIsBranching && this.hasCustomFeedback(content);
-    const isDropzone = this.isPlacing() && !(contentIsBranching && this.isPlacingNewBranching());
+    if (this.props.highlight === -1 && content.params.nextContentId === -1 && !hasCustomFeedback) {
+      fade = false; // Highlighing default endings
+    }
 
     this.nodes.push(
       <Content
@@ -402,6 +401,7 @@ export default class Tree extends React.Component {
 
     // Use for drawing lines and dropzones relative to the node's center
     const nodeCenter = position.x + (this.props.nodeSize.width / 2);
+    const verticalNodeSpacing = (this.props.nodeSize.spacing.y + this.dzSpecs.height);
 
     // Add vertical line above all except first node
     if (branch.id !== 0) {
@@ -542,18 +542,16 @@ export default class Tree extends React.Component {
       }
 
       // Determine position later used for size
-      const verticalNodeSpacing = (this.props.nodeSize.spacing.y + this.dzSpecs.height);
-      const posX = (branch.children[i].x * (this.props.nodeSize.width + this.props.nodeSize.spacing.x));
-      const posY = ((branch.children[i].y - 1) * (this.props.nodeSize.height + verticalNodeSpacing));
+      const position = this.createPosition(branch.children[i], 0, -1);
 
-      lastX = (posX + ((isEmpty || node.loop ? this.dzSpecs.width : this.props.nodeSize.width) / 2) - 14);
+      lastX = (position.x + ((isEmpty || node.loop ? this.dzSpecs.width : this.props.nodeSize.width) / 2) - 14);
       if (!firstX) {
         firstX = lastX;
       }
 
       // Add line above
       const height = this.props.nodeSize.spacing.y * 0.375;
-      this.renderLine('vertical', branch.id + '-vabovebs-' + i, height, lastX + 13, posY + 1);
+      this.renderLine('vertical', branch.id + '-vabovebs-' + i, height, lastX + 13, position.y + 1);
 
       // Add the ball
       this.nodes.push(
@@ -565,7 +563,7 @@ export default class Tree extends React.Component {
           }}
           style={ {
             left: lastX + 'px',
-            top: (posY + 7) + 'px'
+            top: (position.y + 7) + 'px'
           } }>A{ i + 1 }
           {
             node.loop &&
@@ -582,7 +580,7 @@ export default class Tree extends React.Component {
 
       if ((isEmpty || node.loop) && this.isPlacing()) {
         // Add dropzone below empty alternative
-        this.renderDropzone(-1, posX, posY + this.props.nodeSize.height + (this.props.nodeSize.spacing.y / 2) - 2, branch.id, i);
+        this.renderDropzone(-1, position.x, position.y + this.props.nodeSize.height + (this.props.nodeSize.spacing.y / 2) - 2, branch.id, i);
       }
     }
 
@@ -602,6 +600,22 @@ export default class Tree extends React.Component {
     return {
       x: branch.x + this.getNodeWidth(branch),
       y: branch.y + 1, // TODO: 2x for BQ?
+    };
+  }
+
+  /**
+   * Create position in px values
+   *
+   * @param {Object} branch
+   * @param {number} [x=0] Comp
+   * @param {number} [y=0] Comp
+   * @return {Object} x,y
+   */
+  createPosition = (node, x, y) => {
+    const verticalNodeSpacing = (this.props.nodeSize.spacing.y + this.dzSpecs.height);
+    return {
+      x: (node.x + (x || 0)) * (this.props.nodeSize.width + this.props.nodeSize.spacing.x),
+      y: (node.y + (y || 0)) * (this.props.nodeSize.height + verticalNodeSpacing)
     };
   }
 

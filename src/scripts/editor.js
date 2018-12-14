@@ -254,8 +254,8 @@ export default class Editor extends React.Component {
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
       this.treewrap = this.canvas.treewrap.element;
     }
-    if (!this.tree && this.canvas && this.canvas.tree) {
-      this.tree = this.canvas && this.canvas.tree;
+    if (!this.tree && this.canvas && this.canvas.tree && this.canvas.tree.element) {
+      this.tree = this.canvas && this.canvas.tree && this.canvas.tree.element;
     }
 
     return (
