@@ -932,7 +932,7 @@ export default class Canvas extends React.Component {
           this.removeNode(newState.content, prevState.deleting);
         }
 
-        this[`draggable-${prevState.deleting}`].dehighlight();
+        this.tree[`draggable-${prevState.deleting}`].dehighlight();
 
         if (this.props.inserting) {
           // Stop inserting
@@ -982,8 +982,8 @@ export default class Canvas extends React.Component {
    * TODO
    */
   handleCancel = () => {
-    if (this.state.deleting !== null && this[`draggable-${this.state.deleting}`]) {
-      this[`draggable-${this.state.deleting}`].dehighlight();
+    if (this.state.deleting !== null && this.tree[`draggable-${this.state.deleting}`]) {
+      this.tree[`draggable-${this.state.deleting}`].dehighlight();
     }
 
     // Cancel delete confirmation dialog
