@@ -51,8 +51,10 @@ export default class BranchingOptions extends React.Component {
         this.props.feedbackGroup.children[2].$item.children('.h5peditor-label-wrapper').children('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Custom end scenario image' : this.props.feedbackGroup.children[2].field.label);
 
         const isDynamicScore = (this.props.scoringOption === 'dynamic-score');
+        const isNoScore = (this.props.scoringOption === 'no-score');
         const isEndScenario = !(this.props.nextContentId > -1);
-        this.props.feedbackGroup.children[3].$item.toggle((isDynamicScore && !isEndScenario) || (!isDynamicScore && isEndScenario));
+
+        this.props.feedbackGroup.children[3].$item.toggle(!isNoScore && ((isDynamicScore && !isEndScenario) || (!isDynamicScore && isEndScenario)));
       }
     }
   }
