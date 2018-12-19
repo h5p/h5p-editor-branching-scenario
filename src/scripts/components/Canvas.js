@@ -6,6 +6,7 @@ import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
 import Dropzone from './Dropzone.js';
 import Content from './Content.js';
+import Tree from './Tree.js';
 import ConfirmationDialog from './dialogs/ConfirmationDialog.js';
 import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
@@ -47,6 +48,9 @@ export default class Canvas extends React.Component {
     };
   }
 
+  /**
+   * React hook
+   */
   componentDidMount() {
     // Trigger the initial default end scenarios count
     this.props.onContentChanged(null, this.countDefaultEndScenarios());
@@ -54,10 +58,16 @@ export default class Canvas extends React.Component {
     document.addEventListener('keydown', this.handleDocumentKeyDown);
   }
 
+  /**
+   * React hook
+   */
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleDocumentKeyDown);
   }
 
+  /**
+   * React hook
+   */
   static getDerivedStateFromProps(nextProps, state) {
     if (nextProps.inserting && nextProps.insertingId !== state.insertingId) {
       return ({ // Set new state on inserting
@@ -69,6 +79,9 @@ export default class Canvas extends React.Component {
     return null;
   }
 
+  /**
+   * Event handler
+   */
   handleDocumentKeyDown = (event) => {
     switch (event.which) {
       case 46: // Delete
@@ -98,35 +111,6 @@ export default class Canvas extends React.Component {
   }
 
   /**
-   * Get intersections between dropzones and a draggable.
-   *
-   * @param {Content} draggable
-   * @return {object[]} intersecting objects ordered by intersecting area in decreasing order
-   */
-  getIntersections(draggable) {
-    const points = draggable.getPoints();
-
-    let dropzones = this.dropzones;
-
-    // Only use next path dropzones
-    if (this.state.editing) {
-      dropzones = dropzones.filter(dropzone => dropzone instanceof Dropzone && dropzone.getType() === 'nextPathDrop');
-    }
-
-    // Get largest intersections
-    return dropzones
-      .filter(dropzone => dropzone && dropzone !== draggable && dropzone.overlap(points))
-      .map(dropzone => {
-        return {
-          dropzone: dropzone,
-          intersection: dropzone.intersection(points)
-        };
-      })
-      .sort((a, b) => b.intersection - a.intersection)
-      .map(dropzone => dropzone.dropzone);
-  }
-
-  /**
    * Get "the" parent node.
    *
    * Assumes that this.renderedNodes holds all nodes in order of appearance
@@ -137,8 +121,8 @@ export default class Canvas extends React.Component {
    * @return {object} Parent node.
    */
   getParent = (id, contentNodes) => {
-    return this.renderedNodes
-      .slice(0, this.renderedNodes.indexOf(id)) // get all node IDs that were rendered on top
+    return this.tree.processed
+      .slice(0, this.tree.processed.indexOf(id)) // get all node IDs that were rendered on top
       .filter(candidate => candidate > -1) // except end scenarios
       .map(candidate => contentNodes[candidate]) // get nodes to IDs
       .filter(candidate => { // get all parents of the child
@@ -151,33 +135,10 @@ export default class Canvas extends React.Component {
       .slice(-1).pop(); // return the closest parent
   }
 
-  handleMove = (id) => {
-    const draggable = this['draggable-' + id];
-    const intersections = this.getIntersections(draggable);
-
-    // Highlight dropzones with largest intersection with draggable
-    this.dropzones.forEach(dropzone => {
-      if (!dropzone || dropzone === draggable || this.isDropzoneDisabled(dropzone.props.id)) {
-        return; // Skip
-      }
-
-      if (intersections.length === 0 || dropzone !== intersections[0]) {
-        dropzone.dehighlight();
-      }
-      else {
-        dropzone.highlight();
-      }
-    });
-  }
-
-  handleDropped = (id) => {
-    // Check if the node overlaps with one of the drop zones
-    const draggable = this['draggable-' + id];
-    const intersections = this.getIntersections(draggable);
-
-    // Dropzone with largest intersection
-    const dropzone = (intersections.length > 0) ? intersections[0] : null;
-
+  /**
+   * TODO
+   */
+  handleDropped = (id, dropzone) => {
     if (!dropzone || dropzone instanceof Content && dropzone.props.disabled) {
       this.setState({
         placing: null
@@ -196,6 +157,9 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * TODO
+   */
   handleDropzoneClick = (nextContentId, parent, alternative) => {
     if (this.state.placing === null) {
       return;
@@ -203,9 +167,12 @@ export default class Canvas extends React.Component {
     this.placeInTree(this.state.placing, nextContentId, parent, alternative);
   }
 
+  /**
+   * TODO
+   */
   handleContentEdit = (id) => {
     // Workaround for Chrome keeping hover state on the draggable
-    H5PEditor.$(this[`draggable-${id}`].element.element).click();
+    H5PEditor.$(this.tree[`draggable-${id}`].element.element).click();
 
     this.setState({
       editing: id,
@@ -213,11 +180,17 @@ export default class Canvas extends React.Component {
     });
   }
 
+  /**
+   * TODO: Move to Content ?
+   */
   handleContentCopy = (id) => {
     const clipboardItem = new H5P.ClipboardItem(this.state.content[id].params, 'type', 'H5PEditor.BranchingScenario');
     H5P.clipboardify(clipboardItem);
   }
 
+  /**
+   * TODO
+   */
   handleContentDelete = (id) => {
     this.setState({
       deleting: id,
@@ -276,7 +249,8 @@ export default class Canvas extends React.Component {
 
     nextIds
       .filter(id => id !== undefined && id > -1)
-      .filter(id => this.renderedNodes.indexOf(id) > this.renderedNodes.indexOf(start)) // prevent loops
+      .filter(id => this.tree.processed.indexOf(id) > this.tree.processed.indexOf(start)) // prevent loops
+      // TODO: Not very react like...
       .forEach(id => {
         childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true, skip));
       });
@@ -285,6 +259,9 @@ export default class Canvas extends React.Component {
     return childrenIds.filter((id, idx) => childrenIds.indexOf(id) === idx);
   }
 
+  /**
+   * TODO
+   */
   getNewContentParams = () => {
     if (this.props.inserting && this.props.inserting.pasted) {
       /**
@@ -496,7 +473,7 @@ export default class Canvas extends React.Component {
 
       // Prevent loops from being attached to parent node later
       let nextId = newState.content[id].params.nextContentId;
-      if (this.renderedNodes.indexOf(nextId) < this.renderedNodes.indexOf(id)) {
+      if (this.tree.processed.indexOf(nextId) < this.tree.processed.indexOf(id)) {
         nextId = -1;
       }
 
@@ -554,7 +531,7 @@ export default class Canvas extends React.Component {
         if (!isBranching(newState.content[id])) {
           const loopCandidateId = newState.content[id].params.nextContentId;
           if (successorId === undefined &&
-              this.renderedNodes.indexOf(loopCandidateId) < this.renderedNodes.indexOf(id)) {
+              this.tree.processed.indexOf(loopCandidateId) < this.tree.processed.indexOf(id)) {
             successorId = loopCandidateId;
           }
         }
@@ -611,33 +588,9 @@ export default class Canvas extends React.Component {
     }, this.contentChanged);
   }
 
-  renderDropzone(id, position, parent, num, parentIsBranching) {
-    const nextContentId = (parent === undefined || parentIsBranching) ? id : undefined;
-    if (num === undefined) {
-      num = 0;
-    }
-
-    const isInitial = (id === -9); // -9 is a special case for the first drop zone since it behaves a bit differently
-    return ( !this.state.editing &&
-      <Dropzone
-        key={ ((id < 0) ? 'f-' + '-' + id + '/' + parent : id) + '-dz-' + num }
-        ref={ element => { if (isInitial) { this.initialDropzone = element; } this.dropzones.push(element); } }
-        nextContentId={ nextContentId }
-        parent={ parent }
-        alternative={ num }
-        position={ position }
-        elementClass={ 'dropzone' + (isInitial && !this.props.inserting ? ' disabled' : '') }
-        style={
-          {
-            left: position.x + 'px',
-            top: position.y + 'px'
-          }
-        }
-        onClick={ () => this.handleDropzoneClick(nextContentId, parent, num) }
-      />
-    );
-  }
-
+  /**
+   * TODO
+   */
   getLibrary(library) {
     for (var i = 0; i < this.props.libraries.length; i++) {
       if (this.props.libraries[i].name === library) {
@@ -654,6 +607,9 @@ export default class Canvas extends React.Component {
     };
   }
 
+  /**
+   * TODO
+   */
   static getBranchingChildren(content) {
     if (!content.params.type || !content.params.type.params ||
         !content.params.type.params.branchingQuestion ||
@@ -670,373 +626,10 @@ export default class Canvas extends React.Component {
     return children;
   }
 
-  renderTree = (branch, x, y, parent, renderedNodes) => {
-    let nodes = [];
-
-    // Avoid drawing the same node twice by keeping track the nodes that have been drawn.
-    if (!renderedNodes) {
-      renderedNodes = [];
-    }
-
-    // Libraries must be loaded before tree can be drawn
-    if (!this.props.libraries) {
-      nodes.push(
-        <div key={ 'loading' } className="loading">Loading…</div>
-      );
-      branch = []; // Stops rendering
-    }
-
-    // Set defaults
-    if (branch === undefined) {
-      branch = [];
-    }
-    else if (!Array.isArray(branch)) {
-      branch = [branch]; // Must always be array
-    }
-    if (x === undefined) {
-      x = 0; // X level start
-    }
-    if (y === undefined) {
-      y = 0; // Y level start
-    }
-
-    const parentIsBranching = (parent !== undefined && isBranching(this.state.content[parent]));
-
-    let firstX, lastX, bigY = y + (this.props.nodeSize.spacing.y * 7.5); // The highest we'll ever be
-
-    // x position of first alternative (of a subtree)
-    let firstAlternativeX;
-
-    branch.forEach((id, num) => {
-      let drawAboveLine = false;
-      const content = this.state.content[id];
-      const contentIsBranching = (content && isBranching(content));
-
-      const hasBeenDrawn = (renderedNodes.indexOf(id) !== -1);
-
-      renderedNodes.push(id);
-
-      // Add vertical spacing for each level
-      let distanceYFactor = parentIsBranching ? 7.5 : 5; // Normal distance, 2 would draw each element right underneath the previous one
-
-      // Alternate code for "tree expansion"
-      // let distanceYFactor = parentIsBranching ? 5.5 : 3; // Normal distance, 2 would draw each element right underneath the previous one
-      //
-      // // If placing, always keep the top node on its position and don't add space for node that has been clicked for moving.
-      // if (this.state.placing !== null && id > 0 && this.state.placing !== id && this.state.placing !== parent) {
-      //   distanceYFactor += 2.5; // space for DZ
-      // }
-
-      const branchY = y + distanceYFactor * this.props.nodeSize.spacing.y;
-
-      // Determine if we have any children
-      const children = (hasBeenDrawn ? null : (contentIsBranching ? Canvas.getBranchingChildren(content) : (content ? [content.params.nextContentId] : null)));
-
-      if (x !== 0 && num > 0) {
-        x += this.props.nodeSize.spacing.x; // Add spacing between nodes
-      }
-
-      // Draw subtree first so we know where to position the node
-      const subtree = children ? this.renderTree(children, x, branchY, id, renderedNodes) : null;
-      const subtreeWidth = subtree ? subtree.x - x : 0;
-
-      // Determine position of node
-      let position = {
-        x: x,
-        y: branchY - (this.props.nodeSize.spacing.y * 2) // *2 for the element itself
-      };
-
-      if (subtreeWidth >= this.props.nodeSize.width) {
-        // Center parent above subtree
-        position.x += ((subtree.x - x) / 2) - (this.props.nodeSize.width / 2);
-      }
-
-      let highlightCurrentNode = false;
-      if (content && !hasBeenDrawn) {
-        const library = this.getLibrary(content.params.type.library);
-        const hasDefaultEndScreen = !this.hasFeedback(content)
-          && content.params.nextContentId !== undefined
-          && content.params.nextContentId < 0
-          && content.params.nextContentId === this.props.highlight;
-
-        const isHighlightingContent = hasDefaultEndScreen
-          || this.props.highlight === id
-          || this.props.onlyThisBall === id;
-
-        if (isHighlightingContent) {
-          highlightCurrentNode = true;
-        }
-
-        const contentHasLoopBack = (subtree === null || subtree.nodes.length === 0)
-          && content.params.nextContentId >= 0;
-
-        const isPlacingBranchingQuestion = this.state.placing === -1 &&
-          this.state.library && this.state.library.title === 'Branching Question';
-
-        // Draw node
-        const label = Content.getTooltip(content);
-        nodes.push(
-          <Content
-            key={ id }
-            id={ id }
-            fade={ this.props.highlight !== null && !highlightCurrentNode }
-            ref={ element => {
-              this['draggable-' + id] = element;
-              if (!this.isDropzoneDisabled(id)) {
-                this.dropzones.push(element);
-              }
-            } }
-            position={ position }
-            width={ this.props.nodeSize.width }
-            selected={ this.state.placing === id }
-            onPlacing={ () => this.handlePlacing(id) }
-            onMove={ () => this.handleMove(id) }
-            onDropped={ () => this.handleDropped(id) }
-            contentClass={ library.className }
-            onEdit={ () => this.handleContentEdit(id) }
-            onCopy={ () => this.handleContentCopy(id) }
-            onDelete={ () => this.handleContentDelete(id) }
-            disabled={ (contentIsBranching && (this.state.placing === null || isPlacingBranchingQuestion)) || this.isDropzoneDisabled(id) }
-            tooltip={ label }
-            scale={ this.props.scale }
-            hasCustomEndScreen={ this.hasCustomEndScreen(content) }
-            hasLoopBack={ contentHasLoopBack}
-            highlightLinkedContent={() => {
-              this.highlightLinkedContent(
-                content.params.nextContentId,
-                id
-              );
-            }}
-          >
-            { label }
-          </Content>
-        );
-        drawAboveLine = true;
-      }
-
-      const isLoop = (parentIsBranching && !drawAboveLine && id > -1);
-      const nodeWidth = (content && !isLoop? (this.props.nodeSize.width / 2) : 21); // Half width actually...
-      const nodeCenter = position.x + nodeWidth;
-
-      distanceYFactor -= parentIsBranching ? 4.5 : 2; // 2 = height factor of Draggable
-      const aboveLineHeight = this.props.nodeSize.spacing.y * distanceYFactor; // *3.5 = enough room for DZ
-
-      // Add vertical line above (except for top node)
-      if (content && id !== 0 && drawAboveLine) {
-        const compensation = (parentIsBranching ? 3 : 0);
-        nodes.push(
-          <div key={ id + '-vabove' } className={ 'vertical-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: nodeCenter + 'px',
-            top: (position.y - aboveLineHeight + compensation) + 'px',
-            height: (aboveLineHeight - compensation - 3) + 'px'
-          } }/>
-        );
-      }
-
-      // Extra lines for BQ
-      if (!hasBeenDrawn &&
-          contentIsBranching &&
-          content.params.type.params.branchingQuestion &&
-          content.params.type.params.branchingQuestion.alternatives &&
-          content.params.type.params.branchingQuestion.alternatives.length > 1) {
-        // Add vertical line below
-        nodes.push(
-          <div key={ id + '-vbelow' } className={ 'vertical-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: nodeCenter + 'px',
-            top: (position.y + this.props.nodeSize.height) + 'px',
-            height: (this.props.nodeSize.spacing.y / 2) + 'px'
-          } }/>
-        );
-
-        // Add horizontal line below
-        nodes.push(
-          <div key={ id + '-hbelow' } className={ 'horizontal-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: subtree.firstAlternativeX + 'px',
-            top: (position.y + this.props.nodeSize.height + (this.props.nodeSize.spacing.y / 2)) + 'px',
-            width: (subtree.dX + 2) + 'px'
-          } }/>
-        );
-      }
-
-      if (parentIsBranching) {
-        const alternatives = this.state.content[parent].params.type.params.branchingQuestion.alternatives;
-
-        // Offset for centering alternatives below BQ node if their total width < node width
-        const alternativesEmpty = alternatives.filter((alt,index) => {
-          if (alt.nextContentId === undefined) {
-            return true; // Avoid crashing
-          }
-          const isRenderedInOtherTree = alt.nextContentId === -1 ? true
-            : renderedNodes.indexOf(alt.nextContentId) > -1;
-
-          let isRenderedAsChild = false;
-          // Check if node is rendered as child if we're on the corresponding index
-          if (num >= index) {
-            isRenderedAsChild = nodes.some(node => {
-              return node.key === alt.nextContentId.toString();
-            });
-          }
-          const isRenderedAsPreviousAlt = branch.indexOf(alt.nextContentId) !== index;
-
-          let isEmpty = num >= index
-            ? isRenderedInOtherTree && !isRenderedAsChild
-            : isRenderedInOtherTree;
-
-          isEmpty = isEmpty || (!isRenderedAsChild && isRenderedAsPreviousAlt);
-
-          return alt.nextContentId < 0 || isEmpty;
-        }).length;
-        const width = alternativesEmpty * this.state.dzSpecs.width +
-          (alternatives.length - alternativesEmpty) * this.props.nodeSize.width +
-          (alternatives.length - 1) * this.props.nodeSize.spacing.x;
-        const alternativesOffsetX = (this.props.nodeSize.width > width) ? ((this.props.nodeSize.width - width) / 2) : 0;
-
-        // Remember position of first alternative for rendering parent node
-        if (num === 0) {
-          firstAlternativeX = alternativesOffsetX + nodeCenter;
-        }
-
-        // Add vertical line above alternative ball
-        nodes.push(
-          <div key={ parent + '-vabovebs-' + num } className={ 'vertical-line' + (this.props.highlight !== null ? ' fade' : '') } style={ {
-            left: alternativesOffsetX + nodeCenter + 'px',
-            top: ((position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * (branch.length > 1 ? 2 : 2.5))) + (branch.length > 1 ? 3 : 1)) + 'px',
-            height: ((this.props.nodeSize.spacing.y * (branch.length > 1 ? 0.375 : 1)) - (branch.length > 1 ? 1 : 1)) + 'px'
-          } }/>
-        );
-
-        const key = parent + '-abox-' + num;
-
-        const alternative = alternatives[num];
-        const hasCustomEndScreen = this.hasCustomEndScreen(alternative);
-
-        let alternativeBallClasses = 'alternative-ball';
-        let hasLoopBack = false;
-        if (!drawAboveLine) {
-          if (id > -1) {
-            // Loop to existing node
-            alternativeBallClasses += ' loop';
-            hasLoopBack = true;
-          }
-          else {
-            // Default or custom end scenario
-            alternativeBallClasses += hasCustomEndScreen
-              ? ' endscreenCustom'
-              : ' endscreen';
-          }
-        }
-
-        // Do not highlight custom end scenarios
-        const highlightingDefaultEndings = this.props.highlight === -1;
-        const highlightingLink = this.props.highlight >= 0
-          && this.props.onlyThisBall !== null;
-        let fadeOut = false;
-        if (highlightingDefaultEndings) {
-          // Fade out if we have a custom ending or no ending
-          fadeOut = hasCustomEndScreen || id !== -1;
-        }
-        else if (highlightingLink) {
-          const isLinkedHighlight = this.props.onlyThisBall === key;
-          fadeOut = !isLinkedHighlight;
-        }
-
-        if (fadeOut) {
-          if (this.props.onlyThisBall === null || this.props.onlyThisBall !== key) {
-            alternativeBallClasses += ' fade';
-          }
-        }
-
-        // Add alternatives ball
-        const alternativeText = alternatives[num].text;
-        nodes.push(
-          <div key={ key }
-            className={ alternativeBallClasses }
-            aria-label={ /* TODO: l10n */ 'Alternative ' + (num + 1) }
-            onDoubleClick={() => {
-              this.handleContentEdit(parent);
-            }}
-            style={ {
-              left: (alternativesOffsetX + nodeCenter - (this.props.nodeSize.spacing.y * 0.75) - 1) + 'px',
-              top: (position.y - aboveLineHeight - (this.props.nodeSize.spacing.y * 1.5)) + 'px'
-            } }>A{ num + 1 }
-            {
-              hasLoopBack &&
-              <div
-                className='loop-back'
-                onClick={() => this.handleBallTouch(hasBeenDrawn ? id : -1, key)}
-              />
-            }
-            <div className="dark-tooltip">
-              <div className="dark-text-wrap">{ !alternativeText ? /* TODO: l10n */ 'Alternative ' + (num + 1) : Content.stripHTML(alternativeText) }</div>
-            </div>
-          </div>
-        );
-
-        // Add dropzone under empty BQ alternative if not of BQ being moved
-        if (this.state.placing !== null && (!content || hasLoopBack) && (!this.isDropzoneDisabled(parent) || this.isOuterNode(this.state.placing, parent) || !isBranching(this.state.content[this.state.placing]))) {
-          nodes.push(this.renderDropzone(-1, {
-            x: alternativesOffsetX + nodeCenter - (this.state.dzSpecs.width / 2),
-            y: position.y - this.state.dzSpecs.height - ((aboveLineHeight - this.state.dzSpecs.height) / 2) // for fixed tree
-            // y: position.y - 42 + 2 * this.props.nodeSize.spacing.y // for expandable tree
-          }, parent, num));
-        }
-      }
-
-      // Add dropzones when placing, except for below the one being moved and for end scenarios
-      if (!hasBeenDrawn && this.state.placing !== null && this.state.placing !== id && id >= 0) {
-        const dzDistance = ((aboveLineHeight - this.state.dzSpecs.height) / 2);
-
-        // Add dropzone above
-        if (content && this.state.placing !== parent && (!this.isDropzoneDisabled(id) || this.isOuterNode(this.state.placing, id))) {
-          nodes.push(this.renderDropzone(id, {
-            x: nodeCenter - (this.state.dzSpecs.width / 2),
-            y: position.y - this.state.dzSpecs.height - dzDistance // for fixed tree
-            // y: position.y - 42 - dzDistance - ((id === 0) ? (42 / 2) : 0) // for expandable tree
-          }, parentIsBranching ? parent : undefined, parentIsBranching ? num : 0, parentIsBranching));
-        }
-
-        // Add dropzone below if there's no subtree (or BQ implicitly with no alternatives)
-        if (content && !isBranching(content) && (!subtree || !subtree.nodes.length) && !this.isDropzoneDisabled(id)) {
-          nodes.push(this.renderDropzone(id, {
-            x: nodeCenter - (this.state.dzSpecs.width / 2),
-            y: position.y + (this.props.nodeSize.spacing.y * 2) + dzDistance // for fixed tree
-            // y: position.y + (this.props.nodeSize.spacing.y * 2) + dzDistance + ((this.state.placing === parent) ? (this.state.dzSpecs.height / 2) : 0) // for expandable tree
-          }, id, parentIsBranching ? num + 1 : 1));
-        }
-      }
-
-      // Increase same level offset + offset required by subtree
-      const elementWidth = (content ? (parentIsBranching && !drawAboveLine && id > -1 ? this.state.dzSpecs.width : this.props.nodeSize.width) : this.state.dzSpecs.width);
-      x += (subtreeWidth >= this.props.nodeSize.width ? subtreeWidth : elementWidth);
-
-      if (subtree) {
-        // Merge our trees
-        nodes = nodes.concat(subtree.nodes);
-
-        if (subtree.y > bigY) {
-          bigY = subtree.y;
-        }
-      }
-
-      if (firstX === undefined) {
-        firstX = position.x + nodeWidth;
-      }
-      lastX = position.x + nodeWidth;
-    });
-
-    this.renderedNodes = renderedNodes;
-
-    return {
-      nodes: nodes,
-      x: x,
-      y: bigY,
-      dX: (firstX !== undefined ? lastX - firstX : 0), // Width of this subtree level only (used for pretty trees)
-      firstAlternativeX: firstAlternativeX
-    };
-  }
-
   /**
    * Check if content has feedback.
+   * TODO: Reuse merge with <Tree>
+   *
    * @param {object} input Content or alternative.
    * @return {boolean} True, if there's some feedback item given, else false.
    */
@@ -1053,6 +646,7 @@ export default class Canvas extends React.Component {
 
   /**
    * Check if input has an end screen, could be default or custom.
+   *
    * @param {object} input Content or alternative.
    * @return {boolean} True, if input has an end screen, else false.
    */
@@ -1068,6 +662,7 @@ export default class Canvas extends React.Component {
 
   /**
    * Check if input has a custom end screen.
+   *
    * @param {object} input Content or alternative.
    * @return {boolean} True, if input has a custom end screen, else false.
    */
@@ -1081,20 +676,9 @@ export default class Canvas extends React.Component {
     return this.hasEndScreen(input) && this.hasFeedback(input);
   }
 
-  handleBallTouch = (id, onlyThisBall) => {
-    if (id > -1) {
-      this.props.onHighlight(id, onlyThisBall);
-    }
-  }
-
-  highlightLinkedContent = (nextContentId, currentContentId) => {
-    if (nextContentId > -1 && currentContentId > -1) {
-      this.props.onHighlight(nextContentId, currentContentId);
-    }
-  };
-
   /**
    * Remove an info node. Not intended for branching questions.
+   *
    * @param {object[]} content Content nodes.
    * @param {number} deleteId Id of node to be deleted.
    */
@@ -1119,19 +703,21 @@ export default class Canvas extends React.Component {
 
     // Adjust nextContentIds to account for removed node
     this.setNodeOffset(content, deleteId, -1);
-    this.renderedNodes = this.renderedNodes
+    this.tree.processed = this.tree.processed
       .map(nodeId => (nodeId > deleteId) ? nodeId - 1  : nodeId);
 
     // Remove node from data structure
     content.splice(deleteId, 1);
-    this.renderedNodes = this.renderedNodes
+    this.tree.processed = this.tree.processed
       .filter(nodeId => nodeId !== deleteId);
+    // TODO: Isn't there a better way to do this?
 
     H5PEditor.removeChildren(deleteNode.formChildren);
   }
 
   /**
    * Splice a Branching Question.
+   *
    * @param {object[]} content Content with nodes.
    * @param {number} deleteId Id of BQ to be deleted.
    */
@@ -1153,6 +739,7 @@ export default class Canvas extends React.Component {
 
   /**
    * Replace next content ids.
+   *
    * @param {object[]} content Nodes.
    * @param {number} oldId Id to be replaced.
    * @param {number} newId Replacing id.
@@ -1172,7 +759,7 @@ export default class Canvas extends React.Component {
       nodesToCheck.forEach(node => {
         if (node.nextContentId === oldId) {
           if (options.keepLoops !== true &&
-              this.renderedNodes.indexOf(newId) <= this.renderedNodes.indexOf(index)) {
+              this.tree.processed.indexOf(newId) <= this.tree.processed.indexOf(index)) {
             node.nextContentId = -1;
           }
           else {
@@ -1185,6 +772,7 @@ export default class Canvas extends React.Component {
 
   /**
    * Add an offset to a node's next content ids.
+   *
    * @param {object[]} content Content with nodes.
    * @param {number} maxUntouchedId Highest id that will not be changed.
    * @param {number} offest Offset.
@@ -1209,6 +797,7 @@ export default class Canvas extends React.Component {
 
   /**
    * Remove a node.
+   *
    * @param {object[]} content Content with nodes.
    * @param {number} deleteId Id of node to be removed.
    */
@@ -1221,6 +810,9 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * TODO
+   */
   handleDelete = () => {
     // Set new parent for node
     this.setState(prevState => {
@@ -1340,7 +932,7 @@ export default class Canvas extends React.Component {
           this.removeNode(newState.content, prevState.deleting);
         }
 
-        this[`draggable-${prevState.deleting}`].dehighlight();
+        this.tree[`draggable-${prevState.deleting}`].dehighlight();
 
         if (this.props.inserting) {
           // Stop inserting
@@ -1386,9 +978,12 @@ export default class Canvas extends React.Component {
     content[nodeId2] = tmp;
   }
 
+  /**
+   * TODO
+   */
   handleCancel = () => {
-    if (this.state.deleting !== null && this[`draggable-${this.state.deleting}`]) {
-      this[`draggable-${this.state.deleting}`].dehighlight();
+    if (this.state.deleting !== null && this.tree[`draggable-${this.state.deleting}`]) {
+      this.tree[`draggable-${this.state.deleting}`].dehighlight();
     }
 
     // Cancel delete confirmation dialog
@@ -1425,18 +1020,21 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * React hook
+   */
   componentDidUpdate() {
     // Center the tree
-    if (this.props.center && this.tree && this['draggable-0']) {
-      // Center on 1st node
+    if (this.props.center && this.tree && this.tree.element && this.tree['draggable-0']) {
+      // Center on 1st node or the whole tree
       // TODO: Would it be cleaner if we stored the width in the state through a ref= callback?
       // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
       const treeWrapWidth = this.treewrap.getBoundingClientRect().width;
       if (treeWrapWidth !== 0) {
-        const center = (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
+        const center = this.props.centerWholeTree ? 0 : (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
         this.setState({
           panning: {
-            x: (center - (this['draggable-0'].props.position.x * this.props.scale)),
+            x: this.props.centerWholeTree ? treeWrapWidth * 0.05 : (center - (this.tree['draggable-0'].props.position.x * this.props.scale)),
             y: 0
           }
         }, this.props.onCanvasCentered);
@@ -1498,6 +1096,9 @@ export default class Canvas extends React.Component {
     ), this.countDefaultEndScenarios());
   }
 
+  /**
+   * TODO
+   */
   handleEditorDone = () => {
     // Update content state for Canvas (params are updated by reference)
     this.setState({
@@ -1506,6 +1107,9 @@ export default class Canvas extends React.Component {
     }, this.contentChanged);
   };
 
+  /**
+   * TODO
+   */
   handleEditorRemove = () => {
     this.setState(prevState => {
       return {
@@ -1536,10 +1140,13 @@ export default class Canvas extends React.Component {
     }).join('');
   }
 
+  /**
+   * TODO
+   */
   panningLimits = (position) => {
     // Limits, you have to have them
     const treewrapRect = this.treewrap.getBoundingClientRect();
-    const treeRect = this.tree.getBoundingClientRect();
+    const treeRect = this.tree.element.getBoundingClientRect();
 
     const padding = (this.props.scale * 64); // Allow exceeding by this much
 
@@ -1584,12 +1191,18 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * TODO
+   */
   handleMoved = (position) => {
     this.setState({
       panning: position
     });
   }
 
+  /**
+   * TODO
+   */
   handleStopped = (moved) => {
     if (!moved) {
       // Stop highlighting
@@ -1608,80 +1221,17 @@ export default class Canvas extends React.Component {
     }
   }
 
-  // For debugging
-  logNodes = caller => {
-    console.log('NODES', caller);
-    this.state.content.forEach((node, index) => {
-      const target = (isBranching(node)) ?
-        (node.params.type.params.branchingQuestion && node.params.type.params.branchingQuestion.alternatives ?
-          node.params.type.params.branchingQuestion.alternatives.map(alt => alt.nextContentId).join(' | ') :
-          -1) : node.params.nextContentId;
-      console.log(`${index} --> ${target}`);
-    });
-    console.log('==========');
-    console.log('d:', this.state.deleting, 'e:',this.state.editing, 'i:', this.state.inserting, 'p:', this.state.placing);
-    console.warn(this.state.content);
-  }
-
   /**
-   * Create list of dropzones that Draggable should not be droppable on.
-   *
-   * @param {number} id Id of draggable.
-   * @return {object[]} Ids of dropzones that are "disabled".
+   * TODO
    */
-  getDisabledDropzones = (id) => {
-    if (id < 0) {
-      return [];
-    }
-    // No BQ or info content shall be droppable on itself
-    let dropzonesDisabled = [id];
-
-    // No BQ shall be able to replace BQs
-    this.state.content.forEach((node, index) => {
-      if (isBranching(node) && isBranching(this.state.content[id])) {
-        dropzonesDisabled.push(index);
-      }
-    });
-
-    // BQs shall not be droppable on their children
-    if (isBranching(this.state.content[id])) {
-      dropzonesDisabled = dropzonesDisabled.concat(this.getChildrenIds(id));
-    }
-
-    return dropzonesDisabled.filter((node, index, nodes) => nodes.indexOf(node) === index);
-  }
-
-  /**
-   * Detect whether a dropzone is "disabled" for a draggable.
-   *
-   * @param {number} id Id of draggable to check for being disabled.
-   * @return {boolean} True, if dropzone is "disabled", else false.
-   */
-  isDropzoneDisabled = (id) => {
-    if (!this.dropzonesDisabled || id === undefined || id === null || id < 0) {
-      return false;
-    }
-
-    return this.dropzonesDisabled.indexOf(id) !== -1;
-  }
-
-  /**
-   * Test if node is not child of focus node and not focus node itself.
-   *
-   * @param {number} focusId Id of node to check against.
-   * @param {number} nodeId Id of node to test.
-   */
-  isOuterNode(focusId, nodeId) {
-    return this.getChildrenIds(focusId, true, true).indexOf(nodeId) === -1;
-  }
-
   handleNextContentChange = (params, newId, render = null) => {
     if (params.nextContentId > -1) {
       // Check that there's still a reference to the content that's not a loop
       let found = 0;
       for (let i = 0; i < this.state.content.length; i++) {
         const hasReference = hasNextContent(this.state.content[i], params.nextContentId, true);
-        const isLooping = this.renderedNodes.indexOf(params.nextContentId) < this.renderedNodes.indexOf(i);
+        const isLooping = this.tree.processed.indexOf(params.nextContentId) < this.tree.processed.indexOf(i);
+        // TODO: Not very React like...
 
         if (hasReference && !isLooping) {
           found += hasNextContent(this.state.content[i], params.nextContentId, true);
@@ -1692,7 +1242,8 @@ export default class Canvas extends React.Component {
         }
       }
 
-      if (found < 2 && this.renderedNodes.indexOf(params.nextContentId) > this.renderedNodes.indexOf(this.state.editing)) {
+      if (found < 2 && this.tree.processed.indexOf(params.nextContentId) > this.tree.processed.indexOf(this.state.editing)) {
+        // TODO: Not very React like... maybe a function for this instead?
         // Display delete dialog
         this.setState({
           setNextContentId: newId,
@@ -1716,6 +1267,9 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * TODO
+   */
   renderConfirmationDialogContent = () => {
     if (this.state.setNextContentId === -2 || this.state.setNextContentId !== null) {  // -2 = deleting entire alternative (handled by H5PEditor)
       const children = this.getChildrenTitles(this.state.deleting, null, this.state.setNextContentId);
@@ -1753,15 +1307,12 @@ export default class Canvas extends React.Component {
     }
   }
 
+  /**
+   * React hook
+   */
   render() {
+    // Use global context to keep track of all dropzone elements in the tree
     this.dropzones = [];
-    this.dropzonesDisabled = (this.state.placing !== null) ? this.getDisabledDropzones(this.state.placing) : [];
-
-    // Generate the tree
-    const tree = this.renderTree(0);
-
-    // Usful for debugging tree rendering
-    // this.logNodes('render');
 
     const interaction = this.state.content[this.state.editing];
 
@@ -1804,8 +1355,8 @@ export default class Canvas extends React.Component {
             ref={ element => this['draggable--1'] = element }
             width={ this.props.nodeSize.insertingWidth }
             selected={ this.state.placing === -1 }
-            onMove={ () => this.handleMove(-1) }
-            onDropped={ () => this.handleDropped(-1) }
+            onMove={ () => this.tree.handleMove(-1, this['draggable--1']) }
+            onDropped={ () => this.tree.handleDropped(-1, this['draggable--1']) }
             contentClass={ this.props.inserting.library.className }
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
@@ -1823,30 +1374,54 @@ export default class Canvas extends React.Component {
             onMoved={ this.handleMoved }
             onStopped={ this.handleStopped }
           >
-            <div
-              className="nodetree"
-              ref={ node => this.tree = node }
-              style={ {
-                width: tree.x + 'px',
-                height: tree.y + 'px',
-                transform: 'translate(' + this.state.panning.x + 'px,' + this.state.panning.y + 'px) scale(' + this.props.scale + ',' + this.props.scale + ')'
-              } }
-            >
-              { tree.nodes }
-            </div>
+            { !this.props.libraries &&
+              <div key={ 'loading' } className="loading">Loading…</div>
+            }
+            { this.props.libraries &&
+              <Tree
+                ref={ node => this.tree = node }
+                content={ this.state.content }
+                panning={ this.state.panning }
+                scale={ this.props.scale }
+                highlight={ this.props.highlight }
+                onlyThisBall={ this.props.onlyThisBall }
+                nodeSize={ this.props.nodeSize }
+                placing={ this.state.placing }
+                library={ this.state.library }
+                getLibrary={ library => this.getLibrary(library) }
+                dropzones={ this.dropzones }
+                onPlacing={ this.handlePlacing }
+                onDropped={ this.handleDropped }
+                onEdit={ this.handleContentEdit }
+                onCopy={ this.handleContentCopy }
+                onDelete={ this.handleContentDelete }
+                onHighlight={ this.props.onHighlight }
+                onDropzoneClick={ this.handleDropzoneClick }
+              />
+            }
           </Draggable>
-          { !tree.nodes.length &&
+          { !this.state.content.length &&
             <StartScreen
               handleClick={ this.props.onDropped }
               handleTutorialClick={ this.props.handleOpenTutorial }
             >
-              { this.renderDropzone(-9, {
-                x: 361.635,
-                y: 130
-              }) }
+              <Dropzone
+                key={ 'f---9/undefined-dz-0' }
+                ref={ element => { this.initialDropzone = element; this.dropzones.push(element); } }
+                nextContentId={ -9 }
+                parent={ undefined }
+                alternative={ 0 }
+                position={ {x: 361.635, y: 130} }
+                elementClass={ 'dropzone' + (!this.props.inserting ? ' disabled' : '') }
+                style={ {
+                  left: '361.635px',
+                  top: '130px'
+                } }
+                onClick={ () => this.handleDropzoneClick(-9, undefined, 0) }
+              />
             </StartScreen>
           }
-          { tree.nodes.length &&
+          { this.state.content.length &&
             <QuickInfoMenu
               fade={ this.props.highlight !== null }
               onTutorialOpen={ this.props.handleOpenTutorial }

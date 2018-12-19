@@ -89,10 +89,33 @@ const find = (arr, ev) => {
   }
 };
 
+/**
+ * Help find all nextContentId for a branching question
+ *
+ * @param {Object} content
+ * @return {number[]}
+ */
+const getBranchingChildren = (content) => {
+  if (!content.params.type || !content.params.type.params ||
+      !content.params.type.params.branchingQuestion ||
+      !content.params.type.params.branchingQuestion.alternatives ||
+      !content.params.type.params.branchingQuestion.alternatives.length) {
+    return; // No alternatives today
+  }
+
+  let children = [];
+  for (let i = 0; i < content.params.type.params.branchingQuestion.alternatives.length; i++) {
+    children.push(content.params.type.params.branchingQuestion.alternatives[i].nextContentId);
+  }
+
+  return children;
+};
+
 export {
   isBranching,
   getAlternativeName,
   getMachineName,
   hasNextContent,
   find,
+  getBranchingChildren
 };

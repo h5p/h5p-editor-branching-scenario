@@ -28,6 +28,7 @@ export default class Editor extends React.Component {
       onlyThisBall: null,
       scale: 1,
       center: true,
+      centerWholeTree: false, // Will center on the whole tree and not just the top node
       translate: null,
       scoringOption: null,
       fullscreen: false,
@@ -153,6 +154,7 @@ export default class Editor extends React.Component {
       const newState = {
         scale: scale || prevState.scale,
         center: options.center || prevState.center,
+        centerWholeTree: options.center || prevState.center,
         translate: options.translate || prevState.translate
       };
       return newState;
@@ -186,7 +188,8 @@ export default class Editor extends React.Component {
    */
   handleCanvasCentered = () => {
     this.setState({
-      center: false
+      center: false,
+      centerWholeTree: false
     });
   }
 
@@ -254,8 +257,8 @@ export default class Editor extends React.Component {
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
       this.treewrap = this.canvas.treewrap.element;
     }
-    if (!this.tree && this.canvas && this.canvas.tree) {
-      this.tree = this.canvas && this.canvas.tree;
+    if (!this.tree && this.canvas && this.canvas.tree && this.canvas.tree.element) {
+      this.tree = this.canvas && this.canvas.tree && this.canvas.tree.element;
     }
 
     return (
@@ -319,6 +322,7 @@ export default class Editor extends React.Component {
               onDropped={ this.handleInsertingDone }
               scale={ this.state.scale }
               center={ this.state.center }
+              centerWholeTree={ this.state.centerWholeTree }
               onCanvasCentered={ this.handleCanvasCentered }
               translate={ this.state.translate }
               onCanvasTranslated={ this.handleCanvasTranslated }
