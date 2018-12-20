@@ -14,6 +14,7 @@ import TabViewTutorial from './components/TabViewTutorial';
 import TabViewMetadata from './components/TabViewMetadata';
 import FullScreenDialog from "./components/dialogs/FullScreenDialog";
 import BlockInteractionOverlay from "./components/BlockInteractionOverlay";
+import Preview from "./components/preview/Preview";
 
 export default class Editor extends React.Component {
   constructor(props) {
@@ -41,18 +42,21 @@ export default class Editor extends React.Component {
           y: 17
         }
       },
-      zoomDisabled: !this.props.content || this.props.content.length === 0
+      zoomDisabled: !this.props.content || this.props.content.length === 0,
+      isShowingPreview: false,
+      hasLoadedLibraries: false,
     };
   }
 
   componentDidMount() {
     // We need to load libraries details before rendering the canvas or menu
-    window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesLoaded);
+    window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesFetched);
 
     // Add title field
     const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
     titleField.$item.find('input')[0].placeholder = 'Enter title here';
-    titleField.$item.appendTo(this.topbar);
+    const fullScreenButton = this.topbar.querySelector('.fullscreen-button');
+    titleField.$item.insertAfter(fullScreenButton);
 
     window.addEventListener('resize', this.handleWindowResize);
   }
@@ -74,11 +78,11 @@ export default class Editor extends React.Component {
     }
   };
 
-  handleLibrariesLoaded = (libraries) => {
-    let loadedLibraries = [];
+  handleLibrariesFetched = (libraries) => {
+    let fetchedLibraries = [];
     for (var i = 0; i < libraries.length; i++) {
       if (libraries[i].restricted !== true) {
-        loadedLibraries.push({
+        fetchedLibraries.push({
           title: libraries[i].title,
           name: libraries[i].uberName,
           className: libraries[i].name.replace('H5P.', '').toLocaleLowerCase()
@@ -87,9 +91,28 @@ export default class Editor extends React.Component {
     }
 
     this.setState({
-      libraries: loadedLibraries
+      libraries: fetchedLibraries
     });
-  }
+
+    this.handleLibrariesLoaded(libraries);
+  };
+
+  handleLibrariesLoaded = (libraries) => {
+    let librariesLoaded = 0;
+
+    libraries.forEach(library => {
+      window.H5PEditor.loadLibrary(library.uberName, () => {
+        librariesLoaded += 1;
+
+        // All libraries loaded
+        if (librariesLoaded >= libraries.length) {
+          this.setState({
+            hasLoadedLibraries: true,
+          });
+        }
+      });
+    });
+  };
 
   handleMouseDown = (event) => {
     this.setState(prevState => {
@@ -252,6 +275,14 @@ export default class Editor extends React.Component {
     }
   }
 
+  togglePreview = () => {
+    this.setState((prevState) => {
+      return {
+        isShowingPreview: !prevState.isShowingPreview,
+      };
+    });
+  };
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -282,6 +313,20 @@ export default class Editor extends React.Component {
               onClick={ this.handleToggleFullscreen }
             />
           }
+          {
+            this.state.isShowingPreview ?
+              <button
+                className='preview-button'
+                title='Back to edit'
+                onClick={this.togglePreview}
+              >Back to edit</button>
+              :
+              <button
+                className='preview-button'
+                title='Preview'
+                onClick={this.togglePreview}
+              >Preview</button>
+          }
           { this.state.fullscreen &&
             <div
               className="proceed-button"
@@ -292,9 +337,11 @@ export default class Editor extends React.Component {
             >Proceed to Save{/* TODO: l10n */}</div>
           }
         </div>
-        <Tabs className="tab-view-wrapper"
+        <Tabs
+          className="tab-view-wrapper"
           activeIndex={ this.state.activeIndex }
           onChange={ key => this.setActiveIndex(key) }
+          isHidden={ this.state.isShowingPreview }
         >
           <Tab
             onMouseUp={ this.handleMouseUp }
@@ -362,6 +409,13 @@ export default class Editor extends React.Component {
             />
           </Tab>
         </Tabs>
+        {
+          this.state.isShowingPreview &&
+          <Preview
+            params={this.props.parent.params}
+            hasLoadedLibraries={this.state.hasLoadedLibraries}
+          />
+        }
       </div>
     );
   }
