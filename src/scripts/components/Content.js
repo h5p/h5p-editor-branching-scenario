@@ -259,6 +259,7 @@ export default class Content extends React.Component {
           <SubMenu
             isContent={ this.props.children !== 'Branching Question' }
             onEdit={ () => this.handleSubMenuAction('onEdit') }
+            onPreview={ () => this.handleSubMenuAction('onPreview') }
             onCopy={ () => this.handleSubMenuAction('onCopy') }
             onDelete={ this.props.onDelete }
           />

@@ -275,10 +275,11 @@ export default class Editor extends React.Component {
     }
   }
 
-  togglePreview = () => {
+  togglePreview = (id) => {
     this.setState((prevState) => {
       return {
         isShowingPreview: !prevState.isShowingPreview,
+        previewId: id >= 0 ? id : null,
       };
     });
   };
@@ -292,8 +293,13 @@ export default class Editor extends React.Component {
       this.tree = this.canvas && this.canvas.tree && this.canvas.tree.element;
     }
 
+    let wrapperClasses = 'bswrapper';
+    if (this.state.isShowingPreview) {
+      wrapperClasses += ' preview';
+    }
+
     return (
-      <div className="bswrapper">
+      <div className={wrapperClasses}>
         {
           this.state.showFullScreenDialog &&
           <BlockInteractionOverlay>
@@ -316,15 +322,15 @@ export default class Editor extends React.Component {
           {
             this.state.isShowingPreview ?
               <button
-                className='preview-button'
+                className='preview-button back'
                 title='Back to edit'
-                onClick={this.togglePreview}
+                onClick={() => this.togglePreview()}
               >Back to edit</button>
               :
               <button
                 className='preview-button'
                 title='Preview'
-                onClick={this.togglePreview}
+                onClick={() => this.togglePreview()}
               >Preview</button>
           }
           { this.state.fullscreen &&
@@ -363,6 +369,7 @@ export default class Editor extends React.Component {
               handleOpenTutorial={ this.handleOpenTutorial }
               onOpenEditor={ this.handleOpenEditor }
               onContentChanged={ this.handleContentChanged }
+              onContentPreview={ this.togglePreview }
               onHighlight={ this.handleHighlight }
               highlight={ this.state.highlight }
               onlyThisBall={ this.state.onlyThisBall }
@@ -414,6 +421,8 @@ export default class Editor extends React.Component {
           <Preview
             params={this.props.parent.params}
             hasLoadedLibraries={this.state.hasLoadedLibraries}
+            previewId={this.state.previewId}
+            goToEditor={() => this.togglePreview()}
           />
         }
       </div>

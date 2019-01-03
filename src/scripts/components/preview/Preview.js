@@ -3,18 +3,15 @@ import './Preview.scss';
 import PropTypes from "prop-types";
 import loading from '../../../assets/loading.gif';
 import PreviewSelector from "./PreviewSelector";
+import EmptyPreview from "./EmptyPreview";
 
 export default class Preview extends React.Component {
   constructor(props) {
     super(props);
-
     this.previewContainer = React.createRef();
-
-    // TODO: Handle props that set which chapter preview should start from
 
     this.state = {
       isInitialized: false,
-      currentContentId: null,
     };
   }
 
@@ -31,16 +28,19 @@ export default class Preview extends React.Component {
   }
 
   initializeInstance() {
-    this.recreateInstance();
+    // Do not initialize empty branching scenarios
+    if (this.props.params.branchingScenario.content.length <= 0) {
+      return;
+    }
 
-    this.setState({
-      isInitialized: true,
-    });
-  }
-
-  recreateInstance() {
     // Remove existing instance
-    // this.previewContainer.current.removeChild(this.previewContainer.firstChild);
+    this.setState({
+      isInitialized: false,
+    });
+    const previewContainer = this.previewContainer.current;
+    if (previewContainer.firstChild) {
+      previewContainer.removeChild(previewContainer.firstChild);
+    }
 
     const branchingScenario = Object.keys(H5PEditor.libraryLoaded)
       .filter((library) => {
@@ -53,13 +53,22 @@ export default class Preview extends React.Component {
         params: this.props.params
       },
       H5PEditor.contentId,
-      H5P.jQuery(this.previewContainer.current)
+      H5P.jQuery(previewContainer)
     );
+    this.setState({
+      isInitialized: true,
+    });
   }
 
   render() {
-    if (this.state.isInitialized && this.props.params.branchingScenario.content.length <= 0) {
-      return (<div>Your branching scenario is empty... fix it..</div>);
+    if (this.props.params.branchingScenario.content.length <= 0) {
+      return (
+        <div className='preview-container'>
+          <EmptyPreview
+            goToEditor={this.props.goToEditor}
+          />
+        </div>
+      );
     }
 
     return (
@@ -73,7 +82,7 @@ export default class Preview extends React.Component {
                 isDisabled={!this.state.isInitialized}
                 previewInstance={this.preview}
                 params={this.props.params}
-                currentContentId={this.state.currentContentId}
+                initialContentId={this.props.previewId}
               />
             }
           </div>
@@ -96,4 +105,6 @@ export default class Preview extends React.Component {
 Preview.propTypes = {
   params: PropTypes.object,
   hasLoadedLibraries: PropTypes.bool,
+  previewId: PropTypes.number,
+  goToEditor: PropTypes.func,
 };

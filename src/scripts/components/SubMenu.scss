@@ -49,8 +49,12 @@
     content: $icon-edit;
   }
 
+  li.preview-content:before {
+    content: $icon-preview;
+  }
+
   li.copy-content:before {
-    font-family: bs;
+    font-family: 'bs-editor';
     content: $icon-copy;
   }
 

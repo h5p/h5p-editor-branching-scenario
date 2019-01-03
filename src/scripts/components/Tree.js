@@ -382,6 +382,7 @@ export default class Tree extends React.Component {
         onDropped={ () => this.handleDropped(branch.id, this['draggable-' + branch.id]) }
         contentClass={ this.getClassName(branch.id) }
         onEdit={ () => this.props.onEdit(branch.id) }
+        onPreview={ () => this.props.onPreview(branch.id) }
         onCopy={ () => this.props.onCopy(branch.id) }
         onDelete={ () => this.props.onDelete(branch.id) }
         disabled={ this.isPlacing() ? !isDropzone : contentIsBranching }

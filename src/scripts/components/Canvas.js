@@ -1393,6 +1393,7 @@ export default class Canvas extends React.Component {
                 onPlacing={ this.handlePlacing }
                 onDropped={ this.handleDropped }
                 onEdit={ this.handleContentEdit }
+                onPreview={ this.props.onContentPreview }
                 onCopy={ this.handleContentCopy }
                 onDelete={ this.handleContentDelete }
                 onHighlight={ this.props.onHighlight }
@@ -1451,5 +1452,6 @@ Canvas.propTypes = {
   center: PropTypes.bool,
   onCanvasCentered: PropTypes.func,
   translate: PropTypes.object,
-  onCanvasTranslated: PropTypes.func
+  onCanvasTranslated: PropTypes.func,
+  onContentPreview: PropTypes.func,
 };

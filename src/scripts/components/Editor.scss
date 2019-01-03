@@ -8,6 +8,13 @@
   font-family: 'H5PRoboto';
   font-size: 1rem;
 }
+
+.bswrapper.preview {
+  .topbar {
+    background: $bq-background;
+  }
+}
+
 .editor-overlay-content,
 #translate-interface > .tab-view-white-box,
 #metadata .h5p-metadata-wrapper {
@@ -38,9 +45,9 @@
     }
 
     input.h5peditor-text {
-      background: #000;
+      background: rgba(0, 0, 0, 0.5);
       padding: 0.53em 0.5em;
-      color: $main-grey;
+      color: white;
       border: solid 1px $col6;
       margin: 0.47em 0em 0.47em 3.2em;
       min-width: 15.3em;
@@ -114,6 +121,18 @@
   padding: 0.47em 0.75em;
   margin-right: 0.4em;
   margin-left: 0.4em;
+}
+
+.preview-button:before {
+  font-family: "Material Icons";
+  content: $icon-preview;
+  font-size: 1.1em;
+  padding-right: 0.75em;
+  vertical-align: text-bottom;
+}
+
+.preview-button.back:before {
+  content: $icon-edit;
 }
 
 .bswrapper {

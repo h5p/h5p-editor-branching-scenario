@@ -1,6 +1,7 @@
 import React from 'react';
-import './Preview.scss';
 import PropTypes from "prop-types";
+import Content from "../Content";
+import './PreviewSelector.scss';
 
 export default class PreviewSelector extends React.Component {
   static defaultValue = 'start';
@@ -8,8 +9,16 @@ export default class PreviewSelector extends React.Component {
   constructor(props) {
     super(props);
 
+    const initialValue = props.initialContentId !== null
+      ? props.initialContentId
+      : PreviewSelector.defaultValue;
+
+    if (initialValue !== PreviewSelector.defaultValue) {
+      this.navigateToContent(initialValue);
+    }
+
     this.state = {
-      value: PreviewSelector.defaultValue,
+      value: initialValue,
     };
 
     props.previewInstance.on('navigated', e => {
@@ -31,28 +40,32 @@ export default class PreviewSelector extends React.Component {
     });
   }
 
-  setContentId = (e) => {
+  setContentId = (id) => {
     // Restart
-    if (e.target.value === PreviewSelector.defaultValue) {
+    if (id === PreviewSelector.defaultValue) {
       this.props.previewInstance.trigger('restarted');
       return;
     }
 
-    const contentId = e.target.value;
-    this.props.previewInstance.trigger('navigated', {
-      nextContentId: contentId,
+    this.setState({
+      value: id,
     });
 
-    this.setState({
-      value: e.target.value,
-    });
+    this.navigateToContent(id);
   };
+
+  navigateToContent(id) {
+    this.props.previewInstance.trigger('navigated', {
+      nextContentId: id,
+    });
+  }
 
   render() {
     return (
       <select
+        className='scene-selector'
         value={this.state.value}
-        onChange={this.setContentId}
+        onChange={e => this.setContentId(e.target.value)}
         disabled={this.props.isDisabled}
       >
         <option value={PreviewSelector.defaultValue}>Preview from the beginning</option>
@@ -62,7 +75,7 @@ export default class PreviewSelector extends React.Component {
               <option
                 key={content.contentId}
                 value={content.contentId}
-              >{content.type.metadata.title}</option>
+              >{Content.stripHTML(content.type.metadata.title)}</option>
             );
           })
         }
@@ -75,4 +88,5 @@ PreviewSelector.propTypes = {
   previewInstance: PropTypes.object,
   params: PropTypes.object,
   isDisabled: PropTypes.bool,
+  initialContentId: PropTypes.number,
 };

@@ -1,0 +1,27 @@
+@import '../../../styles/components/icons';
+@import '../../../styles/base/colours';
+
+.h5p-branchingscenario-editor {
+
+  .empty-preview-wrapper {
+    text-align: center;
+    padding: 2em 1em;
+  }
+
+  .empty-preview-icon:before {
+    font-family: 'Material Icons';
+    content: $icon-no-preview;
+    font-size: 11em;
+    color: #e9ebee;
+  }
+
+  .empty-preview-title {
+    font-size: 2.5em;
+    margin-bottom: 0.3em;
+    color: $accent-col;
+  }
+
+  .editor-link {
+    text-decoration: underline;
+  }
+}
