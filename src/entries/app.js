@@ -42,7 +42,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
       contentId: -1
     };
 
-    this.params.scoringOption = 'no-score';
+    this.params.scoringOption = this.params.scoringOption || 'no-score';
 
     // Sanitize missing nextContentId; can never be undefined
     this.params.content.forEach(item => {
