@@ -1,0 +1,18 @@
+@import '../../../styles/base/colours';
+
+.h5p-branchingscenario-editor {
+  .loading-wrapper {
+    text-align: center;
+    padding: 2em;
+  }
+
+  .loading-graphics {
+    width: 9em;
+  }
+
+  .loading-text {
+    font-size: 2em;
+    color: $accent-col;
+    padding: 1em;
+  }
+}

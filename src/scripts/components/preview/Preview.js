@@ -1,9 +1,10 @@
 import React from 'react';
 import './Preview.scss';
 import PropTypes from "prop-types";
-import loading from '../../../assets/loading.gif';
 import PreviewSelector from "./PreviewSelector";
 import EmptyPreview from "./EmptyPreview";
+import LoadingPreview from "./LoadingPreview";
+import PreviewInfoPopup from "./PreviewInfoPopup";
 
 export default class Preview extends React.Component {
   constructor(props) {
@@ -64,39 +65,36 @@ export default class Preview extends React.Component {
     if (this.props.params.branchingScenario.content.length <= 0) {
       return (
         <div className='preview-container'>
-          <EmptyPreview
-            goToEditor={this.props.goToEditor}
-          />
+          <EmptyPreview goToEditor={this.props.goToEditor}/>
+        </div>
+      );
+    }
+
+    if (!this.state.isInitialized) {
+      return (
+        <div className='preview-container'>
+          <LoadingPreview/>
+          <div className='preview-wrapper'>
+            <div ref={this.previewContainer}/>
+          </div>
         </div>
       );
     }
 
     return (
       <div className='preview-container'>
-        <div className='preview-scene-selection-wrapper'>
-          <div className='preview-introduction'>Preview Branching Questions set from:</div>
-          <div className='preview-selector'>
-            {
-              this.state.isInitialized &&
-              <PreviewSelector
-                isDisabled={!this.state.isInitialized}
-                previewInstance={this.preview}
-                params={this.props.params}
-                initialContentId={this.props.previewId}
-              />
-            }
-          </div>
-        </div>
-        {
-          !this.state.isInitialized &&
-          <div className='loading-wrapper'>
-            <img className='loading-graphics' src={loading} alt='loading...' />
-            <div className='loading-text'>Preview is loading...</div>
-          </div>
-        }
+        <PreviewSelector
+          previewInstance={this.preview}
+          params={this.props.params}
+          initialContentId={this.props.previewId}
+        />
         <div className='preview-wrapper'>
           <div ref={this.previewContainer}/>
         </div>
+        {
+          this.props.isShowingInfoPopup &&
+          <PreviewInfoPopup hideInfoPopup={this.props.hideInfoPopup}/>
+        }
       </div>
     );
   }
@@ -105,6 +103,8 @@ export default class Preview extends React.Component {
 Preview.propTypes = {
   params: PropTypes.object,
   hasLoadedLibraries: PropTypes.bool,
+  isShowingInfoPopup: PropTypes.bool,
   previewId: PropTypes.number,
   goToEditor: PropTypes.func,
+  hideInfoPopup: PropTypes.func,
 };

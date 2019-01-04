@@ -1,5 +1,3 @@
-@import '../../../styles/base/colours';
-
 .preview-wrapper {
   max-width: 60em;
   margin: auto;
@@ -12,29 +10,4 @@
   max-height: calc(100% - 3.15em);
   background: #fff;
   min-height: 40em;
-}
-
-.loading-wrapper {
-  text-align: center;
-  padding: 2em;
-}
-
-.loading-graphics {
-  width: 9em;
-}
-
-.loading-text {
-  font-size: 2em;
-  color: $accent-col;
-  padding: 1em;
-}
-
-.preview-scene-selection-wrapper {
-  text-align: center;
-  padding: 2em;
-  font-size: 1.3em;
-}
-
-.h5p-branching-full-screen {
-  display: none;
 }

@@ -62,24 +62,29 @@ export default class PreviewSelector extends React.Component {
 
   render() {
     return (
-      <select
-        className='scene-selector'
-        value={this.state.value}
-        onChange={e => this.setContentId(e.target.value)}
-        disabled={this.props.isDisabled}
-      >
-        <option value={PreviewSelector.defaultValue}>Preview from the beginning</option>
-        {
-          this.props.params.branchingScenario.content.map((content) => {
-            return (
-              <option
-                key={content.contentId}
-                value={content.contentId}
-              >{Content.stripHTML(content.type.metadata.title)}</option>
-            );
-          })
-        }
-      </select>
+      <div className='preview-scene-selection-wrapper'>
+        <div className='preview-introduction'>Preview Branching Questions set from:</div>
+        <div className='preview-selector'>
+          <select
+            className='scene-selector'
+            value={this.state.value}
+            onChange={e => this.setContentId(e.target.value)}
+            disabled={this.props.isDisabled}
+          >
+            <option value={PreviewSelector.defaultValue}>Preview from the beginning</option>
+            {
+              this.props.params.branchingScenario.content.map((content) => {
+                return (
+                  <option
+                    key={content.contentId}
+                    value={content.contentId}
+                  >{Content.stripHTML(content.type.metadata.title)}</option>
+                );
+              })
+            }
+          </select>
+        </div>
+      </div>
     );
   }
 }

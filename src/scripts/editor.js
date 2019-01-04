@@ -45,6 +45,7 @@ export default class Editor extends React.Component {
       zoomDisabled: !this.props.content || this.props.content.length === 0,
       isShowingPreview: false,
       hasLoadedLibraries: false,
+      isShowingPreviewInfoPopup: true,
     };
   }
 
@@ -284,6 +285,12 @@ export default class Editor extends React.Component {
     });
   };
 
+  hidePreviewInfoPopup = () => {
+    this.setState({
+      isShowingPreviewInfoPopup: false,
+    });
+  };
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -423,6 +430,8 @@ export default class Editor extends React.Component {
             hasLoadedLibraries={this.state.hasLoadedLibraries}
             previewId={this.state.previewId}
             goToEditor={() => this.togglePreview()}
+            isShowingInfoPopup={this.state.isShowingPreviewInfoPopup}
+            hideInfoPopup={this.hidePreviewInfoPopup}
           />
         }
       </div>
