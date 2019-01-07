@@ -1398,6 +1398,9 @@ export default class Canvas extends React.Component {
                 onDelete={ this.handleContentDelete }
                 onHighlight={ this.props.onHighlight }
                 onDropzoneClick={ this.handleDropzoneClick }
+                draggableMouseOver={this.props.draggableMouseOver}
+                draggableMouseOut={this.props.draggableMouseOut}
+                draggableHovered={this.props.draggableHovered}
               />
             }
           </Draggable>
@@ -1454,4 +1457,7 @@ Canvas.propTypes = {
   translate: PropTypes.object,
   onCanvasTranslated: PropTypes.func,
   onContentPreview: PropTypes.func,
+  draggableMouseOver: PropTypes.func,
+  draggableMouseOut: PropTypes.func,
+  draggableHovered: PropTypes.number,
 };

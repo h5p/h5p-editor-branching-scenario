@@ -46,6 +46,7 @@ export default class Editor extends React.Component {
       isShowingPreview: false,
       hasLoadedLibraries: false,
       isShowingPreviewInfoPopup: true,
+      draggableHovered: null,
     };
   }
 
@@ -281,6 +282,7 @@ export default class Editor extends React.Component {
       return {
         isShowingPreview: !prevState.isShowingPreview,
         previewId: id >= 0 ? id : null,
+        draggableHovered: null,
       };
     });
   };
@@ -288,6 +290,18 @@ export default class Editor extends React.Component {
   hidePreviewInfoPopup = () => {
     this.setState({
       isShowingPreviewInfoPopup: false,
+    });
+  };
+
+  draggableMouseOver = (draggableId) => {
+    this.setState({
+      draggableHovered: draggableId,
+    });
+  };
+
+  draggableMouseOut = () => {
+    this.setState({
+      draggableHovered: null,
     });
   };
 
@@ -390,6 +404,9 @@ export default class Editor extends React.Component {
               scoringOption={ this.state.scoringOption }
               nodeSize={ this.state.nodeSize }
               insertingId={ this.state.insertingId }
+              draggableMouseOver={this.draggableMouseOver}
+              draggableMouseOut={this.draggableMouseOut}
+              draggableHovered={this.state.draggableHovered}
             />
             <Toolbar
               disabled={ this.state.zoomDisabled }

@@ -220,8 +220,14 @@ export default class Content extends React.Component {
       elementClass += ' not-disabled';
     }
 
+    if (this.props.draggableHovered !== null
+      && this.props.draggableHovered === this.props.id) {
+      elementClass += ' hovered';
+    }
+
     return (
       <Draggable
+        id={this.props.id}
         ref={ node => this.element = node }
         className={ elementClass }
         style={ {
@@ -233,6 +239,9 @@ export default class Content extends React.Component {
         scale={ this.props.inserting && moving ? 1 : this.props.scale }
         started={ this.props.inserting ? this.props.inserting : null }
         position={ position }
+        draggableMouseOver={this.props.draggableMouseOver}
+        draggableMouseOut={this.props.draggableMouseOut}
+        draggableHovered={this.props.draggableHovered}
         onStarted={ this.props.onPlacing }
         onMoved={ this.handleMoved }
         onStopped={ this.handleStopped }
@@ -285,5 +294,8 @@ Content.propTypes = {
   content: PropTypes.string,
   inserting: PropTypes.object,
   fade: PropTypes.bool,
-  scale: PropTypes.number
+  scale: PropTypes.number,
+  draggableMouseOver: PropTypes.func,
+  draggableMouseOut: PropTypes.func,
+  draggableHovered: PropTypes.number,
 };
