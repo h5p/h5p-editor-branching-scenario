@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from "prop-types";
-import Content from "../Content";
 import './PreviewSelector.scss';
+import {getAlternativeName} from "../../helpers/Library";
 
 export default class PreviewSelector extends React.Component {
   static defaultValue = 'start';
@@ -74,11 +74,14 @@ export default class PreviewSelector extends React.Component {
             <option value={PreviewSelector.defaultValue}>Preview from the beginning</option>
             {
               this.props.params.branchingScenario.content.map((content) => {
+                const alternativeName = getAlternativeName({
+                  params: content,
+                });
                 return (
                   <option
                     key={content.contentId}
                     value={content.contentId}
-                  >{Content.stripHTML(content.type.metadata.title)}</option>
+                  >{alternativeName}</option>
                 );
               })
             }

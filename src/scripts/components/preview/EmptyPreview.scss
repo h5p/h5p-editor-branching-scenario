@@ -16,9 +16,18 @@
   }
 
   .empty-preview-title {
-    font-size: 2.5em;
-    margin-bottom: 0.3em;
+    font-size: 2rem;
+    display: block;
+    font-weight: 300;
     color: $accent-col;
+    margin-bottom: 0.25em;
+  }
+
+  .empty-preview-description {
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+    display: block;
+    color: #626262;
   }
 
   .editor-link {

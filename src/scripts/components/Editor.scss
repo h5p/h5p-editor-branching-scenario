@@ -121,6 +121,15 @@
   padding: 0.47em 0.75em;
   margin-right: 0.4em;
   margin-left: 0.4em;
+  border-radius: 0.25em;
+}
+
+.preview-button:hover {
+  background: #121519;
+}
+
+.preview-button.back:hover {
+  background: #0d396c;
 }
 
 .preview-button:before {
@@ -129,6 +138,7 @@
   font-size: 1.1em;
   padding-right: 0.75em;
   vertical-align: text-bottom;
+  font-weight: normal;
 }
 
 .preview-button.back:before {

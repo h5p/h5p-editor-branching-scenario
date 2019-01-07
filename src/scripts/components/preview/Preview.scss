@@ -1,8 +1,19 @@
+.h5peditor-semi-fullscreen .preview-wrapper {
+  padding-bottom: 0;
+}
+
 .preview-wrapper {
-  max-width: 60em;
+  max-width: 50em;
   margin: auto;
   position: relative;
   overflow: hidden;
+  padding-bottom: 3em;
+
+  .h5p-branching-scenario {
+    .h5p-start-screen, .h5p-end-screen {
+      min-height: initial;
+    }
+  }
 }
 
 .preview-container {
