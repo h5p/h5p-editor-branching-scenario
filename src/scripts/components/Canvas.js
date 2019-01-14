@@ -177,7 +177,7 @@ export default class Canvas extends React.Component {
     this.setState({
       editing: id,
       placing: null
-    });
+    }, this.setIsEditing);
   }
 
   /**
@@ -585,7 +585,10 @@ export default class Canvas extends React.Component {
 
       props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
       return newState;
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   }
 
   /**
@@ -945,7 +948,10 @@ export default class Canvas extends React.Component {
       }
 
       return newState;
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   }
 
   /**
@@ -1012,7 +1018,7 @@ export default class Canvas extends React.Component {
       newState.inserting = null;
     }
 
-    this.setState(newState);
+    this.setState(newState, this.setIsEditing);
 
     if (this.props.inserting) {
       // Stop inserting
@@ -1097,6 +1103,13 @@ export default class Canvas extends React.Component {
   }
 
   /**
+   * Set isEditing state of parent
+   */
+  setIsEditing = () => {
+    this.props.onIsEditing(this.state.editing !== null);
+  }
+
+  /**
    * TODO
    */
   handleEditorDone = () => {
@@ -1104,7 +1117,10 @@ export default class Canvas extends React.Component {
     this.setState({
       editing: null,
       inserting: null
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   };
 
   /**
@@ -1119,7 +1135,10 @@ export default class Canvas extends React.Component {
         deleting: prevState.editing,
         dialog: 'delete'
       };
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   }
 
   /**
