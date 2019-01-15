@@ -1408,6 +1408,7 @@ export default class Canvas extends React.Component {
                 library={ this.state.library }
                 getLibrary={ library => this.getLibrary(library) }
                 dropzones={ this.dropzones }
+                scoringOption={ this.props.scoringOption }
                 onPlacing={ this.handlePlacing }
                 onDropped={ this.handleDropped }
                 onEdit={ this.handleContentEdit }

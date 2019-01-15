@@ -717,7 +717,7 @@ export default class Tree extends React.Component {
       (node.feedback.title && node.feedback.title.trim() !== '') ||
       node.feedback.subtitle ||
       node.feedback.image ||
-      node.feedback.endScreenScore !== undefined
+      (node.feedback.endScreenScore !== undefined && this.props.scoringOption === 'static-end-score')
     );
   }
 
