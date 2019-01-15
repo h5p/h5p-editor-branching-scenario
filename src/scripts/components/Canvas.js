@@ -386,13 +386,12 @@ export default class Canvas extends React.Component {
     // Fill up empty alternatives first before creating new one
     if (nextContentId > -1) {
       const alternatives = content.params.type.params.branchingQuestion.alternatives;
-      const pos = alternatives.map(alt => alt.nextContentId).indexOf(-1);
-      if (pos === -1) {
-        alternatives.push({nextContentId: nextContentId});
-      }
-      else {
-        alternatives[pos] = {nextContentId: nextContentId};
-      }
+      // Currently always using alternative 1.
+      // Note that if we are to add new alternative objects here we must find
+      // a way to let the Editor know or it will be using the wrong object.
+      const pos = 0;
+      //const pos = alternatives.map(alt => alt.nextContentId).indexOf(-1);
+      alternatives[pos].nextContentId = nextContentId;
     }
   }
 
