@@ -64,7 +64,7 @@ export default class PreviewSelector extends React.Component {
     return (
       <div className='preview-scene-selection-wrapper'>
         <div className='preview-introduction'>Preview Branching Questions set from:</div>
-        <div className='preview-selector'>
+        <div className='preview-selector field'>
           <select
             className='scene-selector'
             value={this.state.value}
