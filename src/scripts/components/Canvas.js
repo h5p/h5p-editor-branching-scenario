@@ -100,7 +100,7 @@ export default class Canvas extends React.Component {
         deleting: id,
         confirmReplace: true,
         dialog: 'replace'
-      });
+      }, this.setIsEditing);
     }
     else {
       // Start placing
@@ -195,7 +195,7 @@ export default class Canvas extends React.Component {
     this.setState({
       deleting: id,
       dialog: 'delete'
-    });
+    }, this.setIsEditing);
   }
 
   /**
@@ -1105,7 +1105,7 @@ export default class Canvas extends React.Component {
    * Set isEditing state of parent
    */
   setIsEditing = () => {
-    this.props.onIsEditing(this.state.editing !== null);
+    this.props.onIsEditing(this.state.editing !== null || this.state.dialog !== null);
   }
 
   /**
@@ -1267,7 +1267,7 @@ export default class Canvas extends React.Component {
           setNextContentId: newId,
           deleting: params.nextContentId,
           dialog: 'delete' + (newId === -2 ? ' alternative' : '')  // -2 = deleting entire alternative (handled by H5PEditor)
-        });
+        }, this.setIsEditing);
         return true;
       }
     }
