@@ -179,6 +179,7 @@ export default class Content extends React.Component {
   handleSubMenuAction = (action) => {
     this.props[action]();
     this.props.onDropped(); // Prevent placing after clicking button
+    this.props.draggableMouseOut();
   }
 
   render() {
@@ -270,7 +271,7 @@ export default class Content extends React.Component {
             onEdit={ () => this.handleSubMenuAction('onEdit') }
             onPreview={ () => this.handleSubMenuAction('onPreview') }
             onCopy={ () => this.handleSubMenuAction('onCopy') }
-            onDelete={ this.props.onDelete }
+            onDelete={ () => { this.props.onDelete(); this.props.draggableMouseOut(); } }
           />
         }
         {
