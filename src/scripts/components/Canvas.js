@@ -1036,12 +1036,22 @@ export default class Canvas extends React.Component {
       // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
       const treeWrapWidth = this.treewrap.getBoundingClientRect().width;
       if (treeWrapWidth !== 0) {
-        const center = this.props.centerWholeTree ? 0 : (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
+        const panning = {
+          x: 0,
+          y: 0
+        };
+
+        if (this.props.centerWholeTree) {
+          // Centering the whole tree and not just the top node
+          panning.x = (treeWrapWidth - this.tree.element.getBoundingClientRect().width) / 2;
+        }
+        else {
+          const center = (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
+          panning.x = (center - (this.tree['draggable-0'].props.position.x * this.props.scale));
+        }
+
         this.setState({
-          panning: {
-            x: this.props.centerWholeTree ? treeWrapWidth * 0.05 : (center - (this.tree['draggable-0'].props.position.x * this.props.scale)),
-            y: 0
-          }
+          panning: panning
         }, this.props.onCanvasCentered);
       }
     }
