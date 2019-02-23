@@ -47,6 +47,7 @@ export default class Editor extends React.Component {
       hasLoadedLibraries: false,
       isShowingPreviewInfoPopup: true,
       draggableHovered: null,
+      isEditing: false
     };
   }
 
@@ -145,9 +146,9 @@ export default class Editor extends React.Component {
     });
   }
 
-  handleOpenEditor = (inserting) => {
+  handleIsEditing = (value) => {
     this.setState({
-      inserting: inserting
+      isEditing: value
     });
   }
 
@@ -346,12 +347,14 @@ export default class Editor extends React.Component {
                 className='preview-button back'
                 title='Back to edit'
                 onClick={() => this.togglePreview()}
+                disabled={ this.state.isEditing }
               >Back to edit</button>
               :
               <button
                 className='preview-button'
                 title='Preview'
                 onClick={() => this.togglePreview()}
+                disabled={ this.state.isEditing }
               >Preview</button>
           }
           { this.state.fullscreen &&
@@ -388,7 +391,7 @@ export default class Editor extends React.Component {
               saveData={this.props.saveData}
               content={ this.props.content }
               handleOpenTutorial={ this.handleOpenTutorial }
-              onOpenEditor={ this.handleOpenEditor }
+              onIsEditing={ this.handleIsEditing }
               onContentChanged={ this.handleContentChanged }
               onContentPreview={ this.togglePreview }
               onHighlight={ this.handleHighlight }

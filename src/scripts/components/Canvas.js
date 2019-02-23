@@ -100,7 +100,7 @@ export default class Canvas extends React.Component {
         deleting: id,
         confirmReplace: true,
         dialog: 'replace'
-      });
+      }, this.setIsEditing);
     }
     else {
       // Start placing
@@ -177,7 +177,7 @@ export default class Canvas extends React.Component {
     this.setState({
       editing: id,
       placing: null
-    });
+    }, this.setIsEditing);
   }
 
   /**
@@ -195,7 +195,7 @@ export default class Canvas extends React.Component {
     this.setState({
       deleting: id,
       dialog: 'delete'
-    });
+    }, this.setIsEditing);
   }
 
   /**
@@ -386,13 +386,12 @@ export default class Canvas extends React.Component {
     // Fill up empty alternatives first before creating new one
     if (nextContentId > -1) {
       const alternatives = content.params.type.params.branchingQuestion.alternatives;
-      const pos = alternatives.map(alt => alt.nextContentId).indexOf(-1);
-      if (pos === -1) {
-        alternatives.push({nextContentId: nextContentId});
-      }
-      else {
-        alternatives[pos] = {nextContentId: nextContentId};
-      }
+      // Currently always using alternative 1.
+      // Note that if we are to add new alternative objects here we must find
+      // a way to let the Editor know or it will be using the wrong object.
+      const pos = 0;
+      //const pos = alternatives.map(alt => alt.nextContentId).indexOf(-1);
+      alternatives[pos].nextContentId = nextContentId;
     }
   }
 
@@ -585,7 +584,10 @@ export default class Canvas extends React.Component {
 
       props.onDropped(); // TODO: Shouldn't this really be called after the state is set?
       return newState;
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   }
 
   /**
@@ -945,7 +947,10 @@ export default class Canvas extends React.Component {
       }
 
       return newState;
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   }
 
   /**
@@ -1012,7 +1017,7 @@ export default class Canvas extends React.Component {
       newState.inserting = null;
     }
 
-    this.setState(newState);
+    this.setState(newState, this.setIsEditing);
 
     if (this.props.inserting) {
       // Stop inserting
@@ -1031,12 +1036,22 @@ export default class Canvas extends React.Component {
       // e.g. https://stackoverflow.com/questions/35915257/get-the-height-of-a-component-in-react
       const treeWrapWidth = this.treewrap.getBoundingClientRect().width;
       if (treeWrapWidth !== 0) {
-        const center = this.props.centerWholeTree ? 0 : (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
+        const panning = {
+          x: 0,
+          y: 0
+        };
+
+        if (this.props.centerWholeTree) {
+          // Centering the whole tree and not just the top node
+          panning.x = (treeWrapWidth - this.tree.element.getBoundingClientRect().width) / 2;
+        }
+        else {
+          const center = (treeWrapWidth / 2) - ((this.props.nodeSize.width * this.props.scale) / 2);
+          panning.x = (center - (this.tree['draggable-0'].props.position.x * this.props.scale));
+        }
+
         this.setState({
-          panning: {
-            x: this.props.centerWholeTree ? treeWrapWidth * 0.05 : (center - (this.tree['draggable-0'].props.position.x * this.props.scale)),
-            y: 0
-          }
+          panning: panning
         }, this.props.onCanvasCentered);
       }
     }
@@ -1097,6 +1112,13 @@ export default class Canvas extends React.Component {
   }
 
   /**
+   * Set isEditing state of parent
+   */
+  setIsEditing = () => {
+    this.props.onIsEditing(this.state.editing !== null || this.state.dialog !== null);
+  }
+
+  /**
    * TODO
    */
   handleEditorDone = () => {
@@ -1104,7 +1126,10 @@ export default class Canvas extends React.Component {
     this.setState({
       editing: null,
       inserting: null
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   };
 
   /**
@@ -1119,7 +1144,10 @@ export default class Canvas extends React.Component {
         deleting: prevState.editing,
         dialog: 'delete'
       };
-    }, this.contentChanged);
+    }, () => {
+      this.contentChanged();
+      this.setIsEditing();
+    });
   }
 
   /**
@@ -1249,7 +1277,7 @@ export default class Canvas extends React.Component {
           setNextContentId: newId,
           deleting: params.nextContentId,
           dialog: 'delete' + (newId === -2 ? ' alternative' : '')  // -2 = deleting entire alternative (handled by H5PEditor)
-        });
+        }, this.setIsEditing);
         return true;
       }
     }
@@ -1390,6 +1418,7 @@ export default class Canvas extends React.Component {
                 library={ this.state.library }
                 getLibrary={ library => this.getLibrary(library) }
                 dropzones={ this.dropzones }
+                scoringOption={ this.props.scoringOption }
                 onPlacing={ this.handlePlacing }
                 onDropped={ this.handleDropped }
                 onEdit={ this.handleContentEdit }
