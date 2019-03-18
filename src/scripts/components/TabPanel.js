@@ -31,7 +31,7 @@ export default class Tabs extends React.Component {
       });
     });
 
-    const tabsClasses = 'tabs' + (this.props.isHidden ? ' hidden' : '');
+    const tabsClasses = 'tabs' + (this.props.isHidden ? ' hidden' : '') + (this.props.tour ? ' tour-fade' : '');
     return (
       <div className={tabsClasses}>
         <ul className="tabs-nav">

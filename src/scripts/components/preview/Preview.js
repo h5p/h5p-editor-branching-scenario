@@ -82,7 +82,7 @@ export default class Preview extends React.Component {
     }
 
     return (
-      <div className='preview-container'>
+      <div className={ 'preview-container' + (this.props.tour ? ' tour-fade' : '') }>
         <PreviewSelector
           previewInstance={this.preview}
           params={this.props.params}

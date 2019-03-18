@@ -15,6 +15,8 @@ import TabViewMetadata from './components/TabViewMetadata';
 import FullScreenDialog from "./components/dialogs/FullScreenDialog";
 import BlockInteractionOverlay from "./components/BlockInteractionOverlay";
 import Preview from "./components/preview/Preview";
+import Tour from "./components/Tour";
+import { getUserStorage, setUserStorage } from './helpers/UserStorage';
 
 export default class Editor extends React.Component {
   constructor(props) {
@@ -47,7 +49,8 @@ export default class Editor extends React.Component {
       hasLoadedLibraries: false,
       isShowingPreviewInfoPopup: true,
       draggableHovered: null,
-      isEditing: false
+      isEditing: false,
+      tour: false
     };
   }
 
@@ -59,6 +62,22 @@ export default class Editor extends React.Component {
     const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
     titleField.$item.find('input')[0].placeholder = 'Enter title here';
     titleField.$item.prependTo(this.topbar);
+
+    getUserStorage('h5p-editor-branching-scenario-tour-v1-seen', (seen) => {
+      if (seen !== true) {
+        const formRect = document.querySelector(this.state.fullscreen ? '.tree.h5peditor-semi-fullscreen' : '.h5peditor-form').getBoundingClientRect();
+        const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
+        this.setState({
+          tour: {
+            width: (fsButtonRect.width - 18) + 'px',
+            height: (fsButtonRect.height - 18) + 'px',
+            left: ((((fsButtonRect.left + 8) - formRect.left) / formRect.width) * 100) + '%',
+            top: ((((fsButtonRect.top + 6) - formRect.top) / formRect.height) * 100) + '%'
+          }
+        });
+        this.topbar.firstChild.classList.add('tour-fade');
+      }
+    });
 
     window.addEventListener('resize', this.handleWindowResize);
   }
@@ -305,6 +324,13 @@ export default class Editor extends React.Component {
     });
   };
 
+  handleCloseTour = () => {
+    setUserStorage('h5p-editor-branching-scenario-tour-v1-seen', true);
+    this.setState({
+      tour: false
+    });
+  };
+
   render() {
     // This might be replaced by callbacks invoked by the refs
     if (!this.treewrap && this.canvas && this.canvas.treewrap && this.canvas.treewrap.element) {
@@ -317,6 +343,9 @@ export default class Editor extends React.Component {
     let wrapperClasses = 'bswrapper';
     if (this.state.isShowingPreview) {
       wrapperClasses += ' preview';
+    }
+    if (this.state.tour) {
+      wrapperClasses += ' tour';
     }
 
     return (
@@ -334,14 +363,14 @@ export default class Editor extends React.Component {
           {
             this.state.isShowingPreview ?
               <button
-                className='preview-button back'
+                className={ 'preview-button back' + (this.state.tour ? ' tour-fade' : '') }
                 title='Back to edit'
                 onClick={() => this.togglePreview()}
                 disabled={ this.state.isEditing }
               >Back to edit</button>
               :
               <button
-                className='preview-button'
+                className={ 'preview-button' + (this.state.tour ? ' tour-fade' : '') }
                 title='Preview'
                 onClick={() => this.togglePreview()}
                 disabled={ this.state.isEditing }
@@ -349,7 +378,7 @@ export default class Editor extends React.Component {
           }
           { H5PEditor.semiFullscreen !== undefined &&
             <div
-              className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') }
+              className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') + (this.state.tour ? ' tour-active' : '') }
               title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
               role="button"
               tabIndex="0"
@@ -358,7 +387,7 @@ export default class Editor extends React.Component {
           }
           { this.state.fullscreen &&
             <div
-              className="proceed-button"
+              className={ 'proceed-button' + (this.state.tour ? ' tour-fade' : '') }
               title="Proceed to save your Branching Scenario"
               role="button"
               tabIndex="0"
@@ -367,7 +396,7 @@ export default class Editor extends React.Component {
           }
         </div>
         <Tabs
-          className="tab-view-wrapper"
+          tour={ this.state.tour }
           activeIndex={ this.state.activeIndex }
           onChange={ key => this.setActiveIndex(key) }
           isHidden={ this.state.isShowingPreview }
@@ -445,12 +474,20 @@ export default class Editor extends React.Component {
         {
           this.state.isShowingPreview &&
           <Preview
+            tour={ this.state.tour }
             params={this.props.parent.params}
             hasLoadedLibraries={this.state.hasLoadedLibraries}
             previewId={this.state.previewId}
             goToEditor={() => this.togglePreview()}
             isShowingInfoPopup={this.state.isShowingPreviewInfoPopup}
             hideInfoPopup={this.hidePreviewInfoPopup}
+          />
+        }
+        {
+          this.state.tour &&
+          <Tour
+            position={ this.state.tour }
+            onClose={ this.handleCloseTour }
           />
         }
       </div>
