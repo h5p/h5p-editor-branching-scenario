@@ -58,8 +58,7 @@ export default class Editor extends React.Component {
     // Add title field
     const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
     titleField.$item.find('input')[0].placeholder = 'Enter title here';
-    const fullScreenButton = this.topbar.querySelector('.fullscreen-button');
-    titleField.$item.insertAfter(fullScreenButton);
+    titleField.$item.prependTo(this.topbar);
 
     window.addEventListener('resize', this.handleWindowResize);
   }
@@ -332,15 +331,6 @@ export default class Editor extends React.Component {
           </BlockInteractionOverlay>
         }
         <div className="topbar" ref={ element => this.topbar = element }>
-          { H5PEditor.semiFullscreen !== undefined &&
-            <div
-              className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') }
-              title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
-              role="button"
-              tabIndex="0"
-              onClick={ this.handleToggleFullscreen }
-            />
-          }
           {
             this.state.isShowingPreview ?
               <button
@@ -356,6 +346,15 @@ export default class Editor extends React.Component {
                 onClick={() => this.togglePreview()}
                 disabled={ this.state.isEditing }
               >Preview</button>
+          }
+          { H5PEditor.semiFullscreen !== undefined &&
+            <div
+              className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') }
+              title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
+              role="button"
+              tabIndex="0"
+              onClick={ this.handleToggleFullscreen }
+            />
           }
           { this.state.fullscreen &&
             <div

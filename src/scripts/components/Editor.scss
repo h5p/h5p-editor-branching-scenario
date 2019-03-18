@@ -49,7 +49,7 @@
       padding: 0.53em 0.5em;
       color: white;
       border: solid 1px $col6;
-      margin: 0.47em 0em 0.47em 3.2em;
+      margin: 0.47em;
       min-width: 15.3em;
       max-width: 25em;
       font-size: 0.9375em;
@@ -80,8 +80,11 @@
   line-height: 1;
   flex-grow: 0;
   min-width: 3em;
-  position: absolute;
-  top: 0;
+  transition: background 0.2s linear;
+
+  &:hover {
+    background: #363b42;
+  }
 
   &:before {
     font-family: "bs-editor";
@@ -93,23 +96,32 @@
   }
 }
 
+.bswrapper.preview .fullscreen-button:hover {
+  background: #0d396c;
+}
+
 .field-name-extraTitle {
   flex-grow: 1;
 }
 
 .proceed-button {
   cursor: pointer;
-  background: $success-col;
+  background: #166df7;
   color: white;
-  text-transform: uppercase;
   font-size: 0.875em;
   font-weight: bold;
-  padding: 0.47em 0.75em;
+  padding: 0.75em 1.25em;
   border-radius: 0.25em;
   flex-shrink: 0;
   margin-right: 0.4em;
   margin-left: 0.4em;
+  transition: background 0.2s linear;
+
+  &:hover {
+    background: #0f56e5;
+  }
 }
+
 .preview-button {
   cursor: pointer;
   background: transparent;
@@ -122,6 +134,7 @@
   margin-right: 0.4em;
   margin-left: 0.4em;
   border-radius: 0.25em;
+  transition: background 0.2s linear;
 
   &[disabled] {
     cursor: default;
@@ -130,7 +143,7 @@
 }
 
 .preview-button:not([disabled]):hover {
-  background: #121519;
+  background: #363b42;
 }
 
 .preview-button.back:hover {
