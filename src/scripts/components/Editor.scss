@@ -81,6 +81,7 @@
   flex-grow: 0;
   min-width: 3em;
   transition: background 0.2s linear;
+  color: #fff;
 
   &:hover {
     background: #363b42;
@@ -108,10 +109,10 @@
   cursor: pointer;
   background: #166df7;
   color: white;
-  font-size: 0.875em;
+  font-size: 1em;
   font-weight: bold;
-  padding: 0.75em 1.25em;
-  border-radius: 0.25em;
+  padding: 0.5em 1em;
+  border-radius: .208em;
   flex-shrink: 0;
   margin-right: 0.4em;
   margin-left: 0.4em;

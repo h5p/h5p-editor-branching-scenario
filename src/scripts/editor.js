@@ -325,6 +325,7 @@ export default class Editor extends React.Component {
   };
 
   handleCloseTour = () => {
+    this.topbar.firstChild.classList.remove('tour-fade');
     setUserStorage('h5p-editor-branching-scenario-tour-v1-seen', true);
     this.setState({
       tour: false
