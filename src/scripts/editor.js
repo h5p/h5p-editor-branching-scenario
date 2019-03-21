@@ -63,21 +63,23 @@ export default class Editor extends React.Component {
     titleField.$item.find('input')[0].placeholder = 'Enter title here';
     titleField.$item.prependTo(this.topbar);
 
-    getUserStorage('h5p-editor-branching-scenario-tour-v1-seen', (seen) => {
-      if (seen !== true) {
-        const formRect = document.querySelector(this.state.fullscreen ? '.tree.h5peditor-semi-fullscreen' : '.h5peditor-form').getBoundingClientRect();
-        const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
-        this.setState({
-          tour: {
-            width: (fsButtonRect.width - 18) + 'px',
-            height: (fsButtonRect.height - 18) + 'px',
-            left: ((((fsButtonRect.left + 8) - formRect.left) / formRect.width) * 100) + '%',
-            top: ((((fsButtonRect.top + 6) - formRect.top) / formRect.height) * 100) + '%'
-          }
-        });
-        this.topbar.firstChild.classList.add('tour-fade');
-      }
-    });
+    if (H5PEditor.semiFullscreen !== undefined) {
+      getUserStorage('h5p-editor-branching-scenario-tour-v1-seen', (seen) => {
+        if (seen !== true) {
+          const formRect = document.querySelector(this.state.fullscreen ? '.tree.h5peditor-semi-fullscreen' : '.h5peditor-form').getBoundingClientRect();
+          const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
+          this.setState({
+            tour: {
+              width: (fsButtonRect.width - 18) + 'px',
+              height: (fsButtonRect.height - 18) + 'px',
+              left: ((((fsButtonRect.left + 8) - formRect.left) / formRect.width) * 100) + '%',
+              top: ((((fsButtonRect.top + 6) - formRect.top) / formRect.height) * 100) + '%'
+            }
+          });
+          this.topbar.firstChild.classList.add('tour-fade');
+        }
+      });
+    }
 
     window.addEventListener('resize', this.handleWindowResize);
   }
