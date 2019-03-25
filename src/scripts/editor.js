@@ -66,16 +66,7 @@ export default class Editor extends React.Component {
     if (H5PEditor.semiFullscreen !== undefined) {
       getUserStorage('h5p-editor-branching-scenario-tour-v1-seen', (seen) => {
         if (seen !== true) {
-          const formRect = document.querySelector(this.state.fullscreen ? '.tree.h5peditor-semi-fullscreen' : '.h5peditor-form').getBoundingClientRect();
-          const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
-          this.setState({
-            tour: {
-              width: (fsButtonRect.width - 18) + 'px',
-              height: (fsButtonRect.height - 18) + 'px',
-              left: ((((fsButtonRect.left + 8) - formRect.left) / formRect.width) * 100) + '%',
-              top: ((((fsButtonRect.top + 6) - formRect.top) / formRect.height) * 100) + '%'
-            }
-          });
+          this.setTourState();
           this.topbar.firstChild.classList.add('tour-fade');
         }
       });
@@ -88,6 +79,19 @@ export default class Editor extends React.Component {
     window.removeEventListener('resize', this.handleWindowResize);
   }
 
+  setTourState = () => {
+    const formRect = document.querySelector(this.state.fullscreen ? '.tree.h5peditor-semi-fullscreen' : '.h5peditor-form').getBoundingClientRect();
+    const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
+    this.setState({
+      tour: {
+        width: (fsButtonRect.width - 18) + 'px',
+        height: (fsButtonRect.height - 18) + 'px',
+        left: ((fsButtonRect.left + 6) - formRect.left) + 'px',
+        top: ((fsButtonRect.top + 6) - formRect.top) + 'px'
+      }
+    });
+  };
+
   handleWindowResize = () => {
     this.resizeTimeout = null;
     if (!this.resizeTimeout) {
@@ -97,6 +101,9 @@ export default class Editor extends React.Component {
         this.setState({
           center: true
         });
+        if (this.state.tour) {
+          this.setTourState();
+        }
       }, 66);
     }
   };
