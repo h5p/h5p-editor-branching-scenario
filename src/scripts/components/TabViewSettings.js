@@ -10,6 +10,7 @@ export default class TabViewSettings extends React.Component {
     this.refStartScreen = React.createRef();
     this.refEndScreen = React.createRef();
     this.refScoringOption= React.createRef();
+    this.refBehaviour= React.createRef();
 
     const params = this.props.main.params;
 
@@ -32,6 +33,11 @@ export default class TabViewSettings extends React.Component {
     );
     this.scoringOptionWrapper = document.createElement('div');
 
+    const behaviourField = H5PEditor.findSemanticsField(
+      'behaviour',
+      this.props.main.field
+    );
+    this.behaviourWrapper = document.createElement('div');
 
     // Fill fields
     H5PEditor.processSemanticsChunk(
@@ -61,6 +67,14 @@ export default class TabViewSettings extends React.Component {
     );
     children = children.concat(this.props.main.children);
 
+    H5PEditor.processSemanticsChunk(
+      [behaviourField],
+      params,
+      H5PEditor.$(this.behaviourWrapper),
+      this.props.main
+    );
+    children = children.concat(this.props.main.children);
+
     // Restore children
     this.props.main.children = children;
 
@@ -86,6 +100,7 @@ export default class TabViewSettings extends React.Component {
     this.refStartScreen.current.appendChild(this.startScreenWrapper);
     this.refEndScreen.current.appendChild(this.endScreenWrapper);
     this.refScoringOption.current.appendChild(this.scoringOptionWrapper);
+    this.refBehaviour.current.appendChild(this.behaviourWrapper);
   }
 
   render() {
@@ -129,6 +144,15 @@ export default class TabViewSettings extends React.Component {
             </legend>
             <div
               ref={this.refScoringOption}
+              className='h5p-scoring-option-wrapper'
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="tab-view-info">
+              Behavioural Settings
+            </legend>
+            <div
+              ref={this.refBehaviour}
               className='h5p-scoring-option-wrapper'
             />
           </fieldset>
