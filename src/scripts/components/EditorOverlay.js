@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import './EditorOverlay.scss';
 import Canvas from './Canvas';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
-import BehaviouralSettings from "./content-type-editor/BehaviouralSettings";
 import { isBranching } from '../helpers/Library';
 import Content from "./Content";
 
@@ -105,12 +104,6 @@ export default class EditorOverlay extends React.Component {
       // Hide the showContentTitle checkbox for BQ content
       const showContentTitleField = this.findField('showContentTitle');
       showContentTitleField.$item.remove();
-
-      // Hide content behaviour group only relevant for content
-      const contentBehaviourGroup = this.findField('contentBehaviour');
-      if (contentBehaviourGroup && contentBehaviourGroup.$group) {
-        contentBehaviourGroup.$group.remove();
-      }
     }
 
     const library = this.findField('type');
@@ -292,9 +285,6 @@ export default class EditorOverlay extends React.Component {
 
     const feedbackGroupField = (!this.isBranchingQuestion ? this.findField('feedback') : null);
 
-    // Behaviour fields for content nodes
-    const behaviourGroupField = (!this.isBranchingQuestion ? this.findField('contentBehaviour') : null);
-
     return (
       <div className={ wrapperClass }>
         <div className='editor-overlay-header' >
@@ -319,19 +309,14 @@ export default class EditorOverlay extends React.Component {
           <div className='editor-overlay-semantics' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
-            <div>
-              <BranchingOptions
-                nextContentId={ this.props.content.params.nextContentId }
-                validAlternatives={ this.props.validAlternatives }
-                onChangeContent={ this.handleNextContentIdChange }
-                isInserting={ this.props.isInserting }
-                feedbackGroup={ feedbackGroupField }
-                scoringOption={ this.props.scoringOption }
-              />
-              <BehaviouralSettings
-                behaviourGroup={ behaviourGroupField }
-              />
-            </div>
+            <BranchingOptions
+              nextContentId={ this.props.content.params.nextContentId }
+              validAlternatives={ this.props.validAlternatives }
+              onChangeContent={ this.handleNextContentIdChange }
+              isInserting={ this.props.isInserting }
+              feedbackGroup={ feedbackGroupField }
+              scoringOption={ this.props.scoringOption }
+            />
           }
           <div
             className={`editor-overlay-feedback-semantics${feedbackGroupClass}`}
