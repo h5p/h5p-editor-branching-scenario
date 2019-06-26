@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import './EditorOverlay.scss';
 import Canvas from './Canvas';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
+import BehaviouralSettings from "./content-type-editor/BehaviouralSettings";
 import { isBranching } from '../helpers/Library';
 import Content from "./Content";
 
@@ -285,6 +286,9 @@ export default class EditorOverlay extends React.Component {
 
     const feedbackGroupField = (!this.isBranchingQuestion ? this.findField('feedback') : null);
 
+    // Behaviour fields for content nodes
+    const behaviourGroupField = (!this.isBranchingQuestion ? this.findField('contentBehaviour') : null);
+
     return (
       <div className={ wrapperClass }>
         <div className='editor-overlay-header' >
@@ -309,14 +313,19 @@ export default class EditorOverlay extends React.Component {
           <div className='editor-overlay-semantics' ref={ this.form }/>
           {
             !this.isBranchingQuestion &&
-            <BranchingOptions
-              nextContentId={ this.props.content.params.nextContentId }
-              validAlternatives={ this.props.validAlternatives }
-              onChangeContent={ this.handleNextContentIdChange }
-              isInserting={ this.props.isInserting }
-              feedbackGroup={ feedbackGroupField }
-              scoringOption={ this.props.scoringOption }
-            />
+            <div>
+              <BranchingOptions
+                nextContentId={ this.props.content.params.nextContentId }
+                validAlternatives={ this.props.validAlternatives }
+                onChangeContent={ this.handleNextContentIdChange }
+                isInserting={ this.props.isInserting }
+                feedbackGroup={ feedbackGroupField }
+                scoringOption={ this.props.scoringOption }
+              />
+              <BehaviouralSettings
+                behaviourGroup={ behaviourGroupField }
+              />
+            </div>
           }
           <div
             className={`editor-overlay-feedback-semantics${feedbackGroupClass}`}
