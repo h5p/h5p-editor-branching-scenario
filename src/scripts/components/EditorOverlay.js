@@ -110,17 +110,18 @@ export default class EditorOverlay extends React.Component {
     const titleField = H5PEditor.findField('title', library.metadataForm);
     titleField.$input.on('change', () => this.forceUpdate());
 
-    if (library.children[0] instanceof H5P.DragNBar.FormManager) {
+    const fm = (library.children[0] instanceof H5P.DragNBar.FormManager ? library.children[0] : (library.children[0].children && library.children[0].children[1] instanceof H5P.DragNBar.FormManager ? library.children[0].children[1] : null));
+    if (fm) {
       // Use the form manager's buttons instead of ours
-      library.children[0].setAlwaysShowButtons(true);
-      library.children[0].off('formremove');
-      library.children[0].off('formdone');
-      library.children[0].on('formremove', e => {
+      fm.setAlwaysShowButtons(true);
+      fm.off('formremove'); // Remove any old listeners just in case
+      fm.off('formdone');
+      fm.on('formremove', e => {
         if (e.data === 1) {
           this.handleRemove();
         }
       });
-      library.children[0].on('formdone', e => {
+      fm.on('formdone', e => {
         if (e.data === 1) {
           this.handleDone();
         }
