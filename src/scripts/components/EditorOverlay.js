@@ -110,6 +110,23 @@ export default class EditorOverlay extends React.Component {
     const titleField = H5PEditor.findField('title', library.metadataForm);
     titleField.$input.on('change', () => this.forceUpdate());
 
+    if (library.children[0] instanceof H5P.DragNBar.FormManager) {
+      // Use the form manager's buttons instead of ours
+      library.children[0].setAlwaysShowButtons(true);
+      library.children[0].off('formremove');
+      library.children[0].off('formdone');
+      library.children[0].on('formremove', e => {
+        if (e.data === 1) {
+          this.handleRemove();
+        }
+      });
+      library.children[0].on('formdone', e => {
+        if (e.data === 1) {
+          this.handleDone();
+        }
+      });
+    }
+
     // Force visuals to resize after initial render
     H5P.$window.trigger('resize');
   }
@@ -236,7 +253,8 @@ export default class EditorOverlay extends React.Component {
   }
 
   render() {
-    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(this.props.content.params.type.library.split('.')[1].split(' ')[0])}`;
+    const library = this.props.content.params.type.library.split(' ')[0];
+    const iconClass = `editor-overlay-title editor-overlay-icon-${Canvas.camelToKebab(library.split('.')[1])}`;
     let scoreClass = this.props.scoringOption === 'no-score'
       ? ' hide-scores' : '';
     if (this.props.scoringOption === 'dynamic-score') {
@@ -249,6 +267,9 @@ export default class EditorOverlay extends React.Component {
     }
     if (this.props.moveDown) {
       wrapperClass += ' move-down';
+    }
+    if (library === 'H5P.CoursePresentation' || library === 'H5P.InteractiveVideo') {
+      wrapperClass += ' inconspicuous';
     }
     const feedbackGroupClass = this.props.content.params.nextContentId !== -1 ? ' hide-score' : '';
 
@@ -265,7 +286,7 @@ export default class EditorOverlay extends React.Component {
 
     return (
       <div className={ wrapperClass }>
-        <div className='editor-overlay-header'>
+        <div className='editor-overlay-header' >
           <span
             className={ iconClass }
           >{ title }</span>
