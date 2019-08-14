@@ -23,6 +23,10 @@
   &.move-down {
     z-index: 59;
   }
+
+  .form-manager-footer {
+    display: none;
+  }
 }
 
 .editor-overlay .editor-overlay-header {
