@@ -3,11 +3,15 @@
   "description": "description",
   "majorVersion": 1,
   "minorVersion": 1,
-  "patchVersion": 0,
+  "patchVersion": 1,
   "runnable": 0,
   "author": "Joubel",
   "license": "MIT",
   "machineName": "H5PEditor.BranchingScenario",
+  "coreApi": {
+    "majorVersion": 1,
+    "minorVersion": 23
+  },
   "preloadedJs": [
     {
       "path": "dist/dist.js"
@@ -32,32 +36,32 @@
     {
       "machineName": "H5P.CoursePresentation",
       "majorVersion": 1,
-      "minorVersion": 20
+      "minorVersion": 21
     },
     {
       "machineName": "H5P.AdvancedText",
-      "majorVersion":  1,
-      "minorVersion":  1
+      "majorVersion": 1,
+      "minorVersion": 1
     },
     {
       "machineName": "H5P.Image",
-      "majorVersion":  1,
-      "minorVersion":  1
+      "majorVersion": 1,
+      "minorVersion": 1
     },
     {
       "machineName": "H5P.ImageHotspots",
-      "majorVersion":  1,
-      "minorVersion":  8
+      "majorVersion": 1,
+      "minorVersion": 8
     },
     {
       "machineName": "H5P.InteractiveVideo",
-      "majorVersion":  1,
-      "minorVersion":  20
+      "majorVersion": 1,
+      "minorVersion": 21
     },
     {
       "machineName": "H5P.Video",
-      "majorVersion":  1,
-      "minorVersion":  5
+      "majorVersion": 1,
+      "minorVersion": 5
     }
   ]
 }

@@ -18,9 +18,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 0;
 
   &.move-down {
     z-index: 59;
+  }
+
+  .form-manager-footer {
+    display: none;
   }
 }
 
@@ -37,6 +42,33 @@
   flex-direction: row;
   flex-shrink: 0;
   width: 100%;
+}
+.editor-overlay.inconspicuous {
+  .editor-overlay-header {
+    visibility: hidden;
+    height: 41px;
+  }
+  .form-manager-head {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+  }
+  .editor-overlay-content {
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow-x: hidden;
+  }
+  .form-manager-movable {
+    top: 0;
+    border-left: 0;
+  }
+  .form-manager-form.form-manager-slidein {
+    left: 0;
+  }
+  .libwrap {
+    margin-top: 0;
+  }
 }
 
 .editor-overlay .editor-overlay-content {
