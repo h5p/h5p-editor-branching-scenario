@@ -10,7 +10,7 @@
   "machineName": "H5PEditor.BranchingScenario",
   "coreApi": {
     "majorVersion": 1,
-    "minorVersion": 23
+    "minorVersion": 24
   },
   "preloadedJs": [
     {
