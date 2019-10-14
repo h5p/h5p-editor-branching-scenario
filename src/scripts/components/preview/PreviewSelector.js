@@ -9,6 +9,10 @@ export default class PreviewSelector extends React.Component {
   constructor(props) {
     super(props);
 
+    this.previewSceneSelectId = H5PEditor.getNextFieldId({
+      name: 'previewScene'
+    });
+
     const initialValue = props.initialContentId !== null
       ? props.initialContentId
       : PreviewSelector.defaultValue;
@@ -63,9 +67,10 @@ export default class PreviewSelector extends React.Component {
   render() {
     return (
       <div className='preview-scene-selection-wrapper'>
-        <div className='preview-introduction'>Preview Branching Questions set from:</div>
+        <label className='preview-introduction' for={ this.previewSceneSelectId }>Preview Branching Questions set from:</label>
         <div className='preview-selector field'>
           <select
+            id={ this.previewSceneSelectId }
             className='scene-selector'
             value={this.state.value}
             onChange={e => this.setContentId(e.target.value)}

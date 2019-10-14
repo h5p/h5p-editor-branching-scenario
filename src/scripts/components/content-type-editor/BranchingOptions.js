@@ -7,6 +7,13 @@ export default class BranchingOptions extends React.Component {
   constructor(props) {
     super(props);
 
+    this.specialActionSelectId = H5PEditor.getNextFieldId({
+      name: 'specialAction'
+    });
+    this.nextContentSelectId = H5PEditor.getNextFieldId({
+      name: 'nextContent'
+    });
+
     const initialSelectedMainOption = this.props.nextContentId >= 0
       ? 'old-content'
       : (
@@ -126,12 +133,13 @@ export default class BranchingOptions extends React.Component {
           </div>
           <div className="content" ref={ element => this.contentWrapper = element }>
             <div className='field text importance-low'>
-              <label className='h5peditor-label-wrapper'>
+              <label className='h5peditor-label-wrapper' htmlFor={ this.specialActionSelectId }>
                 <span className='h5peditor-label'>
                   { this.props.nextContentLabel || 'Special action after this content' }
                 </span>
               </label>
               <select
+                id={ this.specialActionSelectId }
                 value={ this.state.selectedMainOption }
                 onChange={ this.handleMainOptionChange }
               >
@@ -155,11 +163,11 @@ export default class BranchingOptions extends React.Component {
             {
               this.props.nextContentId >= 0 &&
               <div className="field text importance-low">
-                <label className="h5peditor-label-wrapper" htmlFor="nextPath">
+                <label className="h5peditor-label-wrapper" htmlFor={ this.nextContentSelectId }>
                   <span className="h5peditor-label h5peditor-required">Select a branch to jump to{/* TODO: Use title from semantics */}</span>
                 </label>
                 <select
-                  name="nextPath"
+                  id={ this.nextContentSelectId }
                   value={ this.props.nextContentId }
                   onChange={ this.handleExistingContentChange }
                 >
