@@ -119,13 +119,17 @@
     &.disabled {
       border: initial;
       background: $col10;
-      opacity: 0.3;
-      cursor: auto;
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &:before {
+        content: '\e911';
+      }
     }
 
     &:before {
-      font-family: "bs-editor";
-      content: $icon-paste;
+      font-family: "H5P";
+      content: '\e910';
     }
   }
 
