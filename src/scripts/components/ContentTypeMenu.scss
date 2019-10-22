@@ -117,7 +117,7 @@
 
   li.reuse-question {
     &.disabled {
-      border: initial;
+      border-color: transparent;
       background: $col10;
       opacity: 0.5;
       cursor: not-allowed;
