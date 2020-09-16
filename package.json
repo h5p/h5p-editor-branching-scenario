@@ -27,7 +27,7 @@
     "eslint": "^4.19.1",
     "eslint-plugin-babel": "^5.2.1",
     "eslint-plugin-react": "^7.11.1",
-    "node-sass": "^4.9.3",
+    "node-sass": "^4.13.1",
     "react-addons-test-utils": "^15.1.0",
     "react-test-renderer": "^15.4.2",
     "resolve-url-loader": "^2.3.1",
