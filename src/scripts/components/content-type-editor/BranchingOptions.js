@@ -129,7 +129,7 @@ export default class BranchingOptions extends React.Component {
             role="button"
             onClick={ () => this.setState(prevState => ({expanded: !prevState.expanded})) }
             onKeyPress={ e => { if (e.which === 32) this.setState(prevState => ({expanded: !prevState.expanded}));} }
-            tabIndex="0">Branching Options{ /* TODO: l10n */ }
+            tabIndex="0">Advanced branching options{ /* TODO: l10n */ }
           </div>
           <div className="content" ref={ element => this.contentWrapper = element }>
             <div className='field text importance-low'>
