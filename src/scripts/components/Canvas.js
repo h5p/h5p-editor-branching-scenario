@@ -540,9 +540,6 @@ export default class Canvas extends React.Component {
 
       const processed = [];
       const recursiveTreeUpdate = (branch, branchingParent = null, branchingParentId = null) => {
-        if(!branch) {
-          return;
-        }
         branch.forEach((index, num) => {
           if (index === undefined || index === -1) {
             return; // Skip
@@ -570,7 +567,9 @@ export default class Canvas extends React.Component {
 
           // Update subtree first
           const nextBranch = isBranchingContent ? Canvas.getBranchingChildren(content) : [isContent ? content.params.nextContentId : alternative.nextContentId];
-          recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null, isBranchingContent ? index : null);
+          if (nextBranch) {
+            recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null, isBranchingContent ? index : null);
+          }
         });
       };
       recursiveTreeUpdate([0]);
