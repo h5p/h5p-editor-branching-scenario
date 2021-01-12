@@ -540,6 +540,9 @@ export default class Canvas extends React.Component {
 
       const processed = [];
       const recursiveTreeUpdate = (branch, branchingParent = null, branchingParentId = null) => {
+        if(!branch) {
+          return;
+        }
         branch.forEach((index, num) => {
           if (index === undefined || index === -1) {
             return; // Skip
