@@ -189,6 +189,7 @@
   width: 1em;
   height: 1em;
   border: 2px solid #8a24f3;
+  z-index: 110;
 }
 @keyframes flashing1 {
   from {
@@ -208,6 +209,23 @@
     transform: scale(0.8, 0.8);
   }
 }
+
+.right-top{
+  .tour-circle {
+    top: 0;
+    left: 92%;
+  }
+  .tour-dialog{
+    top: 0;
+    left: 126%;
+
+    &:after{
+      left: 0;
+      top: 2%;
+    }
+  }
+}
+
 .tour-circle {
   position: absolute;
   top: 80%;
@@ -231,8 +249,8 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    transform: scale(0.4, 0.4);
     background: #8a24f3;
+    transform: scale(0.4, 0.4);
   }
 }
 .tour-dialog {

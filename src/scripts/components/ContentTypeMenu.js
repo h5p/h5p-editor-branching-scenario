@@ -241,28 +241,34 @@ export default class ContentTypeMenu extends React.Component {
   render() {
     return (
       <div className="content-type-menu">
-        <label className="label-info">
-          Info Content
-          <TooltipButton
-            text={ this.l10n.tooltipInfo }
-            tooltipClass={ 'tooltip below' }
-          />
-        </label>
-        { this.renderDnDButtons() }
-        <label className="label-info">
-          Branching Content
-          <TooltipButton
-            text={ this.l10n.tooltipBranching }
-          />
-        </label>
-        { this.renderSecondButtons() }
-        <label className="label-info">
-          Reuse Content
-          <TooltipButton
-            text={ this.l10n.tooltipReuse }
-          />
-        </label>
-        { this.renderReuseButton() }
+        <div class="info-container-buttons">
+          <label className="label-info">
+            Info Content
+            <TooltipButton
+              text={ this.l10n.tooltipInfo }
+              tooltipClass={ 'tooltip below' }
+            />
+          </label>
+          { this.renderDnDButtons() }
+        </div>
+        <div class="branching-container-buttons">
+          <label className="label-info">
+            Branching Content
+            <TooltipButton
+              text={ this.l10n.tooltipBranching }
+            />
+          </label>
+          { this.renderSecondButtons() }
+        </div>
+        <div class="reuse-container-buttons">
+          <label className="label-info">
+            Reuse Content
+            <TooltipButton
+              text={ this.l10n.tooltipReuse }
+            />
+          </label>
+          { this.renderReuseButton() }
+        </div>
       </div>
     );
   }
