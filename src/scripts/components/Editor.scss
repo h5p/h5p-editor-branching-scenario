@@ -170,6 +170,26 @@
   &.tour {
     background: #000;
   }
+
+  &.content-node-tour {
+    .content-type-menu{
+      background: #000;
+    }
+    .info-container-buttons {
+      background-color: #363b42;
+      pointer-events: none;
+    }
+  }
+
+  &.branching-node-tour {
+    .content-type-menu{
+      background: #000;
+    }
+    .branching-container-buttons {
+      background-color: #363b42;
+      pointer-events: none;
+    }
+  }
 }
 .link-look {
   color: $accent-col;
@@ -190,6 +210,21 @@
   height: 1em;
   border: 2px solid #8a24f3;
   z-index: 110;
+  &.right-top{
+    .tour-circle {
+      top: 0;
+      left: 92%;
+    }
+    .tour-dialog{
+      top: 0;
+      left: 126%;
+  
+      &:after{
+        left: 0;
+        top: 2%;
+      }
+    }
+  }
 }
 @keyframes flashing1 {
   from {
@@ -207,22 +242,6 @@
   to {
     background: rgba(255, 255, 255, 0.1);
     transform: scale(0.8, 0.8);
-  }
-}
-
-.right-top{
-  .tour-circle {
-    top: 0;
-    left: 92%;
-  }
-  .tour-dialog{
-    top: 0;
-    left: 126%;
-
-    &:after{
-      left: 0;
-      top: 2%;
-    }
   }
 }
 

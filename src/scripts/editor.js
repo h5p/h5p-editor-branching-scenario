@@ -50,9 +50,7 @@ export default class Editor extends React.Component {
       isShowingPreviewInfoPopup: true,
       draggableHovered: null,
       isEditing: false,
-      tour: false,
-      tourBranchingQuestion: false,
-      tourInfoContent: false
+      tour: false
     };
   }
 
@@ -83,61 +81,58 @@ export default class Editor extends React.Component {
 
   setTourState = (tourPosition) => {
     const formRect = document.querySelector(this.state.fullscreen ? '.tree.h5peditor-semi-fullscreen' : '.h5peditor-form').getBoundingClientRect();
+    const bufferSize = 18;
+    let bufferSpace = 6;
     switch(tourPosition) {
       case 'screen-size':
         const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
         this.setState({
           tour: {
+            state: 'screen-size',
+            additionalClass: false,
             markerPosition: 'left-bottom',
+            fadeActive: false,
             message: 'Use this button to go in and out of full-screen mode.',
-            width: (fsButtonRect.width - 18) + 'px',
-            height: (fsButtonRect.height - 18) + 'px',
-            left: ((fsButtonRect.left + 6) - formRect.left) + 'px',
-            top: ((fsButtonRect.top + 6) - formRect.top) + 'px'
+            width: (fsButtonRect.width - bufferSize) + 'px',
+            height: (fsButtonRect.height - bufferSize) + 'px',
+            left: ((fsButtonRect.left + bufferSpace) - formRect.left) + 'px',
+            top: ((fsButtonRect.top + bufferSpace) - formRect.top) + 'px'
           }
         });
       break;      
       case 'content-node':
         const icButtonRect = document.querySelector(".info-container-buttons").getBoundingClientRect();
+        bufferSpace = 5;
         this.setState({
-          tourInfoContent: {
+          tour: {
+            state: 'content-node',
+            additionalClass: 'content-node-tour',
             markerPosition: 'right-top',
-            message: 'Drag Branching question and drop it below your content to create branching.',
-            width: (icButtonRect.width - 5) + 'px',
-            height: (icButtonRect.height - 5) + 'px',
+            fadeActive: true,
+            message: 'Drag and drop any content type below alternatives to create a content that will appear after an alternative is selected.',
+            width: (icButtonRect.width - bufferSpace) + 'px',
+            height: (icButtonRect.height - bufferSpace) + 'px',
             left: (icButtonRect.left - formRect.left) + 'px',
             top: (icButtonRect.top - formRect.top) + 'px'
           }
         });
-        document.querySelector(".content-type-menu").style.backgroundColor = "#000";
-        document.querySelector(".tabs-nav").classList.add("tour-fade");
-        document.querySelector(".info-container-buttons").classList.add("tour-active");
-        document.querySelector(".info-container-buttons").style.backgroundColor = "#363b42";
-        document.querySelector(".branching-container-buttons").classList.add("tour-fade");
-        document.querySelector(".reuse-container-buttons").classList.add("tour-fade");
-        document.querySelector(".canvas").classList.add("tour-fade");
-        document.querySelector(".toolbar").classList.add("tour-fade");
        break;
       case 'branching-node':
         const bcButtonRect = document.querySelector(".branching-container-buttons").getBoundingClientRect();
+        bufferSpace = 5;
         this.setState({
-          tourBranchingQuestion: {
+          tour: {
+            state: 'branching-node',
+            additionalClass: 'branching-node-tour',
             markerPosition: 'right-top',
-            message: 'Drag and drop any content type below alternatives to create a content that will appear after an alternative is selected.',
-            width: (bcButtonRect.width - 5) + 'px',
-            height: (bcButtonRect.height - 5) + 'px',
+            fadeActive: true,
+            message: 'Drag Branching question and drop it below your content to create branching.',
+            width: (bcButtonRect.width - bufferSpace) + 'px',
+            height: (bcButtonRect.height - bufferSpace) + 'px',
             left: (bcButtonRect.left - formRect.left) + 'px',
             top: (bcButtonRect.top - formRect.top) + 'px'
           }
         });
-        document.querySelector(".content-type-menu").style.backgroundColor = "#000";
-        document.querySelector(".tabs-nav").classList.add("tour-fade");
-        document.querySelector(".branching-container-buttons").classList.add("tour-active");
-        document.querySelector(".branching-container-buttons").style.backgroundColor = "#363b42";
-        document.querySelector(".info-container-buttons").classList.add("tour-fade");
-        document.querySelector(".reuse-container-buttons").classList.add("tour-fade");
-        document.querySelector(".canvas").classList.add("tour-fade");
-        document.querySelector(".toolbar").classList.add("tour-fade");
         break;
     }
   };
@@ -407,38 +402,20 @@ export default class Editor extends React.Component {
   };
 
   handleCloseTour = () => {
-    // Remove tour-fade class from all elements
-    let elems = document.querySelectorAll(".tour-fade");
-    [].forEach.call(elems, function(el) {
-        el.classList.remove("tour-fade");
-    });
-
-    // Remove all tour-active class from elements
-    const tourActive = document.querySelector(".tour-active");
-    if (tourActive) {
-      tourActive.classList.remove("tour-active");
-    }
-
-    if (this.state.tour) {
+    if (this.state.tour.state === 'screen-size') {
+      this.topbar.firstChild.classList.remove('tour-fade');
       setUserStorage('h5p-editor-branching-scenario-tour-v1-seen', true);
-      this.setState({
-        tour: false
-      });
     }
-    else if (this.state.tourBranchingQuestion) {
+    else if (this.state.tour.state === 'branching-node') {
       setUserStorage('h5p-editor-branching-scenario-branching-content-tour-v1-seen', true);
-      this.setState({
-        tourBranchingQuestion: false
-      });
-      document.querySelector(".content-type-menu").style.backgroundColor = null;
     }
-    else if (this.state.tourInfoContent) {
+    else if (this.state.tour.state === 'content-node') {
       setUserStorage('h5p-editor-branching-scenario-information-content-tour-v1-seen', true);
-      this.setState({
-        tourInfoContent: false
-      });
-      document.querySelector(".content-type-menu").style.backgroundColor = null;
     }
+
+    this.setState({
+      tour: false
+    });
   };
 
   render() {
@@ -454,12 +431,12 @@ export default class Editor extends React.Component {
     if (this.state.isShowingPreview) {
       wrapperClasses += ' preview';
     }
-    if (this.state.tour || this.state.tourBranchingQuestion || this.state.tourInfoContent) {
+    if (this.state.tour) {
       wrapperClasses += ' tour';
     }
 
     return (
-      <div className={wrapperClasses}>
+      <div className={wrapperClasses + (this.state.tour.additionalClass ? ' '+this.state.tour.additionalClass : '')}>
         {
           this.state.showFullScreenDialog &&
           <BlockInteractionOverlay>
@@ -470,7 +447,7 @@ export default class Editor extends React.Component {
           </BlockInteractionOverlay>
         }
         <div 
-        className={ 'topbar ' + ((this.state.tourBranchingQuestion || this.state.tourInfoContent) ? ' tour-fade' : '') }
+        className={ 'topbar ' + ((this.state.tour.state === 'branching-node' || this.state.tour.state === 'content-node') ? ' tour-fade' : '') }
         ref={ element => this.topbar = element }>
           {
             this.state.isShowingPreview ?
@@ -520,6 +497,7 @@ export default class Editor extends React.Component {
             <ContentTypeMenu ref={ element => this.contentypemenu = element }
               inserting={ this.state.inserting }
               libraries={ this.state.libraries }
+              tourState={ this.state.tour.state }
               onMouseDown={ this.handleMouseDown }
               onNodeSize={ this.handleNodeSize }
             />
@@ -550,6 +528,7 @@ export default class Editor extends React.Component {
               draggableMouseOver={this.draggableMouseOver}
               draggableMouseOut={this.draggableMouseOut}
               draggableHovered={this.state.draggableHovered}
+              isTourActive= { (this.state.tour ? true : false) }
             />
             <Toolbar
               disabled={ this.state.zoomDisabled }
@@ -559,6 +538,7 @@ export default class Editor extends React.Component {
               onScaleChanged={ this.handleScaleChanged }
               containerRect={ this.treewrap } /* TODO: Don't send refs as props on render... */
               contentRect={ this.tree } /* TODO: Don't send refs as props on render... */
+              isTourActive= { (this.state.tour ? true : false) }
             />
           </Tab>
           <Tab title="Settings" className="bs-editor-settings-tab">
@@ -596,12 +576,13 @@ export default class Editor extends React.Component {
           />
         }
         {
-          (this.state.tour || this.state.tourBranchingQuestion || this.state.tourInfoContent) &&
+          this.state.tour &&
           <Tour
-            position={ this.state.tour || this.state.tourBranchingQuestion || this.state.tourInfoContent }
+            additionalClass = { this.state.tour.additionalClass }
+            position={ this.state.tour }
             onClose={ this.handleCloseTour }
-            message={ this.state.tour.message || this.state.tourBranchingQuestion.message || this.state.tourInfoContent.message }
-            markerPosition={ this.state.tour.markerPosition || this.state.tourBranchingQuestion.markerPosition || this.state.tourInfoContent.markerPosition }
+            message={ this.state.tour.message }
+            markerPosition={ this.state.tour.markerPosition }
           />
         }
       </div>

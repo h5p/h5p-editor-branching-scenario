@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './TabPanel.scss';
 
 export default class Tabs extends React.Component {
@@ -31,10 +32,11 @@ export default class Tabs extends React.Component {
       });
     });
 
-    const tabsClasses = 'tabs' + (this.props.isHidden ? ' hidden' : '') + (this.props.tour ? ' tour-fade' : '');
+    const tabsClasses = 'tabs' + (this.props.isHidden ? ' hidden' : '') + (this.props.tour.fadeActive === false ? ' tour-fade' : '');
+    const tabListClasses = 'tabs-nav' + (this.props.tour.fadeActive === true ? ' tour-fade' : '');
     return (
       <div className={tabsClasses}>
-        <ul className="tabs-nav">
+        <ul className={tabListClasses}>
           { Object.keys(this.props.children).map(this.renderNavItem) }
         </ul>
         { tabs }
@@ -42,3 +44,7 @@ export default class Tabs extends React.Component {
     );
   }
 }
+
+Tabs.propTypes = {
+  fadeActive: PropTypes.bool
+};

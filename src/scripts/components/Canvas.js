@@ -1360,7 +1360,7 @@ export default class Canvas extends React.Component {
     }
 
     return (
-      <div className="wrapper">
+      <div className={ 'wrapper' + (this.props.isTourActive === true ? ' tour-fade' : '') }>
         { this.state.editing !== null &&
           <EditorOverlay
             ref={ node => this.editorOverlay = node }
@@ -1491,4 +1491,5 @@ Canvas.propTypes = {
   draggableMouseOver: PropTypes.func,
   draggableMouseOut: PropTypes.func,
   draggableHovered: PropTypes.number,
+  isTourActive: PropTypes.bool
 };
