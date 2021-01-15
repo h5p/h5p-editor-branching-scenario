@@ -82,6 +82,19 @@
     margin-left: 0.25em;
     color: #da0001;
   }
+
+  .editor-overlay-library{
+    .form-manager {
+      border: 0;
+      
+      &.libwrap { 
+        > .form-manager-form {
+          padding: 20px 0;
+          border: 0;
+        }
+      }
+    }
+  }
 }
 
 .editor-overlay .editor-overlay-header .editor-overlay-icon {
