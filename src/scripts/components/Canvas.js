@@ -567,7 +567,9 @@ export default class Canvas extends React.Component {
 
           // Update subtree first
           const nextBranch = isBranchingContent ? Canvas.getBranchingChildren(content) : [isContent ? content.params.nextContentId : alternative.nextContentId];
-          recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null, isBranchingContent ? index : null);
+          if (nextBranch) {
+            recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null, isBranchingContent ? index : null);
+          }
         });
       };
       recursiveTreeUpdate([0]);
