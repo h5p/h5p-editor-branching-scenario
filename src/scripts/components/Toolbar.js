@@ -153,7 +153,7 @@ export default class Toolbar extends React.Component {
     }
 
     return (
-      <div className={ 'toolbar' + (this.props.isTourActive === true ? ' tour-fade' : '') }>
+      <div className={ 'toolbar' + (this.props.isTourActive ? ' tour-fade' : '') }>
         <div className="zoom-wrapper">
           <span
             className={ zoomOutClass }

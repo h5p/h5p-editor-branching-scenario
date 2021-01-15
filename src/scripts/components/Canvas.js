@@ -1360,7 +1360,7 @@ export default class Canvas extends React.Component {
     }
 
     return (
-      <div className={ 'wrapper' + (this.props.isTourActive === true ? ' tour-fade' : '') }>
+      <div className={ 'wrapper' + (this.props.isTourActive ? ' tour-fade' : '') }>
         { this.state.editing !== null &&
           <EditorOverlay
             ref={ node => this.editorOverlay = node }

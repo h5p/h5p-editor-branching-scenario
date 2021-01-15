@@ -276,5 +276,6 @@ export default class ContentTypeMenu extends React.Component {
 
 ContentTypeMenu.propTypes = {
   libraries: PropTypes.array,
+  tourState: PropTypes.string,
   handleMouseDown: PropTypes.func
 };
