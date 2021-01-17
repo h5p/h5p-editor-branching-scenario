@@ -46,5 +46,5 @@ export default class Tabs extends React.Component {
 }
 
 Tabs.propTypes = {
-  fadeActive: PropTypes.bool
+  fadeActive: PropTypes.bool.isRequired
 };
