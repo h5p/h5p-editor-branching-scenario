@@ -241,7 +241,7 @@ export default class ContentTypeMenu extends React.Component {
   render() {
     return (
       <div className="content-type-menu">
-        <div class={ 'info-container-buttons' + ( this.props.tourState === 'branching-node' ? ' tour-fade' : '' ) }>
+        <div className={ 'info-container-buttons' + ( this.props.tourState === 'branching-node' ? ' tour-fade' : '' ) }>
           <label className="label-info">
             Info Content
             <TooltipButton
@@ -251,7 +251,7 @@ export default class ContentTypeMenu extends React.Component {
           </label>
           { this.renderDnDButtons() }
         </div>
-        <div class={ 'branching-container-buttons' + ( this.props.tourState === 'content-node' ? ' tour-fade' : '' ) }>
+        <div className={ 'branching-container-buttons' + ( this.props.tourState === 'content-node' ? ' tour-fade' : '' ) }>
           <label className="label-info">
             Branching Content
             <TooltipButton
@@ -260,7 +260,7 @@ export default class ContentTypeMenu extends React.Component {
           </label>
           { this.renderSecondButtons() }
         </div>
-        <div class={ 'reuse-container-buttons' + ( this.props.tourState ? ' tour-fade' : '' ) }>
+        <div className={ 'reuse-container-buttons' + ( this.props.tourState ? ' tour-fade' : '' ) }>
           <label className="label-info">
             Reuse Content
             <TooltipButton
