@@ -1,9 +1,10 @@
 import React from 'react';
 import Dialog from "./Dialog";
+import replaceGraphics from "../../../assets/replace.gif";
 import './ConfirmationDialog.scss';
 
 const ConfirmationDialog = (props) => {
-  let title, question, confirm, graphics;
+  let title, question, confirm, graphics, altText;
 
   switch (props.action) {
     case 'delete':
@@ -22,7 +23,8 @@ const ConfirmationDialog = (props) => {
       title = 'Replace Content'; // TODO: l10n
       question = 'Are you sure you want to replace this content?';
       confirm = 'Replace';
-      graphics = require("../../../assets/replace.gif");
+      graphics = replaceGraphics;
+      altText = 'Replace Content';
       break;
   }
 
@@ -31,6 +33,7 @@ const ConfirmationDialog = (props) => {
       icon={ <span className={ 'icon-' + props.action }/> }
       action={ props.action }
       graphics={ graphics }
+      graphicsAltText={ altText }
       headerText={ title }
       body={ question }
       handleConfirm={ props.onConfirm }
