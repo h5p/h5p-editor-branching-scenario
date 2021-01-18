@@ -13,10 +13,10 @@ export default class Tabs extends React.Component {
 
     return (
       <li
-        key={ key }
-        title={ tab.props.title }
+        key={key}
+        title={tab.props.title}
         className={[tab.props.className, this.props.activeIndex == key ? 'active' : ''].join(' ')}
-        onClick={ () => this.props.onChange(key) }>
+        onClick={() => this.props.onChange(key)}>
       </li>
     );
   }
@@ -26,7 +26,7 @@ export default class Tabs extends React.Component {
     let index = 0;
     let active = this.props.activeIndex;
 
-    let tabs = React.Children.map(this.props.children, function(child) {
+    let tabs = React.Children.map(this.props.children, function (child) {
       return React.cloneElement(child, {
         active: child.props.active === true ? true : (active == index++)
       });
@@ -37,9 +37,9 @@ export default class Tabs extends React.Component {
     return (
       <div className={tabsClasses}>
         <ul className={tabListClasses}>
-          { Object.keys(this.props.children).map(this.renderNavItem) }
+          {Object.keys(this.props.children).map(this.renderNavItem)}
         </ul>
-        { tabs }
+        { tabs}
       </div>
     );
   }
@@ -50,5 +50,5 @@ Tabs.propTypes = {
     PropTypes.shape({
       fadeActive: PropTypes.bool.isRequired
     })
-  , PropTypes.bool])
+    , PropTypes.bool])
 };
