@@ -46,5 +46,9 @@ export default class Tabs extends React.Component {
 }
 
 Tabs.propTypes = {
-  fadeActive: PropTypes.bool
+  tour: PropTypes.oneOfType([
+    PropTypes.shape({
+      fadeActive: PropTypes.bool.isRequired
+    })
+  , PropTypes.bool])
 };
