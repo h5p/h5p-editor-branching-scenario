@@ -282,16 +282,20 @@ export default class Editor extends React.Component {
           if (seen !== true) {
             // Initial tour for information content block
             setTimeout(() => {
-              this.setTourState('content-node');
+              if(this.state.activeIndex == 0 && this.state.isEditing === false && this.state.isShowingPreview === false){
+                this.setTourState('content-node');
+              }
             }, 5000);
           }
         });
       } else {
         getUserStorage('h5p-editor-branching-scenario-branching-content-tour-v1-seen', (seen) => {
           if (seen !== true) {
-            // Initial tour for information content block
+            // Initial tour for branching node
             setTimeout(() => {
-              this.setTourState('branching-node');
+              if(this.state.activeIndex == 0 && this.state.isEditing === false && this.state.isShowingPreview === false){
+                this.setTourState('branching-node');
+              }
             }, 5000);
           }
         });
