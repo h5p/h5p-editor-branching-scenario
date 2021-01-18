@@ -1,0 +1,19 @@
+.confirmation-dialog{
+    .confirmation-dialog-body{
+        .confirmation-dialog-body-split{
+            display: flex;
+            .confirmation-dialog-body-left-content{
+                flex-grow: 1;
+                flex-basis: 0;
+            }
+            .confirmation-dialog-body-right-content{
+                flex-grow: 1;
+                flex-basis: 0;
+                margin-left: 1rem;
+                img{
+                    width: 100%;
+                }
+            }
+        }
+    }
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import Dialog from "./Dialog";
+import ReplaceDialog from "./ReplaceDialog";
 import './ConfirmationDialog.scss';
 
 const ConfirmationDialog = (props) => {
@@ -26,18 +27,32 @@ const ConfirmationDialog = (props) => {
   }
 
   return (
-    <Dialog
-      icon={ <span className={ 'icon-' + props.action }/> }
-      headerText={ title }
-      body={ question }
-      handleConfirm={ props.onConfirm }
-      handleCancel={ props.onCancel }
-      textConfirm={ confirm }
-      textCancel={ 'Cancel' }
-      styleConfirm={ 'dialog-confirm-red' }
-    >
-      { props.children }
-    </Dialog>
+    props.action !== 'replace' ?
+      <Dialog
+        icon={ <span className={ 'icon-' + props.action }/> }
+        headerText={ title }
+        body={ question }
+        handleConfirm={ props.onConfirm }
+        handleCancel={ props.onCancel }
+        textConfirm={ confirm }
+        textCancel={ 'Cancel' }
+        styleConfirm={ 'dialog-confirm-red' }
+      >
+        { props.children }
+      </Dialog>
+      :
+      <ReplaceDialog
+        icon={ <span className={ 'icon-' + props.action }/> }
+        headerText={ title }
+        body={ question }
+        handleConfirm={ props.onConfirm }
+        handleCancel={ props.onCancel }
+        textConfirm={ confirm }
+        textCancel={ 'Cancel' }
+        styleConfirm={ 'dialog-confirm-red' }
+      >
+        { props.children }
+      </ReplaceDialog>
   );
 };
 
