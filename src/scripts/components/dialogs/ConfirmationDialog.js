@@ -1,10 +1,9 @@
 import React from 'react';
 import Dialog from "./Dialog";
-import ReplaceDialog from "./ReplaceDialog";
 import './ConfirmationDialog.scss';
 
 const ConfirmationDialog = (props) => {
-  let title, question, confirm;
+  let title, question, confirm, graphics;
 
   switch (props.action) {
     case 'delete':
@@ -23,36 +22,25 @@ const ConfirmationDialog = (props) => {
       title = 'Replace Content'; // TODO: l10n
       question = 'Are you sure you want to replace this content?';
       confirm = 'Replace';
+      graphics = require("../../../assets/replace.gif");
       break;
   }
 
   return (
-    props.action !== 'replace' ?
-      <Dialog
-        icon={ <span className={ 'icon-' + props.action }/> }
-        headerText={ title }
-        body={ question }
-        handleConfirm={ props.onConfirm }
-        handleCancel={ props.onCancel }
-        textConfirm={ confirm }
-        textCancel={ 'Cancel' }
-        styleConfirm={ 'dialog-confirm-red' }
-      >
-        { props.children }
-      </Dialog>
-      :
-      <ReplaceDialog
-        icon={ <span className={ 'icon-' + props.action }/> }
-        headerText={ title }
-        body={ question }
-        handleConfirm={ props.onConfirm }
-        handleCancel={ props.onCancel }
-        textConfirm={ confirm }
-        textCancel={ 'Cancel' }
-        styleConfirm={ 'dialog-confirm-red' }
-      >
-        { props.children }
-      </ReplaceDialog>
+    <Dialog
+      icon={ <span className={ 'icon-' + props.action }/> }
+      action={ props.action }
+      graphics={ graphics }
+      headerText={ title }
+      body={ question }
+      handleConfirm={ props.onConfirm }
+      handleCancel={ props.onCancel }
+      textConfirm={ confirm }
+      textCancel={ 'Cancel' }
+      styleConfirm={ 'dialog-confirm-red' }
+    >
+      { props.children }
+    </Dialog>
   );
 };
 

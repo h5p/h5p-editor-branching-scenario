@@ -9,8 +9,23 @@ const Dialog = (props) => {
         <span className='header-text'>{props.headerText}</span>
       </div>
       <div className='confirmation-dialog-body'>
-        <p className='confirmation-question'>{props.body}</p>
-        {props.children}
+        {
+          props.action === 'replace' ?
+            <div className='confirmation-dialog-body-split'>
+              <div className='confirmation-dialog-body-left-content'>
+                <p className='confirmation-question'>{props.body}</p>
+                {props.children}
+              </div>
+              <div className='confirmation-dialog-body-right-content'>
+                <img className='replace-graphics' src={props.graphics} alt='replace content?' />
+              </div>
+            </div>
+            :
+            <div className="confirmation-dialog-body-content">
+              <p className='confirmation-question'>{props.body}</p>
+              {props.children}
+            </div>
+        }
         <div className='dialog-buttons'>
           <a
             className={props.styleConfirm || 'dialog-confirm'}
