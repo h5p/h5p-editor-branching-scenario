@@ -21,6 +21,20 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
     this.setValue = setValue;
 
+    /**
+     * Help fetch the correct translations.
+     *
+     * @params {...args}
+     * @return {string}
+     */
+    this.t = function t() {
+      const args = ['H5PEditor.BranchingScenario'];
+      for (let i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+      return H5PEditor.t.apply(window, args);
+    };
+
     const contentFields = H5PEditor.findSemanticsField('content', this.field);
     this.libraryFields = contentFields.field.fields;
     this.libraries = H5PEditor.findSemanticsField('type', contentFields).options;
@@ -28,10 +42,10 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params = params || {};
 
     // Defaults for translatable fields
-    this.endScreenButtonText = 'Restart the course';
-    this.proceedButtonText = "Proceed";
-    this.startScreenButtonText = "Start the course";
-    this.title = "Branching Scenario Main Title";
+    this.endScreenButtonText = this.t('endScreenButtonText');
+    this.proceedButtonText = this.t('proceed');
+    this.startScreenButtonText = this.t('startScreenButtonText');
+    this.title = this.t('branchingScenarioTitle');
 
     this.params.content = this.params.content || [];
 
@@ -156,7 +170,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     description.setAttribute('id', feedbackDescriptionId);
     description.classList.add('h5p-feedback-description');
     description.classList.add('h5peditor-field-description');
-    description.textContent = 'It is recommended to provide feedback that motivates and also provides guidance. Leave all fields empty if you don\'t want the user to get feedback after choosing this alternative/viewing this content.';
+    description.textContent = this.t('feedbackDescription');
 
     feedbackGroup.querySelector('.title').setAttribute('aria-describedby', feedbackDescriptionId);
 
