@@ -1,4 +1,5 @@
 import React from 'react';
+import {t} from '../helpers/t';
 import './TabViewTranslations.scss';
 
 export default class TabViewTranslations extends React.Component {
@@ -18,8 +19,8 @@ export default class TabViewTranslations extends React.Component {
   render() {
     return (
       <div id="translate-interface" className="tab tab-view-full-page large-padding">
-        <span className="tab-view-title">Translations</span>
-        <span className="tab-view-description">The language and labels used in all content types can be customised by editing the fields below.</span>
+        <span className="tab-view-title">{t('translations')}</span>
+        <span className="tab-view-description">{t('translationsDescription')}</span>
         <div className="tab-view-white-box" ref={this.commonFields} />
       </div>
     );

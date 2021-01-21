@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import {t} from '../helpers/t';
 import Content from './Content.js';
 import Dropzone from './Dropzone.js';
 import { isBranching, getBranchingChildren } from '../helpers/Library';
@@ -561,7 +561,7 @@ export default class Tree extends React.Component {
       this.nodes.push(
         <div key={ key }
           className={ className }
-          aria-label={ /* TODO: l10n */ 'Alternative ' + (i + 1) }
+          aria-label={t('alternative') + ' ' + (i + 1)}
           onDoubleClick={() => {
             this.props.onEdit(branch.id);
           }}
@@ -577,7 +577,7 @@ export default class Tree extends React.Component {
             />
           }
           <div className="dark-tooltip">
-            <div className="dark-text-wrap">{ !text ? /* TODO: l10n */ 'Alternative ' + (i + 1) : Content.stripHTML(text) }</div>
+            <div className="dark-text-wrap">{ !text ? t('alternative') + ' ' + (i + 1) : Content.stripHTML(text) }</div>
           </div>
         </div>
       );

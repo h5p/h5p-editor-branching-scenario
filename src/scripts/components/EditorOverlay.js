@@ -7,6 +7,7 @@ import Canvas from './Canvas';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
 import { isBranching } from '../helpers/Library';
 import Content from "./Content";
+import {t} from '../helpers/t';
 
 export default class EditorOverlay extends React.Component {
 
@@ -160,7 +161,7 @@ export default class EditorOverlay extends React.Component {
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
-            nextContentLabel={'Special action if selected'}
+            nextContentLabel={t('specialActionSelected')}
             feedbackGroup={ feedbackGroup }
             scoringOption={ this.props.scoringOption }
           />
@@ -296,12 +297,14 @@ export default class EditorOverlay extends React.Component {
               className="button-remove"
               onClick={ this.handleRemove }
             >
-              Remove { /* TODO: l10 */ }
+              {t('remove')} 
             </button>
             <button
               className="button-blue"
               onClick={ this.handleDone }
-            >Done{/* TODO: l10n */}</button>
+            >
+              {t('done')} 
+            </button>
           </span>
         </div>
 

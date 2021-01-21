@@ -1,15 +1,16 @@
 import React from 'react';
 import Dialog from "./Dialog";
 import './FullScreenDialog.scss';
+import {t} from '../../helpers/t';
 
 const FullScreenDialog = (props) => {
   return (
     <Dialog
       classes='full-screen-dialog'
-      headerText='Full screen mode'
-      body='We strongly recommend to use Branching Scenario editor in full-screen mode, for better editing experience.'
-      textConfirm='Edit in full-screen'
-      textCancel='Edit in window-mode'
+      headerText={t('fullScreenMode')}
+      body={t('fullScreenRecommendation')}
+      textConfirm={t('editFullScreen')}
+      textCancel={t('editWindow')}
       handleConfirm={props.handleConfirm}
       handleCancel={props.handleCancel}
     />

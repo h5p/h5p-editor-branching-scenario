@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './StartScreen.scss';
+import {t} from '../helpers/t';
 
 export default class StartScreen extends React.Component {
   constructor(props) {
@@ -11,12 +12,12 @@ export default class StartScreen extends React.Component {
     return (
       <div className="startscreen-wrapper" onClick={this.props.handleClick}>
         <div className="startscreen-header">
-          <h1>No content has been added yet</h1>
-          <p>To create content drag the icons from the left menu to the dropzone below</p>
+          <h1>{t('noContentAdded')}</h1>
+          <p>{t('dragIconFromMenu')}</p>
           { this.props.children }
         </div>
         <div className="startscreen-footer">
-          <p><a onClick={this.props.handleTutorialClick}>Step by step tutorial</a> on how to use Branching Scenario</p>
+          <p><a onClick={this.props.handleTutorialClick}>{t('stepByStepTutorial')}</a></p>
         </div>
       </div>
     );

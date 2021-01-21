@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Editor from '../scripts/editor';
 import { isBranching } from '../scripts/helpers/Library';
+import {t} from "../scripts/helpers/t";
 
 /*global H5PEditor*/
 H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function () {
@@ -18,22 +19,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.parent = parent;
     // Fields of semantics
     this.field = field;
-
     this.setValue = setValue;
-
-    /**
-     * Help fetch the correct translations.
-     *
-     * @params {...args}
-     * @return {string}
-     */
-    this.t = function t() {
-      const args = ['H5PEditor.BranchingScenario'];
-      for (let i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-      return H5PEditor.t.apply(window, args);
-    };
 
     const contentFields = H5PEditor.findSemanticsField('content', this.field);
     this.libraryFields = contentFields.field.fields;
@@ -42,10 +28,10 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params = params || {};
 
     // Defaults for translatable fields
-    this.endScreenButtonText = this.t('endScreenButtonText');
-    this.proceedButtonText = this.t('proceed');
-    this.startScreenButtonText = this.t('startScreenButtonText');
-    this.title = this.t('branchingScenarioTitle');
+    this.endScreenButtonText = t('endScreenButtonText');
+    this.proceedButtonText = t('proceed');
+    this.startScreenButtonText = t('startScreenButtonText');
+    this.title = t('branchingScenarioTitle');
 
     this.params.content = this.params.content || [];
 
@@ -170,7 +156,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     description.setAttribute('id', feedbackDescriptionId);
     description.classList.add('h5p-feedback-description');
     description.classList.add('h5peditor-field-description');
-    description.textContent = this.t('feedbackDescription');
+    description.textContent = t('feedbackDescription');
 
     feedbackGroup.querySelector('.title').setAttribute('aria-describedby', feedbackDescriptionId);
 

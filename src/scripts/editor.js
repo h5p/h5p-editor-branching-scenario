@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './editor.scss';
-
+import {t} from './helpers/t';
 import './components/Editor.scss';
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';
@@ -464,14 +464,14 @@ export default class Editor extends React.Component {
                 title='Back to edit'
                 onClick={() => this.togglePreview()}
                 disabled={this.state.isEditing}
-              >Back to edit</button>
+              >{t('backToEdit')}</button>
               :
               <button
                 className={'preview-button' + (this.state.tour ? ' tour-fade' : '')}
                 title='Preview'
                 onClick={() => this.togglePreview()}
                 disabled={this.state.isEditing}
-              >Preview</button>
+              >{t('preview')}</button>
           }
           {H5PEditor.semiFullscreen !== undefined &&
             <div
@@ -489,7 +489,7 @@ export default class Editor extends React.Component {
               role="button"
               tabIndex="0"
               onClick={this.handleToggleFullscreen}
-            >Proceed to Save{/* TODO: l10n */}</div>
+            >{t('proceedToSave')}</div>
           }
         </div>
         <Tabs

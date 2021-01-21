@@ -39,7 +39,7 @@ export default class Tabs extends React.Component {
         <ul className={tabListClasses}>
           {Object.keys(this.props.children).map(this.renderNavItem)}
         </ul>
-        { tabs}
+        {tabs}
       </div>
     );
   }
@@ -49,6 +49,6 @@ Tabs.propTypes = {
   tour: PropTypes.oneOfType([
     PropTypes.shape({
       fadeActive: PropTypes.bool.isRequired
-    })
-    , PropTypes.bool])
+    }), PropTypes.bool]
+  )
 };

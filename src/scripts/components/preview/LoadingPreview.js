@@ -1,12 +1,15 @@
 import React from 'react';
 import loading from "../../../assets/loading.gif";
+import { t } from '../../helpers/t';
 import './LoadingPreview.scss';
 
+
+//https://wordpress.org/support/topic/loading-gif-without-alt-attribute/
 const LoadingPreview = () => {
   return (
     <div className='loading-wrapper'>
-      <img className='loading-graphics' src={loading} alt='loading...' />
-      <div className='loading-text'>Preview is loading...</div>
+      <img className='loading-graphics' src={loading} alt="" />
+      <div className='loading-text'>{t('previewLoading')}</div>
     </div>
   );
 };

@@ -12,6 +12,7 @@ import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
 import BlockInteractionOverlay from './BlockInteractionOverlay';
 import { getMachineName, getAlternativeName, isBranching, hasNextContent } from '../helpers/Library';
+import {t} from '../helpers/t';
 
 /*global H5P*/
 export default class Canvas extends React.Component {
@@ -27,8 +28,8 @@ export default class Canvas extends React.Component {
         top: {
           icon: '',
           title: '',
-          saveButton: "Save changes",
-          closeButton: "close"
+          saveButton: t('saveChanges'),
+          closeButton: t('close')
         },
         content: {
         }

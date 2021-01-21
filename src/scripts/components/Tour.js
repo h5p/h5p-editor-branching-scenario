@@ -1,4 +1,5 @@
 import React from 'react';
+import {t} from '../helpers/t';
 
 export default class Tour extends React.Component {
   constructor(props) {
@@ -12,7 +13,7 @@ export default class Tour extends React.Component {
           <div className="tour-dialog">
             {this.props.message}
             <br/>
-            <button type="button" className="tour-button" onClick={ this.props.onClose }>I got it</button>
+            <button type="button" className="tour-button" onClick={ this.props.onClose }>{t('iGotIt')}</button>
           </div>
         </div>
       </div>

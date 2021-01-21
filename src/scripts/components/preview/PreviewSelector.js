@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from "prop-types";
 import './PreviewSelector.scss';
 import {getAlternativeName} from "../../helpers/Library";
+import {t} from '../../helpers/t';
 
 export default class PreviewSelector extends React.Component {
   static defaultValue = 'start';
@@ -67,7 +68,9 @@ export default class PreviewSelector extends React.Component {
   render() {
     return (
       <div className='preview-scene-selection-wrapper'>
-        <label className='preview-introduction' for={ this.previewSceneSelectId }>Preview Branching Questions set from:</label>
+        <label className='preview-introduction' for={this.previewSceneSelectId}>
+          {t('previewSelectorTitle')}:
+        </label>
         <div className='preview-selector field'>
           <select
             id={ this.previewSceneSelectId }
@@ -76,7 +79,7 @@ export default class PreviewSelector extends React.Component {
             onChange={e => this.setContentId(e.target.value)}
             disabled={this.props.isDisabled}
           >
-            <option value={PreviewSelector.defaultValue}>Preview from the beginning</option>
+            <option value={PreviewSelector.defaultValue}>{t('previewFromBeginning')}</option>
             {
               this.props.params.branchingScenario.content.map((content) => {
                 const alternativeName = getAlternativeName({
