@@ -13,6 +13,11 @@ export default class Tree extends React.Component {
       width: 42,
       height: 32
     };
+
+    this.tips = {
+      newContentTypeId: null,
+      currentContentTypeId: null
+    };
   }
 
   /**
@@ -385,6 +390,7 @@ export default class Tree extends React.Component {
         draggableHovered={this.props.draggableHovered}
         contentClass={ this.getClassName(branch.id) }
         onEdit={ () => this.props.onEdit(branch.id) }
+        onHighlight={ () => this.props.onHighlight(this.tips.newContentTypeId, this.tips.currentContentTypeId) }
         onPreview={ () => this.props.onPreview(branch.id) }
         onCopy={ () => this.props.onCopy(branch.id) }
         onDelete={ () => this.props.onDelete(branch.id) }
@@ -495,6 +501,7 @@ export default class Tree extends React.Component {
           left: x + 'px',
           top: y + 'px'
         } }
+        onFocus={ () => this.props.onDropzoneHighlight() }
         onClick={ () => this.props.onDropzoneClick(nextContentId, parent, num) }
       />
     );
@@ -652,6 +659,7 @@ export default class Tree extends React.Component {
    */
   handleMove = (id, draggable) => {
     const intersections = this.getIntersections(draggable);
+    let focusFlag = 1;
 
     // Highlight dropzones with largest intersection with draggable
     this.props.dropzones.forEach(dropzone => {
@@ -663,9 +671,16 @@ export default class Tree extends React.Component {
         dropzone.dehighlight();
       }
       else {
+        focusFlag = 0;
+        this.tips.newContentTypeId = id;
+        this.tips.currentContentTypeId = intersections[0];
         dropzone.highlight();
       }
     });
+
+    if (focusFlag) {
+      this.props.onFocus();
+    }
   }
 
   /**

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import './Canvas.scss';
 import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
+import Tip from './Tip.js';
 import Dropzone from './Dropzone.js';
 import Content from './Content.js';
 import Tree from './Tree.js';
@@ -44,7 +45,8 @@ export default class Canvas extends React.Component {
         x: 0,
         y: 0
       },
-      setNextContentId: null
+      setNextContentId: null,
+      tips: null
     };
   }
 
@@ -69,13 +71,16 @@ export default class Canvas extends React.Component {
    * React hook
    */
   static getDerivedStateFromProps(nextProps, state) {
+   
     if (nextProps.inserting && nextProps.insertingId !== state.insertingId) {
       return ({ // Set new state on inserting
         insertingId: nextProps.insertingId,
+        tips: null,
         placing: -1,
         library: nextProps.inserting.library
       });
     }
+
     return null;
   }
 
@@ -111,6 +116,106 @@ export default class Canvas extends React.Component {
   }
 
   /**
+   * Implement Tips Highlight
+   * By dragging new/existing component to another
+   *
+   * @param {number} newContentType ID of existing content type.
+   * @param {number} currentContentType ID of New content type.
+   */
+  handleHighlight = (newContentType, currentContentType) => {
+    let newContentTypeTitle, scenario = 2;
+    if (newContentType === -1) {
+      //Tips - Scenario 5, 8 & 11
+      newContentTypeTitle = this.props.getNewContent(this.getNewContentParams()).params.type.metadata.contentType;
+      if (this.props.inserting && this.props.inserting.pasted) {
+        scenario = 5;
+      }
+      if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+        scenario = 8;
+      }
+      if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+        scenario = 11;
+      }
+    }else{
+      newContentTypeTitle = this.state.content[newContentType].params.type.metadata.title;
+    }
+
+    //Tips - Scenario 3 & 6
+    if (this.state.content[currentContentType.props.id].params.type.params.branchingQuestion) {
+      scenario = 3;
+      if (this.props.inserting && this.props.inserting.pasted) {
+        scenario = 6;
+      }
+    }
+    
+    this.setState({
+      tips: {
+        scenario: scenario,
+        newContentType: newContentTypeTitle,
+        currentContentType: this.state.content[currentContentType.props.id].params.type.metadata.title
+      }
+    });
+    return this.props.onHighlight;
+  }
+
+  /**
+   * TODO
+   */
+  handleTreeFocus = () => {
+    // In order to remove tips, on focus of tree reset tips to null
+    this.setState({ 
+      tips: null
+    });
+  }
+
+  /**
+   * Implement Tips Highlight
+   * By dragging new/existing component to Dropzones
+   */
+  handleDropzoneHighlight = () => {
+
+    if (this.state.insertingId) {
+      // Tips Scenario 1
+      this.setState({
+        tips: {
+          scenario: 1,
+          newContentType: this.state.library.title
+        }
+      });
+    }
+
+    if (this.props.inserting && this.props.inserting.pasted) {
+      // Tips Scenario 4
+      this.setState({
+        tips: {
+          scenario: 4,
+          newContentType: this.state.library.title
+        }
+      });
+    }
+
+    if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+      // Tips Scenario 7
+      this.setState({
+        tips: {
+          scenario: 7,
+          newContentType: this.state.library.title
+        }
+      });
+    }
+
+    if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+      // Tips Scenario 10
+      this.setState({
+        tips: {
+          scenario: 10,
+          newContentType: this.props.inserting.library.title
+        }
+      });
+    }
+  }
+
+  /**
    * Get "the" parent node.
    *
    * Assumes that this.renderedNodes holds all nodes in order of appearance
@@ -141,7 +246,8 @@ export default class Canvas extends React.Component {
   handleDropped = (id, dropzone) => {
     if (!dropzone || dropzone instanceof Content && dropzone.props.disabled) {
       this.setState({
-        placing: null
+        placing: null,
+        tips: null
       });
       this.props.onDropped(); // TODO: See handlePlacing. Should be called after setstate or could it be done differently.
       return;
@@ -443,6 +549,7 @@ export default class Canvas extends React.Component {
     this.setState((prevState, props) => {
       let newState = {
         placing: null,
+        tips: null,
         editing: null,
         inserting: null,
         content: [...prevState.content],
@@ -1243,7 +1350,8 @@ export default class Canvas extends React.Component {
         // Stop click-to-place placing
         if (this.state.placing !== null && this.state.deleting === null) {
           this.setState({
-            placing: null
+            placing: null,
+            tips: null
           });
           this.props.onDropped();
         }
@@ -1396,6 +1504,12 @@ export default class Canvas extends React.Component {
           </Content>
         }
         <div className={`canvas${this.state.placing !== null ? ' placing-draggable' : ''}`}>
+          { this.state.tips &&
+            <Tip 
+              scenario={ this.state.tips.scenario }
+              currentContentType={ this.state.tips.currentContentType }
+              newContentType={ this.state.tips.newContentType } />
+          }
           <Draggable
             ref={ node => this.treewrap = node }
             className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
@@ -1427,7 +1541,9 @@ export default class Canvas extends React.Component {
                 onPreview={ this.props.onContentPreview }
                 onCopy={ this.handleContentCopy }
                 onDelete={ this.handleContentDelete }
-                onHighlight={ this.props.onHighlight }
+                onHighlight={ this.handleHighlight }
+                onDropzoneHighlight={ this.handleDropzoneHighlight }
+                onFocus={ this.handleTreeFocus }
                 onDropzoneClick={ this.handleDropzoneClick }
                 draggableMouseOver={this.props.draggableMouseOver}
                 draggableMouseOut={this.props.draggableMouseOut}
@@ -1452,6 +1568,7 @@ export default class Canvas extends React.Component {
                   left: '361.635px',
                   top: '130px'
                 } }
+                onFocus={ () => this.handleDropzoneHighlight() }
                 onClick={ () => this.handleDropzoneClick(-9, undefined, 0) }
               />
             </StartScreen>
