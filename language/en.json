@@ -83,6 +83,10 @@
       "configureEndScenario": "Configure the default end scenario screen",
       "jumpToOtherBranch": "Jump to another branch",
       "selectABranchToJump": "Select a branch to jump to",
-      "feedbackDescription": "It is recommended to provide feedback that motivates and also provides guidance. Leave all fields empty if you don't want the user to get feedback after choosing this alternative/viewing this content."
+      "feedbackDescription": "It is recommended to provide feedback that motivates and also provides guidance. Leave all fields empty if you don't want the user to get feedback after choosing this alternative/viewing this content.",
+      "requiresFinishingCoursePresentationLabel": "Required to view entire presentation",
+      "requiresFinishingCoursePresentationDescription": "Urges viewers to navigate all the way to the last slide of the presentation in order to proceed. This setting will not work for active surface mode presentations",
+      "requiresFinishingVideoLabel": "Required to watch until the end",
+      "requiresFinishingVideoDescription": "Urges viewers to complete the video before proceeding with the scenario"
     }
   }
