@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import TooltipButton from './TooltipButton';
 import './TabViewSettings.scss';
+import {t} from '../helpers/t';
 
 export default class TabViewSettings extends React.Component {
   constructor(props) {
@@ -10,6 +11,7 @@ export default class TabViewSettings extends React.Component {
     this.refStartScreen = React.createRef();
     this.refEndScreen = React.createRef();
     this.refScoringOption= React.createRef();
+    this.refBehaviour= React.createRef();
 
     const params = this.props.main.params;
 
@@ -32,6 +34,11 @@ export default class TabViewSettings extends React.Component {
     );
     this.scoringOptionWrapper = document.createElement('div');
 
+    const behaviourField = H5PEditor.findSemanticsField(
+      'behaviour',
+      this.props.main.field
+    );
+    this.behaviourWrapper = document.createElement('div');
 
     // Fill fields
     H5PEditor.processSemanticsChunk(
@@ -61,6 +68,14 @@ export default class TabViewSettings extends React.Component {
     );
     children = children.concat(this.props.main.children);
 
+    H5PEditor.processSemanticsChunk(
+      [behaviourField],
+      params,
+      H5PEditor.$(this.behaviourWrapper),
+      this.props.main
+    );
+    children = children.concat(this.props.main.children);
+
     // Restore children
     this.props.main.children = children;
 
@@ -75,10 +90,10 @@ export default class TabViewSettings extends React.Component {
 
     // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      tooltipStartingScreen: 'Starting screen is an intro screen that should give a learner additional information about the course',
-      tooltipEndScenario: 'Each alternative that does not have a custom end screen set - will lead to a default end screen.',
-      tooltipEndFeedback: 'You can customize the feedback, set a different text size and color using textual editor.',
-      tooltipScoringOptions: '<p><b>Statically set score for each end scenario</b><br />The author gives points for each scenario</p><p><b>Dynamically calculate score from user answers</b><br />The author gives points for each content and/or for each alternative inside branching question<br />The final score is calculated as a sum of points that the user earned until he reached the end</p><p><b>No scoring</b><br />Upon reaching the end - the user will get only feedback</p>'
+      tooltipStartingScreen: t('tooltipStartingScreen'),
+      tooltipEndScenario: t('tooltipEndScenario'),
+      tooltipEndFeedback: t('tooltopEndFeedback'),
+      tooltipScoringOptions: t('tooltipScoringOptions')
     };
   }
 
@@ -86,17 +101,18 @@ export default class TabViewSettings extends React.Component {
     this.refStartScreen.current.appendChild(this.startScreenWrapper);
     this.refEndScreen.current.appendChild(this.endScreenWrapper);
     this.refScoringOption.current.appendChild(this.scoringOptionWrapper);
+    this.refBehaviour.current.appendChild(this.behaviourWrapper);
   }
 
   render() {
     return (
       <div id="settings" className="tab tab-view-full-page large-padding">
-        <span className="tab-view-title">Settings</span>
-        <span className="tab-view-description">Below are the settings for your <strong>Branching Questions</strong></span>
+        <span className="tab-view-title">{t('settings')}</span>
+        <span className="tab-view-description">{t('branchingQuestionSettingsDescription')}</span>
         <div className="tab-view-white-box">
           <fieldset>
             <legend className="tab-view-info">
-              Configure starting screen
+              {t('configureStartScreen')}
               <TooltipButton
                 text={ this.l10n.tooltipStartingScreen }
                 tooltipClass={ 'tooltip below' }
@@ -109,7 +125,7 @@ export default class TabViewSettings extends React.Component {
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">
-            Configure the default "End scenario" screen
+              {t('configureEndScenario')}
               <TooltipButton
                 text={ this.l10n.tooltipEndScenario }
               />
@@ -121,7 +137,7 @@ export default class TabViewSettings extends React.Component {
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">
-              Scoring options
+              {t('scoringOptions')}
               <TooltipButton
                 text={ this.l10n.tooltipScoringOptions }
                 tooltipClass={ 'tooltip wide' }
@@ -129,6 +145,15 @@ export default class TabViewSettings extends React.Component {
             </legend>
             <div
               ref={this.refScoringOption}
+              className='h5p-scoring-option-wrapper'
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="tab-view-info">
+              Behavioural Settings
+            </legend>
+            <div
+              ref={this.refBehaviour}
               className='h5p-scoring-option-wrapper'
             />
           </fieldset>

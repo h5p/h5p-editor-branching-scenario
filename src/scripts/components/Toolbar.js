@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { find } from '../helpers/Library';
-
+import {t} from '../helpers/t';
 import './Toolbar.scss';
 
 export default class Toolbar extends React.Component {
@@ -174,12 +174,12 @@ export default class Toolbar extends React.Component {
           />
           <span
             className={ 'fit-to-canvas' + (this.props.disabled ? ' disabled' : '') }
-            title="Zoom to fit"
+            title={t('zoomToFit')}
             tabIndex="0"
             role="button"
             onClick={ this.handleFitToCanvas }
           >
-            Zoom to fit
+            {t('zoomToFit')}
           </span>
         </div>
         <div
@@ -190,9 +190,9 @@ export default class Toolbar extends React.Component {
           onClick={ this.handleShowPopup }
         >{ this.props.numDefaultEndScenarios }</div>
         <div className={ infoPopupClass }>
-          { this.props.numDefaultEndScenarios } alternative(s) are missing the custom end scenario.
+          { this.props.numDefaultEndScenarios } {(t('alternativesMissing'))}
           { !!this.props.numDefaultEndScenarios &&
-            <span> Click <span className="highlight-end-scenarios-button" role="button" tabIndex="0" onClick={ this.handleHighlight }>here</span> to highlight these.</span>
+            <span> <span className="highlight-end-scenarios-button" role="button" tabIndex="0" onClick={ this.handleHighlight }>{t('clickHereToHighlight')}</span></span>
           }
 
           <div className="close-info-popup-button" onClick={ this.handleClosePopup } aria-label="Close"></div>

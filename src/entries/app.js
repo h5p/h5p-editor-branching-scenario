@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Editor from '../scripts/editor';
 import { isBranching } from '../scripts/helpers/Library';
+import {t} from "../scripts/helpers/t";
 
 /*global H5PEditor*/
 H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function () {
@@ -18,7 +19,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.parent = parent;
     // Fields of semantics
     this.field = field;
-
     this.setValue = setValue;
 
     const contentFields = H5PEditor.findSemanticsField('content', this.field);
@@ -28,10 +28,10 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.params = params || {};
 
     // Defaults for translatable fields
-    this.endScreenButtonText = 'Restart the course';
-    this.proceedButtonText = "Proceed";
-    this.startScreenButtonText = "Start the course";
-    this.title = "Branching Scenario Main Title";
+    this.endScreenButtonText = t('endScreenButtonText');
+    this.proceedButtonText = t('proceed');
+    this.startScreenButtonText = t('startScreenButtonText');
+    this.title = t('branchingScenarioTitle');
 
     this.params.content = this.params.content || [];
 
@@ -156,7 +156,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     description.setAttribute('id', feedbackDescriptionId);
     description.classList.add('h5p-feedback-description');
     description.classList.add('h5peditor-field-description');
-    description.textContent = 'It is recommended to provide feedback that motivates and also provides guidance. Leave all fields empty if you don\'t want the user to get feedback after choosing this alternative/viewing this content.';
+    description.textContent = t('feedbackDescription');
 
     feedbackGroup.querySelector('.title').setAttribute('aria-describedby', feedbackDescriptionId);
 
