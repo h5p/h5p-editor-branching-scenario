@@ -119,7 +119,7 @@ export default class EditorOverlay extends React.Component {
     titleField.$input.on('change', () => this.forceUpdate());
 
     // Change label and description of "requires finishing" field if they can be more specific.
-    this.modifyrequiresFinishingField(library);
+    this.modifyRequiresFinishingField(library);
 
     const fm = (library.children[0] instanceof H5P.DragNBar.FormManager ? library.children[0] : (library.children[0].children && library.children[0].children[1] instanceof H5P.DragNBar.FormManager ? library.children[0].children[1] : null));
     if (fm) {
@@ -147,7 +147,7 @@ export default class EditorOverlay extends React.Component {
    * Change field for required finished field to suit current interaction.
    * @param {object} library Library type object.
    */
-  modifyrequiresFinishingField(library = {}) {
+  modifyRequiresFinishingField(library = {}) {
     const machineName = (library.params && library.params.library) ? library.params.library.split(' ')[0] : null;
     const requiresFinishingField = this.findField('requiresFinishing');
     if (!machineName || !requiresFinishingField || !requiresFinishingField.$item) {
