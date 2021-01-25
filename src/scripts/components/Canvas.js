@@ -356,14 +356,13 @@ export default class Canvas extends React.Component {
 
     nextIds
       .filter(id => id !== undefined && id > -1)
-      .filter(id => this.tree.processed.indexOf(id) > this.tree.processed.indexOf(start)) // prevent loops
       // TODO: Not very react like...
       .forEach(id => {
         childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true, skip));
       });
 
     // Remove any duplicates
-    return childrenIds.filter((id, idx) => childrenIds.indexOf(id) === idx);
+    return childrenIds;
   }
 
   /**
