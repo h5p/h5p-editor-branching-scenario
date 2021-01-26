@@ -350,6 +350,11 @@ export default class Tree extends React.Component {
     const content = this.props.content[branch.id];
     const contentIsBranching = branch.isBranching;
 
+    // TODO move this to assignment level
+    if(content.params.nextContentId === undefined) {
+      content.params.nextContentId = -1;
+    }
+
     // Determine position of node
     const position = this.createPosition(branch);
 
