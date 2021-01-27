@@ -351,7 +351,7 @@ export default class Tree extends React.Component {
     const contentIsBranching = branch.isBranching;
 
     // TODO move this to assignment level
-    if(content.params.nextContentId === undefined) {
+    if(content.params.nextContentId === undefined && content.params.type.library != "H5P.BranchingQuestion 1.0") {
       content.params.nextContentId = -1;
     }
 

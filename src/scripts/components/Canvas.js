@@ -1204,7 +1204,7 @@ export default class Canvas extends React.Component {
           }
         });
       }
-      else if ( this.hasEndScreen(content) && !this.hasCustomEndScreen(content)) {
+      else if (this.hasEndScreen(content) && !this.hasCustomEndScreen(content)) {
         numMissingEndScenarios++;
       }
     });
