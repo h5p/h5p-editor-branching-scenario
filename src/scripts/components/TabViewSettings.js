@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import TooltipButton from './TooltipButton';
 import './TabViewSettings.scss';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class TabViewSettings extends React.Component {
   constructor(props) {
@@ -150,7 +150,7 @@ export default class TabViewSettings extends React.Component {
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">
-              Behavioural Settings
+              {t('behavioralSettings')}
             </legend>
             <div
               ref={this.refBehaviour}

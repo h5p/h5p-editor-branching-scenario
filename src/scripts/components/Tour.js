@@ -1,5 +1,5 @@
 import React from 'react';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class Tour extends React.Component {
   constructor(props) {

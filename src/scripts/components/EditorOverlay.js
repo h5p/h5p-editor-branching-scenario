@@ -7,7 +7,7 @@ import Canvas from './Canvas';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
 import { isBranching } from '../helpers/Library';
 import Content from "./Content";
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class EditorOverlay extends React.Component {
 

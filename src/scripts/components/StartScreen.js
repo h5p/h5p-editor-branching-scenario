@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './StartScreen.scss';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class StartScreen extends React.Component {
   constructor(props) {

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Editor from '../scripts/editor';
 import { isBranching } from '../scripts/helpers/Library';
-import {t} from "../scripts/helpers/t";
+import {t} from "../scripts/helpers/translate";
 
 /*global H5PEditor*/
 H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function () {

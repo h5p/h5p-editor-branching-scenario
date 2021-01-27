@@ -2,7 +2,7 @@ import React from 'react';
 import Dialog from "./Dialog";
 import replaceGraphics from "../../../assets/replace.gif";
 import './ConfirmationDialog.scss';
-import {t} from '../../helpers/t';
+import {t} from '../../helpers/translate';
 
 const ConfirmationDialog = (props) => {
   let title, question, confirm, graphics, altText;

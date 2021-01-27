@@ -1,5 +1,5 @@
 import React from 'react';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 import './TabViewTranslations.scss';
 
 export default class TabViewTranslations extends React.Component {

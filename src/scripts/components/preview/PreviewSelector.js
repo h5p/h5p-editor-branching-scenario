@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from "prop-types";
 import './PreviewSelector.scss';
 import {getAlternativeName} from "../../helpers/Library";
-import {t} from '../../helpers/t';
+import {t} from '../../helpers/translate';
 
 export default class PreviewSelector extends React.Component {
   static defaultValue = 'start';

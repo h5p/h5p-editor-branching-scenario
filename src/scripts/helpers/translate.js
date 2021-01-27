@@ -1,5 +1,5 @@
 /**
- * Help fetch the correct translations.
+ * Fetch the translated String.
  *
  * @params {...args}
  * @return {string}

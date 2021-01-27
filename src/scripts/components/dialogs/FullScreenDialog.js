@@ -1,7 +1,7 @@
 import React from 'react';
 import Dialog from "./Dialog";
 import './FullScreenDialog.scss';
-import {t} from '../../helpers/t';
+import {t} from '../../helpers/translate';
 
 const FullScreenDialog = (props) => {
   return (

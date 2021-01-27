@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './editor.scss';
-import {t} from './helpers/t';
+import {t} from './helpers/translate';
 import './components/Editor.scss';
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';
@@ -60,7 +60,7 @@ export default class Editor extends React.Component {
 
     // Add title field
     const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
-    titleField.$item.find('input')[0].placeholder = 'Enter title here';
+    titleField.$item.find('input')[0].placeholder = t('enterTitleHere');
     titleField.$item.prependTo(this.topbar);
 
     if (H5PEditor.semiFullscreen !== undefined) {
@@ -92,7 +92,7 @@ export default class Editor extends React.Component {
             additionalClass: false,
             markerPosition: 'left-bottom',
             fadeActive: false,
-            message: 'Use this button to go in and out of full-screen mode.',
+            message: t('fullScreenModeButton'),
             width: (fsButtonRect.width - bufferSize) + 'px',
             height: (fsButtonRect.height - bufferSize) + 'px',
             left: ((fsButtonRect.left + bufferSpace) - formRect.left) + 'px',
@@ -110,7 +110,7 @@ export default class Editor extends React.Component {
             additionalClass: 'content-node-tour',
             markerPosition: 'right-top',
             fadeActive: true,
-            message: 'Drag and drop any content type below alternatives to create a content that will appear after an alternative is selected.',
+            message: t('dragContentTypesBelow'),
             width: (icButtonRect.width - bufferSpace) + 'px',
             height: (icButtonRect.height - bufferSpace) + 'px',
             left: (icButtonRect.left - formRect.left) + 'px',
@@ -129,7 +129,7 @@ export default class Editor extends React.Component {
             additionalClass: 'branching-node-tour',
             markerPosition: 'right-top',
             fadeActive: true,
-            message: 'Drag Branching question and drop it below your content to create branching.',
+            message: t('dragBranchingQuestionBelow'),
             width: (bcButtonRect.width - bufferSpace) + 'px',
             height: (bcButtonRect.height - bufferSpace) + 'px',
             left: (bcButtonRect.left - formRect.left) + 'px',
@@ -461,14 +461,14 @@ export default class Editor extends React.Component {
             this.state.isShowingPreview ?
               <button
                 className={'preview-button back' + (this.state.tour ? ' tour-fade' : '')}
-                title='Back to edit'
+                title={t('backToEdit')}
                 onClick={() => this.togglePreview()}
                 disabled={this.state.isEditing}
               >{t('backToEdit')}</button>
               :
               <button
                 className={'preview-button' + (this.state.tour ? ' tour-fade' : '')}
-                title='Preview'
+                title={t('preview')}
                 onClick={() => this.togglePreview()}
                 disabled={this.state.isEditing}
               >{t('preview')}</button>
@@ -476,7 +476,7 @@ export default class Editor extends React.Component {
           {H5PEditor.semiFullscreen !== undefined &&
             <div
               className={'fullscreen-button' + (this.state.fullscreen ? ' active' : '') + (this.state.tour ? ' tour-active' : '')}
-              title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
+              title={(this.state.fullscreen ? t('exit') : t('enter')) + ' ' + t('fullScreenMode')}
               role="button"
               tabIndex="0"
               onClick={this.handleToggleFullscreen}
@@ -485,7 +485,7 @@ export default class Editor extends React.Component {
           {this.state.fullscreen &&
             <div
               className={'proceed-button' + (this.state.tour ? ' tour-fade' : '')}
-              title="Proceed to save your Branching Scenario"
+              title={t('proceedToSaveBranchingScenario')}
               role="button"
               tabIndex="0"
               onClick={this.handleToggleFullscreen}
@@ -549,23 +549,23 @@ export default class Editor extends React.Component {
               isTourActive={(this.state.tour ? true : false)}
             />
           </Tab>
-          <Tab title="Settings" className="bs-editor-settings-tab">
+          <Tab title={t('settings')} className="bs-editor-settings-tab">
             <TabViewSettings
               main={this.props.main}
               updateScoringOption={this.handleScoringOptionChange}
             />
           </Tab>
-          <Tab title="Translations" className="bs-editor-translations-tab">
+          <Tab title={t('translations')} className="bs-editor-translations-tab">
             <TabViewTranslations
               parent={this.props.parent}
             />
           </Tab>
-          <Tab title="Get help" className="bs-editor-tutorial-tab">
+          <Tab title={t('getHelp')} className="bs-editor-tutorial-tab">
             <TabViewTutorial
               handleOpenCanvas={this.handleOpenCanvas}
             />
           </Tab>
-          <Tab title="Metadata" className="bs-editor-metadata-tab">
+          <Tab title={t('metadata')} className="bs-editor-metadata-tab">
             <TabViewMetadata
               metadataForm={this.props.main.parent.metadataForm}
             />

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { find } from '../helpers/Library';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 import './Toolbar.scss';
 
 export default class Toolbar extends React.Component {
@@ -133,8 +133,6 @@ export default class Toolbar extends React.Component {
   }
 
   render() {
-    // TODO: l10n
-
     let infoPopupClass = 'info-popup';
     if (this.state.showInfoPopup) {
       infoPopupClass += ' visible';
@@ -157,7 +155,7 @@ export default class Toolbar extends React.Component {
         <div className="zoom-wrapper">
           <span
             className={ zoomOutClass }
-            title="Zoom out"
+            title={t('zoomOut')}
             tabIndex="0"
             role="button"
             onClick={ () => this.handleZoom(false) }
@@ -167,7 +165,7 @@ export default class Toolbar extends React.Component {
           </span>
           <span
             className={ zoomInClass }
-            title="Zoom in"
+            title={t('zoomIn')}
             tabIndex="0"
             role="button"
             onClick={ () => this.handleZoom(true) }
@@ -184,7 +182,7 @@ export default class Toolbar extends React.Component {
         </div>
         <div
           className="missing-end-scenarios"
-          title={`${this.props.numDefaultEndScenarios} alternatives without custom end scenario`}
+          title={`${this.props.numDefaultEndScenarios} ${t('alternativeWithoutCustomEnd')}`}
           role="button"
           tabIndex="0"
           onClick={ this.handleShowPopup }
@@ -195,7 +193,7 @@ export default class Toolbar extends React.Component {
             <span> <span className="highlight-end-scenarios-button" role="button" tabIndex="0" onClick={ this.handleHighlight }>{t('clickHereToHighlight')}</span></span>
           }
 
-          <div className="close-info-popup-button" onClick={ this.handleClosePopup } aria-label="Close"></div>
+          <div className="close-info-popup-button" onClick={ this.handleClosePopup } aria-label={t('close')}></div>
         </div>
       </div>
     );
