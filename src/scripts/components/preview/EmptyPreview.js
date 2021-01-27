@@ -1,7 +1,7 @@
 import React from 'react';
 import './EmptyPreview.scss';
 import PropTypes from "prop-types";
-import {t} from '../../helpers/t';
+import {t} from '../../helpers/translate';
 
 const EmptyPreview = (props) => {
   return (

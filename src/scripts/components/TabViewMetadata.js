@@ -1,7 +1,7 @@
 import React from 'react';
 import TooltipButton from './TooltipButton';
 import './TabViewMetadata.scss';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class TabViewMetadata extends React.Component {
   constructor(props) {

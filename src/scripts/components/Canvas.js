@@ -13,7 +13,7 @@ import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
 import BlockInteractionOverlay from './BlockInteractionOverlay';
 import { getMachineName, getAlternativeName, isBranching, hasNextContent } from '../helpers/Library';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 /*global H5P*/
 export default class Canvas extends React.Component {
@@ -1415,7 +1415,7 @@ export default class Canvas extends React.Component {
       children.unshift(getAlternativeName(this.state.content[this.state.deleting]));
       return (
         <div className='confirmation-details'>
-          <p>If you proceed, you will lose all the content attached to this alternative:</p>
+          <p>{t('shiftConfirmationAlternative')}:</p>
           <ul>
             { children.map((title, index) =>
               <li key={index}>{title}</li>
@@ -1427,7 +1427,7 @@ export default class Canvas extends React.Component {
     else if (isBranching(this.state.content[this.state.deleting])) {
       return (
         <div className='confirmation-details'>
-          <p>If you proceed you will lose all content attached to this branch:</p>
+          <p>{t('shiftConfirmationBranch')}:</p>
           <ul>
             { this.getChildrenTitles(this.state.deleting, this.state.placing).map((title, index) =>
               <li key={index}>{title}</li>
@@ -1439,7 +1439,7 @@ export default class Canvas extends React.Component {
     else {
       return (
         <div className='confirmation-details'>
-          <p>Only this content will be deleted and removed from the branch.</p>
+          <p>{t('contentDeletionConfirmation')}</p>
         </div>
       );
     }
@@ -1519,7 +1519,7 @@ export default class Canvas extends React.Component {
             onStopped={ this.handleStopped }
           >
             { !this.props.libraries &&
-              <div key={ 'loading' } className="loading">Loading…</div>
+              <div key={ 'loading' } className="loading">{t('loading')}</div>
             }
             { this.props.libraries &&
               <Tree

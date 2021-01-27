@@ -1,6 +1,6 @@
 import React from 'react';
 import './TabViewTutorial.scss';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class TabViewTutorial extends React.Component {
   constructor(props) {

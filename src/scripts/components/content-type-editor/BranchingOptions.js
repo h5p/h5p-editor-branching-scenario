@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './BranchingOptions.scss';
-import {t} from '../../helpers/t';
+import {t} from '../../helpers/translate';
 
 export default class BranchingOptions extends React.Component {
 
@@ -53,10 +53,10 @@ export default class BranchingOptions extends React.Component {
 
       if (this.state.selectedMainOption !== 'new-content') {
         // Update field labels to match parent option
-        this.props.feedbackGroup.$title.html(this.state.selectedMainOption === 'end-scenario' ? 'Feedback on the end screen' : this.props.feedbackGroup.field.label);
+        this.props.feedbackGroup.$title.html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackOnEndScreen') : this.props.feedbackGroup.field.label);
         this.props.feedbackGroup.children[0].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackTitle') : this.props.feedbackGroup.children[0].field.label);
-        this.props.feedbackGroup.children[1].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Feedback text' : this.props.feedbackGroup.children[1].field.label);
-        this.props.feedbackGroup.children[2].$item.children('.h5peditor-label-wrapper').children('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Feedback image' : this.props.feedbackGroup.children[2].field.label);
+        this.props.feedbackGroup.children[1].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackText') : this.props.feedbackGroup.children[1].field.label);
+        this.props.feedbackGroup.children[2].$item.children('.h5peditor-label-wrapper').children('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackImage') : this.props.feedbackGroup.children[2].field.label);
 
         const isEndScenario = !(this.props.nextContentId > -1);
 
@@ -125,7 +125,7 @@ export default class BranchingOptions extends React.Component {
         <fieldset className={ 'field group' + (this.state.expanded ? ' expanded' : '' ) }>
           <div
             className="title"
-            title="Expand/Collapse"
+            title={t('expandCollapse')}
             role="button"
             onClick={ () => this.setState(prevState => ({expanded: !prevState.expanded})) }
             onKeyPress={ e => { if (e.which === 32) this.setState(prevState => ({expanded: !prevState.expanded}));} }

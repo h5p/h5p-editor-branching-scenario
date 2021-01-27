@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 import Content from './Content.js';
 import Dropzone from './Dropzone.js';
 import { isBranching, getBranchingChildren } from '../helpers/Library';

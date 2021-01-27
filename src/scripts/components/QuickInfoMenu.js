@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { isDecendantOf } from '../helpers/DOM';
 import './QuickInfoMenu.scss';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class QuickInfoMenu extends React.Component {
   constructor(props) {
@@ -55,7 +55,7 @@ export default class QuickInfoMenu extends React.Component {
       <div className={ 'legend' + expanded + fade } onClick={ this.handleToggle } ref={ element => this.legend = element }>
         <span>{t('quickInfo')}
           <span className="close link-look">
-            { this.state.expanded ? 'Hide' : 'Show' }
+            { this.state.expanded ? t('hide') : t('show') }
           </span>
         </span>
         <div className={ 'legend-content' + expanded }>

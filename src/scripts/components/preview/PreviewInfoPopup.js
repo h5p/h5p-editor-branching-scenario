@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from "prop-types";
-import {t} from '../../helpers/t';
+import {t} from '../../helpers/translate';
 
 const PreviewInfoPopup = (props) => {
   return (
@@ -14,7 +14,7 @@ const PreviewInfoPopup = (props) => {
       <div
         className="close-info-popup-button"
         onClick={ props.hideInfoPopup }
-        aria-label="Close"
+        aria-label={t('close')}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './SubMenu.scss';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class SubMenu extends React.Component {
   constructor(props) {
@@ -13,7 +13,7 @@ export default class SubMenu extends React.Component {
 
     return (
       <ul className={ elementClass }>
-        <li>{ this.props.isContent ? 'Content Options' : 'Branching Question Options' }</li>
+        <li>{ this.props.isContent ? t('contentOptions') : t('branchingQuestionOptions') }</li>
         <li
           className='preview-content'
           onClick={ this.props.onPreview }

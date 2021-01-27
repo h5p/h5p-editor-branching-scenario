@@ -1,6 +1,6 @@
 import React from 'react';
 import loading from "../../../assets/loading.gif";
-import { t } from '../../helpers/t';
+import { t } from '../../helpers/translate';
 import './LoadingPreview.scss';
 
 

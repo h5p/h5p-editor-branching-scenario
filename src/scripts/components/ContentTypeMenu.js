@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import './ContentTypeMenu.scss';
 import TooltipButton from './TooltipButton';
 import { isBranching, getMachineName, find } from '../helpers/Library';
-import {t} from '../helpers/t';
+import {t} from '../helpers/translate';
 
 export default class ContentTypeMenu extends React.Component {
 
@@ -205,7 +205,7 @@ export default class ContentTypeMenu extends React.Component {
 
     return (
       <ul className="content-type-buttons">
-        <li ref={ element => element ? this.props.onNodeSize(element.getBoundingClientRect()) : undefined } className={ className } title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
+        <li ref={ element => element ? this.props.onNodeSize(element.getBoundingClientRect()) : undefined } className={ className } title={t('addNew') + ' ' + t('branchingQuestion')} onMouseDown={ event => this.handleMouseDown(event, bs) }>{t('branchingQuestion')}</li>
       </ul>
     );
   }
@@ -230,10 +230,10 @@ export default class ContentTypeMenu extends React.Component {
         <li
           ref={ node => this.reuseButton = node }
           className={ className }
-          title="Add from clipboard"
+          title={t('addFromClipboard')}
           onMouseDown={ event => this.handleMouseDown(event, 'reuse-question') }
         >
-          Paste
+          {t('paste')}
         </li>
       </ul>
     );
