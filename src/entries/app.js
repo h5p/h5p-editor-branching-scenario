@@ -21,6 +21,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.field = field;
     this.setValue = setValue;
 
+
     const contentFields = H5PEditor.findSemanticsField('content', this.field);
     this.libraryFields = contentFields.field.fields;
     this.libraries = H5PEditor.findSemanticsField('type', contentFields).options;
@@ -93,6 +94,23 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     const commonFields = this.field.fields.filter(branchingField => {
       return branchingField.common;
     });
+
+    // Keep reference to original function
+    const getLibraryMetadataSettings = H5PEditor.Library.prototype.getLibraryMetadataSettings;
+
+    // Override the function in core
+    H5PEditor.Library.prototype.getLibraryMetadataSettings = (library) => {
+      if (library.name === 'H5P.AdvancedText' || library.name === 'H5P.Image') {
+        return {
+          disable: false,
+          disableExtraTitleField: false
+        };
+      }
+      
+      // For all other libraries, use the function from core
+      return getLibraryMetadataSettings(library);
+    };
+
     H5PEditor.processSemanticsChunk(
       commonFields,
       this.params,
