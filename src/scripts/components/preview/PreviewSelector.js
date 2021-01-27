@@ -68,7 +68,7 @@ export default class PreviewSelector extends React.Component {
   render() {
     return (
       <div className='preview-scene-selection-wrapper'>
-        <label className='preview-introduction' for={this.previewSceneSelectId}>
+        <label className='preview-introduction' htmlFor={this.previewSceneSelectId}>
           {t('previewSelectorTitle')}:
         </label>
         <div className='preview-selector field'>
