@@ -357,13 +357,14 @@ export default class Canvas extends React.Component {
 
     nextIds
       .filter(id => id !== undefined && id > -1)
+      .filter(id => this.tree.processed.indexOf(id) > this.tree.processed.indexOf(start)) // prevent loops
       // TODO: Not very react like...
       .forEach(id => {
         childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true, skip));
       });
 
     // Remove any duplicates
-    return childrenIds;
+    return childrenIds.filter((id, idx) => childrenIds.indexOf(id) === idx);
   }
 
   /**
@@ -800,7 +801,7 @@ export default class Canvas extends React.Component {
     }
 
     // Special case: First node to be deleted, swap it with successor
-    if (deleteId === 0 && content.length > 1) {
+    if (deleteId === 0 && content.length > 1 && content[0].params.nextContentId !== -1) {
       const swapId = content[0].params.nextContentId;
       this.swapNodes(content, 0, content[deleteId].params.nextContentId);
       content[swapId].params.nextContentId = 0;
