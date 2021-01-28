@@ -143,7 +143,7 @@ export default class EditorOverlay extends React.Component {
    */
   modifyRequiresFinishingField(library = {}) {
     const machineName = (library.params && library.params.library) ? library.params.library.split(' ')[0] : null;
-    const requiresFinishingField = this.findField('requiresFinishing');
+    const requiresFinishingField = this.findField('forceContentFinished');
     if (!machineName || !requiresFinishingField || !requiresFinishingField.$item) {
       return; // Nothing to do.
     }
