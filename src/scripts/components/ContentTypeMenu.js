@@ -10,7 +10,6 @@ export default class ContentTypeMenu extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
       tooltipInfo: t('tooltipInfo'),
       tooltipBranching: t('tooltipBranching'),

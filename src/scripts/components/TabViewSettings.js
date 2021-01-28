@@ -93,7 +93,10 @@ export default class TabViewSettings extends React.Component {
       tooltipStartingScreen: t('tooltipStartingScreen'),
       tooltipEndScenario: t('tooltipEndScenario'),
       tooltipEndFeedback: t('tooltopEndFeedback'),
-      tooltipScoringOptions: t('tooltipScoringOptions')
+      tooltipScoringOptions: `<span class='tooltip-title'>${t('tooltipStaticScoreTitle')}</span><p>${t('tooltipStaticScoreText')}</p>
+                              <span class='tooltip-title'>${t('tooltipDynamicScoreTitle')}</span><p>${t('tooltipDynamicScoreText')}</p>
+                              <span class='tooltip-title'>${t('tooltipNoScoreTitle')}</span><p>${t('tooltipNoScoreText')}</p>
+                              `
     };
   }
 
