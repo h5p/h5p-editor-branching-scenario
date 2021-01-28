@@ -350,7 +350,7 @@ export default class Tree extends React.Component {
     const content = this.props.content[branch.id];
     const contentIsBranching = branch.isBranching;
 
-    // TODO move this to assignment level
+    // When a node is moved and the previous parent is now the final node, Ensure it gets counted in end scenario counter
     if(content.params.nextContentId === undefined && content.params.type.library != "H5P.BranchingQuestion 1.0") {
       content.params.nextContentId = -1;
     }
