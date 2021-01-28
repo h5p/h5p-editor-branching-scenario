@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import './Canvas.scss';
 import StartScreen from './StartScreen.js';
 import Draggable from './Draggable.js';
+import Tip from './Tip.js';
 import Dropzone from './Dropzone.js';
 import Content from './Content.js';
 import Tree from './Tree.js';
@@ -12,6 +13,7 @@ import EditorOverlay from './EditorOverlay';
 import QuickInfoMenu from './QuickInfoMenu';
 import BlockInteractionOverlay from './BlockInteractionOverlay';
 import { getMachineName, getAlternativeName, isBranching, hasNextContent } from '../helpers/Library';
+import {t} from '../helpers/translate';
 
 /*global H5P*/
 export default class Canvas extends React.Component {
@@ -27,8 +29,8 @@ export default class Canvas extends React.Component {
         top: {
           icon: '',
           title: '',
-          saveButton: "Save changes",
-          closeButton: "close"
+          saveButton: t('saveChanges'),
+          closeButton: t('close')
         },
         content: {
         }
@@ -44,7 +46,8 @@ export default class Canvas extends React.Component {
         x: 0,
         y: 0
       },
-      setNextContentId: null
+      setNextContentId: null,
+      tips: null
     };
   }
 
@@ -69,13 +72,16 @@ export default class Canvas extends React.Component {
    * React hook
    */
   static getDerivedStateFromProps(nextProps, state) {
+   
     if (nextProps.inserting && nextProps.insertingId !== state.insertingId) {
       return ({ // Set new state on inserting
         insertingId: nextProps.insertingId,
+        tips: null,
         placing: -1,
         library: nextProps.inserting.library
       });
     }
+
     return null;
   }
 
@@ -111,6 +117,107 @@ export default class Canvas extends React.Component {
   }
 
   /**
+   * Implement Tips Highlight
+   * By dragging new/existing component to another
+   *
+   * @param {number} newContentType ID of existing content type.
+   * @param {number} currentContentType ID of New content type.
+   */
+  handleContentHighlight = (newContentType, currentContentType) => {
+    let newContentTypeTitle, scenario = 'NEW_CONTENT_ON_EXISTING_CONTENT';
+    // Check if newContentType is new content (drag from left side navigation)
+    if (newContentType === -1) {
+      // Tips - Scenario 5, 8 & 11
+      newContentTypeTitle = this.props.getNewContent(this.getNewContentParams()).params.type.metadata.contentType;
+      if (this.props.inserting && this.props.inserting.pasted) {
+        scenario = 'PASTED_CONTENT_ON_EXISTING_CONTENT';
+      }
+      if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+        scenario = 'NEW_BQ_ON_EXISTING_CONTENT';
+      }
+      if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+        scenario = 'PASTED_BQ_ON_EXISTING_CONTENT';
+      }
+    }else{
+      newContentTypeTitle = this.state.content[newContentType].params.type.metadata.title;
+    }
+
+    // Tips - Scenario 3 & 6
+    if (this.state.content[currentContentType.props.id].params.type.params.branchingQuestion) {
+      scenario = 'NEW_CONTENT_ON_EXISTING_BQ';
+      if (this.props.inserting && this.props.inserting.pasted) {
+        scenario = 'PASTED_CONTENT_ON_EXISTING_BQ';
+      }
+    }
+    
+    this.setState({
+      tips: {
+        scenario: scenario,
+        newContentTypeTitle: newContentTypeTitle,
+        currentContentTypeTitle: this.state.content[currentContentType.props.id].params.type.metadata.title
+      }
+    });
+    return this.props.onHighlight;
+  }
+
+  /**
+   * Hide Tips
+   * In order to remove tips, on focus of tree reset tips to null
+   */
+  handleTreeFocus = () => {
+    this.setState({ 
+      tips: null
+    });
+  }
+
+  /**
+   * Implement Tips Highlight
+   * By dragging new/existing component to Dropzones
+   */
+  handleDropzoneHighlight = () => {
+
+    if (this.state.insertingId) {
+      // Tips - Scenario 1
+      this.setState({
+        tips: {
+          scenario: 'NEW_CONTENT_ON_DROPZONE',
+          newContentTypeTitle: this.state.library.title
+        }
+      });
+    }
+
+    if (this.props.inserting && this.props.inserting.pasted) {
+      // Tips - Scenario 4
+      this.setState({
+        tips: {
+          scenario: 'PASTED_CONTENT_ON_DROPZONE',
+          newContentTypeTitle: this.state.library.title
+        }
+      });
+    }
+
+    if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+      // Tips - Scenario 7
+      this.setState({
+        tips: {
+          scenario: 'NEW_BQ_ON_DROPZONE',
+          newContentTypeTitle: this.state.library.title
+        }
+      });
+    }
+
+    if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
+      // Tips - Scenario 10
+      this.setState({
+        tips: {
+          scenario: 'PASTED_BQ_ON_DROPZONE',
+          newContentTypeTitle: this.props.inserting.library.title
+        }
+      });
+    }
+  }
+
+  /**
    * Get "the" parent node.
    *
    * Assumes that this.renderedNodes holds all nodes in order of appearance
@@ -141,7 +248,8 @@ export default class Canvas extends React.Component {
   handleDropped = (id, dropzone) => {
     if (!dropzone || dropzone instanceof Content && dropzone.props.disabled) {
       this.setState({
-        placing: null
+        placing: null,
+        tips: null
       });
       this.props.onDropped(); // TODO: See handlePlacing. Should be called after setstate or could it be done differently.
       return;
@@ -249,14 +357,13 @@ export default class Canvas extends React.Component {
 
     nextIds
       .filter(id => id !== undefined && id > -1)
-      .filter(id => this.tree.processed.indexOf(id) > this.tree.processed.indexOf(start)) // prevent loops
       // TODO: Not very react like...
       .forEach(id => {
         childrenIds = childrenIds.concat(this.getChildrenIds(id, includeBranching, true, skip));
       });
 
     // Remove any duplicates
-    return childrenIds.filter((id, idx) => childrenIds.indexOf(id) === idx);
+    return childrenIds;
   }
 
   /**
@@ -443,6 +550,7 @@ export default class Canvas extends React.Component {
     this.setState((prevState, props) => {
       let newState = {
         placing: null,
+        tips: null,
         editing: null,
         inserting: null,
         content: [...prevState.content],
@@ -567,7 +675,9 @@ export default class Canvas extends React.Component {
 
           // Update subtree first
           const nextBranch = isBranchingContent ? Canvas.getBranchingChildren(content) : [isContent ? content.params.nextContentId : alternative.nextContentId];
-          recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null, isBranchingContent ? index : null);
+          if (nextBranch) {
+            recursiveTreeUpdate(nextBranch, isBranchingContent ? content : null, isBranchingContent ? index : null);
+          }
         });
       };
       recursiveTreeUpdate([0]);
@@ -1095,7 +1205,7 @@ export default class Canvas extends React.Component {
           }
         });
       }
-      else if ( this.hasEndScreen(content) && !this.hasCustomEndScreen(content)) {
+      else if (this.hasEndScreen(content) && !this.hasCustomEndScreen(content)) {
         numMissingEndScenarios++;
       }
     });
@@ -1241,7 +1351,8 @@ export default class Canvas extends React.Component {
         // Stop click-to-place placing
         if (this.state.placing !== null && this.state.deleting === null) {
           this.setState({
-            placing: null
+            placing: null,
+            tips: null
           });
           this.props.onDropped();
         }
@@ -1305,7 +1416,7 @@ export default class Canvas extends React.Component {
       children.unshift(getAlternativeName(this.state.content[this.state.deleting]));
       return (
         <div className='confirmation-details'>
-          <p>If you proceed, you will lose all the content attached to this alternative:</p>
+          <p>{t('shiftConfirmationAlternative')}:</p>
           <ul>
             { children.map((title, index) =>
               <li key={index}>{title}</li>
@@ -1317,7 +1428,7 @@ export default class Canvas extends React.Component {
     else if (isBranching(this.state.content[this.state.deleting])) {
       return (
         <div className='confirmation-details'>
-          <p>If you proceed you will lose all content attached to this branch:</p>
+          <p>{t('shiftConfirmationBranch')}:</p>
           <ul>
             { this.getChildrenTitles(this.state.deleting, this.state.placing).map((title, index) =>
               <li key={index}>{title}</li>
@@ -1329,7 +1440,7 @@ export default class Canvas extends React.Component {
     else {
       return (
         <div className='confirmation-details'>
-          <p>Only this content will be deleted and removed from the branch.</p>
+          <p>{t('contentDeletionConfirmation')}</p>
         </div>
       );
     }
@@ -1358,7 +1469,7 @@ export default class Canvas extends React.Component {
     }
 
     return (
-      <div className="wrapper">
+      <div className={ 'wrapper' + (this.props.isTourActive ? ' tour-fade' : '') }>
         { this.state.editing !== null &&
           <EditorOverlay
             ref={ node => this.editorOverlay = node }
@@ -1394,6 +1505,12 @@ export default class Canvas extends React.Component {
           </Content>
         }
         <div className={`canvas${this.state.placing !== null ? ' placing-draggable' : ''}`}>
+          { this.state.tips &&
+            <Tip 
+              scenario={ this.state.tips.scenario }
+              currentContentTypeTitle={ this.state.tips.currentContentTypeTitle }
+              newContentTypeTitle={ this.state.tips.newContentTypeTitle } />
+          }
           <Draggable
             ref={ node => this.treewrap = node }
             className={ 'treewrap' + (this.props.highlight !== null ? ' dark' : '') }
@@ -1403,7 +1520,7 @@ export default class Canvas extends React.Component {
             onStopped={ this.handleStopped }
           >
             { !this.props.libraries &&
-              <div key={ 'loading' } className="loading">Loading…</div>
+              <div key={ 'loading' } className="loading">{t('loading')}</div>
             }
             { this.props.libraries &&
               <Tree
@@ -1425,7 +1542,9 @@ export default class Canvas extends React.Component {
                 onPreview={ this.props.onContentPreview }
                 onCopy={ this.handleContentCopy }
                 onDelete={ this.handleContentDelete }
-                onHighlight={ this.props.onHighlight }
+                onHighlight={ this.handleContentHighlight }
+                onDropzoneHighlight={ this.handleDropzoneHighlight }
+                onFocus={ this.handleTreeFocus }
                 onDropzoneClick={ this.handleDropzoneClick }
                 draggableMouseOver={this.props.draggableMouseOver}
                 draggableMouseOut={this.props.draggableMouseOut}
@@ -1450,6 +1569,7 @@ export default class Canvas extends React.Component {
                   left: '361.635px',
                   top: '130px'
                 } }
+                onFocus={ () => this.handleDropzoneHighlight() }
                 onClick={ () => this.handleDropzoneClick(-9, undefined, 0) }
               />
             </StartScreen>
@@ -1489,4 +1609,5 @@ Canvas.propTypes = {
   draggableMouseOver: PropTypes.func,
   draggableMouseOut: PropTypes.func,
   draggableHovered: PropTypes.number,
+  isTourActive: PropTypes.bool
 };

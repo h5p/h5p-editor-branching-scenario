@@ -51,6 +51,7 @@ export default class Dropzone extends React.Component {
 
   highlight() {
     this.element.classList.add('highlight');
+    this.props.onFocus();
   }
 
   dehighlight() {
@@ -72,6 +73,7 @@ export default class Dropzone extends React.Component {
         ref={ node => this.element = node }
         className={ this.props.elementClass }
         style={ this.props.style }
+        onFocus={ this.props.onFocus }
         onClick={ this.props.onClick }
         type={ this.props.type }
       >

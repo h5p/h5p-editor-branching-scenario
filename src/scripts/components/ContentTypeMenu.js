@@ -3,17 +3,17 @@ import PropTypes from 'prop-types';
 import './ContentTypeMenu.scss';
 import TooltipButton from './TooltipButton';
 import { isBranching, getMachineName, find } from '../helpers/Library';
+import {t} from '../helpers/translate';
 
 export default class ContentTypeMenu extends React.Component {
 
   constructor(props) {
     super(props);
 
-    // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
-      tooltipInfo: 'Create new content by dragging content below to dropzones on the right',
-      tooltipBranching: 'Create branching question to add a custom path in the <strong>Branching Scenario</strong>',
-      tooltipReuse: 'Drag "Paste" to a dropzone to insert content from a clipboard'
+      tooltipInfo: t('tooltipInfo'),
+      tooltipBranching: t('tooltipBranching'),
+      tooltipReuse: t('tooltipReuse')
     };
 
     this.state = {
@@ -160,7 +160,7 @@ export default class ContentTypeMenu extends React.Component {
   renderDnDButtons() {
     if (!this.props.libraries) {
       return (
-        <div className="loading">Loading…</div>
+        <div className="loading">{t('loading')}</div>
       );
     }
 
@@ -193,7 +193,7 @@ export default class ContentTypeMenu extends React.Component {
   renderSecondButtons() {
     if (!this.props.libraries) {
       return (
-        <div className="loading">Loading…</div>
+        <div className="loading">{t('loading')}</div>
       );
     }
     const bs = find(this.props.libraries, library => library.className === 'branchingquestion');
@@ -204,7 +204,7 @@ export default class ContentTypeMenu extends React.Component {
 
     return (
       <ul className="content-type-buttons">
-        <li ref={ element => element ? this.props.onNodeSize(element.getBoundingClientRect()) : undefined } className={ className } title="Add New Branching Question" onMouseDown={ event => this.handleMouseDown(event, bs) }>Branching Question</li>
+        <li ref={ element => element ? this.props.onNodeSize(element.getBoundingClientRect()) : undefined } className={ className } title={t('addNew') + ' ' + t('branchingQuestion')} onMouseDown={ event => this.handleMouseDown(event, bs) }>{t('branchingQuestion')}</li>
       </ul>
     );
   }
@@ -212,7 +212,7 @@ export default class ContentTypeMenu extends React.Component {
   renderReuseButton() {
     if (!this.props.libraries) {
       return (
-        <div className="loading">Loading…</div>
+        <div className="loading">{t('loading')}</div>
       );
     }
 
@@ -229,10 +229,10 @@ export default class ContentTypeMenu extends React.Component {
         <li
           ref={ node => this.reuseButton = node }
           className={ className }
-          title="Add from clipboard"
+          title={t('addFromClipboard')}
           onMouseDown={ event => this.handleMouseDown(event, 'reuse-question') }
         >
-          Paste
+          {t('paste')}
         </li>
       </ul>
     );
@@ -241,28 +241,34 @@ export default class ContentTypeMenu extends React.Component {
   render() {
     return (
       <div className="content-type-menu">
-        <label className="label-info">
-          Info Content
-          <TooltipButton
-            text={ this.l10n.tooltipInfo }
-            tooltipClass={ 'tooltip below' }
-          />
-        </label>
-        { this.renderDnDButtons() }
-        <label className="label-info">
-          Branching Content
-          <TooltipButton
-            text={ this.l10n.tooltipBranching }
-          />
-        </label>
-        { this.renderSecondButtons() }
-        <label className="label-info">
-          Reuse Content
-          <TooltipButton
-            text={ this.l10n.tooltipReuse }
-          />
-        </label>
-        { this.renderReuseButton() }
+        <div className={ 'info-container-buttons' + ( this.props.tourState === 'branching-node' ? ' tour-fade' : '' ) }>
+          <label className="label-info">
+            {t('contentInfo')}
+            <TooltipButton
+              text={ this.l10n.tooltipInfo }
+              tooltipClass={ 'tooltip below' }
+            />
+          </label>
+          { this.renderDnDButtons() }
+        </div>
+        <div className={ 'branching-container-buttons' + ( this.props.tourState === 'content-node' ? ' tour-fade' : '' ) }>
+          <label className="label-info">
+            {t('contentBranching')}
+            <TooltipButton
+              text={ this.l10n.tooltipBranching }
+            />
+          </label>
+          { this.renderSecondButtons() }
+        </div>
+        <div className={ 'reuse-container-buttons' + ( this.props.tourState ? ' tour-fade' : '' ) }>
+          <label className="label-info">
+            {t('contentReuse')}
+            <TooltipButton
+              text={ this.l10n.tooltipReuse }
+            />
+          </label>
+          { this.renderReuseButton() }
+        </div>
       </div>
     );
   }
@@ -270,5 +276,6 @@ export default class ContentTypeMenu extends React.Component {
 
 ContentTypeMenu.propTypes = {
   libraries: PropTypes.array,
+  tourState: PropTypes.string,
   handleMouseDown: PropTypes.func
 };

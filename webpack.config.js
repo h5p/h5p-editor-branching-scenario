@@ -26,7 +26,7 @@ var config = {
       {
         test: /\.(png|woff|woff2|eot|ttf|svg|gif)$/,
         include: path.resolve(__dirname, 'src'),
-        loader: 'url-loader?limit=100000'
+        loader: 'url-loader?limit=1000000'
       }
     ]
   }

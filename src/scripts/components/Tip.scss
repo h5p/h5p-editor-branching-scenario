@@ -1,0 +1,22 @@
+@import '../../styles/main.scss';
+
+.tips{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $tip-bg-col;
+  padding: .5rem .8rem;
+  position: absolute;
+  width: 98%;
+  z-index: 1;
+
+  &::before{
+    flex-shrink: 0;
+    content: $icon-info;
+    font-family: "Material Icons";
+    color: $tip-info-icon-col;
+    font-size: 1rem;
+    padding-right: .5rem;
+    font-weight: 600;
+  }
+}

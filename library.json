@@ -36,7 +36,7 @@
     {
       "machineName": "H5P.CoursePresentation",
       "majorVersion": 1,
-      "minorVersion": 21
+      "minorVersion": 22
     },
     {
       "machineName": "H5P.AdvancedText",
@@ -56,7 +56,7 @@
     {
       "machineName": "H5P.InteractiveVideo",
       "majorVersion": 1,
-      "minorVersion": 21
+      "minorVersion": 22
     },
     {
       "machineName": "H5P.Video",

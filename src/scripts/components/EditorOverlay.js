@@ -8,6 +8,7 @@ import BranchingOptions from "./content-type-editor/BranchingOptions";
 import BehaviouralSettings from "./content-type-editor/BehaviouralSettings";
 import { isBranching } from '../helpers/Library';
 import Content from "./Content";
+import {t} from '../helpers/translate';
 
 export default class EditorOverlay extends React.Component {
 
@@ -111,6 +112,9 @@ export default class EditorOverlay extends React.Component {
     const titleField = H5PEditor.findField('title', library.metadataForm);
     titleField.$input.on('change', () => this.forceUpdate());
 
+    // Change label and description of "requires finishing" field if they can be more specific.
+    this.modifyRequiresFinishingField(library);
+
     const fm = (library.children[0] instanceof H5P.DragNBar.FormManager ? library.children[0] : (library.children[0].children && library.children[0].children[1] instanceof H5P.DragNBar.FormManager ? library.children[0].children[1] : null));
     if (fm) {
       // Use the form manager's buttons instead of ours
@@ -131,6 +135,69 @@ export default class EditorOverlay extends React.Component {
 
     // Force visuals to resize after initial render
     H5P.$window.trigger('resize');
+  }
+
+  /**
+   * Change field for required finished field to suit current interaction.
+   * @param {object} library Library type object.
+   */
+  modifyRequiresFinishingField(library = {}) {
+    const machineName = (library.params && library.params.library) ? library.params.library.split(' ')[0] : null;
+    const requiresFinishingField = this.findField('requiresFinishing');
+    if (!machineName || !requiresFinishingField || !requiresFinishingField.$item) {
+      return; // Nothing to do.
+    }
+
+    // Set individual overrides depending on interaction type
+    if (machineName === 'H5P.CoursePresentation') {
+      this.overrideBooleanField(
+        requiresFinishingField.$item,
+        {
+          label: t('requiresFinishingCoursePresentationLabel'),
+          description: t('requiresFinishingCoursePresentationDescription')
+        }
+      );
+    }
+    else if (machineName === 'H5P.InteractiveVideo' || machineName === 'H5P.Video') {
+      this.overrideBooleanField(
+        requiresFinishingField.$item,
+        {
+          label: t('requiresFinishingVideoLabel'),
+          description: t('requiresFinishingVideoDescription')
+        }
+      );
+    }
+    else {
+      /*
+       * Pull request that introduced option to block proceeding until interaction
+       * is finished was more general than design that was created later. It
+       * can also block proceeding based on xAPI completed statements, but
+       * there are no interactions of that sort included yet - remove settings here for now.
+       */
+      requiresFinishingField.$item.remove();
+    }
+  }
+
+  /**
+   * Override form's boolean fields DOM properties.
+   * @param {H5P.jQuery} $item DOM element of boolean field.
+   * @param {object} [params] Parameters.
+   * @param {string} [params.label] Override for label.
+   * @param {string} [params.description] Override for description.
+   */
+  overrideBooleanField($item, params = {}) {
+    if (!$item) {
+      return;
+    }
+
+    if (params.label) {
+      const $label = $item.find('.h5peditor-label');
+      const $input = $label.find('input').detach();
+      $label.html(params.label).prepend($input);
+    }
+    if (params.description) {
+      $item.find('.h5peditor-field-description').html(params.description);
+    }
   }
 
   /**
@@ -161,7 +228,7 @@ export default class EditorOverlay extends React.Component {
             validAlternatives={validAlternatives}
             onChangeContent={branchingUpdated}
             alternativeIndex={listIndex}
-            nextContentLabel={'Special action if selected'}
+            nextContentLabel={t('specialActionSelected')}
             feedbackGroup={ feedbackGroup }
             scoringOption={ this.props.scoringOption }
           />
@@ -300,12 +367,14 @@ export default class EditorOverlay extends React.Component {
               className="button-remove"
               onClick={ this.handleRemove }
             >
-              Remove { /* TODO: l10 */ }
+              {t('remove')}
             </button>
             <button
               className="button-blue"
               onClick={ this.handleDone }
-            >Done{/* TODO: l10n */}</button>
+            >
+              {t('done')}
+            </button>
           </span>
         </div>
 

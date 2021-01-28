@@ -26,7 +26,7 @@
   padding-left: 1.333333333333333em;
   padding-bottom: 0;
   font-weight: 300;
-  display: block;
+  display: flex;
   margin-bottom: 0.6666666666666667em;
   margin-top: 0.6666666666666667em;
 }
@@ -110,6 +110,12 @@
     content: $icon-image-hotspots;
   }
 
+  li.branchingquestion{
+    background-color: #396ad1;
+    border-color: #396ad1;
+    color: #ffffff;
+  }
+
   li.branchingquestion:before {
     font-family: "bs-editor";
     content: $icon-branching-question;
@@ -137,5 +143,10 @@
     border-color: #30333a;
     background-color: #30333a;
     color: #525358;
+    &.branchingquestion{
+      background-color: #2b51a0;
+      border-color: #2b51a0;
+      color: #5a7cc4;
+    }
   }
 }

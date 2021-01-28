@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import {t} from '../helpers/translate';
 import Content from './Content.js';
 import Dropzone from './Dropzone.js';
 import { isBranching, getBranchingChildren } from '../helpers/Library';
@@ -12,6 +12,11 @@ export default class Tree extends React.Component {
     this.dzSpecs = {
       width: 42,
       height: 32
+    };
+
+    this.tips = {
+      newContentTypeId: null,
+      currentContentTypeId: null
     };
   }
 
@@ -345,6 +350,11 @@ export default class Tree extends React.Component {
     const content = this.props.content[branch.id];
     const contentIsBranching = branch.isBranching;
 
+    // When a node is moved and the previous parent is now the final node, Ensure it gets counted in end scenario counter
+    if(content.params.nextContentId === undefined && content.params.type.library != "H5P.BranchingQuestion 1.0") {
+      content.params.nextContentId = -1;
+    }
+
     // Determine position of node
     const position = this.createPosition(branch);
 
@@ -385,6 +395,7 @@ export default class Tree extends React.Component {
         draggableHovered={this.props.draggableHovered}
         contentClass={ this.getClassName(branch.id) }
         onEdit={ () => this.props.onEdit(branch.id) }
+        onHighlight={ () => this.props.onHighlight(this.tips.newContentTypeId, this.tips.currentContentTypeId) }
         onPreview={ () => this.props.onPreview(branch.id) }
         onCopy={ () => this.props.onCopy(branch.id) }
         onDelete={ () => this.props.onDelete(branch.id) }
@@ -495,6 +506,7 @@ export default class Tree extends React.Component {
           left: x + 'px',
           top: y + 'px'
         } }
+        onFocus={ () => this.props.onDropzoneHighlight() }
         onClick={ () => this.props.onDropzoneClick(nextContentId, parent, num) }
       />
     );
@@ -561,7 +573,7 @@ export default class Tree extends React.Component {
       this.nodes.push(
         <div key={ key }
           className={ className }
-          aria-label={ /* TODO: l10n */ 'Alternative ' + (i + 1) }
+          aria-label={t('alternative') + ' ' + (i + 1)}
           onDoubleClick={() => {
             this.props.onEdit(branch.id);
           }}
@@ -577,7 +589,7 @@ export default class Tree extends React.Component {
             />
           }
           <div className="dark-tooltip">
-            <div className="dark-text-wrap">{ !text ? /* TODO: l10n */ 'Alternative ' + (i + 1) : Content.stripHTML(text) }</div>
+            <div className="dark-text-wrap">{ !text ? t('alternative') + ' ' + (i + 1) : Content.stripHTML(text) }</div>
           </div>
         </div>
       );
@@ -652,6 +664,7 @@ export default class Tree extends React.Component {
    */
   handleMove = (id, draggable) => {
     const intersections = this.getIntersections(draggable);
+    let focusFlag = 1;
 
     // Highlight dropzones with largest intersection with draggable
     this.props.dropzones.forEach(dropzone => {
@@ -663,9 +676,16 @@ export default class Tree extends React.Component {
         dropzone.dehighlight();
       }
       else {
+        focusFlag = 0;
+        this.tips.newContentTypeId = id;
+        this.tips.currentContentTypeId = intersections[0];
         dropzone.highlight();
       }
     });
+
+    if (focusFlag) {
+      this.props.onFocus();
+    }
   }
 
   /**

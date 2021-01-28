@@ -1,19 +1,20 @@
 import React from 'react';
 import PropTypes from "prop-types";
+import {t} from '../../helpers/translate';
 
 const PreviewInfoPopup = (props) => {
   return (
     <div className='info-popup visible'>
       <div
         className='info-popup-header'
-      >Preview Mode.</div>
+      >{t('previewMode')}</div>
       <div
         className='info-popup-body'
-      >This is how the user will see your content.</div>
+      >{t('previewModeBody')}</div>
       <div
         className="close-info-popup-button"
         onClick={ props.hideInfoPopup }
-        aria-label="Close"
+        aria-label={t('close')}
       />
     </div>
   );

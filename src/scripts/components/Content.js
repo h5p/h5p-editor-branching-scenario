@@ -103,6 +103,7 @@ export default class Content extends React.Component {
   highlight() {
     if (!this.props.disabled) {
       this.element.element.classList.add('highlight');
+      this.props.onHighlight();
     }
   }
 
@@ -298,5 +299,5 @@ Content.propTypes = {
   scale: PropTypes.number,
   draggableMouseOver: PropTypes.func,
   draggableMouseOut: PropTypes.func,
-  draggableHovered: PropTypes.number,
+  draggableHovered: PropTypes.number
 };

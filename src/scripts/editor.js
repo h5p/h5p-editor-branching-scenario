@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './editor.scss';
-
+import {t} from './helpers/translate';
 import './components/Editor.scss';
 import Tabs from './components/TabPanel';
 import Tab from './components/Tab';
@@ -60,13 +60,13 @@ export default class Editor extends React.Component {
 
     // Add title field
     const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
-    titleField.$item.find('input')[0].placeholder = 'Enter title here';
+    titleField.$item.find('input')[0].placeholder = t('enterTitleHere');
     titleField.$item.prependTo(this.topbar);
 
     if (H5PEditor.semiFullscreen !== undefined) {
       getUserStorage('h5p-editor-branching-scenario-tour-v1-seen', (seen) => {
         if (seen !== true) {
-          this.setTourState();
+          this.setTourState('screen-size');
           this.topbar.firstChild.classList.add('tour-fade');
         }
       });
@@ -79,17 +79,66 @@ export default class Editor extends React.Component {
     window.removeEventListener('resize', this.handleWindowResize);
   }
 
-  setTourState = () => {
+  setTourState = (tourPosition) => {
     const formRect = document.querySelector(this.state.fullscreen ? '.tree.h5peditor-semi-fullscreen' : '.h5peditor-form').getBoundingClientRect();
-    const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
-    this.setState({
-      tour: {
-        width: (fsButtonRect.width - 18) + 'px',
-        height: (fsButtonRect.height - 18) + 'px',
-        left: ((fsButtonRect.left + 6) - formRect.left) + 'px',
-        top: ((fsButtonRect.top + 6) - formRect.top) + 'px'
+    const bufferSize = 18;
+    let bufferSpace = 6;
+    switch (tourPosition) {
+      case 'screen-size': {
+        const fsButtonRect = this.topbar.children[2].getBoundingClientRect();
+        this.setState({
+          tour: {
+            state: 'screen-size',
+            additionalClass: false,
+            markerPosition: 'left-bottom',
+            fadeActive: false,
+            message: t('fullScreenModeButton'),
+            width: (fsButtonRect.width - bufferSize) + 'px',
+            height: (fsButtonRect.height - bufferSize) + 'px',
+            left: ((fsButtonRect.left + bufferSpace) - formRect.left) + 'px',
+            top: ((fsButtonRect.top + bufferSpace) - formRect.top) + 'px'
+          }
+        });
+        break;
       }
-    });
+      case 'content-node': {
+        const icButtonRect = document.querySelector(".info-container-buttons").getBoundingClientRect();
+        bufferSpace = 5;
+        this.setState({
+          tour: {
+            state: 'content-node',
+            additionalClass: 'content-node-tour',
+            markerPosition: 'right-top',
+            fadeActive: true,
+            message: t('dragContentTypesBelow'),
+            width: (icButtonRect.width - bufferSpace) + 'px',
+            height: (icButtonRect.height - bufferSpace) + 'px',
+            left: (icButtonRect.left - formRect.left) + 'px',
+            top: (icButtonRect.top - formRect.top) + 'px'
+          }
+        });
+        break;
+      }
+      case 'branching-node': {
+
+        const bcButtonRect = document.querySelector(".branching-container-buttons").getBoundingClientRect();
+        bufferSpace = 5;
+        this.setState({
+          tour: {
+            state: 'branching-node',
+            additionalClass: 'branching-node-tour',
+            markerPosition: 'right-top',
+            fadeActive: true,
+            message: t('dragBranchingQuestionBelow'),
+            width: (bcButtonRect.width - bufferSpace) + 'px',
+            height: (bcButtonRect.height - bufferSpace) + 'px',
+            left: (bcButtonRect.left - formRect.left) + 'px',
+            top: (bcButtonRect.top - formRect.top) + 'px'
+          }
+        });
+        break;
+      }
+    }
   };
 
   handleWindowResize = () => {
@@ -102,7 +151,7 @@ export default class Editor extends React.Component {
           center: true
         });
         if (this.state.tour) {
-          this.setTourState();
+          this.setTourState('screen-size');
         }
       }, 66);
     }
@@ -225,6 +274,33 @@ export default class Editor extends React.Component {
     }
 
     this.setState(newState);
+
+    // Content added, dialog closed and then check the tour conditions
+    if (content !== null && content.length === 1 && this.state.isEditing) {
+      if (content[0].type.params.branchingQuestion !== undefined) {
+        getUserStorage('h5p-editor-branching-scenario-information-content-tour-v1-seen', (seen) => {
+          if (seen !== true) {
+            // Initial tour for information content block
+            setTimeout(() => {
+              if(this.state.activeIndex == 0 && this.state.isEditing === false && this.state.isShowingPreview === false){
+                this.setTourState('content-node');
+              }
+            }, 5000);
+          }
+        });
+      } else {
+        getUserStorage('h5p-editor-branching-scenario-branching-content-tour-v1-seen', (seen) => {
+          if (seen !== true) {
+            // Initial tour for branching node
+            setTimeout(() => {
+              if(this.state.activeIndex == 0 && this.state.isEditing === false && this.state.isShowingPreview === false){
+                this.setTourState('branching-node');
+              }
+            }, 5000);
+          }
+        });
+      }
+    }
   }
 
   /**
@@ -334,8 +410,17 @@ export default class Editor extends React.Component {
   };
 
   handleCloseTour = () => {
-    this.topbar.firstChild.classList.remove('tour-fade');
-    setUserStorage('h5p-editor-branching-scenario-tour-v1-seen', true);
+    if (this.state.tour.state === 'screen-size') {
+      this.topbar.firstChild.classList.remove('tour-fade');
+      setUserStorage('h5p-editor-branching-scenario-tour-v1-seen', true);
+    }
+    else if (this.state.tour.state === 'branching-node') {
+      setUserStorage('h5p-editor-branching-scenario-branching-content-tour-v1-seen', true);
+    }
+    else if (this.state.tour.state === 'content-node') {
+      setUserStorage('h5p-editor-branching-scenario-information-content-tour-v1-seen', true);
+    }
+
     this.setState({
       tour: false
     });
@@ -359,7 +444,7 @@ export default class Editor extends React.Component {
     }
 
     return (
-      <div className={wrapperClasses}>
+      <div className={wrapperClasses + (this.state.tour.additionalClass ? ' ' + this.state.tour.additionalClass : '')}>
         {
           this.state.showFullScreenDialog &&
           <BlockInteractionOverlay>
@@ -369,122 +454,127 @@ export default class Editor extends React.Component {
             />
           </BlockInteractionOverlay>
         }
-        <div className="topbar" ref={ element => this.topbar = element }>
+        <div
+          className={'topbar ' + ((this.state.tour.state === 'branching-node' || this.state.tour.state === 'content-node') ? ' tour-fade' : '')}
+          ref={element => this.topbar = element}>
           {
             this.state.isShowingPreview ?
               <button
-                className={ 'preview-button back' + (this.state.tour ? ' tour-fade' : '') }
-                title='Back to edit'
+                className={'preview-button back' + (this.state.tour ? ' tour-fade' : '')}
+                title={t('backToEdit')}
                 onClick={() => this.togglePreview()}
-                disabled={ this.state.isEditing }
-              >Back to edit</button>
+                disabled={this.state.isEditing}
+              >{t('backToEdit')}</button>
               :
               <button
-                className={ 'preview-button' + (this.state.tour ? ' tour-fade' : '') }
-                title='Preview'
+                className={'preview-button' + (this.state.tour ? ' tour-fade' : '')}
+                title={t('preview')}
                 onClick={() => this.togglePreview()}
-                disabled={ this.state.isEditing }
-              >Preview</button>
+                disabled={this.state.isEditing}
+              >{t('preview')}</button>
           }
-          { H5PEditor.semiFullscreen !== undefined &&
+          {H5PEditor.semiFullscreen !== undefined &&
             <div
-              className={ 'fullscreen-button' + (this.state.fullscreen ? ' active' : '') + (this.state.tour ? ' tour-active' : '') }
-              title={(this.state.fullscreen ? 'Exit' : 'Enter') + ' full-screen mode'}
+              className={'fullscreen-button' + (this.state.fullscreen ? ' active' : '') + (this.state.tour ? ' tour-active' : '')}
+              title={(this.state.fullscreen ? t('exit') : t('enter')) + ' ' + t('fullScreenMode')}
               role="button"
               tabIndex="0"
-              onClick={ this.handleToggleFullscreen }
+              onClick={this.handleToggleFullscreen}
             />
           }
-          { this.state.fullscreen &&
+          {this.state.fullscreen &&
             <div
-              className={ 'proceed-button' + (this.state.tour ? ' tour-fade' : '') }
-              title="Proceed to save your Branching Scenario"
+              className={'proceed-button' + (this.state.tour ? ' tour-fade' : '')}
+              title={t('proceedToSaveBranchingScenario')}
               role="button"
               tabIndex="0"
-              onClick={ this.handleToggleFullscreen }
-            >Proceed to Save{/* TODO: l10n */}</div>
+              onClick={this.handleToggleFullscreen}
+            >{t('proceedToSave')}</div>
           }
         </div>
         <Tabs
-          tour={ this.state.tour }
-          activeIndex={ this.state.activeIndex }
-          onChange={ key => this.setActiveIndex(key) }
-          isHidden={ this.state.isShowingPreview }
+          tour={this.state.tour}
+          activeIndex={this.state.activeIndex}
+          onChange={key => this.setActiveIndex(key)}
+          isHidden={this.state.isShowingPreview}
         >
           <Tab
-            onMouseUp={ this.handleMouseUp }
+            onMouseUp={this.handleMouseUp}
             title="Create content"
             className="bs-editor-content-tab has-submenu">
-            <ContentTypeMenu
-              inserting={ this.state.inserting }
-              libraries={ this.state.libraries }
-              onMouseDown={ this.handleMouseDown }
-              onNodeSize={ this.handleNodeSize }
+            <ContentTypeMenu ref={element => this.contentypemenu = element}
+              inserting={this.state.inserting}
+              libraries={this.state.libraries}
+              tourState={this.state.tour.state}
+              onMouseDown={this.handleMouseDown}
+              onNodeSize={this.handleNodeSize}
             />
             <Canvas
-              ref={ node => this.canvas = node }
-              inserting={ this.state.inserting }
-              libraries={ this.state.libraries }
-              getNewContent={ this.props.getNewContent }
+              ref={node => this.canvas = node}
+              inserting={this.state.inserting}
+              libraries={this.state.libraries}
+              getNewContent={this.props.getNewContent}
               saveData={this.props.saveData}
-              content={ this.props.content }
-              handleOpenTutorial={ this.handleOpenTutorial }
-              onIsEditing={ this.handleIsEditing }
-              onContentChanged={ this.handleContentChanged }
-              onContentPreview={ this.togglePreview }
-              onHighlight={ this.handleHighlight }
-              highlight={ this.state.highlight }
-              onlyThisBall={ this.state.onlyThisBall }
-              onDropped={ this.handleInsertingDone }
-              scale={ this.state.scale }
-              center={ this.state.center }
-              centerWholeTree={ this.state.centerWholeTree }
-              onCanvasCentered={ this.handleCanvasCentered }
-              translate={ this.state.translate }
-              onCanvasTranslated={ this.handleCanvasTranslated }
-              scoringOption={ this.state.scoringOption }
-              nodeSize={ this.state.nodeSize }
-              insertingId={ this.state.insertingId }
+              content={this.props.content}
+              handleOpenTutorial={this.handleOpenTutorial}
+              onIsEditing={this.handleIsEditing}
+              onContentChanged={this.handleContentChanged}
+              onContentPreview={this.togglePreview}
+              onHighlight={this.handleHighlight}
+              highlight={this.state.highlight}
+              onlyThisBall={this.state.onlyThisBall}
+              onDropped={this.handleInsertingDone}
+              scale={this.state.scale}
+              center={this.state.center}
+              centerWholeTree={this.state.centerWholeTree}
+              onCanvasCentered={this.handleCanvasCentered}
+              translate={this.state.translate}
+              onCanvasTranslated={this.handleCanvasTranslated}
+              scoringOption={this.state.scoringOption}
+              nodeSize={this.state.nodeSize}
+              insertingId={this.state.insertingId}
               draggableMouseOver={this.draggableMouseOver}
               draggableMouseOut={this.draggableMouseOut}
               draggableHovered={this.state.draggableHovered}
+              isTourActive={(this.state.tour ? true : false)}
             />
             <Toolbar
-              disabled={ this.state.zoomDisabled }
-              numDefaultEndScenarios={ this.state.numDefaultEndScenarios }
-              onHighlight={ this.handleHighlight }
-              scale={ this.state.scale }
-              onScaleChanged={ this.handleScaleChanged }
-              containerRect={ this.treewrap } /* TODO: Don't send refs as props on render... */
-              contentRect={ this.tree } /* TODO: Don't send refs as props on render... */
+              disabled={this.state.zoomDisabled}
+              numDefaultEndScenarios={this.state.numDefaultEndScenarios}
+              onHighlight={this.handleHighlight}
+              scale={this.state.scale}
+              onScaleChanged={this.handleScaleChanged}
+              containerRect={this.treewrap} /* TODO: Don't send refs as props on render... */
+              contentRect={this.tree} /* TODO: Don't send refs as props on render... */
+              isTourActive={(this.state.tour ? true : false)}
             />
           </Tab>
-          <Tab title="Settings" className="bs-editor-settings-tab">
+          <Tab title={t('settings')} className="bs-editor-settings-tab">
             <TabViewSettings
               main={this.props.main}
               updateScoringOption={this.handleScoringOptionChange}
             />
           </Tab>
-          <Tab title="Translations" className="bs-editor-translations-tab">
+          <Tab title={t('translations')} className="bs-editor-translations-tab">
             <TabViewTranslations
               parent={this.props.parent}
             />
           </Tab>
-          <Tab title="Get help" className="bs-editor-tutorial-tab">
+          <Tab title={t('getHelp')} className="bs-editor-tutorial-tab">
             <TabViewTutorial
-              handleOpenCanvas={ this.handleOpenCanvas }
+              handleOpenCanvas={this.handleOpenCanvas}
             />
           </Tab>
-          <Tab title="Metadata" className="bs-editor-metadata-tab">
+          <Tab title={t('metadata')} className="bs-editor-metadata-tab">
             <TabViewMetadata
-              metadataForm={ this.props.main.parent.metadataForm }
+              metadataForm={this.props.main.parent.metadataForm}
             />
           </Tab>
         </Tabs>
         {
           this.state.isShowingPreview &&
           <Preview
-            tour={ this.state.tour }
+            tour={this.state.tour}
             params={this.props.parent.params}
             hasLoadedLibraries={this.state.hasLoadedLibraries}
             previewId={this.state.previewId}
@@ -496,8 +586,11 @@ export default class Editor extends React.Component {
         {
           this.state.tour &&
           <Tour
-            position={ this.state.tour }
-            onClose={ this.handleCloseTour }
+            additionalClass={this.state.tour.additionalClass}
+            position={this.state.tour}
+            onClose={this.handleCloseTour}
+            message={this.state.tour.message}
+            markerPosition={this.state.tour.markerPosition}
           />
         }
       </div>
