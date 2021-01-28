@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './Tip.scss';
 import {t} from '../helpers/translate';
 
@@ -36,13 +37,18 @@ const Tip = (props) => {
       message = t('pastedBQOnExisitingContent', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
       break;
   }
-  console.log(message);
 
   return (
     <div className='tips'>
       {message}
     </div>
   );
+};
+
+Tip.propTypes = {
+  scenario: PropTypes.number,
+  currentContentType: PropTypes.string,
+  newContentType: PropTypes.string
 };
 
 export default Tip;
