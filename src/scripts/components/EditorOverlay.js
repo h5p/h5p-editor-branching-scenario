@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import './EditorOverlay.scss';
 import Canvas from './Canvas';
 import BranchingOptions from "./content-type-editor/BranchingOptions";
+import BehaviouralSettings from "./content-type-editor/BehaviouralSettings";
 import { isBranching } from '../helpers/Library';
 import Content from "./Content";
 import {t} from '../helpers/translate';
@@ -352,6 +353,9 @@ export default class EditorOverlay extends React.Component {
 
     const feedbackGroupField = (!this.isBranchingQuestion ? this.findField('feedback') : null);
 
+    // Behaviour fields for content nodes
+    const behaviourGroupField = (!this.isBranchingQuestion ? this.findField('contentBehaviour') : null);
+
     return (
       <div className={ wrapperClass }>
         <div className='editor-overlay-header' >
@@ -386,6 +390,9 @@ export default class EditorOverlay extends React.Component {
                 isInserting={ this.props.isInserting }
                 feedbackGroup={ feedbackGroupField }
                 scoringOption={ this.props.scoringOption }
+              />
+              <BehaviouralSettings
+                behaviourGroup={ behaviourGroupField }
               />
             </div>
           }
