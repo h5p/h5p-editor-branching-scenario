@@ -1,70 +1,48 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import './Tip.scss';
+import {t} from '../helpers/translate';
 
-export default class Tip extends React.Component {
-  
-  constructor(props) {
-    super(props);
-
-    this.message = null;
+const Tip = (props) => {
+  let message;
+  switch(props.scenario){
+    case 'NEW_CONTENT_ON_DROPZONE':
+      message = t('newContentOnDropzone', {newContentTypeName : props.newContentTypeTitle});
+      break;
+    case 'NEW_CONTENT_ON_EXISTING_CONTENT':
+      message = t('newContentOnExisitingContent', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      break;
+    case 'NEW_CONTENT_ON_EXISTING_BQ':
+      message = t('newContentOnExisitingBQ', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      break;
+    case 'PASTED_CONTENT_ON_DROPZONE':
+      message = t('pastedContentOnDropzone', {newContentTypeName : props.newContentTypeTitle});
+      break;
+    case 'PASTED_CONTENT_ON_EXISTING_CONTENT':
+      message = t('pastedContentOnExisitingContent', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      break;
+    case 'PASTED_CONTENT_ON_EXISTING_BQ':
+      message = t('pastedContentOnExisitingBQ', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      break;
+    case 'NEW_BQ_ON_DROPZONE':
+      message = t('newBQOnDropzone');
+      break;
+    case 'NEW_BQ_ON_EXISTING_CONTENT':
+      message = t('newBQOnExisitingContent', {exitingContentName : props.currentContentTypeTitle});
+      break;
+    case 'PASTED_BQ_ON_DROPZONE':
+      message = t('pastedBQOnDropzone', {newContentTypeName : props.newContentTypeTitle});
+      break;
+    case 'PASTED_BQ_ON_EXISTING_CONTENT':
+      message = t('pastedBQOnExisitingContent', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      break;
   }
+  console.log(message);
 
-  /**
-   * Set tip's message based on the scenario number.
-   *
-   * @param {number} scenario if content
-   */
-  renderTips = (scenario) => {
-    switch(scenario){
-      case 1:
-        this.message = 'Drop here to create a new ' + this.props.newContentType;
-        break;
-      case 2:
-        this.message = 'Drop here to replace "' + this.props.currentContentType + '" with a new ' + this.props.newContentType;
-        break;
-      case 3:
-        this.message = 'Drop here to replace "' + this.props.currentContentType + '" with a new ' + this.props.newContentType + '. Important! The entire branch below this question will be deleted.';
-        break;
-      case 4:
-        this.message = 'Drop here to paste "' + this.props.newContentType +'"';
-        break;
-      case 5:
-        this.message = 'Drop here to replace "' + this.props.currentContentType + '" with a "' + this.props.newContentType + '"';
-        break;
-      case 6:
-        this.message = 'Drop here to replace "' + this.props.currentContentType + '" with "' + this.props.newContentType + '". Important! The entire branch below this question will be deleted.';
-        break;
-      case 7:
-        this.message = 'Drop here to create a new Branching question. The existing structure below this dropzone will attach to the first alternative.';
-        break;
-      case 8:
-        this.message = 'Drop here to replace "' + this.props.currentContentType + '" with a new Branching question. The existing structure below this content will attach to the first alternative.';
-        break;
-      case 10:
-        this.message = 'Drop here to paste "' + this.props.newContentType + '". The existing structure below this dropzone will attach to the first alternative.';
-        break;
-      case 11:
-        this.message = 'Drop here to replace "' + this.props.currentContentType + '" with a "' + this.props.newContentType + '". The existing structure below this content will attach to the first alternative';
-        break;
-    }
-  }
-
-  render() {
-    // Create scenario based tips messages
-    this.renderTips(this.props.scenario);
-
-    return (
-      <div className='tips'>
-        {this.message}
-      </div>
-    );
-  }
-}
-
-Tip.propTypes = {
-  scenario: PropTypes.number,
-  currentContentType: PropTypes.string,
-  newContentType: PropTypes.string
+  return (
+    <div className='tips'>
+      {message}
+    </div>
+  );
 };
+
+export default Tip;

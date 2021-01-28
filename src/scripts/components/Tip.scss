@@ -8,8 +8,8 @@
   padding: .5rem .8rem;
   position: absolute;
   width: 98%;
-  z-index: 11;
-  
+  z-index: 1;
+
   &::before{
     flex-shrink: 0;
     content: $icon-info;
@@ -17,5 +17,6 @@
     color: $tip-info-icon-col;
     font-size: 1rem;
     padding-right: .5rem;
+    font-weight: 600;
   }
 }

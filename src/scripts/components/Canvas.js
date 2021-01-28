@@ -123,47 +123,48 @@ export default class Canvas extends React.Component {
    * @param {number} newContentType ID of existing content type.
    * @param {number} currentContentType ID of New content type.
    */
-  handleHighlight = (newContentType, currentContentType) => {
-    let newContentTypeTitle, scenario = 2;
+  handleContentHighlight = (newContentType, currentContentType) => {
+    let newContentTypeTitle, scenario = 'NEW_CONTENT_ON_EXISTING_CONTENT';
+    // Check if newContentType is new content (drag from left side navigation)
     if (newContentType === -1) {
-      //Tips - Scenario 5, 8 & 11
+      // Tips - Scenario 5, 8 & 11
       newContentTypeTitle = this.props.getNewContent(this.getNewContentParams()).params.type.metadata.contentType;
       if (this.props.inserting && this.props.inserting.pasted) {
-        scenario = 5;
+        scenario = 'PASTED_CONTENT_ON_EXISTING_CONTENT';
       }
       if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
-        scenario = 8;
+        scenario = 'NEW_BQ_ON_EXISTING_CONTENT';
       }
       if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
-        scenario = 11;
+        scenario = 'PASTED_BQ_ON_EXISTING_CONTENT';
       }
     }else{
       newContentTypeTitle = this.state.content[newContentType].params.type.metadata.title;
     }
 
-    //Tips - Scenario 3 & 6
+    // Tips - Scenario 3 & 6
     if (this.state.content[currentContentType.props.id].params.type.params.branchingQuestion) {
-      scenario = 3;
+      scenario = 'NEW_CONTENT_ON_EXISTING_BQ';
       if (this.props.inserting && this.props.inserting.pasted) {
-        scenario = 6;
+        scenario = 'PASTED_CONTENT_ON_EXISTING_BQ';
       }
     }
     
     this.setState({
       tips: {
         scenario: scenario,
-        newContentType: newContentTypeTitle,
-        currentContentType: this.state.content[currentContentType.props.id].params.type.metadata.title
+        newContentTypeTitle: newContentTypeTitle,
+        currentContentTypeTitle: this.state.content[currentContentType.props.id].params.type.metadata.title
       }
     });
     return this.props.onHighlight;
   }
 
   /**
-   * TODO
+   * Hide Tips
+   * In order to remove tips, on focus of tree reset tips to null
    */
   handleTreeFocus = () => {
-    // In order to remove tips, on focus of tree reset tips to null
     this.setState({ 
       tips: null
     });
@@ -176,41 +177,41 @@ export default class Canvas extends React.Component {
   handleDropzoneHighlight = () => {
 
     if (this.state.insertingId) {
-      // Tips Scenario 1
+      // Tips - Scenario 1
       this.setState({
         tips: {
-          scenario: 1,
-          newContentType: this.state.library.title
+          scenario: 'NEW_CONTENT_ON_DROPZONE',
+          newContentTypeTitle: this.state.library.title
         }
       });
     }
 
     if (this.props.inserting && this.props.inserting.pasted) {
-      // Tips Scenario 4
+      // Tips - Scenario 4
       this.setState({
         tips: {
-          scenario: 4,
-          newContentType: this.state.library.title
+          scenario: 'PASTED_CONTENT_ON_DROPZONE',
+          newContentTypeTitle: this.state.library.title
         }
       });
     }
 
     if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
-      // Tips Scenario 7
+      // Tips - Scenario 7
       this.setState({
         tips: {
-          scenario: 7,
-          newContentType: this.state.library.title
+          scenario: 'NEW_BQ_ON_DROPZONE',
+          newContentTypeTitle: this.state.library.title
         }
       });
     }
 
     if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
-      // Tips Scenario 10
+      // Tips - Scenario 10
       this.setState({
         tips: {
-          scenario: 10,
-          newContentType: this.props.inserting.library.title
+          scenario: 'PASTED_BQ_ON_DROPZONE',
+          newContentTypeTitle: this.props.inserting.library.title
         }
       });
     }
@@ -1507,8 +1508,8 @@ export default class Canvas extends React.Component {
           { this.state.tips &&
             <Tip 
               scenario={ this.state.tips.scenario }
-              currentContentType={ this.state.tips.currentContentType }
-              newContentType={ this.state.tips.newContentType } />
+              currentContentTypeTitle={ this.state.tips.currentContentTypeTitle }
+              newContentTypeTitle={ this.state.tips.newContentTypeTitle } />
           }
           <Draggable
             ref={ node => this.treewrap = node }
@@ -1541,7 +1542,7 @@ export default class Canvas extends React.Component {
                 onPreview={ this.props.onContentPreview }
                 onCopy={ this.handleContentCopy }
                 onDelete={ this.handleContentDelete }
-                onHighlight={ this.handleHighlight }
+                onHighlight={ this.handleContentHighlight }
                 onDropzoneHighlight={ this.handleDropzoneHighlight }
                 onFocus={ this.handleTreeFocus }
                 onDropzoneClick={ this.handleDropzoneClick }
