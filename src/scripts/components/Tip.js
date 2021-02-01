@@ -7,34 +7,34 @@ const Tip = (props) => {
   let message;
   switch(props.scenario){
     case 'NEW_CONTENT_ON_DROPZONE':
-      message = t('newContentOnDropzone', {newContentTypeName : props.newContentTypeTitle});
+      message = t('newContentOnDropzone', {':newContentTypeName' : props.newContentTypeTitle});
       break;
     case 'NEW_CONTENT_ON_EXISTING_CONTENT':
-      message = t('newContentOnExisitingContent', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      message = t('newContentOnExisitingContent', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
       break;
     case 'NEW_CONTENT_ON_EXISTING_BQ':
-      message = t('newContentOnExisitingBQ', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      message = t('newContentOnExisitingBQ', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
       break;
     case 'PASTED_CONTENT_ON_DROPZONE':
-      message = t('pastedContentOnDropzone', {newContentTypeName : props.newContentTypeTitle});
+      message = t('pastedContentOnDropzone', {':newContentTypeName' : props.newContentTypeTitle});
       break;
     case 'PASTED_CONTENT_ON_EXISTING_CONTENT':
-      message = t('pastedContentOnExisitingContent', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      message = t('pastedContentOnExisitingContent', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
       break;
     case 'PASTED_CONTENT_ON_EXISTING_BQ':
-      message = t('pastedContentOnExisitingBQ', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      message = t('pastedContentOnExisitingBQ', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
       break;
     case 'NEW_BQ_ON_DROPZONE':
       message = t('newBQOnDropzone');
       break;
     case 'NEW_BQ_ON_EXISTING_CONTENT':
-      message = t('newBQOnExisitingContent', {exitingContentName : props.currentContentTypeTitle});
+      message = t('newBQOnExisitingContent', {':exitingContentName' : props.currentContentTypeTitle});
       break;
     case 'PASTED_BQ_ON_DROPZONE':
-      message = t('pastedBQOnDropzone', {newContentTypeName : props.newContentTypeTitle});
+      message = t('pastedBQOnDropzone', {':newContentTypeName' : props.newContentTypeTitle});
       break;
     case 'PASTED_BQ_ON_EXISTING_CONTENT':
-      message = t('pastedBQOnExisitingContent', {exitingContentName : props.currentContentTypeTitle, newContentTypeName : props.newContentTypeTitle});
+      message = t('pastedBQOnExisitingContent', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
       break;
   }
 
@@ -46,7 +46,7 @@ const Tip = (props) => {
 };
 
 Tip.propTypes = {
-  scenario: PropTypes.number,
+  scenario: PropTypes.string,
   currentContentType: PropTypes.string,
   newContentType: PropTypes.string
 };

@@ -119,15 +119,15 @@
     "requiresFinishingCoursePresentationDescription": "Urges viewers to navigate all the way to the last slide of the presentation in order to proceed. This setting will not work for active surface mode presentations",
     "requiresFinishingVideoLabel": "Required to watch until the end",
     "requiresFinishingVideoDescription": "Urges viewers to complete the video before proceeding with the scenario",
-    "newContentOnDropzone": "Drop here to create a new newContentTypeName",
-    "newContentOnExisitingContent": "Drop here to replace \"exitingContentName\" with a new newContentTypeName",
-    "newContentOnExisitingBQ": "Drop here to replace \"exitingContentName\" with a new newContentTypeName. Important! The entire branch below this question will be deleted.",
-    "pastedContentOnDropzone": "Drop here to paste newContentTypeName",
-    "pastedContentOnExisitingContent": "Drop here to replace \"exitingContentName\" with a newContentTypeName",
-    "pastedContentOnExisitingBQ": "Drop here to replace \"exitingContentName\" with newContentTypeName. Important! The entire branch below this question will be deleted.",
+    "newContentOnDropzone": "Drop here to create a new :newContentTypeName",
+    "newContentOnExisitingContent": "Drop here to replace \":exitingContentName\" with a new :newContentTypeName",
+    "newContentOnExisitingBQ": "Drop here to replace \":exitingContentName\" with a new :newContentTypeName. Important! The entire branch below this question will be deleted.",
+    "pastedContentOnDropzone": "Drop here to paste :newContentTypeName",
+    "pastedContentOnExisitingContent": "Drop here to replace \":exitingContentName\" with a :newContentTypeName",
+    "pastedContentOnExisitingBQ": "Drop here to replace \"exitingContentName\" with :newContentTypeName. Important! The entire branch below this question will be deleted.",
     "newBQOnDropzone": "Drop here to create a new Branching question. The existing structure below this dropzone will attach to the first alternative.",
-    "newBQOnExisitingContent": "Drop here to replace \"exitingContentName\" with a new Branching question. The existing structure below this content will attach to the first alternative.",
-    "pastedBQOnDropzone": "Drop here to paste \"newContentTypeName\". The existing structure below this dropzone will attach to the first alternative.",
-    "pastedBQOnExisitingContent": "Drop here to replace \"exitingContentName\" with a newContentTypeName. The existing structure below this content will attach to the first alternative."
+    "newBQOnExisitingContent": "Drop here to replace \":exitingContentName\" with a new Branching question. The existing structure below this content will attach to the first alternative.",
+    "pastedBQOnDropzone": "Drop here to paste \":newContentTypeName\". The existing structure below this dropzone will attach to the first alternative.",
+    "pastedBQOnExisitingContent": "Drop here to replace \":exitingContentName\" with a :newContentTypeName. The existing structure below this content will attach to the first alternative."
   }
 }
