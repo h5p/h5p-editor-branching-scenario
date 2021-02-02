@@ -88,15 +88,13 @@ export default class TabViewSettings extends React.Component {
       this.props.updateScoringOption();
     });
 
-    // TODO: This needs to come from app and needs to be sanitized
     this.l10n = {
       tooltipStartingScreen: t('tooltipStartingScreen'),
       tooltipEndScenario: t('tooltipEndScenario'),
       tooltipEndFeedback: t('tooltopEndFeedback'),
       tooltipScoringOptions: `<span class='tooltip-title'>${t('tooltipStaticScoreTitle')}</span><p>${t('tooltipStaticScoreText')}</p>
                               <span class='tooltip-title'>${t('tooltipDynamicScoreTitle')}</span><p>${t('tooltipDynamicScoreText')}</p>
-                              <span class='tooltip-title'>${t('tooltipNoScoreTitle')}</span><p>${t('tooltipNoScoreText')}</p>
-                              `
+                              <span class='tooltip-title'>${t('tooltipNoScoreTitle')}</span><p>${t('tooltipNoScoreText')}</p>`
     };
   }
 
