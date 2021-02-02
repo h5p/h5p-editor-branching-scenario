@@ -151,7 +151,7 @@ export default class TabViewSettings extends React.Component {
           </fieldset>
           <fieldset>
             <legend className="tab-view-info">
-              {t('behavioralSettings')}
+              {t('behaviouralSettings')}
             </legend>
             <div
               ref={this.refBehaviour}
