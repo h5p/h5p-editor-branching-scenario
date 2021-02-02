@@ -105,6 +105,12 @@ export default class EditorOverlay extends React.Component {
       // Hide the showContentTitle checkbox for BQ content
       const showContentTitleField = this.findField('showContentTitle');
       showContentTitleField.$item.remove();
+
+      // hides the contentBehaviour group so it can be moved into Branching Options object.
+      const contentBehaviourGroup = this.findField('contentBehaviour');
+      if (contentBehaviourGroup && contentBehaviourGroup.$item[0]) {
+        contentBehaviourGroup.$item[0].remove();
+      }
     }
 
     const library = this.findField('type');
@@ -352,6 +358,8 @@ export default class EditorOverlay extends React.Component {
 
     const feedbackGroupField = (!this.isBranchingQuestion ? this.findField('feedback') : null);
 
+    const behaviourGroupField = (!this.isBranchingQuestion ? this.findField('contentBehaviour') : null);
+
     return (
       <div className={ wrapperClass }>
         <div className='editor-overlay-header' >
@@ -385,6 +393,7 @@ export default class EditorOverlay extends React.Component {
                 onChangeContent={ this.handleNextContentIdChange }
                 isInserting={ this.props.isInserting }
                 feedbackGroup={ feedbackGroupField }
+                contentBehaviourGroup={ behaviourGroupField }
                 scoringOption={ this.props.scoringOption }
               />
             </div>

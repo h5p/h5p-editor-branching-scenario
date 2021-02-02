@@ -67,6 +67,9 @@ export default class BranchingOptions extends React.Component {
         this.props.feedbackGroup.children[3].$item.toggle(isDynamicScore || isStaticScore);
       }
     }
+    if (this.props.contentBehaviourGroup && !this.isBranchingQuestion) {
+      this.props.contentBehaviourGroup.$item.appendTo(this.contentWrapper);
+    }
   }
 
   static hasFeedback(props) {
