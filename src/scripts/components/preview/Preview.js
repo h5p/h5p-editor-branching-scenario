@@ -48,6 +48,9 @@ export default class Preview extends React.Component {
         return library.split(' ')[0] === 'H5P.BranchingScenario';
       })[0];
 
+    // Flag passed into BS to prevent XAPI statements being fired whilst in Preview.
+    this.props.params.branchingScenario.preventXAPI = true;
+
     this.preview = H5P.newRunnable(
       {
         library: branchingScenario,
