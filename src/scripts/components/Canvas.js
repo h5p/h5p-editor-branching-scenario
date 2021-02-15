@@ -116,6 +116,22 @@ export default class Canvas extends React.Component {
     }
   }
 
+   /**
+   * @param {number} id - Dropzone ID.
+   */
+  handleMouseOver = (id) => {
+    if (this.state.placing !== null && this.state.placing !== id && this.state.content[id] !== undefined) {
+      this.handleContentHighlight(this.state.placing, this.state.content[id]);
+    }
+  }
+
+  /**
+   * Hide Tips
+   */
+  handleMouseLeft = () => {
+    this.handleTreeFocus();
+  }
+
   /**
    * Implement Tips Highlight
    * By dragging new/existing component to another
@@ -143,7 +159,8 @@ export default class Canvas extends React.Component {
     }
 
     // Tips - Scenario 3 & 6
-    if (this.state.content[currentContentType.props.id].params.type.params.branchingQuestion) {
+    const content = (currentContentType.props !== undefined) ? this.state.content[currentContentType.props.id] : currentContentType;
+    if (content.params.type.params.branchingQuestion) {
       scenario = 'NEW_CONTENT_ON_EXISTING_BQ';
       if (this.props.inserting && this.props.inserting.pasted) {
         scenario = 'PASTED_CONTENT_ON_EXISTING_BQ';
@@ -154,7 +171,7 @@ export default class Canvas extends React.Component {
       tips: {
         scenario: scenario,
         newContentTypeTitle: newContentTypeTitle,
-        currentContentTypeTitle: this.state.content[currentContentType.props.id].params.type.metadata.title
+        currentContentTypeTitle: content.params.type.metadata.title
       }
     });
     return this.props.onHighlight;
@@ -175,7 +192,7 @@ export default class Canvas extends React.Component {
    * By dragging new/existing component to Dropzones
    */
   handleDropzoneHighlight = () => {
-
+    
     if (this.state.insertingId) {
       // Tips - Scenario 1
       this.setState({
@@ -1501,6 +1518,8 @@ export default class Canvas extends React.Component {
             position={ this.props.inserting.position }
             onPlacing={ () => this.handlePlacing(-1) }
             scale={ this.props.scale }
+            onMouseOver={ this.handleMouseOver }
+            onMouseOut={ this.handleMouseLeft }
           >
             { this.props.inserting.library.title }
           </Content>
@@ -1538,6 +1557,8 @@ export default class Canvas extends React.Component {
                 dropzones={ this.dropzones }
                 scoringOption={ this.props.scoringOption }
                 onPlacing={ this.handlePlacing }
+                onMouseOver={ this.handleMouseOver }
+                onMouseOut={ this.handleMouseLeft }
                 onDropped={ this.handleDropped }
                 onEdit={ this.handleContentEdit }
                 onPreview={ this.props.onContentPreview }
@@ -1571,6 +1592,7 @@ export default class Canvas extends React.Component {
                   top: '130px'
                 } }
                 onFocus={ () => this.handleDropzoneHighlight() }
+                onBlur={ () => this.handleTreeFocus() }
                 onClick={ () => this.handleDropzoneClick(-9, undefined, 0) }
               />
             </StartScreen>

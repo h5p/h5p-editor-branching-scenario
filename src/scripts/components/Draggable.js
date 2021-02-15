@@ -130,11 +130,19 @@ export default class Draggable extends React.Component {
         onMouseOver={() => {
           if (this.props.draggableMouseOver) {
             this.props.draggableMouseOver(this.props.id);
+            // Optimizing parent call by checking following condition
+            if (this.props.contentMouseOveFlag) {
+              this.props.onMouseOver();
+            }
           }
         }}
         onMouseOut={() => {
           if (this.props.draggableMouseOut) {
             this.props.draggableMouseOut();
+            // Optimizing parent call by checking following condition
+            if (this.props.contentMouseOveFlag) {
+              this.props.onMouseOut();
+            }
           }
         }}
         onMouseDown={this.handleMouseDown}
@@ -156,6 +164,7 @@ Draggable.propTypes = {
   onMoved: PropTypes.func,
   onStopped: PropTypes.func,
   id: PropTypes.number,
+  contentMouseOveFlag:  PropTypes.bool,
   draggableMouseOver: PropTypes.func,
   draggableMouseOut: PropTypes.func,
   draggableHovered: PropTypes.number,
