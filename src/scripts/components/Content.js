@@ -248,7 +248,6 @@ export default class Content extends React.Component {
         onMoved={ this.handleMoved }
         onStopped={ this.handleStopped }
         disabled={ this.props.disabled }
-        contentMouseOveFlag={ true }
         onMouseOver={ () => this.props.onMouseOver() }
         onMouseOut={ () => this.props.onMouseOut() }
       >

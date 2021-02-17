@@ -120,6 +120,7 @@
     "requiresFinishingVideoLabel": "Required to watch until the end",
     "requiresFinishingVideoDescription": "Urges viewers to complete the video before proceeding with the scenario",
     "newContentOnDropzone": "Drop here to create a new :newContentTypeName",
+    "existingContentOnDropzone": "Drop here to create a \":exitingContentName\"",
     "newContentOnExisitingContent": "Drop here to replace \":exitingContentName\" with a new :newContentTypeName",
     "newContentOnExisitingBQ": "Drop here to replace \":exitingContentName\" with a new :newContentTypeName. Important! The entire branch below this question will be deleted.",
     "pastedContentOnDropzone": "Drop here to paste :newContentTypeName",

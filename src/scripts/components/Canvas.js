@@ -117,6 +117,7 @@ export default class Canvas extends React.Component {
   }
 
    /**
+   * Handle mouse over event on existing content
    * @param {number} id - Dropzone ID.
    */
   handleMouseOver = (id) => {
@@ -159,6 +160,7 @@ export default class Canvas extends React.Component {
     }
 
     // Tips - Scenario 3 & 6
+    // For dragndrop and non-dragndrop highlight events the object is different which needs extra care
     const content = (currentContentType.props !== undefined) ? this.state.content[currentContentType.props.id] : currentContentType;
     if (content.params.type.params.branchingQuestion) {
       scenario = 'NEW_CONTENT_ON_EXISTING_BQ';
@@ -191,14 +193,23 @@ export default class Canvas extends React.Component {
    * Implement Tips Highlight
    * By dragging new/existing component to Dropzones
    */
-  handleDropzoneHighlight = () => {
-    
+  handleDropzoneHighlight = (existingContentId) => {
     if (this.state.insertingId) {
       // Tips - Scenario 1
       this.setState({
         tips: {
           scenario: 'NEW_CONTENT_ON_DROPZONE',
           newContentTypeTitle: this.state.library.title
+        }
+      });
+    }
+
+    // Tips - Existing content of canvas is placing on dropzone
+    if (this.state.placing > -1) {
+      this.setState({
+        tips: {
+          scenario: 'EXISTING_CONTENT_ON_DROPZONE',
+          currentContentTypeTitle: this.state.content[this.state.placing].params.type.metadata.title
         }
       });
     }
