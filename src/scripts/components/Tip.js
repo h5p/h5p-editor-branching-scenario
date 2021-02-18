@@ -12,6 +12,12 @@ const Tip = (props) => {
     case 'EXISTING_CONTENT_ON_DROPZONE':
       message = t('existingContentOnDropzone', {':exitingContentName' : props.currentContentTypeTitle});
       break;
+    case 'EXISTING_CONTENT_ON_EXISTING_CONTENT':
+      message = t('existingContentOnExisitingContent', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
+      break;
+    case 'EXISTING_CONTENT_ON_EXISTING_BQ':
+      message = t('existingContentOnExisitingBQ', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
+      break;
     case 'NEW_CONTENT_ON_EXISTING_CONTENT':
       message = t('newContentOnExisitingContent', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
       break;

@@ -142,6 +142,10 @@ export default class Canvas extends React.Component {
    */
   handleContentHighlight = (newContentType, currentContentType) => {
     let newContentTypeTitle, scenario = 'NEW_CONTENT_ON_EXISTING_CONTENT';
+    // Placing existing content on another existing content
+    if (this.state.placing > -1) {
+      scenario = 'EXISTING_CONTENT_ON_EXISTING_CONTENT';
+    }
     // Check if newContentType is new content (drag from left side navigation)
     if (newContentType === -1) {
       // Tips - Scenario 5, 8 & 11
@@ -166,6 +170,10 @@ export default class Canvas extends React.Component {
       scenario = 'NEW_CONTENT_ON_EXISTING_BQ';
       if (this.props.inserting && this.props.inserting.pasted) {
         scenario = 'PASTED_CONTENT_ON_EXISTING_BQ';
+      }
+      // Placing existing content on existing branching question
+      if (this.state.placing > -1) {
+        scenario = 'EXISTING_CONTENT_ON_EXISTING_BQ';
       }
     }
     
