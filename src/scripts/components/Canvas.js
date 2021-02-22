@@ -149,6 +149,10 @@ export default class Canvas extends React.Component {
     // Check if newContentType is new content (drag from left side navigation)
     if (newContentType === -1) {
       // Tips - Scenario 5, 8 & 11
+      // Sometimes BS editor crashes because of undefined data
+      if (this.props.getNewContent(this.getNewContentParams()).params.type.metadata === undefined) {
+        return false;
+      }
       newContentTypeTitle = this.props.getNewContent(this.getNewContentParams()).params.type.metadata.contentType;
       if (this.props.inserting && this.props.inserting.pasted) {
         scenario = 'PASTED_CONTENT_ON_EXISTING_CONTENT';

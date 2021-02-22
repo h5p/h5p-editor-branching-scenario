@@ -388,12 +388,16 @@ export default class Tree extends React.Component {
         width={ this.props.nodeSize.width }
         selected={ this.props.placing === branch.id }
         onPlacing={ () => this.props.onPlacing(branch.id) }
-        onMouseOver={ () => this.props.onMouseOver(branch.id) }
-        onMouseOut={ () => this.props.onMouseOut() }
         onMove={ () => this.handleMove(branch.id, this['draggable-' + branch.id]) }
         onDropped={ () => this.handleDropped(branch.id, this['draggable-' + branch.id]) }
-        draggableMouseOver={this.props.draggableMouseOver}
-        draggableMouseOut={this.props.draggableMouseOut}
+        draggableMouseOver={ () => {
+          this.props.draggableMouseOver;
+          this.props.onMouseOver(branch.id);
+        }}
+        draggableMouseOut={ () => {
+          this.props.draggableMouseOut;
+          this.props.onMouseOut();
+        }}
         draggableHovered={this.props.draggableHovered}
         contentClass={ this.getClassName(branch.id) }
         onEdit={ () => this.props.onEdit(branch.id) }
