@@ -170,6 +170,10 @@ export default class Canvas extends React.Component {
     // Tips - Scenario 3 & 6
     // For dragndrop and non-dragndrop highlight events the object is different which needs extra care
     const content = (currentContentType.props !== undefined) ? this.state.content[currentContentType.props.id] : currentContentType;
+    // Prevent Tip if user moves new BQ on existing BQ
+    if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion' && content.params.type.params.branchingQuestion) {
+      return false;
+    }
     if (content.params.type.params.branchingQuestion) {
       scenario = 'NEW_CONTENT_ON_EXISTING_BQ';
       if (this.props.inserting && this.props.inserting.pasted) {
