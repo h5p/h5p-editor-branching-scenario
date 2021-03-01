@@ -412,7 +412,7 @@ export default class Tree extends React.Component {
         hasLoopBack={ hasLoop }
         highlightLinkedContent={ () => {
           if (content.params.nextContentId > -1) {
-            this.props.onHighlight(content.params.nextContentId, branch.id);
+            this.props.onHighlightLoop(content.params.nextContentId, branch.id);
           }
         } }
       >

@@ -171,7 +171,7 @@ export default class Canvas extends React.Component {
     // For dragndrop and non-dragndrop highlight events the object is different which needs extra care
     const content = (currentContentType.props !== undefined) ? this.state.content[currentContentType.props.id] : currentContentType;
     // Prevent Tip if user moves new BQ on existing BQ
-    if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion' && content.params.type.params.branchingQuestion) {
+    if ((content.params === undefined) || (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion' && content.params.type.params.branchingQuestion)) {
       return false;
     }
     if (content.params.type.params.branchingQuestion) {
@@ -1591,6 +1591,7 @@ export default class Canvas extends React.Component {
                 onPreview={ this.props.onContentPreview }
                 onCopy={ this.handleContentCopy }
                 onDelete={ this.handleContentDelete }
+                onHighlightLoop={ this.props.onHighlight }
                 onHighlight={ this.handleContentHighlight }
                 onDropzoneHighlight={ this.handleDropzoneHighlight }
                 onFocus={ this.handleTreeFocus }
