@@ -103,6 +103,7 @@ export default class Canvas extends React.Component {
   handlePlacing = (id) => {
     if (this.state.placing !== null && this.state.placing !== id) {
       this.setState({
+        tips: false,
         deleting: id,
         confirmReplace: true,
         dialog: 'replace'
@@ -241,13 +242,23 @@ export default class Canvas extends React.Component {
     }
 
     if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
-      // Tips - Scenario 7
-      this.setState({
-        tips: {
-          scenario: 'NEW_BQ_ON_DROPZONE',
-          newContentTypeTitle: this.state.library.title
-        }
-      });
+      if ((existingContentId != undefined && existingContentId === -1) || (this.tree.tips.currentContentTypeId !== null && this.tree.tips.currentContentTypeId.props.nextContentId === undefined)) {
+        // Tips - When user trying to drop new BQ on last dropzone(s)
+        this.setState({
+          tips: {
+            scenario: 'NEW_BQ_ON_LT_DROPZONE',
+            newContentTypeTitle: this.state.library.title
+          }
+        });
+      }else{
+        // Tips - Scenario 7
+        this.setState({
+          tips: {
+            scenario: 'NEW_BQ_ON_DROPZONE',
+            newContentTypeTitle: this.state.library.title
+          }
+        });
+      }
     }
 
     if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {

@@ -512,9 +512,9 @@ export default class Tree extends React.Component {
           left: x + 'px',
           top: y + 'px'
         } }
-        onMouseOver={ () => this.props.onDropzoneHighlight() }
+        onMouseOver={ () => this.props.onDropzoneHighlight(id) }
         onMouseOut={ () => this.props.onFocus() }
-        onFocus={ () => this.props.onDropzoneHighlight() }
+        onFocus={ () => this.props.onDropzoneHighlight(id) }
         onClick={ () => this.props.onDropzoneClick(nextContentId, parent, num) }
       />
     );

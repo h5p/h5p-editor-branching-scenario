@@ -33,6 +33,9 @@ const Tip = (props) => {
     case 'PASTED_CONTENT_ON_EXISTING_BQ':
       message = t('pastedContentOnExisitingBQ', {':exitingContentName' : props.currentContentTypeTitle, ':newContentTypeName' : props.newContentTypeTitle});
       break;
+    case 'NEW_BQ_ON_LT_DROPZONE':
+      message = t('newBQOnLastDropzone');
+      break;
     case 'NEW_BQ_ON_DROPZONE':
       message = t('newBQOnDropzone');
       break;
