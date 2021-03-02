@@ -105,7 +105,7 @@ export default class Canvas extends React.Component {
     if (this.state.placing !== null && this.state.placing !== id) {
       this.setState({
         tips: false,
-        isPlacingOnBQ: (this.state.content[id].params.type.params.branchingQuestion) ? true : false,
+        isPlacingOnBQ: (id > -1 && this.state.content[id].params.type.params.branchingQuestion) ? true : false,
         deleting: id,
         confirmReplace: true,
         dialog: 'replace'
@@ -115,7 +115,7 @@ export default class Canvas extends React.Component {
       // Start placing
       this.setState({
         placing: id,
-        isPlacingOnBQ: (this.state.content[id].params.type.params.branchingQuestion) ? true : false
+        isPlacingOnBQ: (id > -1 && this.state.content[id].params.type.params.branchingQuestion) ? true : false
       });
     }
   }
