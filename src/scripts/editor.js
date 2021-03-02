@@ -285,7 +285,7 @@ export default class Editor extends React.Component {
               if(this.state.activeIndex == 0 && this.state.isEditing === false && this.state.isShowingPreview === false){
                 this.setTourState('content-node');
               }
-            }, 5000);
+            }, 2000);
           }
         });
       } else {
@@ -296,7 +296,7 @@ export default class Editor extends React.Component {
               if(this.state.activeIndex == 0 && this.state.isEditing === false && this.state.isShowingPreview === false){
                 this.setTourState('branching-node');
               }
-            }, 5000);
+            }, 2000);
           }
         });
       }
