@@ -23,7 +23,10 @@ const ConfirmationDialog = (props) => {
       title = t('replaceContent');
       question = t('confirmReplaceContent');
       confirm = t('replace');
-      graphics = replaceGraphics;
+      // Add graphics only for non-BQ contents
+      if (!props.isBQ) {
+        graphics = replaceGraphics;
+      }
       altText = t('replaceContent');
       break;
   }

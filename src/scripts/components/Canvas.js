@@ -22,6 +22,7 @@ export default class Canvas extends React.Component {
 
     this.state = {
       placing: null,
+      isPlacingOnBQ: false,
       deleting: null,
       inserting: null,
       editing: null,
@@ -104,6 +105,7 @@ export default class Canvas extends React.Component {
     if (this.state.placing !== null && this.state.placing !== id) {
       this.setState({
         tips: false,
+        isPlacingOnBQ: (this.state.content[id].params.type.params.branchingQuestion) ? true : false,
         deleting: id,
         confirmReplace: true,
         dialog: 'replace'
@@ -112,7 +114,8 @@ export default class Canvas extends React.Component {
     else {
       // Start placing
       this.setState({
-        placing: id
+        placing: id,
+        isPlacingOnBQ: (this.state.content[id].params.type.params.branchingQuestion) ? true : false
       });
     }
   }
@@ -1646,6 +1649,7 @@ export default class Canvas extends React.Component {
         { this.state.dialog !== null &&
           <ConfirmationDialog
             action={ this.state.dialog }
+            isBQ= { this.state.isPlacingOnBQ }
             onConfirm={ this.handleDelete }
             onCancel={ this.handleCancel }
           >
