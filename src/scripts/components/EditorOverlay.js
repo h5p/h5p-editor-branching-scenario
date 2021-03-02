@@ -358,7 +358,7 @@ export default class EditorOverlay extends React.Component {
 
     const feedbackGroupField = (!this.isBranchingQuestion ? this.findField('feedback') : null);
 
-    const behaviourGroupField = (!this.isBranchingQuestion ? this.findField('contentBehaviour') : null);
+    const behaviourGroupField = this.findField('contentBehaviour');
 
     return (
       <div className={ wrapperClass }>
@@ -385,9 +385,10 @@ export default class EditorOverlay extends React.Component {
         <div className={`editor-overlay-content${scoreClass}`}>
           <div className='editor-overlay-semantics' ref={ this.form }/>
           {
-            !this.isBranchingQuestion &&
+            
             <div>
               <BranchingOptions
+                isBranchingQuestion ={ this.isBranchingQuestion }
                 nextContentId={ this.props.content.params.nextContentId }
                 validAlternatives={ this.props.validAlternatives }
                 onChangeContent={ this.handleNextContentIdChange }

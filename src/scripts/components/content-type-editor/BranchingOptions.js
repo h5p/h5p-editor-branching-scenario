@@ -30,7 +30,7 @@ export default class BranchingOptions extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.feedbackGroup !== undefined) {
+    if (this.props.feedbackGroup && this.props.feedbackGroup !== undefined) {
       this.props.feedbackGroup.$group.appendTo(this.contentWrapper);
     }
   }
@@ -44,7 +44,7 @@ export default class BranchingOptions extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.props.feedbackGroup !== undefined) {
+    if (this.props.feedbackGroup && this.props.feedbackGroup !== undefined) {
       if (H5PEditor.Html) {
         H5PEditor.Html.removeWysiwyg();
       }
@@ -67,12 +67,17 @@ export default class BranchingOptions extends React.Component {
         this.props.feedbackGroup.children[3].$item.toggle(isDynamicScore || isStaticScore);
       }
     }
-    if (this.props.contentBehaviourGroup && !this.isBranchingQuestion) {
+    if (this.props.contentBehaviourGroup) {
       this.props.contentBehaviourGroup.$item.appendTo(this.contentWrapper);
     }
   }
 
   static hasFeedback(props) {
+    // For BQ we do not need  feedback form
+    if (props.isBranchingQuestion) {
+      return false;
+    }
+
     if (props.feedbackGroup === undefined || props.feedbackGroup.params === undefined) {
       return false;
     }
@@ -135,34 +140,37 @@ export default class BranchingOptions extends React.Component {
             tabIndex="0">{t('advancedBranchingOptions')}
           </div>
           <div className="content" ref={ element => this.contentWrapper = element }>
-            <div className='field text importance-low'>
-              <label className='h5peditor-label-wrapper' htmlFor={ this.specialActionSelectId }>
-                <span className='h5peditor-label'>
-                  { this.props.nextContentLabel || t('specialActionAfterContent') }
-                </span>
-              </label>
-              <select
-                id={ this.specialActionSelectId }
-                value={ this.state.selectedMainOption }
-                onChange={ this.handleMainOptionChange }
-              >
-                <option
-                  key="default"
-                  value="new-content"
-                > - </option>
-                <option
-                  key="end-scenario"
-                  value="end-scenario"
-                >{t('customEndScenario')}</option>
-                {
-                  this.props.validAlternatives.length > 0 &&
+            {
+              !this.props.isBranchingQuestion &&
+              <div className='field text importance-low'>
+                <label className='h5peditor-label-wrapper' htmlFor={ this.specialActionSelectId }>
+                  <span className='h5peditor-label'>
+                    { this.props.nextContentLabel || t('specialActionAfterContent') }
+                  </span>
+                </label>
+                <select
+                  id={ this.specialActionSelectId }
+                  value={ this.state.selectedMainOption }
+                  onChange={ this.handleMainOptionChange }
+                >
                   <option
-                    key="old-content"
-                    value="old-content"
-                  >{t('jumpToOtherBranch')}</option>
-                }
-              </select>
-            </div>
+                    key="default"
+                    value="new-content"
+                  > - </option>
+                  <option
+                    key="end-scenario"
+                    value="end-scenario"
+                  >{t('customEndScenario')}</option>
+                  {
+                    this.props.validAlternatives.length > 0 &&
+                    <option
+                      key="old-content"
+                      value="old-content"
+                    >{t('jumpToOtherBranch')}</option>
+                  }
+                </select>
+              </div>
+            }
             {
               this.props.nextContentId >= 0 &&
               <div className="field text importance-low">
@@ -194,6 +202,7 @@ export default class BranchingOptions extends React.Component {
 
 BranchingOptions.propTypes = {
   nextContentId: PropTypes.number,
+  isBranchingQuestion: PropTypes.bool,
   validAlternatives: PropTypes.array,
   onChangeContent: PropTypes.func
 };
