@@ -390,12 +390,12 @@ export default class Tree extends React.Component {
         onPlacing={ () => this.props.onPlacing(branch.id) }
         onMove={ () => this.handleMove(branch.id, this['draggable-' + branch.id]) }
         onDropped={ () => this.handleDropped(branch.id, this['draggable-' + branch.id]) }
-        draggableMouseOver={ () => {
-          this.props.draggableMouseOver;
+        draggableMouseOver={ (id) => {
+          this.props.draggableMouseOver(id);
           this.props.onMouseOver(branch.id);
         }}
         draggableMouseOut={ () => {
-          this.props.draggableMouseOut;
+          this.props.draggableMouseOut();
           this.props.onMouseOut();
         }}
         draggableHovered={this.props.draggableHovered}
