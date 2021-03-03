@@ -593,7 +593,7 @@ export default class Tree extends React.Component {
             node.loop &&
             <div
               className='loop-back'
-              onClick={ () => this.props.onHighlight(node.id, key) }
+              onClick={ () => this.props.onHighlightLoop(node.id, key) }
             />
           }
           <div className="dark-tooltip">
