@@ -114,8 +114,7 @@ export default class Canvas extends React.Component {
     else {
       // Start placing
       this.setState({
-        placing: id,
-        isPlacingOnBQ: (id > -1 && this.state.content[id].params.type.params.branchingQuestion) ? true : false
+        placing: id
       });
     }
   }
