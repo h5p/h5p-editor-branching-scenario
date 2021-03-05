@@ -1633,7 +1633,7 @@ export default class Canvas extends React.Component {
                   top: '130px'
                 } }
                 onFocus={ () => this.handleDropzoneHighlight() }
-                onBlur={ () => this.handleTreeFocus() }
+                onMouseOut={ () => this.handleTreeFocus() }
                 onClick={ () => this.handleDropzoneClick(-9, undefined, 0) }
               />
             </StartScreen>
