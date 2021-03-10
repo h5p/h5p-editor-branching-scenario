@@ -27,6 +27,11 @@ export default class EditorOverlay extends React.Component {
     // Useful multiple places later
     this.isBranchingQuestion = isBranching(this.props.content);
 
+    // Show Branching options by default for all forms
+    this.state = {
+      isSubFrom: false
+    }
+
     this.validAltCount = this.props.validAlternatives
       ? this.props.validAlternatives.length : 0;
   }
@@ -122,6 +127,22 @@ export default class EditorOverlay extends React.Component {
 
     const fm = (library.children[0] instanceof H5P.DragNBar.FormManager ? library.children[0] : (library.children[0].children && library.children[0].children[1] instanceof H5P.DragNBar.FormManager ? library.children[0].children[1] : null));
     if (fm) {
+      fm.on('formopened', e => {
+        const library = this.findField('type').params.library.split(' ')[0];
+        if (library === "H5P.CoursePresentation" || library === "H5P.InteractiveVideo" ) {
+          this.setState({ isSubFrom: true });
+          this.handleVisibilityOfFields(false);
+        }
+      });
+
+      fm.on('formclose', e => {
+        const library = this.findField('type').params.library.split(' ')[0];
+        if (library === "H5P.CoursePresentation" || library === "H5P.InteractiveVideo" ) {
+          this.setState({ isSubFrom: false });
+          this.handleVisibilityOfFields(true);
+        }
+      });
+
       // Use the form manager's buttons instead of ours
       fm.setAlwaysShowButtons(true);
       fm.off('formremove'); // Remove any old listeners just in case
@@ -287,6 +308,22 @@ export default class EditorOverlay extends React.Component {
   }
 
   /**
+   * Handle visibility of behavioural fields depends on scenario
+   */
+  handleVisibilityOfFields = (display) => {
+    this.findField('showContentTitle').$item[0].style.display = "none";
+    this.findField('forceContentFinished').$item[0].style.display = "none";
+    this.findField('contentBehaviour').$item[0].style.display = "none";
+
+    // Show fields for the parent form
+    if (display) {
+      this.findField('showContentTitle').$item[0].style.display = "block";
+      this.findField('forceContentFinished').$item[0].style.display = "block";
+      this.findField('contentBehaviour').$item[0].style.display = "block";
+    }
+  }
+
+  /**
    * Handle click on "done".
    */
   handleDone = () => {
@@ -384,7 +421,7 @@ export default class EditorOverlay extends React.Component {
 
         <div className={`editor-overlay-content${scoreClass}`}>
           <div className='editor-overlay-semantics' ref={ this.form }/>
-          {
+          { !this.state.isSubFrom &&
             
             <div>
               <BranchingOptions
