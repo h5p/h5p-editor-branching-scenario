@@ -311,15 +311,16 @@ export default class EditorOverlay extends React.Component {
    * Handle visibility of behavioural fields depends on scenario
    */
   handleVisibilityOfFields = (display) => {
-    this.findField('showContentTitle').$item[0].style.display = "none";
-    this.findField('forceContentFinished').$item[0].style.display = "none";
-    this.findField('contentBehaviour').$item[0].style.display = "none";
-
     // Show fields for the parent form
     if (display) {
       this.findField('showContentTitle').$item[0].style.display = "block";
       this.findField('forceContentFinished').$item[0].style.display = "block";
       this.findField('contentBehaviour').$item[0].style.display = "block";
+    }
+    else{ 
+      this.findField('showContentTitle').$item[0].style.display = "none";
+      this.findField('forceContentFinished').$item[0].style.display = "none";
+      this.findField('contentBehaviour').$item[0].style.display = "none";
     }
   }
 
