@@ -91,7 +91,7 @@ export default class Preview extends React.Component {
           params={this.props.params}
           initialContentId={this.props.previewId}
         />
-        <div className='preview-wrapper'>
+        <div className='preview-wrapper h5p-frame'>
           <div ref={this.previewContainer}/>
         </div>
         {
