@@ -121,15 +121,9 @@
       }
 
       &:nth-child(7):before {
-        font-family: "Material Icons";
-        border-radius: 50%;
+        @include icon-go-to-existing();
         border: none;
-        color: #fff;
-        background: linear-gradient(0deg, #b83737 1%, #e8668d 100% );
-        font-weight: normal;
-        box-shadow: 0px 3px 6px rgba(0,0,0,0.4);
-        padding: 0.1em;
-        @include icon-go-to-existing()
+        transform: rotate(-45deg);
       }
 
       &:last-child {
