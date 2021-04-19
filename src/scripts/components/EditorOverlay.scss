@@ -66,9 +66,6 @@
   .form-manager-form.form-manager-slidein {
     left: 0;
   }
-  .libwrap {
-    margin-top: 0;
-  }
 }
 
 .editor-overlay .editor-overlay-content {
@@ -89,7 +86,7 @@
       
       &.libwrap { 
         > .form-manager-form {
-          padding: 20px 0;
+          padding: 0;
           border: 0;
         }
       }
