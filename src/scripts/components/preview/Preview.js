@@ -56,7 +56,7 @@ export default class Preview extends React.Component {
         library: branchingScenario,
         params: this.props.params
       },
-      H5PEditor.contentId,
+      H5PEditor.contentId || 1,
       H5P.jQuery(previewContainer)
     );
     this.setState({
