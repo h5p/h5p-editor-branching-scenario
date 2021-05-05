@@ -122,8 +122,8 @@
     "newContentOnDropzone": "Drop here to create a new :newContentTypeName",
     "existingContentOnDropzone": "Drop here to move \":existingContentName\"",
     "newContentOnExisitingContent": "Drop here to replace \":existingContentName\" with a new :newContentTypeName",
-    "existingContentOnExisitingContent": "Drop here to replace \":existingContentName\" with a :newContentTypeName",
-    "existingContentOnExisitingBQ": "Drop here to replace \":existingContentName\" with :newContentTypeName. Important! The entire branch below this question will be deleted.",
+    "existingContentOnExisitingContent": "Drop here to replace \":existingContentName\" with a \":newContentTypeName\"",
+    "existingContentOnExisitingBQ": "Drop here to replace \":existingContentName\" with \":newContentTypeName\". Important! The entire branch below this question will be deleted.",
     "newContentOnExisitingBQ": "Drop here to replace \":existingContentName\" with a new :newContentTypeName. Important! The entire branch below this question will be deleted.",
     "pastedContentOnDropzone": "Drop here to paste \":newContentTypeName\"",
     "pastedContentOnExisitingContent": "Drop here to replace \":existingContentName\" with a \":newContentTypeName\"",
@@ -132,6 +132,6 @@
     "newBQOnDropzone": "Drop here to create a new Branching question. The existing structure below this dropzone will attach to the first alternative.",
     "newBQOnExisitingContent": "Drop here to replace \":existingContentName\" with a new Branching question. The existing structure below this content will attach to the first alternative.",
     "pastedBQOnDropzone": "Drop here to paste \":newContentTypeName\". The existing structure below this dropzone will attach to the first alternative.",
-    "pastedBQOnExisitingContent": "Drop here to replace \":existingContentName\" with a :newContentTypeName. The existing structure below this content will attach to the first alternative."
+    "pastedBQOnExisitingContent": "Drop here to replace \":existingContentName\" with a \":newContentTypeName\". The existing structure below this content will attach to the first alternative."
   }
 }
