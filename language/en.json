@@ -120,18 +120,18 @@
     "requiresFinishingVideoLabel": "Required to watch until the end",
     "requiresFinishingVideoDescription": "Urges viewers to complete the video before proceeding with the scenario",
     "newContentOnDropzone": "Drop here to create a new :newContentTypeName",
-    "existingContentOnDropzone": "Drop here to move \":exitingContentName\"",
-    "newContentOnExisitingContent": "Drop here to replace \":exitingContentName\" with a new :newContentTypeName",
-    "existingContentOnExisitingContent": "Drop here to replace \":exitingContentName\" with a :newContentTypeName",
-    "existingContentOnExisitingBQ": "Drop here to replace \":exitingContentName\" with :newContentTypeName. Important! The entire branch below this question will be deleted.",
-    "newContentOnExisitingBQ": "Drop here to replace \":exitingContentName\" with a new :newContentTypeName. Important! The entire branch below this question will be deleted.",
-    "pastedContentOnDropzone": "Drop here to paste :newContentTypeName",
-    "pastedContentOnExisitingContent": "Drop here to replace \":exitingContentName\" with a :newContentTypeName",
-    "pastedContentOnExisitingBQ": "Drop here to replace \"exitingContentName\" with :newContentTypeName. Important! The entire branch below this question will be deleted.",
+    "existingContentOnDropzone": "Drop here to move \":existingContentName\"",
+    "newContentOnExisitingContent": "Drop here to replace \":existingContentName\" with a new :newContentTypeName",
+    "existingContentOnExisitingContent": "Drop here to replace \":existingContentName\" with a :newContentTypeName",
+    "existingContentOnExisitingBQ": "Drop here to replace \":existingContentName\" with :newContentTypeName. Important! The entire branch below this question will be deleted.",
+    "newContentOnExisitingBQ": "Drop here to replace \":existingContentName\" with a new :newContentTypeName. Important! The entire branch below this question will be deleted.",
+    "pastedContentOnDropzone": "Drop here to paste \":newContentTypeName\"",
+    "pastedContentOnExisitingContent": "Drop here to replace \":existingContentName\" with a \":newContentTypeName\"",
+    "pastedContentOnExisitingBQ": "Drop here to replace \":existingContentName\" with \":newContentTypeName\". Important! The entire branch below this question will be deleted.",
     "newBQOnLastDropzone": "Drop here to create a new Branching question.",
     "newBQOnDropzone": "Drop here to create a new Branching question. The existing structure below this dropzone will attach to the first alternative.",
-    "newBQOnExisitingContent": "Drop here to replace \":exitingContentName\" with a new Branching question. The existing structure below this content will attach to the first alternative.",
+    "newBQOnExisitingContent": "Drop here to replace \":existingContentName\" with a new Branching question. The existing structure below this content will attach to the first alternative.",
     "pastedBQOnDropzone": "Drop here to paste \":newContentTypeName\". The existing structure below this dropzone will attach to the first alternative.",
-    "pastedBQOnExisitingContent": "Drop here to replace \":exitingContentName\" with a :newContentTypeName. The existing structure below this content will attach to the first alternative."
+    "pastedBQOnExisitingContent": "Drop here to replace \":existingContentName\" with a :newContentTypeName. The existing structure below this content will attach to the first alternative."
   }
 }
