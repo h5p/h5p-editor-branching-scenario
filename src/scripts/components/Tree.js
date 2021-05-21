@@ -351,7 +351,7 @@ export default class Tree extends React.Component {
     const contentIsBranching = branch.isBranching;
 
     // When a node is moved and the previous parent is now the final node, Ensure it gets counted in end scenario counter
-    if(content.params.nextContentId === undefined && content.params.type.library != "H5P.BranchingQuestion 1.0") {
+    if(content.params.nextContentId === undefined && content.params.type.library.split(' ')[0] !==  "H5P.BranchingQuestion") {
       content.params.nextContentId = -1;
     }
 
