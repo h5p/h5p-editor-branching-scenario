@@ -368,7 +368,7 @@ export default class Tree extends React.Component {
     if (this.props.onlyThisBall !== null && (this.props.highlight === branch.id || this.props.onlyThisBall === branch.id)) {
       fade = false; // Highlighing this content
     }
-    if (this.props.highlight === -1 && content.params.nextContentId === -1 && !hasCustomFeedback) {
+    if (this.props.highlight === -1 && content.params.nextContentId === -1 && !hasCustomFeedback && content.params.type.library.split(' ')[0] != "H5P.BranchingQuestion") {
       fade = false; // Highlighing default endings
     }
 
