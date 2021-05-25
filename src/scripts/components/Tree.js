@@ -349,9 +349,10 @@ export default class Tree extends React.Component {
 
     const content = this.props.content[branch.id];
     const contentIsBranching = branch.isBranching;
+    const isQuestionNode = content.params.type.library.split(' ')[0] === "H5P.BranchingQuestion";
 
     // When a node is moved and the previous parent is now the final node, Ensure it gets counted in end scenario counter
-    if(content.params.nextContentId === undefined && content.params.type.library.split(' ')[0] !==  "H5P.BranchingQuestion") {
+    if(content.params.nextContentId === undefined && !isQuestionNode) {
       content.params.nextContentId = -1;
     }
 
@@ -368,7 +369,10 @@ export default class Tree extends React.Component {
     if (this.props.onlyThisBall !== null && (this.props.highlight === branch.id || this.props.onlyThisBall === branch.id)) {
       fade = false; // Highlighing this content
     }
-    if (this.props.highlight === -1 && content.params.nextContentId === -1 && !hasCustomFeedback && content.params.type.library.split(' ')[0] != "H5P.BranchingQuestion") {
+    if (this.props.highlight === -1
+      && content.params.nextContentId === -1
+      && !hasCustomFeedback
+      && !isQuestionNode) {
       fade = false; // Highlighing default endings
     }
 
