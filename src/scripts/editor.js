@@ -308,7 +308,7 @@ export default class Editor extends React.Component {
    */
   handleScoringOptionChange = () => {
     this.setState({
-      scoringOption: this.props.main.params.scoringOption
+      scoringOption: this.props.main.params.scoringOptionGroup.scoringOption
     });
   };
 
