@@ -36,8 +36,9 @@ export default class Preview extends React.Component {
       // Throttle centering to ~15fps
       this.resizeTimeout = setTimeout(() => {
         this.resizeTimeout = null;
-        console.log(this.preview)
-        this.preview.trigger('resize');
+        if(this.preview) {
+          this.preview.trigger('resize');
+        }
       }, 66);
     }
   };
