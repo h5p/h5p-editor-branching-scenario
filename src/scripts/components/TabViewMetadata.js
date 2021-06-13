@@ -1,6 +1,7 @@
 import React from 'react';
 import TooltipButton from './TooltipButton';
 import './TabViewMetadata.scss';
+import {t} from '../helpers/translate';
 
 export default class TabViewMetadata extends React.Component {
   constructor(props) {
@@ -14,14 +15,14 @@ export default class TabViewMetadata extends React.Component {
   render() {
     return (
       <div id="metadata" className="tab tab-view-full-page large-padding" >
-        <span className="tab-view-title">Metadata</span>
-        <span className="tab-view-description">Add metadata for main content</span>
+        <span className="tab-view-title">{t('metadata')}</span>
+        <span className="tab-view-description">{t('addMetadata')}</span>
         <div className="tab-view-white-box" >
           <fieldset>
             <legend className="tab-view-info">
-              Metadata
+              {t('metadata')}
               <TooltipButton
-                text="Metadata help users to reuse your content."
+                text={t('metadataDescription')}
                 tooltipClass={ 'tooltip below' }
               />
             </legend>

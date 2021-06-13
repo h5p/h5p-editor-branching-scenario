@@ -66,9 +66,6 @@
   .form-manager-form.form-manager-slidein {
     left: 0;
   }
-  .libwrap {
-    margin-top: 0;
-  }
 }
 
 .editor-overlay .editor-overlay-content {
@@ -81,6 +78,19 @@
   .editor-overlay-label-red {
     margin-left: 0.25em;
     color: #da0001;
+  }
+
+  .editor-overlay-library{
+    .form-manager {
+      border: 0;
+      
+      &.libwrap { 
+        > .form-manager-form {
+          padding: 0;
+          border: 0;
+        }
+      }
+    }
   }
 }
 

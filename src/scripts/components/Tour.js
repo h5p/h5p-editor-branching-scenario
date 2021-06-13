@@ -1,4 +1,5 @@
 import React from 'react';
+import {t} from '../helpers/translate';
 
 export default class Tour extends React.Component {
   constructor(props) {
@@ -7,12 +8,12 @@ export default class Tour extends React.Component {
 
   render() {
     return (
-      <div className="tour-box" style={ this.props.position }>
+      <div className={ "tour-box " + this.props.markerPosition } style={ this.props.position }>
         <div className="tour-circle">
           <div className="tour-dialog">
-            Use this button to go in and out of
-            full-screen mode.<br/>
-            <button type="button" className="tour-button" onClick={ this.props.onClose }>I got it</button>
+            {this.props.message}
+            <br/>
+            <button type="button" className="tour-button" onClick={ this.props.onClose }>{t('iGotIt')}</button>
           </div>
         </div>
       </div>

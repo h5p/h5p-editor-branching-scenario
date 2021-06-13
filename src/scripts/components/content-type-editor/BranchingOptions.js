@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './BranchingOptions.scss';
+import {t} from '../../helpers/translate';
 
 export default class BranchingOptions extends React.Component {
 
@@ -29,7 +30,7 @@ export default class BranchingOptions extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.feedbackGroup !== undefined) {
+    if (this.props.feedbackGroup && this.props.feedbackGroup !== undefined) {
       this.props.feedbackGroup.$group.appendTo(this.contentWrapper);
     }
   }
@@ -43,7 +44,7 @@ export default class BranchingOptions extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.props.feedbackGroup !== undefined) {
+    if (this.props.feedbackGroup && this.props.feedbackGroup !== undefined) {
       if (H5PEditor.Html) {
         H5PEditor.Html.removeWysiwyg();
       }
@@ -52,10 +53,10 @@ export default class BranchingOptions extends React.Component {
 
       if (this.state.selectedMainOption !== 'new-content') {
         // Update field labels to match parent option
-        this.props.feedbackGroup.$title.html(this.state.selectedMainOption === 'end-scenario' ? 'Customize end scenario' : this.props.feedbackGroup.field.label);
-        this.props.feedbackGroup.children[0].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Custom end scenario title' : this.props.feedbackGroup.children[0].field.label);
-        this.props.feedbackGroup.children[1].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Custom end scenario text' : this.props.feedbackGroup.children[1].field.label);
-        this.props.feedbackGroup.children[2].$item.children('.h5peditor-label-wrapper').children('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? 'Custom end scenario image' : this.props.feedbackGroup.children[2].field.label);
+        this.props.feedbackGroup.$title.html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackOnEndScreen') : this.props.feedbackGroup.field.label);
+        this.props.feedbackGroup.children[0].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackTitle') : this.props.feedbackGroup.children[0].field.label);
+        this.props.feedbackGroup.children[1].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackText') : this.props.feedbackGroup.children[1].field.label);
+        this.props.feedbackGroup.children[2].$item.children('.h5peditor-label-wrapper').children('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackImage') : this.props.feedbackGroup.children[2].field.label);
 
         const isEndScenario = !(this.props.nextContentId > -1);
 
@@ -66,9 +67,17 @@ export default class BranchingOptions extends React.Component {
         this.props.feedbackGroup.children[3].$item.toggle(isDynamicScore || isStaticScore);
       }
     }
+    if (this.props.contentBehaviourGroup) {
+      this.props.contentBehaviourGroup.$item.appendTo(this.contentWrapper);
+    }
   }
 
   static hasFeedback(props) {
+    // For BQ we do not need  feedback form
+    if (props.isBranchingQuestion) {
+      return false;
+    }
+
     if (props.feedbackGroup === undefined || props.feedbackGroup.params === undefined) {
       return false;
     }
@@ -119,52 +128,54 @@ export default class BranchingOptions extends React.Component {
   }
 
   render() {
-    // TODO: translations
     return (
       <div className='editor-overlay-branching-options'>
         <fieldset className={ 'field group' + (this.state.expanded ? ' expanded' : '' ) }>
           <div
             className="title"
-            title="Expand/Collapse"
+            title={t('expandCollapse')}
             role="button"
             onClick={ () => this.setState(prevState => ({expanded: !prevState.expanded})) }
             onKeyPress={ e => { if (e.which === 32) this.setState(prevState => ({expanded: !prevState.expanded}));} }
-            tabIndex="0">Branching Options{ /* TODO: l10n */ }
+            tabIndex="0">{t('advancedBranchingOptions')}
           </div>
           <div className="content" ref={ element => this.contentWrapper = element }>
-            <div className='field text importance-low'>
-              <label className='h5peditor-label-wrapper' htmlFor={ this.specialActionSelectId }>
-                <span className='h5peditor-label'>
-                  { this.props.nextContentLabel || 'Special action after this content' }
-                </span>
-              </label>
-              <select
-                id={ this.specialActionSelectId }
-                value={ this.state.selectedMainOption }
-                onChange={ this.handleMainOptionChange }
-              >
-                <option
-                  key="default"
-                  value="new-content"
-                > - </option>
-                <option
-                  key="end-scenario"
-                  value="end-scenario"
-                >Custom end scenario</option>
-                {
-                  this.props.validAlternatives.length > 0 &&
+            {
+              !this.props.isBranchingQuestion &&
+              <div className='field text importance-low'>
+                <label className='h5peditor-label-wrapper' htmlFor={ this.specialActionSelectId }>
+                  <span className='h5peditor-label'>
+                    { this.props.nextContentLabel || t('specialActionAfterContent') }
+                  </span>
+                </label>
+                <select
+                  id={ this.specialActionSelectId }
+                  value={ this.state.selectedMainOption }
+                  onChange={ this.handleMainOptionChange }
+                >
                   <option
-                    key="old-content"
-                    value="old-content"
-                  >Jump to another branch</option>
-                }
-              </select>
-            </div>
+                    key="default"
+                    value="new-content"
+                  > - </option>
+                  <option
+                    key="end-scenario"
+                    value="end-scenario"
+                  >{t('customEndScenario')}</option>
+                  {
+                    this.props.validAlternatives.length > 0 &&
+                    <option
+                      key="old-content"
+                      value="old-content"
+                    >{t('jumpToOtherBranch')}</option>
+                  }
+                </select>
+              </div>
+            }
             {
               this.props.nextContentId >= 0 &&
               <div className="field text importance-low">
                 <label className="h5peditor-label-wrapper" htmlFor={ this.nextContentSelectId }>
-                  <span className="h5peditor-label h5peditor-required">Select a branch to jump to{/* TODO: Use title from semantics */}</span>
+                  <span className="h5peditor-label h5peditor-required">{t('selectABranchToJump')}</span>
                 </label>
                 <select
                   id={ this.nextContentSelectId }
@@ -191,6 +202,7 @@ export default class BranchingOptions extends React.Component {
 
 BranchingOptions.propTypes = {
   nextContentId: PropTypes.number,
+  isBranchingQuestion: PropTypes.bool,
   validAlternatives: PropTypes.array,
   onChangeContent: PropTypes.func
 };

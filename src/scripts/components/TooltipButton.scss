@@ -15,10 +15,23 @@
   &:after {
     font-family: "Material Icons";
     top: 0;
-    font-size: 0.7rem;
-    color: #999999;
+    color: #88a7ca;
+    font-size: 1.325em;
+    font-weight: normal;
     cursor: pointer;
     padding-left: 0.3rem;
     content: $icon-info;
+  }
+}
+
+.tab-view-info{
+  .tooltip-wrapper {
+    .tooltip-button {
+      &:after {
+        color: #999999;
+        font-size: 1.325em;
+        font-weight: normal;
+      }
+    }
   }
 }

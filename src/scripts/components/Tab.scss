@@ -3,6 +3,7 @@
 .h5p-branchingscenario-editor .h5peditor-form {
   .tab-panel {
   	display: none;
+    overflow: hidden;
     position: relative;
   }
 
@@ -80,7 +81,8 @@
 
   .tab-view-info {
     position: relative;
-    display: block; }
+    display: flex;
+  }
 
   .tab-view-info-tip {
     display: none;

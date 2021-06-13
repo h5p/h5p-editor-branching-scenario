@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { find } from '../helpers/Library';
-
+import {t} from '../helpers/translate';
 import './Toolbar.scss';
 
 export default class Toolbar extends React.Component {
@@ -133,8 +133,6 @@ export default class Toolbar extends React.Component {
   }
 
   render() {
-    // TODO: l10n
-
     let infoPopupClass = 'info-popup';
     if (this.state.showInfoPopup) {
       infoPopupClass += ' visible';
@@ -153,11 +151,11 @@ export default class Toolbar extends React.Component {
     }
 
     return (
-      <div className="toolbar">
+      <div className={ 'toolbar' + (this.props.isTourActive ? ' tour-fade' : '') }>
         <div className="zoom-wrapper">
           <span
             className={ zoomOutClass }
-            title="Zoom out"
+            title={t('zoomOut')}
             tabIndex="0"
             role="button"
             onClick={ () => this.handleZoom(false) }
@@ -167,35 +165,35 @@ export default class Toolbar extends React.Component {
           </span>
           <span
             className={ zoomInClass }
-            title="Zoom in"
+            title={t('zoomIn')}
             tabIndex="0"
             role="button"
             onClick={ () => this.handleZoom(true) }
           />
           <span
             className={ 'fit-to-canvas' + (this.props.disabled ? ' disabled' : '') }
-            title="Zoom to fit"
+            title={t('zoomToFit')}
             tabIndex="0"
             role="button"
             onClick={ this.handleFitToCanvas }
           >
-            Zoom to fit
+            {t('zoomToFit')}
           </span>
         </div>
         <div
           className="missing-end-scenarios"
-          title={`${this.props.numDefaultEndScenarios} alternatives without custom end scenario`}
+          title={`${this.props.numDefaultEndScenarios} ${t('alternativeWithoutCustomEnd')}`}
           role="button"
           tabIndex="0"
           onClick={ this.handleShowPopup }
         >{ this.props.numDefaultEndScenarios }</div>
         <div className={ infoPopupClass }>
-          { this.props.numDefaultEndScenarios } alternative(s) are missing the custom end scenario.
+          { this.props.numDefaultEndScenarios } {(t('alternativesMissing'))}
           { !!this.props.numDefaultEndScenarios &&
-            <span> Click <span className="highlight-end-scenarios-button" role="button" tabIndex="0" onClick={ this.handleHighlight }>here</span> to highlight these.</span>
+            <span> <span className="highlight-end-scenarios-button" role="button" tabIndex="0" onClick={ this.handleHighlight }>{t('clickHereToHighlight')}</span></span>
           }
 
-          <div className="close-info-popup-button" onClick={ this.handleClosePopup } aria-label="Close"></div>
+          <div className="close-info-popup-button" onClick={ this.handleClosePopup } aria-label={t('close')}></div>
         </div>
       </div>
     );
@@ -208,5 +206,6 @@ Toolbar.propTypes = {
   scale: PropTypes.number,
   onScaleChanged: PropTypes.func,
   containerRect: PropTypes.object,
-  contentRect: PropTypes.object
+  contentRect: PropTypes.object,
+  isTourActive: PropTypes.bool
 };

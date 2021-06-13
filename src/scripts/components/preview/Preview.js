@@ -20,6 +20,8 @@ export default class Preview extends React.Component {
     if (this.props.hasLoadedLibraries && !this.state.isInitialized) {
       this.initializeInstance();
     }
+
+    window.addEventListener('resize', this.handleWindowResize);
   }
 
   componentDidUpdate() {
@@ -27,6 +29,19 @@ export default class Preview extends React.Component {
       this.initializeInstance();
     }
   }
+
+  handleWindowResize = () => {
+    this.resizeTimeout = null;
+    if (!this.resizeTimeout) {
+      // Throttle centering to ~15fps
+      this.resizeTimeout = setTimeout(() => {
+        this.resizeTimeout = null;
+        if(this.preview) {
+          this.preview.trigger('resize');
+        }
+      }, 66);
+    }
+  };
 
   initializeInstance() {
     // Do not initialize empty branching scenarios
@@ -48,12 +63,15 @@ export default class Preview extends React.Component {
         return library.split(' ')[0] === 'H5P.BranchingScenario';
       })[0];
 
+    // Flag passed into BS to prevent XAPI statements being fired whilst in Preview.
+    this.props.params.branchingScenario.preventXAPI = true;
+
     this.preview = H5P.newRunnable(
       {
         library: branchingScenario,
         params: this.props.params
       },
-      H5PEditor.contentId,
+      H5PEditor.contentId || 1,
       H5P.jQuery(previewContainer)
     );
     this.setState({
@@ -88,7 +106,7 @@ export default class Preview extends React.Component {
           params={this.props.params}
           initialContentId={this.props.previewId}
         />
-        <div className='preview-wrapper'>
+        <div className='preview-wrapper h5p-frame'>
           <div ref={this.previewContainer}/>
         </div>
         {

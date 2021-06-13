@@ -103,6 +103,7 @@ export default class Content extends React.Component {
   highlight() {
     if (!this.props.disabled) {
       this.element.element.classList.add('highlight');
+      this.props.onHighlight();
     }
   }
 
@@ -187,7 +188,7 @@ export default class Content extends React.Component {
     // Use temporary position when dragging, props is the static place in the tree
     const moving = (this.state.temporaryPosition ? true : false);
     const position = (this.state.temporaryPosition ? this.state.temporaryPosition : this.props.position);
-
+    
     // Determine element class depending on state
     let elementClass = this.props.contentClass + ' draggable';
     if (this.props.selected) {
@@ -298,5 +299,5 @@ Content.propTypes = {
   scale: PropTypes.number,
   draggableMouseOver: PropTypes.func,
   draggableMouseOut: PropTypes.func,
-  draggableHovered: PropTypes.number,
+  draggableHovered: PropTypes.number
 };

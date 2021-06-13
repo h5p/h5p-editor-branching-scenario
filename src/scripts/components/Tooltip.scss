@@ -1,50 +1,52 @@
 @import '../../styles/main.scss';
 
-.tooltip {
-  position: absolute;
-  bottom: 98%;
-  top: auto;
-  width: 15rem;
-  background-color: #ffffff;
-  z-index: 2000;
-  padding: 0.6rem;
-  border-radius: 5px;
-  font-weight: normal;
-  padding-left: 3.5rem;
-  text-align: left;
-  box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
-  font-size: 0.75rem;
-  line-height: 0.9rem;
-  color: $col1;
+.h5p-branchingscenario-editor{
+  .tooltip {
+    position: absolute;
+    bottom: 98%;
+    top: auto;
+    width: 15rem;
+    background-color: #ffffff;
+    z-index: 2000;
+    padding: 0.6rem;
+    border-radius: 5px;
+    font-weight: normal;
+    padding-left: 3.5rem;
+    text-align: left;
+    box-shadow: 0 1px 5px 1px rgba(0, 0, 0, 0.1);
+    font-size: 0.75rem;
+    line-height: 0.9rem;
+    color: $col1;
 
-  p:first-child {
-    margin-top: 0;
+    p:first-child {
+      margin-top: 0;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    &.below {
+      bottom: auto;
+      top: 120%;
+    }
+
+    &.wide {
+      width: 32rem;
+    }
+
+    &:before {
+      font-family: "Material Icons";
+      position: absolute;
+      content: $icon-info;
+      font-size: 1.3rem;
+      color: #1773DA;
+      left: 0.6rem;
+      top: 0.6rem;
+      border-right: solid 1px #e9ebee;
+      padding-right: 0.6rem;
+      height: calc(100% - 1rem);
+      font-weight: normal;
+    }
   }
-
-  p:last-child {
-    margin-bottom: 0;
-  }
-
-  &.below {
-    bottom: auto;
-    top: 120%;
-  }
-
-  &.wide {
-    width: 32rem;
-  }
-}
-
-.tooltip::before {
-  font-family: "Material Icons";
-  position: absolute;
-  content: $icon-info;
-  font-size: 1.3rem;
-  color: #1773DA;
-  left: 0.6rem;
-  top: 0.6rem;
-  border-right: solid 1px #e9ebee;
-  padding-right: 0.6rem;
-  height: calc(100% - 1rem);
-  font-weight: normal;
 }

@@ -103,11 +103,11 @@
   background-color: $draggable-replacing-background;
 }
 
-.canvas.placing-draggable .draggable.not-disabled:hover .draggable-wrapper {
+.canvas.placing-draggable .draggable.not-disabled.hovered .draggable-wrapper {
   background-color: $draggable-replacing-background;
 }
 
-.canvas.placing-draggable .draggable:hover .dropzone-wrapper {
+.canvas.placing-draggable .draggable.hovered .dropzone-wrapper {
   border-color: $drop-zone-highlight-border;
   background-color: $drop-zone-highlight-background;
 }

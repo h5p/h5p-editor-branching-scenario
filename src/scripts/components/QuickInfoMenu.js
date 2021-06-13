@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { isDecendantOf } from '../helpers/DOM';
 import './QuickInfoMenu.scss';
+import {t} from '../helpers/translate';
 
 export default class QuickInfoMenu extends React.Component {
   constructor(props) {
@@ -52,21 +53,21 @@ export default class QuickInfoMenu extends React.Component {
 
     return (
       <div className={ 'legend' + expanded + fade } onClick={ this.handleToggle } ref={ element => this.legend = element }>
-        <span>{ 'Quick Info' }
+        <span>{t('quickInfo')}
           <span className="close link-look">
-            { this.state.expanded ? 'Hide' : 'Show' }
+            { this.state.expanded ? t('hide') : t('show') }
           </span>
         </span>
         <div className={ 'legend-content' + expanded }>
           <ul>
-            <li><strong>{ 'Dropzone' }</strong> { 'It appears when you select or start dragging content' }</li>
-            <li><strong>{ 'Content' }</strong></li>
-            <li><strong>{ 'Branching Question' }</strong> { 'Each alternative can lead to different question/content.' }</li>
-            <li>{ 'Alternative leads to another question/content.' }</li>
-            <li>{ 'Path ends here (with the default end scenario)' }</li>
-            <li>{ 'Path ends here (with the custom end scenario)' }</li>
-            <li>{ 'Path takes the learner to an existing question/content. Click to see where it leads to.' }</li>
-            <li>{ 'Step by Step' } <span className="link-look" onClick={ this.props.onTutorialOpen }>{ 'tutorial' }</span></li>
+            <li><strong>{t('dropzone')}</strong>- {t('legendDropzone')}</li>
+            <li><strong>{t('content')}</strong></li>
+            <li><strong>{t('branchingQuestion')}</strong>- {t('legendBranchingQuestion')}</li>
+            <li>{t('legendAlternative')}</li>
+            <li>{t('legendPathEndDefault')}</li>
+            <li>{t('legendPathEndCustom')}</li>
+            <li>{t('legendPathRetread')}</li>
+            <li><span className="link-look" onClick={ this.props.onTutorialOpen }>{t('stepByStepTutorial')}</span></li>
           </ul>
         </div>
       </div>
