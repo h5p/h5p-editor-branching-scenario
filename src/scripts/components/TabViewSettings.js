@@ -32,6 +32,11 @@ export default class TabViewSettings extends React.Component {
       'scoringOption',
       this.props.main.field
     );
+
+    const scoringOptionGroupField = H5PEditor.findSemanticsField(
+      'scoringOptionGroup',
+      this.props.main.field
+    );
     this.scoringOptionWrapper = document.createElement('div');
 
     const behaviourField = H5PEditor.findSemanticsField(
@@ -61,7 +66,7 @@ export default class TabViewSettings extends React.Component {
     children = children.concat(this.props.main.children);
 
     H5PEditor.processSemanticsChunk(
-      [scoringOptionField],
+      [scoringOptionGroupField],
       params,
       H5PEditor.$(this.scoringOptionWrapper),
       this.props.main
@@ -81,9 +86,9 @@ export default class TabViewSettings extends React.Component {
 
     // Grab the select and listen for any changes to it
     this.$scoringField = H5PEditor.$(this.endScreenWrapper).find('.field-name-endScreenScore');
-    H5PEditor.followField(this.props.main, scoringOptionField.name + '/' + scoringOptionField.name, () => {
+    H5PEditor.followField(this.props.main, scoringOptionGroupField.name + '/' + scoringOptionField.name, () => {
       // Can't use showWhen, because we don't have access to scoringOption in endScreen chunk
-      this.$scoringField.toggleClass('no-display', params.scoringOption !== undefined && params.scoringOption !== 'static-end-score');
+      this.$scoringField.toggleClass('no-display', params.scoringOptionGroup.scoringOption !== undefined && params.scoringOptionGroup.scoringOption !== 'static-end-score');
 
       this.props.updateScoringOption();
     });

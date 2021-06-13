@@ -158,6 +158,7 @@ export default class Canvas extends React.Component {
       }
       newContentTypeTitle = this.props.getNewContent(this.getNewContentParams()).params.type.metadata.contentType;
       if (this.props.inserting && this.props.inserting.pasted) {
+        newContentTypeTitle = this.props.inserting.pasted.generic.metadata.title;
         scenario = 'PASTED_CONTENT_ON_EXISTING_CONTENT';
       }
       if (this.props.inserting && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
@@ -180,6 +181,7 @@ export default class Canvas extends React.Component {
     if (content.params.type.params.branchingQuestion) {
       scenario = 'NEW_CONTENT_ON_EXISTING_BQ';
       if (this.props.inserting && this.props.inserting.pasted) {
+        newContentTypeTitle = this.props.inserting.pasted.generic.metadata.title;
         scenario = 'PASTED_CONTENT_ON_EXISTING_BQ';
       }
       // Placing existing content on existing branching question
@@ -235,10 +237,14 @@ export default class Canvas extends React.Component {
 
     if (this.props.inserting && this.props.inserting.pasted) {
       // Tips - Scenario 4
+      const contentTitle = this.props.inserting.pasted.generic.metadata.title
+        ? this.props.inserting.pasted.generic.metadata.title
+        : this.state.library.title;
+
       this.setState({
         tips: {
           scenario: 'PASTED_CONTENT_ON_DROPZONE',
-          newContentTypeTitle: this.state.library.title
+          newContentTypeTitle: contentTitle
         }
       });
     }
@@ -265,10 +271,14 @@ export default class Canvas extends React.Component {
 
     if (this.props.inserting && this.props.inserting.pasted && this.props.inserting.library.name.split(' ')[0] === 'H5P.BranchingQuestion') {
       // Tips - Scenario 10
+      const contentTitle = this.props.inserting.pasted.generic.metadata.title
+        ? this.props.inserting.pasted.generic.metadata.title
+        : this.state.library.title;
+        
       this.setState({
         tips: {
           scenario: 'PASTED_BQ_ON_DROPZONE',
-          newContentTypeTitle: this.props.inserting.library.title
+          newContentTypeTitle: contentTitle
         }
       });
     }

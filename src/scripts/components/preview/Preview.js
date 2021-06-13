@@ -20,6 +20,8 @@ export default class Preview extends React.Component {
     if (this.props.hasLoadedLibraries && !this.state.isInitialized) {
       this.initializeInstance();
     }
+
+    window.addEventListener('resize', this.handleWindowResize);
   }
 
   componentDidUpdate() {
@@ -27,6 +29,19 @@ export default class Preview extends React.Component {
       this.initializeInstance();
     }
   }
+
+  handleWindowResize = () => {
+    this.resizeTimeout = null;
+    if (!this.resizeTimeout) {
+      // Throttle centering to ~15fps
+      this.resizeTimeout = setTimeout(() => {
+        this.resizeTimeout = null;
+        if(this.preview) {
+          this.preview.trigger('resize');
+        }
+      }, 66);
+    }
+  };
 
   initializeInstance() {
     // Do not initialize empty branching scenarios
