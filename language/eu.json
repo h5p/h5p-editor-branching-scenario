@@ -40,7 +40,7 @@
     "legendDropzone": "Edukia aukeratu edo eramaten hastean erakusten da",
     "content": "Edukia",
     "translations": "Itzulpenak",
-    "translationsDescription": "Eduki-mota guztietan erabilitako hizkuntza eta etiketak azpiko eremuak editatuta pertsonalizatu daitezke",
+    "translationsDescription": "Eduki mota guztietan erabilitako hizkuntza eta etiketak azpiko eremuak editatuta pertsonalizatu daitezke",
     "branchingQuestion": "Adarkatze Galdera",
     "scoringOptions": "Puntuazioaren aukerak",
     "legendBranchingQuestion": "Alternatiba bakoitzak galdera/eduki ezberdinera eraman dezake",
@@ -74,7 +74,7 @@
     "fullScreenMode": "Pantaila osoko modua",
     "editFullScreen": "Editatu pantaila osoan",
     "fullScreenModeButton": "Erabili botoi hau pantaila osoko moduan sartu eta ateratzeko",
-    "dragContentTypesBelow": "Hartu eta eraman azpiko edozein eduki-mota alternatiba bat hautatu ondoren erakusteko",
+    "dragContentTypesBelow": "Hartu eta eraman azpiko edozein eduki mota alternatiba bat hautatu ondoren erakusteko",
     "dragBranchingQuestionBelow": "Hartu Adarkatze Galdera eta eraman ezazu zure edukiaren azpira adarkatzea sortzeko",
     "editWindow": "Editatu leiho-moduan",
     "noPreviewContentTitle": "Ez dago edukirik aurreikusteko",
@@ -131,7 +131,7 @@
     "newBQOnLastDropzone": "Askatu hemen adarkatze galdera berria sortzeko.",
     "newBQOnDropzone": "Askatu hemen adarkatze galdera berria sortzeko. Askatze-eremu honen azpiko egitura lehen aukerara gehituko zaio.",
     "newBQOnExisitingContent": "Askatu hemen \":existingContentName\" adarkatze galdera berriarekin ordezkatzeko. Existitzen den azpiko egitura lehen aukerara gehituko zaio.",
-    "pastedBQOnDropzone": "Askatu hemen to paste \":newContentTypeName\". Askatze-eremu honen azpiko egitura lehen aukerara gehituko zaio.",
+    "pastedBQOnDropzone": "Askatu hemen \":newContentTypeName\" itsasteko. Askatze-eremu honen azpiko egitura lehen aukerara gehituko zaio.",
     "pastedBQOnExisitingContent": "Askatu hemen \":exitingContentName\" \":newContentTypeName\" batekin ordezkatzeko. Existitzen den azpiko egitura lehen aukerara gehituko zaio."
   }
 }
