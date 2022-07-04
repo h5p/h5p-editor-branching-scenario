@@ -28,16 +28,19 @@ var config = {
         use: [
           'style-loader',
           'css-loader',
-          'sass-loader'
+          'resolve-url-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true
+            }
+          }
         ]
       },
       {
         test: /\.(png|woff|woff2|eot|ttf|svg|gif)$/,
         include: path.resolve(__dirname, 'src'),
-        loader: 'url-loader',
-        options: {
-          limit: 1000000
-        }
+        type: 'asset/resource',
       }
     ]
   }
