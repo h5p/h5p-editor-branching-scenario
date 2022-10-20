@@ -316,11 +316,13 @@ export default class EditorOverlay extends React.Component {
       this.findField('showContentTitle').$item[0].style.display = "block";
       this.findField('forceContentFinished').$item[0].style.display = "block";
       this.findField('contentBehaviour').$item[0].style.display = "block";
+      this.findField('proceedButtonText').$item[0].style.display = "block";
     }
     else{ 
       this.findField('showContentTitle').$item[0].style.display = "none";
       this.findField('forceContentFinished').$item[0].style.display = "none";
       this.findField('contentBehaviour').$item[0].style.display = "none";
+      this.findField('proceedButtonText').$item[0].style.display = "none";
     }
   }
 
