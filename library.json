@@ -29,11 +29,6 @@
       "minorVersion": 0
     },
     {
-      "machineName": "H5P.BranchingScenario",
-      "majorVersion": 1,
-      "minorVersion": 8
-    },
-    {
       "machineName": "H5P.CoursePresentation",
       "majorVersion": 1,
       "minorVersion": 25
