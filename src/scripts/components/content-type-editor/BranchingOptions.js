@@ -56,7 +56,9 @@ export default class BranchingOptions extends React.Component {
         this.props.feedbackGroup.$title.html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackOnEndScreen') : this.props.feedbackGroup.field.label);
         this.props.feedbackGroup.children[0].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackTitle') : this.props.feedbackGroup.children[0].field.label);
         this.props.feedbackGroup.children[1].$item.find('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackText') : this.props.feedbackGroup.children[1].field.label);
-        this.props.feedbackGroup.children[2].$item.children('.h5peditor-label-wrapper').children('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackImage') : this.props.feedbackGroup.children[2].field.label);
+        if (this.props.feedbackGroup.children[2].$item) {
+          this.props.feedbackGroup.children[2].$item.children('.h5peditor-label-wrapper').children('.h5peditor-label').html(this.state.selectedMainOption === 'end-scenario' ? t('feedbackImage') : this.props.feedbackGroup.children[2].field.label);
+        }
 
         const isEndScenario = !(this.props.nextContentId > -1);
 
