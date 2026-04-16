@@ -38,7 +38,7 @@ const getAlternativeName = (content) => {
     .replace(/^Advanced Text$/, 'Text');
 
   const name = Content.getTooltip(content);
-  return (name.length > 70 ? name.substr(0, 67) + '...' : name) + ' (' + (library.length > 30 ? library.substr(0, 27) + '...' : library) + ')';
+  return (name.length > 70 ? name.substring(0, 67) + '...' : name) + ' (' + (library.length > 30 ? library.substring(0, 27) + '...' : library) + ')';
 };
 
 /**
