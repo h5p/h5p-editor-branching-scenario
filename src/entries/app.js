@@ -325,6 +325,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     // Use full width
     document.documentElement.style.maxWidth = document.body.style.maxWidth = 'none';
 
+    /*
+     * Extra container to prevent React from failing when Branching Scenario instance is
+     * pasted over existing instance, because H5P core removes React content without React.
+     */
+    const container = document.createElement('div');
+    container.classList.add('h5p-branching-scenario-container');
+    $wrapper.get(0).appendChild(container);
+
     /**
      * Runs after semi-fullscreen has been entered.
      *
@@ -400,7 +408,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
         onContentChanged={ this.handleContentChanged.bind(this) }
         onToggleFullscreen={ toggleSemiFullscreen }
         main={ this }
-      />), $wrapper.get(0)
+      />), container
     );
   };
 
