@@ -111,11 +111,31 @@ const getBranchingChildren = (content) => {
   return children;
 };
 
+/**
+ * Find editor form for given semantics field instance.
+ * @param {object} semanticsFieldInstance Semantics field instance to get form for.
+ * @returns {H5PEditor.Form|boolean} Form if found, else false.
+ */
+const findEditorForm = (semanticsFieldInstance) => {
+  let current = semanticsFieldInstance;
+
+  while (current && typeof current === 'object') {
+    if (current instanceof H5PEditor.Form) {
+      return current;
+    }
+
+    current = current.parent;
+  }
+
+  return false;
+}
+
 export {
   isBranching,
   getAlternativeName,
   getMachineName,
   hasNextContent,
   find,
-  getBranchingChildren
+  getBranchingChildren,
+  findEditorForm
 };

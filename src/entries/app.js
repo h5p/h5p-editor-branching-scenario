@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Editor from '../scripts/editor';
-import { isBranching } from '../scripts/helpers/Library';
+import { findEditorForm, isBranching } from '../scripts/helpers/Library';
 import {t} from "../scripts/helpers/translate";
 
 /*global H5PEditor*/
@@ -106,7 +106,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
           disableExtraTitleField: false
         };
       }
-      
+
       // For all other libraries, use the function from core
       return getLibraryMetadataSettings(library);
     };
@@ -393,6 +393,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.editor = ReactDOM.render(
       (<Editor
         parent={ this.parent }
+        form={ findEditorForm(this) }
         content={ this.content }
         getNewContent={ this.getNewContent.bind(this) }
         libraries={ this.libraries }
