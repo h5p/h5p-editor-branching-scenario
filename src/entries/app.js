@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Editor from '../scripts/editor';
-import { isBranching } from '../scripts/helpers/Library';
+import { findEditorForm, isBranching } from '../scripts/helpers/Library';
 import {t} from "../scripts/helpers/translate";
 
 /*global H5PEditor*/
@@ -106,7 +106,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
           disableExtraTitleField: false
         };
       }
-      
+
       // For all other libraries, use the function from core
       return getLibraryMetadataSettings(library);
     };
@@ -325,6 +325,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     // Use full width
     document.documentElement.style.maxWidth = document.body.style.maxWidth = 'none';
 
+    /*
+     * Extra container to prevent React from failing when Branching Scenario instance is
+     * pasted over existing instance, because H5P core removes React content without React.
+     */
+    const container = document.createElement('div');
+    container.classList.add('h5p-branching-scenario-container');
+    $wrapper.get(0).appendChild(container);
+
     /**
      * Runs after semi-fullscreen has been entered.
      *
@@ -393,13 +401,14 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
     this.editor = ReactDOM.render(
       (<Editor
         parent={ this.parent }
+        form={ findEditorForm(this) }
         content={ this.content }
         getNewContent={ this.getNewContent.bind(this) }
         libraries={ this.libraries }
         onContentChanged={ this.handleContentChanged.bind(this) }
         onToggleFullscreen={ toggleSemiFullscreen }
         main={ this }
-      />), $wrapper.get(0)
+      />), container
     );
   };
 
