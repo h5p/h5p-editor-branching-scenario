@@ -1,6 +1,6 @@
-@import './base/colours';
+@forward "./base/colours.scss";
 
-@import "./components/icons";
+@forward "./components/icons.scss";
 
 //primary colors
 $col1: #363b42;

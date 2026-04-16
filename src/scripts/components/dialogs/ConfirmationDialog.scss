@@ -1,4 +1,4 @@
-@import '../../../styles/components/icons.scss';
+@use '../../../styles/main.scss' as *;
 
 .confirmation-dialog-header .icon-delete:before {
     font-family: "Material Icons";

@@ -1,4 +1,4 @@
-@import '../../../styles/base/colours';
+@use '../../../styles/main.scss' as *;
 
 .confirmation-dialog {
   position: absolute;

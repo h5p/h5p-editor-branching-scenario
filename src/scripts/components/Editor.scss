@@ -1,5 +1,5 @@
-@import '../../fonts/roboto.scss';
-@import '../../styles/main.scss';
+@use '../../fonts/roboto.scss' as *;
+@use '../../styles/main.scss' as *;
 
 .h5p-hub {
   max-width: 960px;
