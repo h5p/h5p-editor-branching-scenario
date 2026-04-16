@@ -159,7 +159,7 @@ export default class Editor extends React.Component {
 
   handleLibrariesFetched = (libraries) => {
     let fetchedLibraries = [];
-    for (var i = 0; i < libraries.length; i++) {
+    for (let i = 0; i < libraries.length; i++) {
       if (libraries[i].restricted !== true) {
         fetchedLibraries.push({
           title: libraries[i].title,

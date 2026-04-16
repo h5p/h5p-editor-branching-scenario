@@ -446,7 +446,7 @@ export default class Canvas extends React.Component {
        * @return {boolean}
        */
       const supported = (lib) => {
-        for (var i = 0; i < this.props.libraries.length; i++) {
+        for (let i = 0; i < this.props.libraries.length; i++) {
           if (this.props.libraries[i].restricted !== true && this.props.libraries[i].name === lib) {
             return true; // Library is supported and allowed
           }
@@ -772,7 +772,7 @@ export default class Canvas extends React.Component {
    * TODO
    */
   getLibrary(library) {
-    for (var i = 0; i < this.props.libraries.length; i++) {
+    for (let i = 0; i < this.props.libraries.length; i++) {
       if (this.props.libraries[i].name === library) {
         return this.props.libraries[i];
       }
