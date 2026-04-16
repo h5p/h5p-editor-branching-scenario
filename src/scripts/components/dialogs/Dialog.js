@@ -8,7 +8,7 @@ const Dialog = (props) => {
         {props.icon}
         <span className='header-text'>{props.headerText}</span>
       </div>
-      <div className='confirmation-dialog-body'>  
+      <div className='confirmation-dialog-body'>
         <div className='confirmation-dialog-body-split'>
           <div className='confirmation-dialog-body-left-content'>
             <p className='confirmation-question'>{props.body}</p>

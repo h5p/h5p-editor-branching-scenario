@@ -11,4 +11,3 @@ export function t () {
   }
   return H5PEditor.t.apply(window, args);
 }
-  
