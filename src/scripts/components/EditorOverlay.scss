@@ -1,5 +1,4 @@
-@import '../../styles/components/icons.scss';
-@import '../../styles/main.scss';
+@use '../../styles/main.scss' as *;
 
 .editor-overlay {
   background: #fff;
@@ -83,8 +82,8 @@
   .editor-overlay-library{
     .form-manager {
       border: 0;
-      
-      &.libwrap { 
+
+      &.libwrap {
         > .form-manager-form {
           padding: 0;
           border: 0;

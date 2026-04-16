@@ -318,7 +318,7 @@ export default class EditorOverlay extends React.Component {
       this.findField('contentBehaviour').$item[0].style.display = "block";
       this.findField('proceedButtonText').$item[0].style.display = "block";
     }
-    else{ 
+    else{
       this.findField('showContentTitle').$item[0].style.display = "none";
       this.findField('forceContentFinished').$item[0].style.display = "none";
       this.findField('contentBehaviour').$item[0].style.display = "none";
@@ -425,7 +425,7 @@ export default class EditorOverlay extends React.Component {
         <div className={`editor-overlay-content${scoreClass}`}>
           <div className='editor-overlay-semantics' ref={ this.form }/>
           { !this.state.isSubFrom &&
-            
+
             <div>
               <BranchingOptions
                 isBranchingQuestion ={ this.isBranchingQuestion }

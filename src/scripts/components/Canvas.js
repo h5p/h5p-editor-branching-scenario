@@ -73,7 +73,7 @@ export default class Canvas extends React.Component {
    * React hook
    */
   static getDerivedStateFromProps(nextProps, state) {
-   
+
     if (nextProps.inserting && nextProps.insertingId !== state.insertingId) {
       return ({ // Set new state on inserting
         insertingId: nextProps.insertingId,
@@ -189,7 +189,7 @@ export default class Canvas extends React.Component {
         scenario = 'EXISTING_CONTENT_ON_EXISTING_BQ';
       }
     }
-    
+
     this.setState({
       tips: {
         scenario: scenario,
@@ -205,7 +205,7 @@ export default class Canvas extends React.Component {
    * In order to remove tips, on focus of tree reset tips to null
    */
   handleTreeFocus = () => {
-    this.setState({ 
+    this.setState({
       tips: null
     });
   }
@@ -274,7 +274,7 @@ export default class Canvas extends React.Component {
       const contentTitle = this.props.inserting.pasted.generic.metadata.title
         ? this.props.inserting.pasted.generic.metadata.title
         : this.state.library.title;
-        
+
       this.setState({
         tips: {
           scenario: 'PASTED_BQ_ON_DROPZONE',
@@ -446,7 +446,7 @@ export default class Canvas extends React.Component {
        * @return {boolean}
        */
       const supported = (lib) => {
-        for (var i = 0; i < this.props.libraries.length; i++) {
+        for (let i = 0; i < this.props.libraries.length; i++) {
           if (this.props.libraries[i].restricted !== true && this.props.libraries[i].name === lib) {
             return true; // Library is supported and allowed
           }
@@ -772,7 +772,7 @@ export default class Canvas extends React.Component {
    * TODO
    */
   getLibrary(library) {
-    for (var i = 0; i < this.props.libraries.length; i++) {
+    for (let i = 0; i < this.props.libraries.length; i++) {
       if (this.props.libraries[i].name === library) {
         return this.props.libraries[i];
       }
@@ -1550,7 +1550,6 @@ export default class Canvas extends React.Component {
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
             moveDown={ this.state.dialog !== null }
-            scoringOption={ this.props.scoringOption }
           />
         }
         { (this.state.deleting !== null || this.state.editing !== null) &&
@@ -1576,7 +1575,7 @@ export default class Canvas extends React.Component {
         }
         <div className={`canvas${this.state.placing !== null ? ' placing-draggable' : ''}`}>
           { this.state.tips &&
-            <Tip 
+            <Tip
               scenario={ this.state.tips.scenario }
               currentContentTypeTitle={ this.state.tips.currentContentTypeTitle }
               newContentTypeTitle={ this.state.tips.newContentTypeTitle } />

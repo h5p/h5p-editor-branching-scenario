@@ -64,15 +64,6 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
 
     setValue(field, this.params);
 
-    // Switch to activate/deactivate the editor popup. Useful for canvas development.
-    this.canvasDev = false;
-    document.addEventListener('keydown', event => {
-      // shift-3
-      if (event.keyCode === 51) {
-        this.canvasDev = !this.canvasDev;
-      }
-    });
-
     this.params.startScreen = this.params.startScreen || {};
     this.params.startScreen.startScreenTitle = this.params.startScreen.startScreenTitle || '';
     this.params.startScreen.startScreenSubtitle = this.params.startScreen.startScreenSubtitle || '';
@@ -106,7 +97,7 @@ H5PEditor.widgets.branchingScenario = H5PEditor.BranchingScenario = (function ()
           disableExtraTitleField: false
         };
       }
-      
+
       // For all other libraries, use the function from core
       return getLibraryMetadataSettings(library);
     };

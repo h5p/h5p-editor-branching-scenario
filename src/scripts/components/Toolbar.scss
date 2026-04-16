@@ -1,4 +1,4 @@
-@import '../../styles/main.scss';
+@use '../../styles/main.scss' as *;
 
 .toolbar {
   position: absolute;

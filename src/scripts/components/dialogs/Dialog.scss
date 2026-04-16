@@ -1,4 +1,4 @@
-@import '../../../styles/base/colours';
+@use '../../../styles/main.scss' as *;
 
 .confirmation-dialog {
   position: absolute;
@@ -36,7 +36,7 @@
   flex-direction: column;
   justify-content: space-between;
   flex: 1 1 auto;
-  
+
   .confirmation-dialog-body-split{
     display: flex;
     .confirmation-dialog-body-left-content{
@@ -80,8 +80,6 @@
     ul > li:before {
       content: "- ";
       text-indent: -5px;
-    }
-    ul > li {
     }
   }
 

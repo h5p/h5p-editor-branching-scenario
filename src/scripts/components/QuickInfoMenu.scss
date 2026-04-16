@@ -1,5 +1,4 @@
-@import '../../styles/components/icons.scss';
-@import '../../styles/main.scss';
+@use '../../styles/main.scss' as *;
 
 .legend {
   cursor: pointer;
@@ -80,7 +79,7 @@
 
       &:nth-child(1):before {
         color: #1773DA;
-        background-color: lighten($accent-col, 40);
+        background-color: hsl(from $accent-col h s calc(l + 40));
         font-family: "Material Icons";
         content: $icon-plus-2;
         border: 2px dotted #1773DA;
