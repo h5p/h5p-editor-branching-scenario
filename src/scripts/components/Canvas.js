@@ -1550,7 +1550,6 @@ export default class Canvas extends React.Component {
             onNextContentChange={ this.handleNextContentChange }
             isInserting={ this.props.inserting }
             moveDown={ this.state.dialog !== null }
-            scoringOption={ this.props.scoringOption }
           />
         }
         { (this.state.deleting !== null || this.state.editing !== null) &&
