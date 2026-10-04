@@ -59,7 +59,7 @@ export default class Editor extends React.Component {
     window.H5PEditor.LibraryListCache.getLibraries(this.props.libraries, this.handleLibrariesFetched);
 
     // Add title field
-    const titleField = this.props.main.parent.metadataForm.getExtraTitleField();
+    const titleField = this.props.form.metadataForm.getExtraTitleField();
     titleField.$item.find('input')[0].placeholder = t('enterTitleHere');
     titleField.$item.prependTo(this.topbar);
 
@@ -557,7 +557,7 @@ export default class Editor extends React.Component {
           </Tab>
           <Tab title={t('translations')} className="bs-editor-translations-tab">
             <TabViewTranslations
-              parent={this.props.parent}
+              form={this.props.form}
             />
           </Tab>
           <Tab title={t('getHelp')} className="bs-editor-tutorial-tab">
@@ -567,7 +567,7 @@ export default class Editor extends React.Component {
           </Tab>
           <Tab title={t('metadata')} className="bs-editor-metadata-tab">
             <TabViewMetadata
-              metadataForm={this.props.main.parent.metadataForm}
+              metadataForm={this.props.form.metadataForm}
             />
           </Tab>
         </Tabs>
@@ -575,7 +575,7 @@ export default class Editor extends React.Component {
           this.state.isShowingPreview &&
           <Preview
             tour={this.state.tour}
-            params={this.props.parent.params}
+            params={this.props.form.params}
             hasLoadedLibraries={this.state.hasLoadedLibraries}
             previewId={this.state.previewId}
             goToEditor={() => this.togglePreview()}
